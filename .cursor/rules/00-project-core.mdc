@@ -1,0 +1,17 @@
+---
+description: Apply Mourneveil repository governance and source-of-truth rules to every task.
+globs: "*"
+alwaysApply: true
+---
+
+Read and follow `AGENTS.md` before modifying the repository.
+
+Key reminders:
+
+- Git HEAD and canonical documents are the source of truth.
+- Use one coding agent in the active working tree at a time.
+- Preserve unrelated user changes.
+- Do not push, merge, rewrite history, or delete branches unless explicitly authorized.
+- Read the explicitly named `.agents/skills/*/SKILL.md` file before executing a matching workflow.
+- Keep implementation focused; do not add speculative systems.
+- Report exact verification evidence.

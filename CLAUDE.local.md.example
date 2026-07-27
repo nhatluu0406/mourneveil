@@ -1,0 +1,12 @@
+# Local Claude preferences
+
+This file is an example only.
+
+Copy it to `CLAUDE.local.md` for machine-specific notes that must not be committed, such as:
+
+- Local browser path
+- Private test fixture locations
+- Local-only performance notes
+- Preferred terminal shell
+
+Never store credentials or API keys here.

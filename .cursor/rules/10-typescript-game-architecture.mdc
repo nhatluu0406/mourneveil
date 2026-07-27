@@ -1,0 +1,13 @@
+---
+description: Architecture rules for Mourneveil TypeScript and React source files.
+globs: "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+- React projects UI and render state; it does not authoritatively resolve gameplay outcomes.
+- Keep mutable runtime state outside authored content definitions.
+- Input emits intents. Simulation resolves outcomes. UI, render, VFX, and audio consume state or typed events.
+- Physics contacts do not directly decide damage, death, loot, or progression.
+- Avoid global mutable state, circular imports, and broad cross-module dependencies.
+- Add abstractions only when the current milestone needs them.
+- Pure gameplay logic should be testable without WebGL, DOM, or Rapier where practical.
