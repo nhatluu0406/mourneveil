@@ -112,6 +112,52 @@ export function stepPlayerMotor(
   }
 }
 
+export function stepPlayerDodgeMotor(
+  state: PlayerMotorState,
+  direction: PlayerFacingDirection,
+  horizontalSpeed: number,
+  fixedStepSeconds: number,
+  resolveCollision: CharacterCollisionResolver,
+): PlayerMotorState {
+  if (!Number.isFinite(horizontalSpeed) || horizontalSpeed < 0) {
+    throw new RangeError('Dodge speed must be a finite non-negative number')
+  }
+  if (!Number.isFinite(fixedStepSeconds) || fixedStepSeconds <= 0) {
+    throw new RangeError('Fixed step must be a finite, positive number')
+  }
+
+  const verticalVelocity = Math.max(
+    state.velocity.y - PLAYER_GRAVITY * fixedStepSeconds,
+    -PLAYER_MAX_FALL_SPEED,
+  )
+  const desiredTranslation = {
+    x: direction.x * horizontalSpeed * fixedStepSeconds,
+    y: verticalVelocity * fixedStepSeconds,
+    z: direction.z * horizontalSpeed * fixedStepSeconds,
+  }
+  const collision = resolveCollision(state.position, desiredTranslation)
+  assertFiniteVector(collision.translation, 'Collision translation')
+
+  return {
+    position: {
+      x: state.position.x + collision.translation.x,
+      y: state.position.y + collision.translation.y,
+      z: state.position.z + collision.translation.z,
+    },
+    velocity: {
+      x: normalizeZero(collision.translation.x / fixedStepSeconds),
+      y:
+        collision.grounded && verticalVelocity <= 0
+          ? 0
+          : collision.translation.y / fixedStepSeconds,
+      z: normalizeZero(collision.translation.z / fixedStepSeconds),
+    },
+    grounded: collision.grounded,
+    movementIntent: NEUTRAL_INTENT,
+    facing: { ...direction },
+  }
+}
+
 export function movementIntentToFacing(
   movementIntent: PlayerMovementIntent,
 ): PlayerFacingDirection {

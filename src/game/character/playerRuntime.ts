@@ -1,5 +1,6 @@
 import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
 import type { PlayerAttackRequest } from '../../input/playerAttackIntent'
+import type { PlayerDodgeRequest } from '../../input/playerDefenseIntent'
 import type {
   CombatActionRequest,
   CombatResourceValidator,
@@ -24,6 +25,13 @@ import {
   type PlayerAttackSpatialSnapshot,
 } from '../combat/playerAttackActions'
 import {
+  PLAYER_DODGE_ACTION,
+  PLAYER_DODGE_ACTION_ID,
+  PLAYER_DODGE_SPEED,
+  PlayerDefenseRuntime,
+  type PlayerDefenseSnapshot,
+} from '../combat/playerDefense'
+import {
   TrainingTargetRuntime,
   type TrainingTargetSnapshot,
 } from '../combat/trainingTarget'
@@ -35,6 +43,7 @@ import {
 import {
   createPlayerMotorState,
   stepPlayerMotor,
+  stepPlayerDodgeMotor,
   type CharacterCollisionResolver,
   type PlayerMotorState,
 } from './playerMotor'
@@ -46,6 +55,7 @@ export interface PlayerRuntimeSnapshot {
   readonly attack: PlayerAttackSpatialSnapshot
   readonly contact: CombatContactSnapshot
   readonly trainingTarget: TrainingTargetSnapshot
+  readonly defense: PlayerDefenseSnapshot
 }
 
 export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
@@ -56,8 +66,12 @@ export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
 export class PlayerRuntime {
   private readonly clock = new FixedStepClock()
   private readonly combatRuntime = new CombatActionRuntime(
-    PLAYER_ATTACK_DEFINITIONS.map((definition) => definition.action),
+    [
+      ...PLAYER_ATTACK_DEFINITIONS.map((definition) => definition.action),
+      PLAYER_DODGE_ACTION,
+    ],
   )
+  private readonly defenseRuntime = new PlayerDefenseRuntime()
   private readonly contactRuntime = new CombatContactRuntime()
   private readonly trainingTargetRuntime = new TrainingTargetRuntime()
   private playerState = createPlayerMotorState()
@@ -72,11 +86,52 @@ export class PlayerRuntime {
   }
 
   requestPlayerAttack(request: PlayerAttackRequest): CombatActionStartResult {
+    if (!this.defenseRuntime.canStartAction()) {
+      return {
+        accepted: false,
+        actionId: playerAttackForRequest(request).action.id,
+        reason: 'guard-active',
+      }
+    }
     const attack = playerAttackForRequest(request)
-    return this.requestCombatAction({
+    const result = this.requestCombatAction({
       type: 'start-action',
       actionId: attack.action.id,
     })
+    if (result.accepted) {
+      this.playerState = {
+        ...this.playerState,
+        facing: { ...request.aimDirection },
+      }
+    }
+    return result
+  }
+
+  requestPlayerDodge(
+    request: PlayerDodgeRequest,
+    movementIntent: PlayerMovementIntent,
+  ): CombatActionStartResult {
+    if (!this.defenseRuntime.canStartAction()) {
+      return { accepted: false, actionId: PLAYER_DODGE_ACTION_ID, reason: 'guard-active' }
+    }
+    const direction = this.defenseRuntime.sampleDodgeDirection(
+      request,
+      movementIntent,
+      this.playerState.facing,
+    )
+    const result = this.requestCombatAction({
+      type: 'start-action',
+      actionId: PLAYER_DODGE_ACTION_ID,
+    })
+    this.defenseRuntime.acceptDodge(result, direction)
+    if (result.accepted) {
+      this.playerState = { ...this.playerState, facing: { ...direction } }
+    }
+    return result
+  }
+
+  setGuardIntent(held: boolean): void {
+    this.defenseRuntime.setGuardIntent(held)
   }
 
   interruptCombatAction(): CombatActionEndResult {
@@ -114,17 +169,33 @@ export class PlayerRuntime {
     const hitEvents: CombatHitEvent[] = []
     const frame = this.clock.advance(frameDeltaSeconds, (fixedStepSeconds, nextStepCount) => {
       this.combatRuntime.advanceFixedStep()
+      const combat = this.combatRuntime.snapshot()
+      this.defenseRuntime.advanceFixedStep(combat)
       if (this.collisionResolver !== null) {
-        const constrainedMovementIntent = constrainMovementIntentForAttack(
-          movementIntent,
-          this.combatRuntime.snapshot().phase,
-        )
-        this.playerState = stepPlayerMotor(
-          this.playerState,
-          constrainedMovementIntent,
-          fixedStepSeconds,
-          this.collisionResolver,
-        )
+        const defense = this.defenseRuntime.snapshot(combat)
+        if (defense.dodgeDirection !== null) {
+          this.playerState = stepPlayerDodgeMotor(
+            this.playerState,
+            defense.dodgeDirection,
+            defense.dodgeMovementActive ? PLAYER_DODGE_SPEED : 0,
+            fixedStepSeconds,
+            this.collisionResolver,
+          )
+        } else {
+          const constrainedMovementIntent = constrainMovementIntentForAttack(
+            {
+              horizontal: movementIntent.horizontal * defense.movementScale,
+              forward: movementIntent.forward * defense.movementScale,
+            },
+            combat.phase,
+          )
+          this.playerState = stepPlayerMotor(
+            this.playerState,
+            constrainedMovementIntent,
+            fixedStepSeconds,
+            this.collisionResolver,
+          )
+        }
       }
       if (this.contactQuery !== null) {
         const combat = this.combatRuntime.snapshot()
@@ -161,6 +232,7 @@ export class PlayerRuntime {
       ),
       contact: this.contactRuntime.snapshot(),
       trainingTarget: this.trainingTargetRuntime.snapshot(),
+      defense: this.defenseRuntime.snapshot(combat),
     }
   }
 }

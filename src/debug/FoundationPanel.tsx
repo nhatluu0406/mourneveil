@@ -89,6 +89,14 @@ export function FoundationPanel({
           </dd>
         </div>
         <div>
+          <dt>Combat input</dt>
+          <dd>
+            LMB {diagnostic.runtime.combatInput.primaryButtonHeld ? 'held' : 'up'} · RMB{' '}
+            {diagnostic.runtime.combatInput.guardHeld ? 'held' : 'up'} · Space{' '}
+            {diagnostic.runtime.combatInput.dodgeKeyHeld ? 'held' : 'up'}
+          </dd>
+        </div>
+        <div>
           <dt>Combat action</dt>
           <dd>
             {diagnostic.runtime.combat.actionId ?? 'idle'} ·{' '}
@@ -125,6 +133,30 @@ export function FoundationPanel({
             {diagnostic.runtime.attack.movementConstrained
               ? 'constrained'
               : 'free'}
+          </dd>
+        </div>
+        <div>
+          <dt>Attack facing</dt>
+          <dd>
+            {diagnostic.runtime.attack.executionFacing
+              ? `(${diagnostic.runtime.attack.executionFacing.x.toFixed(2)}, ${diagnostic.runtime.attack.executionFacing.z.toFixed(2)})`
+              : 'none'}
+          </dd>
+        </div>
+        <div>
+          <dt>Dodge</dt>
+          <dd>
+            {diagnostic.runtime.defense.dodgeExecutionId === null
+              ? 'inactive'
+              : `#${diagnostic.runtime.defense.dodgeExecutionId}`} ·{' '}
+            {diagnostic.runtime.defense.invulnerable ? 'invulnerable' : 'vulnerable'}
+          </dd>
+        </div>
+        <div>
+          <dt>Guard</dt>
+          <dd>
+            {diagnostic.runtime.defense.guarding ? 'guarding' : 'inactive'} · movement{' '}
+            {diagnostic.runtime.defense.movementScale.toFixed(2)}
           </dd>
         </div>
         <div>

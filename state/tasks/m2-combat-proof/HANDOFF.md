@@ -4,26 +4,25 @@ Updated: 2026-08-09 by Codex
 Task: m2-combat-proof
 
 ## Status
-M2.3 is complete. Active attack spheres query registered Rapier hurtboxes after fixed-step movement; simulation-owned execution IDs and target dedup produce typed hit events and deterministic training-target damage/health.
+M2.4 implementation and automated verification are complete. Mouse-world aim, input ownership/lifecycle recovery, dodge, and guard preserve M2.3 contact/damage authority.
 
-Classification: **M2.3 COMPLETE — M2.4 NEXT**
+Classification: **M2.4 COMPLETE — M2.5 NEXT**
 
 ## Locked decisions
-- Each accepted action start receives a monotonic simulation-owned execution ID; hard reset restarts that lifecycle.
-- Rapier reports sphere/hurtbox candidates only. `CombatContactRuntime` validates the active action/window, sorts candidates, permits one hit per target/execution, emits the hit event, then applies damage.
-- Light/heavy damage is immutable attack data: 20/35. The stationary target has 100 health, clamps at zero, rejects damage while defeated, and remains a fixture rather than an enemy framework.
-- Fixed-step order is action phase advance → character movement/collision → current-transform contact query → hit eligibility/damage. Render projects target health/defeat only.
+- Attacks project canvas pointer coordinates to the ground plane, convert the hit point to semantic aim, and snapshot it only after action acceptance.
+- Combat pointer listeners belong to the canvas. UI never enters that path; pointer capture plus cancel/leave/outside-release, blur, pagehide, and hidden-tab lifecycle clear held combat input and reset keyboard state when ownership becomes unreliable.
+- The border/action stall was stale keyboard state: a missed forward key-up plus pressed reverse direction normalized to neutral. Combat was idle, suppression was false, velocity/requested/corrected horizontal movement were zero, and grounding remained true. Shared surface lifecycle reset clears the stale pair; no physics rule changed.
+- Dodge: Space press edge; 2 startup / 8 active / 8 recovery steps; direction sampled from movement or facing fallback; 8 m/s active displacement through the existing Rapier resolver; active-only invulnerability; no voluntary cancel.
+- Guard: held canvas RMB, idle-only entry, release-to-idle on the next fixed step, 35% movement scale. Attacks/dodge cannot start while guard is held; guard cannot enter during committed actions.
 
 ## Verification
-- Focused combat/contact/Rapier: 5 files / 31 tests passed.
-- M1 movement/collision regression: 4 files / 12 tests passed.
-- Existing M2 action/input/runtime regression: 5 files / 28 tests passed.
-- Full: lint/typecheck passed; 18 files / 73 tests; build and `npm run verify` passed (346 modules).
-- Local Vite runtime returned HTTP 200 at `127.0.0.1:4173`; no controllable browser was available, so interactive hit/dedup/facing/death and visual/regression checks remain manual.
-- Existing bundle-size advisory is unchanged and non-blocking.
+- Focused input/defense/contact/Rapier sets passed; full suite: 22 files / 84 tests.
+- Lint, typecheck, build, `npm run verify`, diff check, strict doctor, and sync check passed.
+- Vite served HTTP 200 at `127.0.0.1:4173`. No controllable browser was available, so the requested interactive replay and console/resize observations remain manual.
+- Existing bundle-size advisory remains non-blocking.
 
 ## Not implemented
-Enemy AI/attacks, player health, stamina, dodge, guard, knockback, stagger, combos, loot, controller combat input, production VFX/audio, or broader health/enemy frameworks.
+Enemy attacks/AI, player health, stamina, parry, knockback, combos/buffering, lock-on, controller combat input, production animation/VFX/audio, or M2.5 presentation tuning.
 
 ## Next session starts with
-M2.4 — Dodge and defensive mechanic. Preserve contact/damage contracts; do not start M2.5.
+M2.5 — Combat presentation and feel (Cursor). First replay the pending M2.4 browser matrix; do not change simulation authority to tune presentation.

@@ -39,6 +39,7 @@ export interface ActivePlayerAttackContactShape
 
 export interface PlayerAttackSpatialSnapshot {
   readonly movementConstrained: boolean
+  readonly executionFacing: PlayerFacingDirection | null
   readonly contactShapeId: string | null
   readonly activeContactShape: ActivePlayerAttackContactShape | null
 }
@@ -176,6 +177,7 @@ export function createPlayerAttackSpatialSnapshot(
   if (attack === null) {
     return {
       movementConstrained,
+      executionFacing: null,
       contactShapeId: null,
       activeContactShape: null,
     }
@@ -186,6 +188,7 @@ export function createPlayerAttackSpatialSnapshot(
     combat.contact.windowId === attack.contactShape.windowId
   return {
     movementConstrained,
+    executionFacing: { ...facing },
     contactShapeId: attack.contactShape.id,
     activeContactShape: contactIsActive
       ? transformPlayerAttackContactShape(

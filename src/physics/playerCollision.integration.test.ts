@@ -4,6 +4,7 @@ import { FIXED_STEP_SECONDS } from '../game/core/fixedStepClock'
 import {
   createPlayerMotorState,
   stepPlayerMotor,
+  stepPlayerDodgeMotor,
   type CharacterCollisionResolver,
 } from '../game/character/playerMotor'
 import { GRAYBOX_CENTER_BLOCKER_SIZE } from './grayboxCollision'
@@ -107,6 +108,67 @@ describe('graybox player collision', () => {
       CHARACTER_COLLISION_OFFSET - 0.001,
     )
 
+    world.removeCharacterController(controller)
+    world.free()
+  })
+
+  it('keeps authoritative dodge movement outside a solid boundary', () => {
+    const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
+    world.timestep = FIXED_STEP_SECONDS
+    world.createCollider(
+      RAPIER.ColliderDesc.cuboid(6, 0.25, 6).setTranslation(0, -0.25, 0),
+    )
+    world.createCollider(
+      RAPIER.ColliderDesc.cuboid(0.25, 0.75, 6).setTranslation(1.25, 0.75, 0),
+    )
+    const initialPosition = { x: 0, y: 0.82, z: 0 }
+    const body = world.createRigidBody(
+      RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(0, 0.82, 0),
+    )
+    const collider = world.createCollider(
+      RAPIER.ColliderDesc.capsule(
+        PLAYER_CAPSULE_HALF_HEIGHT,
+        PLAYER_CAPSULE_RADIUS,
+      ),
+      body,
+    )
+    const controller = world.createCharacterController(CHARACTER_COLLISION_OFFSET)
+    configurePlayerCharacterController(controller)
+    const resolveCollision: CharacterCollisionResolver = (position, desired) => {
+      body.setTranslation(position, false)
+      controller.computeColliderMovement(collider, desired)
+      const corrected = controller.computedMovement()
+      body.setTranslation(
+        {
+          x: position.x + corrected.x,
+          y: position.y + corrected.y,
+          z: position.z + corrected.z,
+        },
+        false,
+      )
+      return {
+        translation: { x: corrected.x, y: corrected.y, z: corrected.z },
+        grounded: controller.computedGrounded(),
+      }
+    }
+
+    let state = createPlayerMotorState(initialPosition)
+    for (let step = 0; step < 30; step += 1) {
+      state = stepPlayerDodgeMotor(
+        state,
+        { x: 1, z: 0 },
+        8,
+        FIXED_STEP_SECONDS,
+        resolveCollision,
+      )
+      world.step()
+    }
+
+    const boundaryFace = 1
+    expect(state.position.x + PLAYER_CAPSULE_RADIUS).toBeLessThanOrEqual(
+      boundaryFace - CHARACTER_COLLISION_OFFSET + 0.001,
+    )
+    expect(state.grounded).toBe(true)
     world.removeCharacterController(controller)
     world.free()
   })

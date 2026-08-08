@@ -1,25 +1,24 @@
 # Current State
 
 - Updated: 2026-08-09
-- Milestone: **M2 Combat Proof in progress — M2.3 complete**
+- Milestone: **M2 Combat Proof in progress — M2.4 complete**
 - Active LeanLoop task: `m2-combat-proof`
-- Status: M1 accepted and closed. Authoritative light/heavy attacks now resolve Rapier hurtbox overlap into deduplicated hit events and deterministic training-target damage.
+- Status: mouse-world attack aim, canvas input ownership, stuck-input lifecycle recovery, dodge, and guard now extend the accepted M2.3 authority chain.
 
 ## What exists
 
-- Edge-triggered LMB light attack and Shift+LMB heavy attack semantic requests
-- Immutable 8/4/14-step light and 18/6/30-step heavy action definitions
-- Last-movement facing, phase-driven locomotion constraint, primitive weapon sweep, and active-window contact-sphere visualization
-- Simulation-owned attack execution IDs and one-hit-per-target-per-execution eligibility
-- Stationary Rapier hurtbox target with clamped 100-point health; light deals 20 and heavy 35
-- Development target health/hit diagnostics, reset control, and defeated projection
+- Light/heavy attacks snapshot click-projected world aim and retain M2.3 one-hit damage behavior
+- Canvas-only pointer combat excludes diagnostic UI and clears held input on unreliable pointer/focus lifecycle
+- Collision-resolved 2/8/8-step dodge with sampled direction and active-only invulnerability
+- Idle-only held-RMB guard with deterministic 35% locomotion scale
+- Development aim/input/defense diagnostics and primitive guard projection
 
 ## Known limitations
 
-- No enemy AI, player health, stamina, combos, controller combat input, dodge, guard, knockback, or production effects
-- Browser interaction was unavailable for this session; Vite startup was confirmed, but mouse/visual/runtime regression checks remain manual
+- Browser control was unavailable; multi-direction aiming, UI isolation, border replay, dodge/guard feel, resize, and console checks remain manual
+- No incoming enemy attacks, stamina, parry, player health, controller combat input, or production defense presentation
 - Physical controller M1 play-pass and bundle-size advisory remain deferred
 
 ## Next executable work
 
-M2.4 — Dodge and defensive mechanic. Preserve M2.3 contact/damage authority and do not introduce a broad stamina system.
+M2.5 — Combat presentation and feel (Cursor). Preserve simulation/input/contact authority; include the pending M2.4 browser replay before presentation acceptance.

@@ -4,6 +4,7 @@ import { FoundationPanel } from '../debug/FoundationPanel'
 import { createFoundationDiagnostic } from '../game/core/foundationDiagnostic'
 import { Scene } from '../render/Scene'
 import type { CameraDiagnostic } from '../render/followCamera'
+import { createPointerWorldAimResolver } from '../render/pointerWorldAim'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useFoundationRuntime } from './useFoundationRuntime'
 
@@ -12,7 +13,11 @@ export function App() {
   const [physicsReady, setPhysicsReady] = useState(false)
   const [cameraDiagnostic, setCameraDiagnostic] =
     useState<CameraDiagnostic | null>(null)
-  const { runtime, diagnostic: runtimeDiagnostic } = useFoundationRuntime()
+  const {
+    runtime,
+    diagnostic: runtimeDiagnostic,
+    attachGameplayInput,
+  } = useFoundationRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
   const reportCameraDiagnostic = useCallback((diagnostic: CameraDiagnostic) => {
     setCameraDiagnostic(diagnostic)
@@ -45,8 +50,16 @@ export function App() {
               <p>This browser does not provide the WebGL support Mourneveil needs.</p>
             </div>
           }
-          onCreated={() => {
+          onCreated={({ camera, gl }) => {
             setRendererReady(true)
+            attachGameplayInput(
+              gl.domElement,
+              createPointerWorldAimResolver(
+                gl.domElement,
+                camera,
+                () => runtime.snapshot().player.position,
+              ),
+            )
           }}
         >
           <Suspense fallback={null}>

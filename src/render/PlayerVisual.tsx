@@ -18,6 +18,7 @@ export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
   const weaponRef = useRef<Mesh>(null)
   const weaponMaterialRef = useRef<MeshStandardMaterial>(null)
   const contactShapeRef = useRef<Mesh>(null)
+  const guardMarkerRef = useRef<Mesh>(null)
 
   useFrame(() => {
     const snapshot = runtime.snapshot()
@@ -26,15 +27,18 @@ export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
     const weapon = weaponRef.current
     const weaponMaterial = weaponMaterialRef.current
     const contactShape = contactShapeRef.current
+    const guardMarker = guardMarkerRef.current
     if (
       facingGroup === null ||
       weaponSweep === null ||
       weapon === null ||
       weaponMaterial === null ||
-      contactShape === null
+      contactShape === null ||
+      guardMarker === null
     ) {
       return
     }
+    guardMarker.visible = snapshot.defense.guarding
 
     facingGroup.rotation.y = Math.atan2(
       snapshot.player.facing.x,
@@ -98,6 +102,10 @@ export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
           wireframe
           depthWrite={false}
         />
+      </mesh>
+      <mesh ref={guardMarkerRef} position={[0, 0.42, -0.48]} visible={false}>
+        <boxGeometry args={[0.7, 0.72, 0.08]} />
+        <meshBasicMaterial color="#8fc4da" transparent opacity={0.5} />
       </mesh>
     </group>
   )

@@ -52,16 +52,17 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
   - completion evidence: deterministic contact fixture and single-hit policy verified; training-target defeat path proven; runtime proof recorded
   - evidence: execution IDs, Rapier sphere queries, per-execution target dedup, 20/35 light/heavy damage, clamped target health, and fixed-step sequencing covered; focused sets and full 18-file/73-test verification green; Vite HTTP 200; browser interaction unavailable
 
-- [ ] 4. M2.4 — Dodge and defensive mechanic
+- [x] 4. M2.4 — Defensive mechanics and combat-input correctness
   - depends: 3
   - risk: HIGH
   - preferred agent: Codex
   - isolation: sequential
-  - owns/allows: one dodge action, one defensive mechanic, explicit action-policy integration, focused tests
-  - outcome: deterministic dodge and one scoped defensive response use the shared action authority
-  - non-goals: broad stamina system, parry tree, lock-on, animation framework
-  - verifier: focused defense tests plus `npm run verify && git diff --check`
-  - completion evidence: timing/cancel/interrupt interactions verified; runtime proof recorded
+  - owns/allows: semantic mouse-world attack aim, gameplay pointer ownership/lifecycle fixes, one dodge action, minimal guard state, explicit action-policy integration, focused tests
+  - outcome: clicked-world attack facing is snapshotted per execution; UI pointer events cannot request combat; border/action input lifecycle recovers without RMB; deterministic dodge and guard use simulation authority
+  - non-goals: broad stamina system, parry tree, lock-on, animation framework, controller combat input
+  - verifier: focused aim/input/border/defense tests plus M1/M2 regressions and `npm run verify && git diff --check`
+  - completion evidence: all three blocking input regressions, timing/cancel/interrupt interactions, dodge collision/invulnerability, and guard lifecycle verified; runtime proof recorded
+  - evidence: canvas-only pointer input and semantic ground-plane aim replace window-wide LMB; pointer exit/cancel/outside release resets stale held input; attacks snapshot accepted aim; Space dodge uses 2/8/8 fixed steps with active-only invulnerability and Rapier collision; held RMB guard constrains movement to 35%; focused and full 22-file/84-test verification green; browser replay unavailable and remains manual
 
 - [ ] 5. M2.5 — Combat presentation and feel
   - depends: 4
@@ -98,10 +99,12 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
 - 2026-08-09 | Each attack owns a facing-relative sphere definition; spatial contact is exposed only when its authoritative contact window is active | Gives M2.3 a narrow query contract without hit or damage resolution
 - 2026-08-09 | M2 non-goals ban player/general health systems, but M2.3 may implement a narrow training-target health contract for contact/damage proof | Removes false PLAN conflict blocking M2.3 without authorizing a reusable health/survival framework
 - 2026-08-09 | Attack executions use simulation-owned monotonic IDs; Rapier reports active-sphere/hurtbox candidates, while simulation deduplicates target hits and applies deterministic light/heavy damage of 20/35 | Proves contact and damage without render, callback frequency, or wall-clock authority
+- 2026-08-09 | Canvas pointer ownership produces semantic ground-plane aim; accepted attacks freeze that aim, while pointer lifecycle resets all held gameplay input | Prevents UI click leakage, animation authority, and missed-release input stalls
+- 2026-08-09 | Dodge is a strict non-cancelling 2/8/8-step action with collision-resolved active movement and active-only invulnerability; guard is an idle-only held state with constrained locomotion | Establishes deterministic defensive authority without stamina, parry, or incoming-damage systems
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
 - Failed branch owner: orchestrator on the integration tree; never mix unrelated dirty-main changes
 
 ## Next milestone
-- M2.4 — Dodge and defensive mechanic
+- M2.5 — Combat presentation and feel

@@ -8,6 +8,12 @@ import {
 import type { CharacterCollisionResolver } from './playerMotor'
 import { PlayerRuntime } from './playerRuntime'
 
+const AIM_FORWARD = { x: 0, z: -1 } as const
+
+function attackRequest(attack: 'light' | 'heavy') {
+  return { type: 'player-attack' as const, attack, aimDirection: AIM_FORWARD }
+}
+
 const resolveOnFlatGround: CharacterCollisionResolver = (
   _position,
   desiredTranslation,
@@ -40,7 +46,7 @@ describe('PlayerRuntime', () => {
         targetId: hurtbox.ownerId,
       })),
     )
-    runtime.requestPlayerAttack({ type: 'player-attack', attack: 'light' })
+    runtime.requestPlayerAttack(attackRequest('light'))
 
     for (let step = 1; step < PLAYER_LIGHT_ATTACK.action.startupSteps; step += 1) {
       expect(
@@ -93,14 +99,14 @@ describe('PlayerRuntime', () => {
     const runtime = new PlayerRuntime()
 
     expect(
-      runtime.requestPlayerAttack({ type: 'player-attack', attack: 'light' }),
+      runtime.requestPlayerAttack(attackRequest('light')),
     ).toEqual({
       accepted: true,
       actionId: PLAYER_LIGHT_ATTACK_ID,
       executionId: 1,
     })
     expect(
-      runtime.requestPlayerAttack({ type: 'player-attack', attack: 'heavy' }),
+      runtime.requestPlayerAttack(attackRequest('heavy')),
     ).toEqual({
       accepted: false,
       actionId: 'player.attack.heavy',
@@ -114,7 +120,7 @@ describe('PlayerRuntime', () => {
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 1, forward: 0 })
     expect(runtime.snapshot().player.facing).toEqual({ x: 1, z: 0 })
 
-    runtime.requestPlayerAttack({ type: 'player-attack', attack: 'light' })
+    runtime.requestPlayerAttack(attackRequest('light'))
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 1 })
 
     expect(runtime.snapshot().attack.movementConstrained).toBe(true)
@@ -122,13 +128,13 @@ describe('PlayerRuntime', () => {
       horizontal: 0,
       forward: 0,
     })
-    expect(runtime.snapshot().player.facing).toEqual({ x: 1, z: 0 })
+    expect(runtime.snapshot().player.facing).toEqual(AIM_FORWARD)
   })
 
   it('restores movement after completion and gameplay interruption', () => {
     const runtime = new PlayerRuntime()
     runtime.attachCollisionResolver(resolveOnFlatGround)
-    runtime.requestPlayerAttack({ type: 'player-attack', attack: 'light' })
+    runtime.requestPlayerAttack(attackRequest('light'))
 
     const totalSteps =
       PLAYER_LIGHT_ATTACK.action.startupSteps +
@@ -141,7 +147,7 @@ describe('PlayerRuntime', () => {
     expect(runtime.snapshot().attack.movementConstrained).toBe(false)
     expect(runtime.snapshot().player.movementIntent.horizontal).toBe(1)
 
-    runtime.requestPlayerAttack({ type: 'player-attack', attack: 'heavy' })
+    runtime.requestPlayerAttack(attackRequest('heavy'))
     expect(runtime.interruptCombatAction()).toEqual({
       accepted: true,
       actionId: 'player.attack.heavy',

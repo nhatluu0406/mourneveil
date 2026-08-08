@@ -1,87 +1,134 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { BrowserAttackInput } from './browserAttackInput'
 
-function dispatchMouseEvent(
+function dispatchEventWithProperties(
   target: EventTarget,
-  type: 'mousedown' | 'mouseup',
-  button = 0,
-  shiftKey = false,
-): void {
+  type: string,
+  properties: Record<string, unknown> = {},
+): Event {
   const event = new Event(type, { cancelable: true })
-  Object.defineProperties(event, {
-    button: { value: button },
-    shiftKey: { value: shiftKey },
-  })
+  Object.defineProperties(
+    event,
+    Object.fromEntries(
+      Object.entries(properties).map(([key, value]) => [key, { value }]),
+    ),
+  )
   target.dispatchEvent(event)
+  return event
 }
 
-function createInput(visibilityState = 'visible') {
+function createInput() {
+  const surface = new EventTarget() as HTMLElement
+  Object.assign(surface, {
+    setPointerCapture: vi.fn(),
+    hasPointerCapture: vi.fn(() => true),
+    releasePointerCapture: vi.fn(),
+    getBoundingClientRect: () => ({ left: 0, top: 0, right: 100, bottom: 100 }),
+  })
   const windowTarget = new EventTarget()
   const documentTarget = new EventTarget()
   Object.defineProperty(documentTarget, 'visibilityState', {
     configurable: true,
-    value: visibilityState,
+    value: 'visible',
   })
+  const surfaceExit = vi.fn()
   const input = new BrowserAttackInput(
+    surface,
     windowTarget as unknown as Window,
     documentTarget as unknown as Document,
+    () => ({ x: 1, z: 0 }),
+    surfaceExit,
   )
   input.connect()
-  return { input, windowTarget, documentTarget }
+  return { input, surface, windowTarget, documentTarget, surfaceExit }
 }
 
 describe('BrowserAttackInput', () => {
-  it('emits exactly one light request for a held primary button', () => {
-    const { input, windowTarget } = createInput()
+  it('emits one aimed light edge from the gameplay surface only', () => {
+    const { input, surface } = createInput()
+    const uiButton = new EventTarget()
 
-    dispatchMouseEvent(windowTarget, 'mousedown')
+    dispatchEventWithProperties(uiButton, 'pointerdown', { button: 0, pointerId: 1 })
+    expect(input.consumeAttackRequest()).toBeNull()
+
+    dispatchEventWithProperties(surface, 'pointerdown', {
+      button: 0,
+      pointerId: 2,
+      clientX: 50,
+      clientY: 60,
+      shiftKey: false,
+    })
     expect(input.consumeAttackRequest()).toEqual({
       type: 'player-attack',
       attack: 'light',
+      aimDirection: { x: 1, z: 0 },
     })
-    expect(input.consumeAttackRequest()).toBeNull()
-
-    dispatchMouseEvent(windowTarget, 'mousedown')
+    dispatchEventWithProperties(surface, 'pointerdown', { button: 0, pointerId: 2 })
     expect(input.consumeAttackRequest()).toBeNull()
   })
 
-  it('maps shift plus primary button to heavy instead of light', () => {
-    const { input, windowTarget } = createInput()
-
-    dispatchMouseEvent(windowTarget, 'mousedown', 0, true)
-
-    expect(input.consumeAttackRequest()).toEqual({
-      type: 'player-attack',
-      attack: 'heavy',
+  it('maps shift plus LMB to heavy and permits another edge after pointerup', () => {
+    const { input, surface } = createInput()
+    dispatchEventWithProperties(surface, 'pointerdown', {
+      button: 0,
+      pointerId: 1,
+      shiftKey: true,
     })
-  })
-
-  it('allows a new edge after release', () => {
-    const { input, windowTarget } = createInput()
-
-    dispatchMouseEvent(windowTarget, 'mousedown')
-    input.consumeAttackRequest()
-    dispatchMouseEvent(windowTarget, 'mouseup')
-    dispatchMouseEvent(windowTarget, 'mousedown')
-
+    expect(input.consumeAttackRequest()?.attack).toBe('heavy')
+    dispatchEventWithProperties(surface, 'pointerup', {
+      button: 0,
+      pointerId: 1,
+      clientX: 50,
+      clientY: 50,
+    })
+    dispatchEventWithProperties(surface, 'pointerdown', { button: 0, pointerId: 2 })
     expect(input.consumeAttackRequest()?.attack).toBe('light')
   })
 
-  it('clears pending and held state on focus loss, hidden tab, and reset', () => {
-    const { input, windowTarget, documentTarget } = createInput()
+  it('maps Space to one dodge edge while held', () => {
+    const { input, windowTarget } = createInput()
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'Space' })
+    expect(input.consumeDodgeRequest()).toEqual({ type: 'player-dodge' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'Space' })
+    expect(input.consumeDodgeRequest()).toBeNull()
+    dispatchEventWithProperties(windowTarget, 'keyup', { code: 'Space' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'Space' })
+    expect(input.consumeDodgeRequest()).toEqual({ type: 'player-dodge' })
+  })
 
-    dispatchMouseEvent(windowTarget, 'mousedown')
-    windowTarget.dispatchEvent(new Event('blur'))
+  it('holds RMB guard, suppresses surface context menu, and releases cleanly', () => {
+    const { input, surface } = createInput()
+    dispatchEventWithProperties(surface, 'pointerdown', { button: 2, pointerId: 4 })
+    expect(input.guardHeld()).toBe(true)
+    const menuEvent = dispatchEventWithProperties(surface, 'contextmenu')
+    expect(menuEvent.defaultPrevented).toBe(true)
+    dispatchEventWithProperties(surface, 'pointerup', {
+      button: 2,
+      pointerId: 4,
+      clientX: 50,
+      clientY: 50,
+    })
+    expect(input.guardHeld()).toBe(false)
     expect(input.consumeAttackRequest()).toBeNull()
+  })
 
-    dispatchMouseEvent(windowTarget, 'mousedown')
+  it('clears held and pending state on cancel, surface exit, blur, and hidden tab', () => {
+    const { input, surface, windowTarget, documentTarget, surfaceExit } = createInput()
+    dispatchEventWithProperties(surface, 'pointerdown', { button: 2, pointerId: 1 })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'Space' })
+    dispatchEventWithProperties(surface, 'pointercancel')
+    expect(input.snapshot()).toEqual({
+      primaryButtonHeld: false,
+      guardHeld: false,
+      dodgeKeyHeld: false,
+      pendingAttack: false,
+      pendingDodge: false,
+    })
+
+    dispatchEventWithProperties(surface, 'pointerleave', { buttons: 0 })
+    windowTarget.dispatchEvent(new Event('blur'))
     Object.defineProperty(documentTarget, 'visibilityState', { value: 'hidden' })
     documentTarget.dispatchEvent(new Event('visibilitychange'))
-    expect(input.consumeAttackRequest()).toBeNull()
-
-    Object.defineProperty(documentTarget, 'visibilityState', { value: 'visible' })
-    dispatchMouseEvent(windowTarget, 'mousedown')
-    input.reset()
-    expect(input.consumeAttackRequest()).toBeNull()
+    expect(surfaceExit).toHaveBeenCalledTimes(4)
   })
 })

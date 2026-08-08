@@ -8,10 +8,10 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (107L)
+- PLAN.md (110L)
 - README.md (35L)
 - SETUP.md (152L)
-- STACK.md (64L)
+- STACK.md (66L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (38L)
@@ -161,7 +161,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (47L)
-    - current-state.md (25L)
+    - current-state.md (24L)
     - definition-of-done.md (52L)
     - workflow.md (70L)
   - **docs/product/** (2 files)
@@ -185,21 +185,21 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (68L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
+    - App.tsx (81L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (118L)
-    - useFoundationRuntime.ts (87L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserAttackInput
+    - useFoundationRuntime.ts (150L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserAttackInput
   - **src/debug/** (1 files)
-    - FoundationPanel.tsx (160L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
+    - FoundationPanel.tsx (192L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
   - **src/game/** (0 files)
     - **src/game/character/** (4 files)
       - playerMotor.test.ts (103L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ./playerMotor
-      - playerMotor.ts (160L) -- symbols: PLAYER_MOVE_SPEED, PLAYER_ACCELERATION, PLAYER_DECELERATION, PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED; imports: ../../input/playerMovementIntent
-      - playerRuntime.test.ts (153L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ../combat/playerAttackActions
-      - playerRuntime.ts (166L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMovementIntent, ../../input/playerAttackIntent, ../combat/combatAction
-    - **src/game/combat/** (9 files)
+      - playerMotor.ts (206L) -- symbols: PLAYER_MOVE_SPEED, PLAYER_ACCELERATION, PLAYER_DECELERATION, PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED; imports: ../../input/playerMovementIntent
+      - playerRuntime.test.ts (159L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ../combat/playerAttackActions
+      - playerRuntime.ts (238L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMovementIntent, ../../input/playerAttackIntent, ../../input/playerDefenseIntent
+    - **src/game/combat/** (11 files)
       - combatAction.ts (117L) -- symbols: CombatActionId, CombatContactWindowId, CombatActionPhase, CombatActionWindowPolicy, CombatResourceCost
       - combatActionRuntime.test.ts (236L) -- imports: ../core/fixedStepClock, ./combatAction, ./combatActionRuntime
-      - combatActionRuntime.ts (254L) -- symbols: CombatActionStartFailureR
+      - combatActionRuntime.ts (255L) -- symbols: CombatActionSt
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)
