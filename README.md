@@ -4,7 +4,7 @@ Mourneveil is the working title for a local-first, browser-based 3D action RPG v
 
 ## Current phase
 
-Milestone M0 — Project Foundation.
+Milestone M0 foundation is in the repo; M1 (Graybox Movement Foundation) is planned in `PLAN.md` and not yet implemented.
 
 The repository contains the local web-game foundation: a React application shell, a React Three Fiber scene, a mounted Rapier physics world, a deterministic foundation diagnostic, and automated verification. It intentionally contains no gameplay.
 
@@ -32,4 +32,4 @@ Open the local URL printed by Vite. No environment variables or external service
 - `npm run build` type-checks and creates a production build in `dist/`.
 - `npm run verify` runs lint, typecheck, tests, and build in order.
 
-Read `AGENTS.md` before making repository changes. Canonical implementation status is in `docs/development/current-state.md`.
+Read `AGENTS.md` and `STACK.md` before making repository changes. Active plan: `PLAN.md`. Milestone summary: `docs/development/current-state.md`.

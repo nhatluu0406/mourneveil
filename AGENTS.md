@@ -14,14 +14,15 @@
 Before every task, resolve truth in this order:
 
 1. Current Git HEAD, branch, status, and working tree
-2. `docs/development/current-state.md`
-3. Accepted ADRs under `docs/architecture/decisions/`
-4. Product scope under `docs/product/`
-5. The current task prompt and explicitly named skill
-6. Other documentation
-7. Old reports or conversation context
+2. `STACK.md` — operational project law
+3. `PLAN.md` — current execution graph
+4. Active LeanLoop task state (`python3 scripts/leanloop/task.py path`) — HANDOFF / CHECKPOINT
+5. Accepted ADRs under `docs/architecture/decisions/`
+6. Product scope under `docs/product/`
+7. `docs/development/current-state.md` — concise milestone summary only
+8. Old reports or conversational context
 
-Do not rely on a branch name, commit hash, dependency version, or file layout copied from an old prompt without checking the repository.
+Do not duplicate detailed operational or plan state across these files. Do not rely on a branch name, commit hash, dependency version, or file layout copied from an old prompt without checking the repository.
 
 ## Operating model
 
@@ -38,8 +39,8 @@ Always:
 
 1. Run `git status --short --branch`.
 2. Inspect the current branch and recent relevant commits.
-3. Read this file.
-4. Read `docs/development/current-state.md`.
+3. Read this file, then `STACK.md`, `PLAN.md`, and the active task HANDOFF/CHECKPOINT.
+4. Read `docs/development/current-state.md` for milestone status only.
 5. Read the relevant product, architecture, and task documents.
 6. Read the explicitly named skill under `.agents/skills/`.
 7. Identify unrelated user changes and preserve them.
@@ -134,17 +135,11 @@ Gameplay or visual changes also require a local runtime check with a determinist
 
 ## Canonical documentation
 
-Update `docs/development/current-state.md` when a task changes:
+- Put stable operational law in `STACK.md`.
+- Put the active execution graph and step evidence in `PLAN.md` and the active task HANDOFF.
+- Keep `docs/development/current-state.md` as a short milestone summary: status, known limitations, and the next PLAN step pointer — not a second STACK/PLAN.
 
-- Repository structure
-- Build or test commands
-- Runtime behavior
-- Accepted architecture
-- Current milestone status
-- Known limitations
-- The next recommended task
-
-Do not rewrite product scope or an accepted ADR merely to make an implementation look compliant. Escalate the mismatch.
+Update that summary when milestone status, limitations, or the next recommended task change. Do not rewrite product scope or an accepted ADR merely to make an implementation look compliant. Escalate the mismatch.
 
 ## Skills
 

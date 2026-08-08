@@ -1,23 +1,16 @@
 {
-  "claude": {
-    "hook_commands": [
-      "python .leanloop/kit/.claude/hooks/precompact_checkpoint.py",
-      "python .leanloop/kit/.claude/hooks/session_start.py",
-      "python .leanloop/kit/.claude/hooks/read_guard.py"
-    ],
-    "status_line_command": "python .leanloop/kit/.claude/hooks/statusline.py",
-    "status_line_installed": true
-  },
+  "schema_version": 1,
+  "leanloop_version": "1.0.0-rc.1",
+  "installed_tiers": [
+    "0",
+    "1"
+  ],
+  "python_command": "python",
   "created_merge_files": {
     ".gitignore": false,
     "AGENTS.md": false,
     "CLAUDE.md": false
   },
-  "installed_tiers": [
-    "0",
-    "1"
-  ],
-  "leanloop_version": "1.0.0-rc.1",
   "managed_blocks": {
     ".gitignore": "e3009af69b36498c435aef8d1624323199343580a29881543be9b4259f2c12b9",
     "AGENTS.md": "7128216f0bbc907384c584100046f60549094babcbf2b5a2b70ba454694ee6b3",
@@ -49,18 +42,18 @@
     ".leanloop/kit/PLAYBOOK.md": "999b6aaf9f1bcfc24d8f19afde9c517d765efa00f17a9a18ad852ac8c9ad4bbe",
     ".leanloop/kit/TOOLS.lock": "b24338dc10e21bccdb196a15ed9b062ecf6b381dadc5df5e577f9fad541d2ad5",
     ".leanloop/kit/TOOLS.md": "d0de4d53b30fe007bfb2f49f2fb53b2893be54889fedb819f058c7f6636b076b",
-    ".leanloop/kit/VERSION": "7e71be32b0511b36b524c4fb3cbe93da82a7e730c327c85f3ceeea5e4630a780",
-    ".leanloop/kit/scripts/install_tools.sh": "d982063e6ee44222611c37f3022fae9ceaf7fbea664800740c334aa3f77aa15c",
+    ".leanloop/kit/VERSION": "8e3ccfbe492191dbb919be7b4ef3d93bd88f92b1d99532b25ba19c5ad9f1f722",
+    ".leanloop/kit/scripts/install_tools.sh": "e0070a4d913a6996b4a5693597ac8057ad2d4dfe092beaf5dbb6e459a7a47a52",
     ".leanloop/kit/scripts/leanloop/doctor.py": "a8703a3d278a55e003f2c34cc984358196fd78abcfabf2f3e2b2963ff6566eab",
-    ".leanloop/kit/scripts/leanloop/git_guard.py": "76940ca74d4d0f5f444ff128866926ca0d77123b1760a22842c0e517c8bbef5b",
-    ".leanloop/kit/scripts/leanloop/install.py": "98c82ed373c66f62ba3339ae2ce6cdfdfce14f74f838d659d0314fd872adff2e",
+    ".leanloop/kit/scripts/leanloop/git_guard.py": "c99b2ea240bb286567d6badacfcf7ab331cf66a512c60d2fdf1af8a58cee2512",
+    ".leanloop/kit/scripts/leanloop/install.py": "9581ef9cfaa2fcb743bc4f051e5e59ec79caa2f6ad596030fe81a10d8e0a08bf",
     ".leanloop/kit/scripts/leanloop/leanloop_common.py": "c8db46aa15cf88756c34c87546527c0f829b56ac236cb4398636077acc93490a",
-    ".leanloop/kit/scripts/leanloop/repomap.py": "1a0e6027f718bceb2d8eec58dfdd694adcadc755a8e4ab845147369f816e254e",
-    ".leanloop/kit/scripts/leanloop/safe_commit.py": "e50fdf9d8124457ac08e392fb425e837228ad6bfd39ca726e58b076fe480f976",
-    ".leanloop/kit/scripts/leanloop/sync.py": "9590a83b994e968f3c062ba4c1215df8b496dceed2c816b5a8306e44364745cf",
+    ".leanloop/kit/scripts/leanloop/repomap.py": "49e0005cea800f255e184cb8d8e1949e3e0e957e4b14ddcc15b29be5171c301a",
+    ".leanloop/kit/scripts/leanloop/safe_commit.py": "e7b15ff6be5461719318b6f503a374944960bd9f3219203b2b3caec84e1f286c",
+    ".leanloop/kit/scripts/leanloop/sync.py": "302dad77fd4dd1de69c33cd16d65716a814add9aeef7400375f0b194d4e5238f",
     ".leanloop/kit/scripts/leanloop/task.py": "ad2cb5b68506d13ff6251eec0e0625b4ba79281b944ec4acbd8ead1065851fb0",
     ".leanloop/kit/scripts/leanloop/token_report.py": "4a0d2543e1ec3b07c89618d8fed09564635e80f2a6ed34e30bd6cf312f023389",
-    ".leanloop/kit/scripts/leanloop/worktree.py": "1e40dd04b52ea4eb589bfa317f245c099169b40b4b9cefe002a1ad7c78cdef8d",
+    ".leanloop/kit/scripts/leanloop/worktree.py": "ccada5afe57c7a5074b7ff988e640f35e596594ddb8fd20dbd05baf379595ee3",
     ".leanloop/kit/scripts/sync.sh": "cfff0f0292fd3f1ffb4bee083b1718f0820ab07ab6811b47cc65e34f0107fade",
     ".leanloop/kit/scripts/token_report.sh": "cdda65d6f55224485b018a6aa70e3d575d279bd65b45553be63f2df91614c8fa",
     ".leanloop/kit/skills.json": "7a626ece08cdec48f219b6f896bf80d4524fd3f9a93b144776612f6e409e4e69",
@@ -71,18 +64,25 @@
     ".leanloop/kit/templates/STACK.md": "6ca23210bcc2d3d3414b7d5e7922dd2c27952684c1ff7a6b5d2351f20b22fea4",
     ".leanloop/kit/templates/WIKI-INSTRUCTIONS.md": "13eb97add8adf49506260e7e0ca1ed20f2856f6309d7cd5fde2870edb2dcb900",
     "scripts/leanloop/doctor.py": "a8703a3d278a55e003f2c34cc984358196fd78abcfabf2f3e2b2963ff6566eab",
-    "scripts/leanloop/git_guard.py": "76940ca74d4d0f5f444ff128866926ca0d77123b1760a22842c0e517c8bbef5b",
-    "scripts/leanloop/install.py": "98c82ed373c66f62ba3339ae2ce6cdfdfce14f74f838d659d0314fd872adff2e",
+    "scripts/leanloop/git_guard.py": "c99b2ea240bb286567d6badacfcf7ab331cf66a512c60d2fdf1af8a58cee2512",
+    "scripts/leanloop/install.py": "9581ef9cfaa2fcb743bc4f051e5e59ec79caa2f6ad596030fe81a10d8e0a08bf",
     "scripts/leanloop/leanloop_common.py": "c8db46aa15cf88756c34c87546527c0f829b56ac236cb4398636077acc93490a",
-    "scripts/leanloop/repomap.py": "1a0e6027f718bceb2d8eec58dfdd694adcadc755a8e4ab845147369f816e254e",
-    "scripts/leanloop/safe_commit.py": "e50fdf9d8124457ac08e392fb425e837228ad6bfd39ca726e58b076fe480f976",
-    "scripts/leanloop/sync.py": "9590a83b994e968f3c062ba4c1215df8b496dceed2c816b5a8306e44364745cf",
+    "scripts/leanloop/repomap.py": "49e0005cea800f255e184cb8d8e1949e3e0e957e4b14ddcc15b29be5171c301a",
+    "scripts/leanloop/safe_commit.py": "e7b15ff6be5461719318b6f503a374944960bd9f3219203b2b3caec84e1f286c",
+    "scripts/leanloop/sync.py": "302dad77fd4dd1de69c33cd16d65716a814add9aeef7400375f0b194d4e5238f",
     "scripts/leanloop/task.py": "ad2cb5b68506d13ff6251eec0e0625b4ba79281b944ec4acbd8ead1065851fb0",
     "scripts/leanloop/token_report.py": "4a0d2543e1ec3b07c89618d8fed09564635e80f2a6ed34e30bd6cf312f023389",
-    "scripts/leanloop/worktree.py": "1e40dd04b52ea4eb589bfa317f245c099169b40b4b9cefe002a1ad7c78cdef8d",
+    "scripts/leanloop/worktree.py": "ccada5afe57c7a5074b7ff988e640f35e596594ddb8fd20dbd05baf379595ee3",
     "state/tasks/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
-  "python_command": "python",
-  "schema_version": 1,
-  "sync_ownership_hash": "a4df866f929be5233e7ce22813b852d2681e388b875bab354774ef270df440d8"
+  "sync_ownership_hash": "a4df866f929be5233e7ce22813b852d2681e388b875bab354774ef270df440d8",
+  "claude": {
+    "hook_commands": [
+      "python .leanloop/kit/.claude/hooks/precompact_checkpoint.py",
+      "python .leanloop/kit/.claude/hooks/session_start.py",
+      "python .leanloop/kit/.claude/hooks/read_guard.py"
+    ],
+    "status_line_command": "python .leanloop/kit/.claude/hooks/statusline.py",
+    "status_line_installed": true
+  }
 }

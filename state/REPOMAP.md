@@ -5,18 +5,18 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 
 ## Tree & entry points
 - .gitignore (52L)
-- AGENTS.md (202L)
+- AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
+- PLAN.md (73L)
 - README.md (35L)
 - SETUP.md (152L)
+- STACK.md (59L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (38L)
 - tsconfig.app.json (24L)
-- tsconfig.json (7L)
-- tsconfig.node.json (18L)
-- ... +1 more
+- ... +3 more
 - **.agents/** (0 files)
   - **.agents/skills/** (0 files)
     - **.agents/skills/codebase-map/** (1 files)
@@ -161,7 +161,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (47L)
-    - current-state.md (72L)
+    - current-state.md (30L)
     - definition-of-done.md (52L)
     - workflow.md (70L)
   - **docs/product/** (2 files)
@@ -196,8 +196,14 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - foundationDiagnostic.ts (23L) -- symbols: MILESTONE, WORKING_TITLE, FoundationDiagnostic, createFoundationDiagnostic
   - **src/render/** (1 files)
     - Scene.tsx (52L) -- symbols: Scene
-- **state/** (0 files)
+- **state/** (2 files)
+  - CURRENT_TASK (1L)
+  - REPOMAP.md (210L)
   - **state/tasks/** (0 files)
+    - **state/tasks/m1-graybox-movement/** (2 files)
+      - CHECKPOINT.md (10L)
+      - HANDOFF.md (27L)
+      - **state/tasks/m1-graybox-movement/reports/** (0 files)
 
 ## Local dependency hints
 - `src/main.tsx` -> `./app/App`
