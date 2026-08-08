@@ -6,8 +6,13 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
 
 ## Non-goals
 - Boss, loot, inventory, enemy framework, production animation systems
-- Health or stamina implementation, combos, lock-on, VFX, audio, content production
+- Combos, lock-on, VFX, audio, content production
 - ECS, global event bus, physics redesign, camera or locomotion retuning
+- Player health, healing/regeneration, armor/resistances/status effects, production health UI, broader survival systems
+- General-purpose RPG health framework or enemy AI/death framework
+- Stamina implementation beyond what a later defensive step explicitly authorizes
+
+<!-- M2.3 exception: a narrow training-target health contract is allowed only as listed under step 3. -->
 
 ## Steps
 <!-- risk: LOW|MEDIUM|HIGH ; isolation: inline|sequential|worktree -->
@@ -39,11 +44,12 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
   - risk: HIGH
   - preferred agent: Codex
   - isolation: sequential
-  - owns/allows: narrow contact query, one deterministic target fixture, minimal damage contract, focused tests
-  - outcome: an authoritative active window can produce one validated contact and deterministic damage result
-  - non-goals: enemy framework, health UI, hit reactions, loot, broad hitbox system
+  - owns/allows: narrow contact query, one deterministic training-target fixture, minimal training-target health/damage contract, development-only target health diagnostic, focused tests
+  - outcome: an authoritative active window can produce one validated contact and apply deterministic damage to a stationary training target until it is defeated
+  - authorized training-target health (M2.3 only): max/current health; deterministic damage application; alive/defeated state required for contact proof; development-only target health diagnostic
+  - non-goals: player health; healing/regeneration; armor/resistances/status effects; general-purpose health framework; production health UI; enemy AI/death framework; hit reactions; loot; broad hitbox system
   - verifier: focused contact/damage tests plus `npm run verify && git diff --check`
-  - completion evidence: deterministic contact fixture and single-hit policy verified; runtime proof recorded
+  - completion evidence: deterministic contact fixture and single-hit policy verified; training-target defeat path proven; runtime proof recorded
 
 - [ ] 4. M2.4 — Dodge and defensive mechanic
   - depends: 3
@@ -89,6 +95,7 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
 - 2026-08-09 | Light is 8/4/14 steps and heavy is 18/6/30 steps for startup/active/recovery; both have zero cooldown/resource cost | One authoritative provisional 60 Hz definition location with clearly distinct commitment
 - 2026-08-09 | Player facing follows meaningful movement, persists while neutral, and is frozen while startup/active/recovery suppress locomotion intent | Stable deterministic attack direction without camera or mouse-world aiming
 - 2026-08-09 | Each attack owns a facing-relative sphere definition; spatial contact is exposed only when its authoritative contact window is active | Gives M2.3 a narrow query contract without hit or damage resolution
+- 2026-08-09 | M2 non-goals ban player/general health systems, but M2.3 may implement a narrow training-target health contract for contact/damage proof | Removes false PLAN conflict blocking M2.3 without authorizing a reusable health/survival framework
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
