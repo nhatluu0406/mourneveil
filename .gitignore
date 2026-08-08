@@ -6,6 +6,8 @@ dist/
 coverage/
 playwright-report/
 test-results/
+reports/
+*.lcov
 *.tsbuildinfo
 
 # Runtime and local data
@@ -38,3 +40,4 @@ Desktop.ini
 *.tmp
 *.temp
 *.bak
+vite.config.*.timestamp-*

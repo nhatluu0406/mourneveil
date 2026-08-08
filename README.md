@@ -6,26 +6,30 @@ Mourneveil is the working title for a local-first, browser-based 3D action RPG v
 
 Milestone M0 — Project Foundation.
 
-There is intentionally no gameplay implementation yet. The first implementation task is defined in:
+The repository contains the local web-game foundation: a React application shell, a React Three Fiber scene, a mounted Rapier physics world, a deterministic foundation diagnostic, and automated verification. It intentionally contains no gameplay.
 
-- `prompts/000-bootstrap-foundation.md`
+## Requirements
 
-## Product direction
+- Node.js 22
+- npm 10 or newer
 
-- Isometric 3D action RPG
-- Deliberate, commitment-based combat
-- Compact interconnected level design
-- Dark-fantasy presentation
-- Local development and verification first
-- Deployment is out of scope until the vertical slice is stable
+## Local setup
 
-## Sources of truth
+```powershell
+npm install
+npm run dev
+```
 
-1. Current Git HEAD and working tree
-2. `docs/development/current-state.md`
-3. Accepted architecture decisions in `docs/architecture/decisions/`
-4. Product scope documents in `docs/product/`
-5. Task-specific prompt and applicable skill
-6. `README.md`
+Open the local URL printed by Vite. No environment variables or external services are required.
 
-Read `AGENTS.md` before making changes.
+## Commands
+
+- `npm run dev` starts the local Vite development server.
+- `npm run lint` checks source and configuration files with ESLint.
+- `npm run typecheck` checks TypeScript without emitting files.
+- `npm run test` runs the Vitest suite once.
+- `npm run test:watch` runs Vitest in watch mode.
+- `npm run build` type-checks and creates a production build in `dist/`.
+- `npm run verify` runs lint, typecheck, tests, and build in order.
+
+Read `AGENTS.md` before making repository changes. Canonical implementation status is in `docs/development/current-state.md`.
