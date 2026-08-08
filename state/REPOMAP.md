@@ -8,7 +8,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (90L)
+- PLAN.md (94L)
 - README.md (35L)
 - SETUP.md (152L)
 - STACK.md (61L)
@@ -161,7 +161,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (47L)
-    - current-state.md (30L)
+    - current-state.md (31L)
     - definition-of-done.md (52L)
     - workflow.md (70L)
   - **docs/product/** (2 files)
@@ -188,9 +188,9 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - App.tsx (64L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (118L)
-    - useFoundationRuntime.ts (59L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserMovementInput
+    - useFoundationRuntime.ts (72L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserGamepadInput
   - **src/debug/** (1 files)
-    - FoundationPanel.tsx (81L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
+    - FoundationPanel.tsx (82L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
   - **src/game/** (0 files)
     - **src/game/character/** (4 files)
       - playerMotor.test.ts (95L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ./playerMotor
@@ -200,7 +200,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - **src/game/core/** (4 files)
       - fixedStepClock.test.ts (58L) -- imports: ./fixedStepClock
       - fixedStepClock.ts (83L) -- symbols: FIXED_STEP_SECONDS, MAX_FRAME_DELTA_SECONDS, MAX_CATCH_UP_STEPS, SimulationTimeSnapshot, FixedStepAdvance
-      - foundationDiagnostic.test.ts (28L) -- imports: ../character/playerMotor, ./foundationDiagnostic
-      - foundationDiagnostic.ts (36L) -- symbols: MILESTONE, WO
+      - foundationDiagnostic.test.ts (29L) -- imports: ../character/playerMotor, ./foundationDiagnostic
+      - foundationDiagnostic.ts (38L) -- symbols: MILESTONE, WOR
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

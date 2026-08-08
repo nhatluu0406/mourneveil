@@ -52,7 +52,8 @@ export function FoundationPanel({ diagnostic, camera }: FoundationPanelProps) {
           <dt>Movement intent</dt>
           <dd>
             ({diagnostic.runtime.movementIntent.horizontal.toFixed(2)},{' '}
-            {diagnostic.runtime.movementIntent.forward.toFixed(2)})
+            {diagnostic.runtime.movementIntent.forward.toFixed(2)}) ·{' '}
+            {diagnostic.runtime.activeInputSource}
           </dd>
         </div>
         <div>

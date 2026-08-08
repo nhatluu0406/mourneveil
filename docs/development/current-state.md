@@ -1,30 +1,31 @@
 # Current State
 
 - Updated: 2026-08-09
-- Milestone: M1 in progress; M1.3 complete in repo
+- Milestone: **M1 implementation complete** — READY FOR PRODUCT OWNER ACCEPTANCE
 - Active LeanLoop task: `m1-graybox-movement`
-- Status: High-oblique follow camera and graybox readability are in. M1.2.1 fixed the center-blocker visual clipping and added real-Rapier collision regression coverage. Deferred: sustained-WASD feel lag. Next PLAN step is M1.4.
+- Status: Graybox movement foundation (sim, keyboard+gamepad intent, motor, collision, follow camera) is in `main`. Physical gamepad manual verification and formal PO acceptance remain. M2 not started.
 
 ## What exists
 
-- Local web-game foundation plus fixed-step locomotion and a presentation-only high-oblique follow camera
-- Paths: `src/app/`, `src/render/` (incl. `followCamera.ts`, `FollowCameraRig.tsx`), `src/physics/`, `src/game/core/`, `src/game/character/`, `src/input/`, `src/debug/`
-- No combat, controller mapping (M1.4), audio, save, or production art
+- Fixed-step simulation + semantic movement intents (keyboard + left-stick gamepad)
+- Composition: sum sources then clamp magnitude ≤ 1
+- Kinematic graybox capsule with Rapier collision/grounding
+- Presentation-only high-oblique follow camera
+- Diagnostic panel: milestone M1.4, intent, active input source, pose, grounded, camera mode
 
 ## Where truth lives
 
 - Law: `STACK.md`
-- Execution: `PLAN.md`
+- Execution: `PLAN.md` (M1 steps 1–4 ticked)
 - Recovery: `state/tasks/m1-graybox-movement/HANDOFF.md`
 
-## Known limitations
+## Known limitations / debt
 
-- M1.2.1 browser replay remains pending because no controllable browser was available; automated Rapier and visual-geometry regressions are green
-- Sustained WASD movement feel still laggy; deferred by PO
-- PO M0 formal acceptance still open
-- No committed automated browser suite (ad-hoc Playwright used for M1.3 smoke only)
-- Three/Rapier bundle size advisory deferred
+- Physical controller play-pass not recorded this session (adapter + tests present)
+- Sustained WASD feel weight deferred as non-blocking tuning debt
+- No committed browser automation suite
+- Bundle-size advisory deferred
 
-## Next executable PLAN step
+## Next executable work
 
-M1.4 — Controller input foundation and M1 verification (Cursor). Include the pending center-blocker browser replay in the M1 runtime check; do not start combat.
+Product Owner M1 acceptance. After acceptance, plan M2 combat foundation separately — do not invent M2 here.

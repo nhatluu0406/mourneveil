@@ -1,13 +1,15 @@
+import type { ActiveMovementInputSource } from '../../input/composeMovementIntents'
 import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
 import type { PlayerMotorState } from '../character/playerMotor'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M1.3' as const
+export const MILESTONE = 'M1.4' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
   readonly simulation: SimulationTimeSnapshot
   readonly movementIntent: PlayerMovementIntent
+  readonly activeInputSource: ActiveMovementInputSource
   readonly player: PlayerMotorState
 }
 

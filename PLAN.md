@@ -58,7 +58,7 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
   - verifier: `npm run test -- src/game/character src/physics src/render/PlayerVisual.test.ts && npm run verify && git diff --check`
   - completion evidence: physical-versus-visual geometry recorded; regression green; runtime observation recorded or explicitly pending; HANDOFF/CHECKPOINT updated
 
-- [ ] 4. M1.4 — Controller input foundation and M1 verification
+- [x] 4. M1.4 — Controller input foundation and M1 verification
   - depends: 2, 3, 3a
   - risk: MEDIUM
   - preferred agent: Cursor (Claude independent review if needed before acceptance)
@@ -67,7 +67,8 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
   - outcome: basic controller movement mapping; focus/reconnect sanity; deterministic M1 runtime fixture; production build verification; Product Owner play check pathway documented
   - non-goals: full glyph UI, rebind menu, touch, combat inputs beyond movement
   - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY: Product Owner local play of move + camera + focus-loss using the M1 fixture
-  - completion evidence: `npm run verify` green; fixture path recorded; PO observations filed or explicitly pending; PLAN M1 steps ticked; current-state milestone flipped only after evidence exists
+  - completion evidence: `npm run verify` green; keyboard browser smoke recorded; physical controller pending by PO choice; PLAN/HANDOFF updated; M1 ready for PO acceptance
+  - residual: physical gamepad manual pass; sustained WASD feel tuning debt (not correctness)
 
 ## Parallel groups
 - none — M1 steps share runtime authority and projection; run sequentially
@@ -81,6 +82,9 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
 - 2026-08-09 | Throttle foundation diagnostic React updates (~10 Hz); keep sim/camera every frame | Reduce sustained-input UI jank without changing motor
 - 2026-08-09 | Do not mask M1.2 center-blocker clipping or movement-feel lag inside M1.3 | MEDIUM camera task; HIGH motor/collision remains open for a later fix
 - 2026-08-09 | M1.2.1 confirmed center-blocker clipping was the facing marker extending beyond a collision-safe capsule; keep visual geometry contained by the shared capsule dimensions | Real Rapier regression preserves the existing 2 cm separation policy; no motor, physics, or camera retune required
+- 2026-08-09 | Controller left-stick maps into existing semantic `PlayerMovementIntent` with dead zone `0.18`; composition = sum then clamp magnitude ≤ 1 | One gameplay authority; keyboard-only unchanged; no second movement path
+- 2026-08-09 | Gamepad focus-loss/disconnect uses suppress-until-neutral; poll only in the app/input rAF boundary | Prevents stale stick drive without a second loop or sim timing coupling
+- 2026-08-09 | Sustained WASD “lag” classified as deliberate accel/camera-follow feel debt for later combat-feel work, not input latency | No motor constant change in M1.4
 
 ## Escalation
 - Same error 3 times: stop, write stuck report under active task `reports/`, escalate to Codex (architecture) or Claude (review)

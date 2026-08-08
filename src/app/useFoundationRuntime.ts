@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PlayerRuntime } from '../game/character/playerRuntime'
 import type { FoundationRuntimeDiagnostic } from '../game/core/foundationDiagnostic'
+import { BrowserGamepadInput } from '../input/browserGamepadInput'
 import { BrowserMovementInput } from '../input/browserMovementInput'
+import { composeMovementIntents } from '../input/composeMovementIntents'
 
 interface FoundationRuntimeIntegration {
   readonly runtime: PlayerRuntime
@@ -14,16 +16,19 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
     () => ({
       ...runtime.snapshot(),
       movementIntent: { horizontal: 0, forward: 0 },
+      activeInputSource: 'none',
     }),
   )
 
   useEffect(() => {
-    const movementInput = new BrowserMovementInput(window, document)
+    const keyboardInput = new BrowserMovementInput(window, document)
+    const gamepadInput = new BrowserGamepadInput(window, document)
     let previousFrameTime = performance.now()
     let animationFrameId = 0
     let framesSinceDiagnostic = 0
 
-    movementInput.connect()
+    keyboardInput.connect()
+    gamepadInput.connect()
 
     const advanceFrame = (frameTime: number): void => {
       const frameDeltaSeconds = Math.max(
@@ -31,8 +36,14 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
         (frameTime - previousFrameTime) / 1_000,
       )
       previousFrameTime = frameTime
-      const movementIntent = movementInput.movementIntent()
-      const snapshot = runtime.advanceFrame(frameDeltaSeconds, movementIntent)
+      const composed = composeMovementIntents(
+        keyboardInput.movementIntent(),
+        gamepadInput.movementIntent(),
+      )
+      const snapshot = runtime.advanceFrame(
+        frameDeltaSeconds,
+        composed.intent,
+      )
 
       // Keep simulation every frame; throttle React panel updates to cut sustained-input jank.
       framesSinceDiagnostic += 1
@@ -41,7 +52,8 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
         setDiagnostic({
           simulation: snapshot.simulation,
           player: snapshot.player,
-          movementIntent,
+          movementIntent: composed.intent,
+          activeInputSource: composed.source,
         })
       }
       animationFrameId = requestAnimationFrame(advanceFrame)
@@ -51,7 +63,8 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
 
     return () => {
       cancelAnimationFrame(animationFrameId)
-      movementInput.disconnect()
+      keyboardInput.disconnect()
+      gamepadInput.disconnect()
     }
   }, [runtime])
 

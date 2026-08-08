@@ -11,12 +11,13 @@ describe('createFoundationDiagnostic', () => {
         accumulatorSeconds: 0,
       },
       movementIntent: { horizontal: 0, forward: 1 },
+      activeInputSource: 'keyboard' as const,
       player: createPlayerMotorState(),
     }
 
     expect(createFoundationDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M1.3',
+      milestone: 'M1.4',
       rendererReady: true,
       physicsReady: false,
       foundationReady: false,
