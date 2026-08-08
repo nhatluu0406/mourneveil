@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PlayerRuntime } from '../game/character/playerRuntime'
 import type { FoundationRuntimeDiagnostic } from '../game/core/foundationDiagnostic'
+import {
+  COMBAT_DIAGNOSTIC_ACTION,
+  COMBAT_DIAGNOSTIC_ACTION_ID,
+} from '../debug/combatDiagnosticFixture'
 import { BrowserGamepadInput } from '../input/browserGamepadInput'
 import { BrowserMovementInput } from '../input/browserMovementInput'
 import { composeMovementIntents } from '../input/composeMovementIntents'
@@ -8,10 +12,14 @@ import { composeMovementIntents } from '../input/composeMovementIntents'
 interface FoundationRuntimeIntegration {
   readonly runtime: PlayerRuntime
   readonly diagnostic: FoundationRuntimeDiagnostic
+  readonly startCombatDiagnosticAction: () => void
 }
 
 export function useFoundationRuntime(): FoundationRuntimeIntegration {
-  const runtime = useMemo(() => new PlayerRuntime(), [])
+  const runtime = useMemo(
+    () => new PlayerRuntime([COMBAT_DIAGNOSTIC_ACTION]),
+    [],
+  )
   const [diagnostic, setDiagnostic] = useState<FoundationRuntimeDiagnostic>(
     () => ({
       ...runtime.snapshot(),
@@ -52,6 +60,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
         setDiagnostic({
           simulation: snapshot.simulation,
           player: snapshot.player,
+          combat: snapshot.combat,
           movementIntent: composed.intent,
           activeInputSource: composed.source,
         })
@@ -68,5 +77,14 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
     }
   }, [runtime])
 
-  return { runtime, diagnostic }
+  return {
+    runtime,
+    diagnostic,
+    startCombatDiagnosticAction: () => {
+      runtime.requestCombatAction({
+        type: 'start-action',
+        actionId: COMBAT_DIAGNOSTIC_ACTION_ID,
+      })
+    },
+  }
 }

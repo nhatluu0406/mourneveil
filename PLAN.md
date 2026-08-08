@@ -1,94 +1,95 @@
-# PLAN: M1 Graybox Movement Foundation
-<!-- Live execution graph for M1 only. Tick steps when green; do not invent M2 combat work here. -->
+# PLAN: M2 Combat Proof
+<!-- Live execution graph for M2 only. M1 is accepted; do not broaden this milestone beyond Combat Proof. -->
 
-Input: M0 foundation complete in repo; Product Owner M0 browser acceptance still open | Stack: STACK.md | Contract: `docs/product/vertical-slice.md`, `docs/architecture/overview.md`
-Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-graybox-movement`)
+Input: M1 accepted by Product Owner on 2026-08-09 | Stack: `STACK.md` | Contracts: `docs/product/vertical-slice.md`, `docs/architecture/overview.md`
+Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-proof`)
 
 ## Non-goals
-- Combat, enemies, stamina/posture, loot, save, audio production, art pass
-- Cinematic/free camera system, touch input, backend, deployment
-- Broad ECS/framework introduction; empty module scaffolding beyond owned paths
-- M2 combat implementation (next milestone after M1 acceptance only)
+- Boss, loot, inventory, enemy framework, production animation systems
+- Health or stamina implementation, combos, lock-on, VFX, audio, content production
+- ECS, global event bus, physics redesign, camera or locomotion retuning
 
 ## Steps
 <!-- risk: LOW|MEDIUM|HIGH ; isolation: inline|sequential|worktree -->
 
-- [x] 1. M1.1 — Simulation and input authority
+- [x] 1. M2.1 — Combat action contract foundation
   - depends: —
   - risk: HIGH
   - preferred agent: Codex
   - isolation: sequential (clean tree / worktree if main is dirty)
-  - owns/allows: `src/game/core/`, `src/input/`, `src/debug/` (diagnostic only), focused tests under those trees, docs touch only if runtime contracts change
-  - outcome: deterministic/fixed-step simulation foundation; typed player input intents; focus-loss/reset clears stuck intents; pure tests; runtime diagnostic proving sim ticks + intent sampling without character locomotion unless required to prove the contract
-  - non-goals: character controller, camera retune, combat, controller full mapping beyond what proves the intent contract
-  - verifier: `npm run test -- src/game/core src/input && npm run typecheck && npm run lint`
-  - completion evidence: passing pure tests for clock/intent/focus-reset; diagnostic visible in local runtime; PLAN step ticked; HANDOFF updated
+  - owns/allows: `src/game/combat/`, minimal simulation/debug integration, focused pure tests, M2 task state
+  - outcome: immutable typed action definitions; deterministic single-action runtime; explicit cancellation/interruption; semantic request, resource-validation, and contact-window contracts; debug-only diagnostic proof
+  - non-goals: attack input wiring, visible attacks, animation authority, hitboxes, damage, enemies, health, stamina state, dodge, guard, combos
+  - verifier: `npm run test -- src/game/combat && npm run lint && npm run typecheck`
+  - completion evidence: required deterministic phase/policy tests green; diagnostic exposes authoritative action state; full verification green; PLAN/HANDOFF/CHECKPOINT updated
 
-- [x] 2. M1.2 — Graybox character controller
+- [ ] 2. M2.2 — Player attack actions
   - depends: 1
   - risk: HIGH
   - preferred agent: Codex
   - isolation: sequential
-  - owns/allows: `src/game/character/`, `src/physics/` (queries only), `src/render/` only as needed to project one placeholder body, `src/debug/` fixture hook, focused tests
-  - outcome: one placeholder player body; ground detection; collision-safe movement on the M0 graybox platform; no combat; deterministic debug reproduction path
-  - non-goals: animation set, combat actions, camera system redesign, multiple characters
-  - verifier: `npm run test -- src/game/character src/physics && npm run typecheck && npm run lint`
-  - completion evidence: tests for movement/grounding pure rules; deterministic fixture documented; local runtime observation recorded; PLAN/HANDOFF updated
+  - owns/allows: player combat actions, semantic player attack input, narrow character integration, focused tests
+  - outcome: light/heavy player actions consume the M2.1 contract with authoritative timing and costs validated through its hook
+  - non-goals: damage resolution, enemy framework, production animations, dodge, guard
+  - verifier: focused player-combat tests plus `npm run verify && git diff --check`
+  - completion evidence: deterministic action requests and phase progression verified; runtime proof recorded
 
-- [x] 3. M1.3 — Camera and runtime tuning
+- [ ] 3. M2.3 — Contact and damage proof
   - depends: 2
-  - risk: MEDIUM
-  - preferred agent: Cursor
-  - isolation: sequential
-  - owns/allows: `src/render/` camera/follow, minor `src/app/` shell sizing if required for resize; no simulation authority changes
-  - outcome: readable high-oblique follow camera; sane resize behavior; local visual tuning for graybox readability
-  - non-goals: cinematic camera, free-look system, cutscenes, combat framing rules beyond follow readability
-  - verifier: `npm run typecheck && npm run lint && npm run build`
-  - completion evidence: recorded local runtime check (resize + follow); PLAN/HANDOFF updated
-  - residual defects at completion: center-blocker visual clipping routed to blocking step 3a; sustained WASD feel lag deferred by PO
-
-- [x] 3a. M1.2.1 — Character collision correctness (blocking defect)
-  - depends: 2, 3
   - risk: HIGH
   - preferred agent: Codex
   - isolation: sequential
-  - owns/allows: `src/game/character/`, `src/physics/`, player render projection, center-blocker fixture, focused tests, active M1 state
-  - outcome: evidence-backed center-blocker diagnosis; smallest authority-preserving fix; deterministic real-Rapier regression proving collision-corrected movement does not penetrate beyond tolerance
-  - non-goals: motor redesign, controller input, camera retuning/interpolation, combat, M1.4 implementation
-  - verifier: `npm run test -- src/game/character src/physics src/render/PlayerVisual.test.ts && npm run verify && git diff --check`
-  - completion evidence: physical-versus-visual geometry recorded; regression green; runtime observation recorded or explicitly pending; HANDOFF/CHECKPOINT updated
+  - owns/allows: narrow contact query, one deterministic target fixture, minimal damage contract, focused tests
+  - outcome: an authoritative active window can produce one validated contact and deterministic damage result
+  - non-goals: enemy framework, health UI, hit reactions, loot, broad hitbox system
+  - verifier: focused contact/damage tests plus `npm run verify && git diff --check`
+  - completion evidence: deterministic contact fixture and single-hit policy verified; runtime proof recorded
 
-- [x] 4. M1.4 — Controller input foundation and M1 verification
-  - depends: 2, 3, 3a
-  - risk: MEDIUM
-  - preferred agent: Cursor (Claude independent review if needed before acceptance)
+- [ ] 4. M2.4 — Dodge and defensive mechanic
+  - depends: 3
+  - risk: HIGH
+  - preferred agent: Codex
   - isolation: sequential
-  - owns/allows: `src/input/` controller mapping, `src/debug/` M1 fixture, verification/docs evidence in `docs/development/current-state.md` + task HANDOFF
-  - outcome: basic controller movement mapping; focus/reconnect sanity; deterministic M1 runtime fixture; production build verification; Product Owner play check pathway documented
-  - non-goals: full glyph UI, rebind menu, touch, combat inputs beyond movement
-  - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY: Product Owner local play of move + camera + focus-loss using the M1 fixture
-  - completion evidence: `npm run verify` green; keyboard browser smoke recorded; physical controller pending by PO choice; PLAN/HANDOFF updated; M1 ready for PO acceptance
-  - residual: physical gamepad manual pass; sustained WASD feel tuning debt (not correctness)
+  - owns/allows: one dodge action, one defensive mechanic, explicit action-policy integration, focused tests
+  - outcome: deterministic dodge and one scoped defensive response use the shared action authority
+  - non-goals: broad stamina system, parry tree, lock-on, animation framework
+  - verifier: focused defense tests plus `npm run verify && git diff --check`
+  - completion evidence: timing/cancel/interrupt interactions verified; runtime proof recorded
+
+- [ ] 5. M2.5 — Combat presentation and feel
+  - depends: 4
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: presentation-only combat readability, primitive feedback, scoped feel tuning under fixed contracts
+  - outcome: Combat Proof actions and results are readable without presentation becoming authority
+  - non-goals: production animation pipeline, final VFX/audio, camera redesign
+  - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY: local combat readability pass
+  - completion evidence: runtime observations recorded; no authority drift
+
+- [ ] 6. M2.6 — Combat verification
+  - depends: 5
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: deterministic verification fixture and concise milestone evidence only
+  - outcome: complete Combat Proof happy path is reproducible and M2 limitations are explicit
+  - non-goals: new combat features, content expansion, deployment
+  - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY: Product Owner Combat Proof playthrough
+  - completion evidence: automated gates and manual acceptance pathway recorded; M2 ready for acceptance
 
 ## Parallel groups
-- none — M1 steps share runtime authority and projection; run sequentially
+- none — M2 steps share combat authority and execute sequentially
 
 ## Decisions
 <!-- append-only: date | decision | reason -->
-- 2026-08-08 | M1 planned before any movement implementation | LeanLoop alignment; recoverability for fresh agent sessions
-- 2026-08-08 | Repair `.leanloop/install.json` managed digests to LF working-tree bytes | Adoption recorded CRLF hashes; repo uses `eol=lf`; doctor --strict was failing falsely on content-identical files
-- 2026-08-09 | M1.3 follow camera is presentation-only: damped look target + rigid high-oblique offset (`FOLLOW_DAMPING=12`) | Keeps isometric framing; must not write into simulation
-- 2026-08-09 | No player-mesh interpolation in M1.3 | 60 Hz motor + damped camera sufficient for graybox; avoid coupling render alpha into authority
-- 2026-08-09 | Throttle foundation diagnostic React updates (~10 Hz); keep sim/camera every frame | Reduce sustained-input UI jank without changing motor
-- 2026-08-09 | Do not mask M1.2 center-blocker clipping or movement-feel lag inside M1.3 | MEDIUM camera task; HIGH motor/collision remains open for a later fix
-- 2026-08-09 | M1.2.1 confirmed center-blocker clipping was the facing marker extending beyond a collision-safe capsule; keep visual geometry contained by the shared capsule dimensions | Real Rapier regression preserves the existing 2 cm separation policy; no motor, physics, or camera retune required
-- 2026-08-09 | Controller left-stick maps into existing semantic `PlayerMovementIntent` with dead zone `0.18`; composition = sum then clamp magnitude ≤ 1 | One gameplay authority; keyboard-only unchanged; no second movement path
-- 2026-08-09 | Gamepad focus-loss/disconnect uses suppress-until-neutral; poll only in the app/input rAF boundary | Prevents stale stick drive without a second loop or sim timing coupling
-- 2026-08-09 | Sustained WASD “lag” classified as deliberate accel/camera-follow feel debt for later combat-feel work, not input latency | No motor constant change in M1.4
+- 2026-08-09 | M1 accepted and closed; initialize a fresh M2 Combat Proof graph | Product Owner explicitly authorized M2.1
+- 2026-08-09 | Combat action durations are positive integer simulation steps; phase transitions are runtime authority and contact is exposed only during an action's active phase | Deterministic 60 Hz progression without animation-frame authority
+- 2026-08-09 | Voluntary cancellation and forced interruption use separate typed phase-window policies; resource validation is injected at start | Proves future policy and stamina seams without implementing those systems
 
 ## Escalation
-- Same error 3 times: stop, write stuck report under active task `reports/`, escalate to Codex (architecture) or Claude (review)
-- Failed branch owner: orchestrator on the integration tree; never mix unrelated dirty main changes
+- Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
+- Failed branch owner: orchestrator on the integration tree; never mix unrelated dirty-main changes
 
-## Next milestone (reference only)
-- M2: Combat foundation — not planned here
+## Next milestone
+- M2.2 — Player attack actions

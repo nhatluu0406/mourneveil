@@ -1,31 +1,23 @@
 # Current State
 
 - Updated: 2026-08-09
-- Milestone: **M1 implementation complete** — READY FOR PRODUCT OWNER ACCEPTANCE
-- Active LeanLoop task: `m1-graybox-movement`
-- Status: Graybox movement foundation (sim, keyboard+gamepad intent, motor, collision, follow camera) is in `main`. Physical gamepad manual verification and formal PO acceptance remain. M2 not started.
+- Milestone: **M2 Combat Proof in progress — M2.1 complete**
+- Active LeanLoop task: `m2-combat-proof`
+- Status: M1 accepted and closed. Authoritative combat-action contracts and fixed-step runtime exist; visible attacks are not implemented.
 
 ## What exists
 
-- Fixed-step simulation + semantic movement intents (keyboard + left-stick gamepad)
-- Composition: sum sources then clamp magnitude ≤ 1
-- Kinematic graybox capsule with Rapier collision/grounding
-- Presentation-only high-oblique follow camera
-- Diagnostic panel: milestone M1.4, intent, active input source, pose, grounded, camera mode
+- Immutable action definitions with integer startup, active, recovery, and cooldown durations
+- One-action runtime with typed cancellation/interruption policies, resource-validation hook, and active-phase contact-window state
+- Fixed-step integration through the existing player runtime
+- Debug-only action trigger and diagnostic phase/contact projection
 
-## Where truth lives
+## Known limitations
 
-- Law: `STACK.md`
-- Execution: `PLAN.md` (M1 steps 1–4 ticked)
-- Recovery: `state/tasks/m1-graybox-movement/HANDOFF.md`
-
-## Known limitations / debt
-
-- Physical controller play-pass not recorded this session (adapter + tests present)
-- Sustained WASD feel weight deferred as non-blocking tuning debt
-- No committed browser automation suite
-- Bundle-size advisory deferred
+- No production combat input, visible attacks, animation, hitboxes, damage, enemies, health, stamina, dodge, or guard
+- Browser diagnostic interaction was unavailable for this session; HTTP runtime startup was confirmed only
+- Physical controller M1 play-pass and bundle-size advisory remain deferred
 
 ## Next executable work
 
-Product Owner M1 acceptance. After acceptance, plan M2 combat foundation separately — do not invent M2 here.
+M2.2 — Player attack actions. Do not begin contact/damage proof until M2.2 is complete.
