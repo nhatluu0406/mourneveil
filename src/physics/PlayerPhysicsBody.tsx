@@ -8,10 +8,12 @@ import {
 import { useEffect, useRef } from 'react'
 import type { PlayerRuntime } from '../game/character/playerRuntime'
 import { PlayerVisual } from '../render/PlayerVisual'
-
-export const CHARACTER_COLLISION_OFFSET = 0.02
-export const CHARACTER_GROUND_SNAP_DISTANCE = 0.1
-export const CHARACTER_MAX_WALKABLE_SLOPE_RADIANS = Math.PI / 4
+import {
+  CHARACTER_COLLISION_OFFSET,
+  PLAYER_CAPSULE_HALF_HEIGHT,
+  PLAYER_CAPSULE_RADIUS,
+  configurePlayerCharacterController,
+} from './playerCollisionConfig'
 
 interface PlayerPhysicsBodyProps {
   runtime: PlayerRuntime
@@ -33,14 +35,7 @@ export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
     const controller = world.createCharacterController(
       CHARACTER_COLLISION_OFFSET,
     )
-    controller.setSlideEnabled(true)
-    controller.enableSnapToGround(CHARACTER_GROUND_SNAP_DISTANCE)
-    controller.setMaxSlopeClimbAngle(
-      CHARACTER_MAX_WALKABLE_SLOPE_RADIANS,
-    )
-    controller.setMinSlopeSlideAngle(
-      CHARACTER_MAX_WALKABLE_SLOPE_RADIANS,
-    )
+    configurePlayerCharacterController(controller)
 
     const detachResolver = runtime.attachCollisionResolver(
       (position, desiredTranslation) => {
@@ -79,7 +74,10 @@ export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
       position={[initialPosition.x, initialPosition.y, initialPosition.z]}
       enabledRotations={[false, false, false]}
     >
-      <CapsuleCollider ref={colliderRef} args={[0.45, 0.35]} />
+      <CapsuleCollider
+        ref={colliderRef}
+        args={[PLAYER_CAPSULE_HALF_HEIGHT, PLAYER_CAPSULE_RADIUS]}
+      />
       <PlayerVisual />
     </RigidBody>
   )

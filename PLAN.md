@@ -45,10 +45,21 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
   - non-goals: cinematic camera, free-look system, cutscenes, combat framing rules beyond follow readability
   - verifier: `npm run typecheck && npm run lint && npm run build`
   - completion evidence: recorded local runtime check (resize + follow); PLAN/HANDOFF updated
-  - residual defects (not fixed in M1.3): center-blocker capsule clipping (M1.2 collision); sustained WASD feel lag deferred by PO
+  - residual defects at completion: center-blocker visual clipping routed to blocking step 3a; sustained WASD feel lag deferred by PO
+
+- [x] 3a. M1.2.1 — Character collision correctness (blocking defect)
+  - depends: 2, 3
+  - risk: HIGH
+  - preferred agent: Codex
+  - isolation: sequential
+  - owns/allows: `src/game/character/`, `src/physics/`, player render projection, center-blocker fixture, focused tests, active M1 state
+  - outcome: evidence-backed center-blocker diagnosis; smallest authority-preserving fix; deterministic real-Rapier regression proving collision-corrected movement does not penetrate beyond tolerance
+  - non-goals: motor redesign, controller input, camera retuning/interpolation, combat, M1.4 implementation
+  - verifier: `npm run test -- src/game/character src/physics src/render/PlayerVisual.test.ts && npm run verify && git diff --check`
+  - completion evidence: physical-versus-visual geometry recorded; regression green; runtime observation recorded or explicitly pending; HANDOFF/CHECKPOINT updated
 
 - [ ] 4. M1.4 — Controller input foundation and M1 verification
-  - depends: 2, 3
+  - depends: 2, 3, 3a
   - risk: MEDIUM
   - preferred agent: Cursor (Claude independent review if needed before acceptance)
   - isolation: sequential
@@ -69,6 +80,7 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
 - 2026-08-09 | No player-mesh interpolation in M1.3 | 60 Hz motor + damped camera sufficient for graybox; avoid coupling render alpha into authority
 - 2026-08-09 | Throttle foundation diagnostic React updates (~10 Hz); keep sim/camera every frame | Reduce sustained-input UI jank without changing motor
 - 2026-08-09 | Do not mask M1.2 center-blocker clipping or movement-feel lag inside M1.3 | MEDIUM camera task; HIGH motor/collision remains open for a later fix
+- 2026-08-09 | M1.2.1 confirmed center-blocker clipping was the facing marker extending beyond a collision-safe capsule; keep visual geometry contained by the shared capsule dimensions | Real Rapier regression preserves the existing 2 cm separation policy; no motor, physics, or camera retune required
 
 ## Escalation
 - Same error 3 times: stop, write stuck report under active task `reports/`, escalate to Codex (architecture) or Claude (review)

@@ -2,6 +2,7 @@ import { Physics, RigidBody, useRapier } from '@react-three/rapier'
 import { useEffect } from 'react'
 import type { PlayerRuntime } from '../game/character/playerRuntime'
 import { FIXED_STEP_SECONDS } from '../game/core/fixedStepClock'
+import { GRAYBOX_CENTER_BLOCKER_SIZE } from '../physics/grayboxCollision'
 import { PlayerPhysicsBody } from '../physics/PlayerPhysicsBody'
 import { FollowCameraRig } from './FollowCameraRig'
 import type { CameraDiagnostic } from './followCamera'
@@ -71,7 +72,13 @@ function FoundationWorld({ onPhysicsReady, runtime }: SceneProps) {
       <OrientationMarker />
       <RigidBody type="fixed" colliders="cuboid">
         <mesh castShadow receiveShadow position={[0, 0.75, 0]}>
-          <boxGeometry args={[1.5, 1.5, 1.5]} />
+          <boxGeometry
+            args={[
+              GRAYBOX_CENTER_BLOCKER_SIZE.x,
+              GRAYBOX_CENTER_BLOCKER_SIZE.y,
+              GRAYBOX_CENTER_BLOCKER_SIZE.z,
+            ]}
+          />
           <meshStandardMaterial color="#a88455" roughness={0.76} />
         </mesh>
       </RigidBody>

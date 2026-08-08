@@ -3,7 +3,7 @@
 - Updated: 2026-08-09
 - Milestone: M1 in progress; M1.3 complete in repo
 - Active LeanLoop task: `m1-graybox-movement`
-- Status: High-oblique follow camera and graybox readability are in. Open: center-blocker capsule clipping (M1.2 collision defect) and deferred sustained-WASD feel lag. Next PLAN step is M1.4.
+- Status: High-oblique follow camera and graybox readability are in. M1.2.1 fixed the center-blocker visual clipping and added real-Rapier collision regression coverage. Deferred: sustained-WASD feel lag. Next PLAN step is M1.4.
 
 ## What exists
 
@@ -19,7 +19,7 @@
 
 ## Known limitations
 
-- **Capsule clips into center graybox cube** (PO screenshot) — treat as open collision defect before claiming collision-safe movement
+- M1.2.1 browser replay remains pending because no controllable browser was available; automated Rapier and visual-geometry regressions are green
 - Sustained WASD movement feel still laggy; deferred by PO
 - PO M0 formal acceptance still open
 - No committed automated browser suite (ad-hoc Playwright used for M1.3 smoke only)
@@ -27,4 +27,4 @@
 
 ## Next executable PLAN step
 
-M1.4 — Controller input foundation and M1 verification (Cursor). Keep the center-blocker clipping defect visible; do not start combat.
+M1.4 — Controller input foundation and M1 verification (Cursor). Include the pending center-blocker browser replay in the M1 runtime check; do not start combat.

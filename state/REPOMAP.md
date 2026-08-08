@@ -8,7 +8,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (78L)
+- PLAN.md (90L)
 - README.md (35L)
 - SETUP.md (152L)
 - STACK.md (61L)
