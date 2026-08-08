@@ -1,10 +1,11 @@
 import type { ActiveMovementInputSource } from '../../input/composeMovementIntents'
 import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
 import type { PlayerMotorState } from '../character/playerMotor'
+import type { PlayerAttackSpatialSnapshot } from '../combat/playerAttackActions'
 import type { CombatActionSnapshot } from '../combat/combatActionRuntime'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M2.1' as const
+export const MILESTONE = 'M2.2' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
@@ -13,6 +14,7 @@ export interface FoundationRuntimeDiagnostic {
   readonly activeInputSource: ActiveMovementInputSource
   readonly player: PlayerMotorState
   readonly combat: CombatActionSnapshot
+  readonly attack: PlayerAttackSpatialSnapshot
 }
 
 export interface FoundationDiagnostic {

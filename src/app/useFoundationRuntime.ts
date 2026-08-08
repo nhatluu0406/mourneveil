@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { PlayerRuntime } from '../game/character/playerRuntime'
 import type { FoundationRuntimeDiagnostic } from '../game/core/foundationDiagnostic'
-import {
-  COMBAT_DIAGNOSTIC_ACTION,
-  COMBAT_DIAGNOSTIC_ACTION_ID,
-} from '../debug/combatDiagnosticFixture'
+import { BrowserAttackInput } from '../input/browserAttackInput'
 import { BrowserGamepadInput } from '../input/browserGamepadInput'
 import { BrowserMovementInput } from '../input/browserMovementInput'
 import { composeMovementIntents } from '../input/composeMovementIntents'
@@ -12,14 +9,10 @@ import { composeMovementIntents } from '../input/composeMovementIntents'
 interface FoundationRuntimeIntegration {
   readonly runtime: PlayerRuntime
   readonly diagnostic: FoundationRuntimeDiagnostic
-  readonly startCombatDiagnosticAction: () => void
 }
 
 export function useFoundationRuntime(): FoundationRuntimeIntegration {
-  const runtime = useMemo(
-    () => new PlayerRuntime([COMBAT_DIAGNOSTIC_ACTION]),
-    [],
-  )
+  const runtime = useMemo(() => new PlayerRuntime(), [])
   const [diagnostic, setDiagnostic] = useState<FoundationRuntimeDiagnostic>(
     () => ({
       ...runtime.snapshot(),
@@ -31,12 +24,14 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
   useEffect(() => {
     const keyboardInput = new BrowserMovementInput(window, document)
     const gamepadInput = new BrowserGamepadInput(window, document)
+    const attackInput = new BrowserAttackInput(window, document)
     let previousFrameTime = performance.now()
     let animationFrameId = 0
     let framesSinceDiagnostic = 0
 
     keyboardInput.connect()
     gamepadInput.connect()
+    attackInput.connect()
 
     const advanceFrame = (frameTime: number): void => {
       const frameDeltaSeconds = Math.max(
@@ -48,6 +43,10 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
         keyboardInput.movementIntent(),
         gamepadInput.movementIntent(),
       )
+      const attackRequest = attackInput.consumeAttackRequest()
+      if (attackRequest !== null) {
+        runtime.requestPlayerAttack(attackRequest)
+      }
       const snapshot = runtime.advanceFrame(
         frameDeltaSeconds,
         composed.intent,
@@ -61,6 +60,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
           simulation: snapshot.simulation,
           player: snapshot.player,
           combat: snapshot.combat,
+          attack: snapshot.attack,
           movementIntent: composed.intent,
           activeInputSource: composed.source,
         })
@@ -74,17 +74,12 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
       cancelAnimationFrame(animationFrameId)
       keyboardInput.disconnect()
       gamepadInput.disconnect()
+      attackInput.disconnect()
     }
   }, [runtime])
 
   return {
     runtime,
     diagnostic,
-    startCombatDiagnosticAction: () => {
-      runtime.requestCombatAction({
-        type: 'start-action',
-        actionId: COMBAT_DIAGNOSTIC_ACTION_ID,
-      })
-    },
   }
 }

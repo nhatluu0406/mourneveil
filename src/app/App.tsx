@@ -12,11 +12,7 @@ export function App() {
   const [physicsReady, setPhysicsReady] = useState(false)
   const [cameraDiagnostic, setCameraDiagnostic] =
     useState<CameraDiagnostic | null>(null)
-  const {
-    runtime,
-    diagnostic: runtimeDiagnostic,
-    startCombatDiagnosticAction,
-  } = useFoundationRuntime()
+  const { runtime, diagnostic: runtimeDiagnostic } = useFoundationRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
   const reportCameraDiagnostic = useCallback((diagnostic: CameraDiagnostic) => {
     setCameraDiagnostic(diagnostic)
@@ -62,11 +58,7 @@ export function App() {
           </Suspense>
         </Canvas>
       </RenderErrorBoundary>
-      <FoundationPanel
-        diagnostic={diagnostic}
-        camera={cameraDiagnostic}
-        onStartCombatDiagnostic={startCombatDiagnosticAction}
-      />
+      <FoundationPanel diagnostic={diagnostic} camera={cameraDiagnostic} />
     </main>
   )
 }

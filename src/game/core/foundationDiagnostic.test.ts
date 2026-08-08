@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createPlayerMotorState } from '../character/playerMotor'
 import { CombatActionRuntime } from '../combat/combatActionRuntime'
+import { createPlayerAttackSpatialSnapshot } from '../combat/playerAttackActions'
 import { createFoundationDiagnostic } from './foundationDiagnostic'
 
 describe('createFoundationDiagnostic', () => {
@@ -15,11 +16,16 @@ describe('createFoundationDiagnostic', () => {
       activeInputSource: 'keyboard' as const,
       player: createPlayerMotorState(),
       combat: new CombatActionRuntime([]).snapshot(),
+      attack: createPlayerAttackSpatialSnapshot(
+        new CombatActionRuntime([]).snapshot(),
+        createPlayerMotorState().position,
+        createPlayerMotorState().facing,
+      ),
     }
 
     expect(createFoundationDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M2.1',
+      milestone: 'M2.2',
       rendererReady: true,
       physicsReady: false,
       foundationReady: false,

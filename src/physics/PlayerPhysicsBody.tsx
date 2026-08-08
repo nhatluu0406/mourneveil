@@ -78,7 +78,7 @@ export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
         ref={colliderRef}
         args={[PLAYER_CAPSULE_HALF_HEIGHT, PLAYER_CAPSULE_RADIUS]}
       />
-      <PlayerVisual />
+      <PlayerVisual runtime={runtime} />
     </RigidBody>
   )
 }

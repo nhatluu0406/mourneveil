@@ -23,13 +23,13 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
   - verifier: `npm run test -- src/game/combat && npm run lint && npm run typecheck`
   - completion evidence: required deterministic phase/policy tests green; diagnostic exposes authoritative action state; full verification green; PLAN/HANDOFF/CHECKPOINT updated
 
-- [ ] 2. M2.2 — Player attack actions
+- [x] 2. M2.2 — Player attack actions
   - depends: 1
   - risk: HIGH
   - preferred agent: Codex
   - isolation: sequential
   - owns/allows: player combat actions, semantic player attack input, narrow character integration, focused tests
-  - outcome: light/heavy player actions consume the M2.1 contract with authoritative timing and costs validated through its hook
+  - outcome: edge-triggered LMB/Shift+LMB light/heavy requests consume the M2.1 contract; fixed-step phases drive committed movement, persistent facing, primitive sweep projection, and facing-relative contact spheres without resolving hits
   - non-goals: damage resolution, enemy framework, production animations, dodge, guard
   - verifier: focused player-combat tests plus `npm run verify && git diff --check`
   - completion evidence: deterministic action requests and phase progression verified; runtime proof recorded
@@ -86,10 +86,13 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
 - 2026-08-09 | M1 accepted and closed; initialize a fresh M2 Combat Proof graph | Product Owner explicitly authorized M2.1
 - 2026-08-09 | Combat action durations are positive integer simulation steps; phase transitions are runtime authority and contact is exposed only during an action's active phase | Deterministic 60 Hz progression without animation-frame authority
 - 2026-08-09 | Voluntary cancellation and forced interruption use separate typed phase-window policies; resource validation is injected at start | Proves future policy and stamina seams without implementing those systems
+- 2026-08-09 | Light is 8/4/14 steps and heavy is 18/6/30 steps for startup/active/recovery; both have zero cooldown/resource cost | One authoritative provisional 60 Hz definition location with clearly distinct commitment
+- 2026-08-09 | Player facing follows meaningful movement, persists while neutral, and is frozen while startup/active/recovery suppress locomotion intent | Stable deterministic attack direction without camera or mouse-world aiming
+- 2026-08-09 | Each attack owns a facing-relative sphere definition; spatial contact is exposed only when its authoritative contact window is active | Gives M2.3 a narrow query contract without hit or damage resolution
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
 - Failed branch owner: orchestrator on the integration tree; never mix unrelated dirty-main changes
 
 ## Next milestone
-- M2.2 — Player attack actions
+- M2.3 — Contact and damage proof

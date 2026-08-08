@@ -26,6 +26,7 @@
 - Graybox locomotion: the fixed-step player motor proposes kinematic displacement; Rapier's character controller exclusively resolves collision and grounding with a 2 cm contact offset, 10 cm ground snap, and 45 degree walkable-slope limit
 - Simulation time: fixed 60 Hz; clamp frame delta to 250 ms; run at most 8 catch-up steps per frame; discard excess whole-step backlog and preserve only a fractional-step remainder
 - Combat actions: immutable definitions use integer simulation-step durations; one authoritative runtime owns phase transitions and contact-window state; animation may project action state but never advance it
+- Player attacks: LMB requests light and Shift+LMB requests heavy on the press edge; committed attack phases preserve the last meaningful movement facing, suppress locomotion intent, and expose facing-relative contact-shape data only during the authoritative active window
 - React is shell/UI projection — not combat/simulation authority
 - Flow: device input → intents → simulation resolves outcomes → render/UI/audio/VFX consume typed state/events
 - Physics reports collision facts; simulation assigns gameplay meaning

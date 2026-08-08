@@ -1,14 +1,22 @@
 import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
+import type { PlayerAttackRequest } from '../../input/playerAttackIntent'
 import type {
-  CombatActionDefinition,
   CombatActionRequest,
   CombatResourceValidator,
 } from '../combat/combatAction'
 import {
   CombatActionRuntime,
+  type CombatActionEndResult,
   type CombatActionSnapshot,
   type CombatActionStartResult,
 } from '../combat/combatActionRuntime'
+import {
+  PLAYER_ATTACK_DEFINITIONS,
+  constrainMovementIntentForAttack,
+  createPlayerAttackSpatialSnapshot,
+  playerAttackForRequest,
+  type PlayerAttackSpatialSnapshot,
+} from '../combat/playerAttackActions'
 import {
   FixedStepClock,
   type FixedStepAdvance,
@@ -25,6 +33,7 @@ export interface PlayerRuntimeSnapshot {
   readonly simulation: SimulationTimeSnapshot
   readonly player: PlayerMotorState
   readonly combat: CombatActionSnapshot
+  readonly attack: PlayerAttackSpatialSnapshot
 }
 
 export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
@@ -33,19 +42,29 @@ export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
 
 export class PlayerRuntime {
   private readonly clock = new FixedStepClock()
-  private readonly combatRuntime: CombatActionRuntime
+  private readonly combatRuntime = new CombatActionRuntime(
+    PLAYER_ATTACK_DEFINITIONS.map((definition) => definition.action),
+  )
   private playerState = createPlayerMotorState()
   private collisionResolver: CharacterCollisionResolver | null = null
-
-  constructor(combatActions: readonly CombatActionDefinition[] = []) {
-    this.combatRuntime = new CombatActionRuntime(combatActions)
-  }
 
   requestCombatAction(
     request: CombatActionRequest,
     validateResources?: CombatResourceValidator,
   ): CombatActionStartResult {
     return this.combatRuntime.request(request, validateResources)
+  }
+
+  requestPlayerAttack(request: PlayerAttackRequest): CombatActionStartResult {
+    const attack = playerAttackForRequest(request)
+    return this.requestCombatAction({
+      type: 'start-action',
+      actionId: attack.action.id,
+    })
+  }
+
+  interruptCombatAction(): CombatActionEndResult {
+    return this.combatRuntime.requestInterruption()
   }
 
   attachCollisionResolver(resolver: CharacterCollisionResolver): () => void {
@@ -65,28 +84,33 @@ export class PlayerRuntime {
     const frame = this.clock.advance(frameDeltaSeconds, (fixedStepSeconds) => {
       this.combatRuntime.advanceFixedStep()
       if (this.collisionResolver !== null) {
+        const constrainedMovementIntent = constrainMovementIntentForAttack(
+          movementIntent,
+          this.combatRuntime.snapshot().phase,
+        )
         this.playerState = stepPlayerMotor(
           this.playerState,
-          movementIntent,
+          constrainedMovementIntent,
           fixedStepSeconds,
           this.collisionResolver,
         )
       }
     })
 
-    return {
-      simulation: this.clock.snapshot(),
-      player: this.playerState,
-      combat: this.combatRuntime.snapshot(),
-      frame,
-    }
+    return { ...this.snapshot(), frame }
   }
 
   snapshot(): PlayerRuntimeSnapshot {
+    const combat = this.combatRuntime.snapshot()
     return {
       simulation: this.clock.snapshot(),
       player: this.playerState,
-      combat: this.combatRuntime.snapshot(),
+      combat,
+      attack: createPlayerAttackSpatialSnapshot(
+        combat,
+        this.playerState.position,
+        this.playerState.facing,
+      ),
     }
   }
 }

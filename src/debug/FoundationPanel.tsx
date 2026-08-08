@@ -4,7 +4,6 @@ import type { CameraDiagnostic } from '../render/followCamera'
 interface FoundationPanelProps {
   diagnostic: FoundationDiagnostic
   camera: CameraDiagnostic | null
-  onStartCombatDiagnostic: () => void
 }
 
 function readinessLabel(ready: boolean): string {
@@ -14,7 +13,6 @@ function readinessLabel(ready: boolean): string {
 export function FoundationPanel({
   diagnostic,
   camera,
-  onStartCombatDiagnostic,
 }: FoundationPanelProps) {
   return (
     <aside className="foundation-panel" aria-label="Foundation diagnostic">
@@ -82,6 +80,13 @@ export function FoundationPanel({
           <dd>{diagnostic.runtime.player.grounded ? 'yes' : 'no'}</dd>
         </div>
         <div>
+          <dt>Facing</dt>
+          <dd>
+            ({diagnostic.runtime.player.facing.x.toFixed(2)},{' '}
+            {diagnostic.runtime.player.facing.z.toFixed(2)})
+          </dd>
+        </div>
+        <div>
           <dt>Combat action</dt>
           <dd>
             {diagnostic.runtime.combat.actionId ?? 'idle'} ·{' '}
@@ -103,10 +108,24 @@ export function FoundationPanel({
               : 'disabled'}
           </dd>
         </div>
+        <div>
+          <dt>Attack shape</dt>
+          <dd>
+            {diagnostic.runtime.attack.contactShapeId ?? 'none'} Â·{' '}
+            {diagnostic.runtime.attack.activeContactShape
+              ? 'active'
+              : 'inactive'}
+          </dd>
+        </div>
+        <div>
+          <dt>Attack movement</dt>
+          <dd>
+            {diagnostic.runtime.attack.movementConstrained
+              ? 'constrained'
+              : 'free'}
+          </dd>
+        </div>
       </dl>
-      <button type="button" onClick={onStartCombatDiagnostic}>
-        Start debug combat action
-      </button>
     </aside>
   )
 }

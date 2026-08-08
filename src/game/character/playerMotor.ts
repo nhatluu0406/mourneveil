@@ -12,11 +12,17 @@ export interface Vector3Value {
   readonly z: number
 }
 
+export interface PlayerFacingDirection {
+  readonly x: number
+  readonly z: number
+}
+
 export interface PlayerMotorState {
   readonly position: Vector3Value
   readonly velocity: Vector3Value
   readonly grounded: boolean
   readonly movementIntent: PlayerMovementIntent
+  readonly facing: PlayerFacingDirection
 }
 
 export interface CharacterCollisionResult {
@@ -35,6 +41,7 @@ const NEUTRAL_INTENT: PlayerMovementIntent = Object.freeze({
   horizontal: 0,
   forward: 0,
 })
+const INITIAL_FACING: PlayerFacingDirection = Object.freeze({ x: 0, z: -1 })
 
 export function createPlayerMotorState(
   position: Vector3Value = INITIAL_POSITION,
@@ -44,6 +51,7 @@ export function createPlayerMotorState(
     velocity: ZERO_VECTOR,
     grounded: false,
     movementIntent: NEUTRAL_INTENT,
+    facing: INITIAL_FACING,
   }
 }
 
@@ -63,6 +71,9 @@ export function stepPlayerMotor(
   }
   const hasMovementIntent =
     movementIntent.horizontal !== 0 || movementIntent.forward !== 0
+  const facing = hasMovementIntent
+    ? movementIntentToFacing(movementIntent)
+    : state.facing
   const horizontalVelocity = moveToward2D(
     { x: state.velocity.x, z: state.velocity.z },
     targetHorizontalVelocity,
@@ -97,6 +108,24 @@ export function stepPlayerMotor(
     },
     grounded: collision.grounded,
     movementIntent: { ...movementIntent },
+    facing,
+  }
+}
+
+export function movementIntentToFacing(
+  movementIntent: PlayerMovementIntent,
+): PlayerFacingDirection {
+  const magnitude = Math.hypot(
+    movementIntent.horizontal,
+    movementIntent.forward,
+  )
+  if (magnitude === 0) {
+    throw new RangeError('Neutral movement has no facing direction')
+  }
+
+  return {
+    x: normalizeZero(movementIntent.horizontal / magnitude),
+    z: normalizeZero(-movementIntent.forward / magnitude),
   }
 }
 

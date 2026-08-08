@@ -45,6 +45,14 @@ describe('player motor', () => {
     expect(result.grounded).toBe(true)
   })
 
+  it('updates facing from meaningful movement and preserves it while neutral', () => {
+    const moved = simulate({ horizontal: 1, forward: 0 }, 1)
+    const stopped = simulate({ horizontal: 0, forward: 0 }, 1, moved)
+
+    expect(moved.facing).toEqual({ x: 1, z: 0 })
+    expect(stopped.facing).toEqual(moved.facing)
+  })
+
   it('produces equivalent movement for equivalent fixed-step sequences', () => {
     const intent = { horizontal: 1, forward: 0 }
 
