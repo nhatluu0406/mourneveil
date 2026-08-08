@@ -41,3 +41,12 @@ Desktop.ini
 *.temp
 *.bak
 vite.config.*.timestamp-*
+
+# LEANLOOP:IGNORE:START
+state/CURRENT_TASK
+state/CHECKPOINT.md
+state/reports/
+state/tasks/*/CHECKPOINT.md
+state/tasks/*/reports/
+__pycache__/
+# LEANLOOP:IGNORE:END
