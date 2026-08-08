@@ -1,14 +1,16 @@
 import type { FoundationDiagnostic } from '../game/core/foundationDiagnostic'
+import type { CameraDiagnostic } from '../render/followCamera'
 
 interface FoundationPanelProps {
   diagnostic: FoundationDiagnostic
+  camera: CameraDiagnostic | null
 }
 
 function readinessLabel(ready: boolean): string {
   return ready ? 'ready' : 'initializing'
 }
 
-export function FoundationPanel({ diagnostic }: FoundationPanelProps) {
+export function FoundationPanel({ diagnostic, camera }: FoundationPanelProps) {
   return (
     <aside className="foundation-panel" aria-label="Foundation diagnostic">
       <p className="foundation-panel__eyebrow">Working title</p>
@@ -28,6 +30,14 @@ export function FoundationPanel({ diagnostic }: FoundationPanelProps) {
           <dt>Physics</dt>
           <dd data-ready={diagnostic.physicsReady}>
             {readinessLabel(diagnostic.physicsReady)}
+          </dd>
+        </div>
+        <div>
+          <dt>Camera</dt>
+          <dd>
+            {camera
+              ? `${camera.mode} · look (${camera.followLookAt.x.toFixed(1)}, ${camera.followLookAt.z.toFixed(1)})`
+              : 'starting'}
           </dd>
         </div>
         <div>

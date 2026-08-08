@@ -3,14 +3,20 @@ import { Suspense, useCallback, useMemo, useState } from 'react'
 import { FoundationPanel } from '../debug/FoundationPanel'
 import { createFoundationDiagnostic } from '../game/core/foundationDiagnostic'
 import { Scene } from '../render/Scene'
+import type { CameraDiagnostic } from '../render/followCamera'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useFoundationRuntime } from './useFoundationRuntime'
 
 export function App() {
   const [rendererReady, setRendererReady] = useState(false)
   const [physicsReady, setPhysicsReady] = useState(false)
+  const [cameraDiagnostic, setCameraDiagnostic] =
+    useState<CameraDiagnostic | null>(null)
   const { runtime, diagnostic: runtimeDiagnostic } = useFoundationRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
+  const reportCameraDiagnostic = useCallback((diagnostic: CameraDiagnostic) => {
+    setCameraDiagnostic(diagnostic)
+  }, [])
   const diagnostic = useMemo(
     () =>
       createFoundationDiagnostic(
@@ -26,7 +32,12 @@ export function App() {
       <RenderErrorBoundary>
         <Canvas
           shadows
-          camera={{ position: [8, 8, 8], fov: 45, near: 0.1, far: 100 }}
+          camera={{
+            position: [8.5, 10.5, 8.5],
+            fov: 40,
+            near: 0.1,
+            far: 120,
+          }}
           dpr={[1, 2]}
           fallback={
             <div className="render-fallback" role="alert">
@@ -34,17 +45,20 @@ export function App() {
               <p>This browser does not provide the WebGL support Mourneveil needs.</p>
             </div>
           }
-          onCreated={({ camera }) => {
-            camera.lookAt(0, 0, 0)
+          onCreated={() => {
             setRendererReady(true)
           }}
         >
           <Suspense fallback={null}>
-            <Scene onPhysicsReady={reportPhysicsReady} runtime={runtime} />
+            <Scene
+              onPhysicsReady={reportPhysicsReady}
+              onCameraDiagnostic={reportCameraDiagnostic}
+              runtime={runtime}
+            />
           </Suspense>
         </Canvas>
       </RenderErrorBoundary>
-      <FoundationPanel diagnostic={diagnostic} />
+      <FoundationPanel diagnostic={diagnostic} camera={cameraDiagnostic} />
     </main>
   )
 }

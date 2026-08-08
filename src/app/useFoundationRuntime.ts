@@ -21,6 +21,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
     const movementInput = new BrowserMovementInput(window, document)
     let previousFrameTime = performance.now()
     let animationFrameId = 0
+    let framesSinceDiagnostic = 0
 
     movementInput.connect()
 
@@ -33,11 +34,16 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
       const movementIntent = movementInput.movementIntent()
       const snapshot = runtime.advanceFrame(frameDeltaSeconds, movementIntent)
 
-      setDiagnostic({
-        simulation: snapshot.simulation,
-        player: snapshot.player,
-        movementIntent,
-      })
+      // Keep simulation every frame; throttle React panel updates to cut sustained-input jank.
+      framesSinceDiagnostic += 1
+      if (framesSinceDiagnostic >= 6) {
+        framesSinceDiagnostic = 0
+        setDiagnostic({
+          simulation: snapshot.simulation,
+          player: snapshot.player,
+          movementIntent,
+        })
+      }
       animationFrameId = requestAnimationFrame(advanceFrame)
     }
 

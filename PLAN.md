@@ -35,7 +35,7 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
   - verifier: `npm run test -- src/game/character src/physics && npm run typecheck && npm run lint`
   - completion evidence: tests for movement/grounding pure rules; deterministic fixture documented; local runtime observation recorded; PLAN/HANDOFF updated
 
-- [ ] 3. M1.3 — Camera and runtime tuning
+- [x] 3. M1.3 — Camera and runtime tuning
   - depends: 2
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -45,6 +45,7 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
   - non-goals: cinematic camera, free-look system, cutscenes, combat framing rules beyond follow readability
   - verifier: `npm run typecheck && npm run lint && npm run build`
   - completion evidence: recorded local runtime check (resize + follow); PLAN/HANDOFF updated
+  - residual defects (not fixed in M1.3): center-blocker capsule clipping (M1.2 collision); sustained WASD feel lag deferred by PO
 
 - [ ] 4. M1.4 — Controller input foundation and M1 verification
   - depends: 2, 3
@@ -64,6 +65,10 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
 <!-- append-only: date | decision | reason -->
 - 2026-08-08 | M1 planned before any movement implementation | LeanLoop alignment; recoverability for fresh agent sessions
 - 2026-08-08 | Repair `.leanloop/install.json` managed digests to LF working-tree bytes | Adoption recorded CRLF hashes; repo uses `eol=lf`; doctor --strict was failing falsely on content-identical files
+- 2026-08-09 | M1.3 follow camera is presentation-only: damped look target + rigid high-oblique offset (`FOLLOW_DAMPING=12`) | Keeps isometric framing; must not write into simulation
+- 2026-08-09 | No player-mesh interpolation in M1.3 | 60 Hz motor + damped camera sufficient for graybox; avoid coupling render alpha into authority
+- 2026-08-09 | Throttle foundation diagnostic React updates (~10 Hz); keep sim/camera every frame | Reduce sustained-input UI jank without changing motor
+- 2026-08-09 | Do not mask M1.2 center-blocker clipping or movement-feel lag inside M1.3 | MEDIUM camera task; HIGH motor/collision remains open for a later fix
 
 ## Escalation
 - Same error 3 times: stop, write stuck report under active task `reports/`, escalate to Codex (architecture) or Claude (review)

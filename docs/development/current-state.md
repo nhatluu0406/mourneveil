@@ -1,31 +1,30 @@
 # Current State
 
-- Updated: 2026-08-08
-- Milestone: M1 in progress; M1.2 complete in repo
+- Updated: 2026-08-09
+- Milestone: M1 in progress; M1.3 complete in repo
 - Active LeanLoop task: `m1-graybox-movement`
-- Status: M1.2 fixed-step graybox locomotion, Rapier collision/grounding, render projection, and diagnostics are implemented and mechanically verified. Product Owner local M0 browser verification remains open.
+- Status: High-oblique follow camera and graybox readability are in. Open: center-blocker capsule clipping (M1.2 collision defect) and deferred sustained-WASD feel lag. Next PLAN step is M1.4.
 
 ## What exists
 
-- Local web-game foundation: React shell, R3F scene, Rapier world, development diagnostic, CI via `.github/workflows/ci.yml`
-- Implemented paths today: `src/app/`, `src/render/`, `src/physics/`, `src/game/core/`, `src/game/character/`, `src/input/`, `src/debug/`
-- Fixed-step movement drives one kinematic graybox capsule through Rapier collision/grounding; no combat, animation, camera follow, audio, save, or production art
+- Local web-game foundation plus fixed-step locomotion and a presentation-only high-oblique follow camera
+- Paths: `src/app/`, `src/render/` (incl. `followCamera.ts`, `FollowCameraRig.tsx`), `src/physics/`, `src/game/core/`, `src/game/character/`, `src/input/`, `src/debug/`
+- No combat, controller mapping (M1.4), audio, save, or production art
 
 ## Where truth lives
 
 - Law: `STACK.md`
-- Execution: `PLAN.md` (M1 steps)
+- Execution: `PLAN.md`
 - Recovery: `state/tasks/m1-graybox-movement/HANDOFF.md`
-- Product/ADR: `docs/product/`, `docs/architecture/`
 
 ## Known limitations
 
-- PO M0 browser acceptance not recorded as done
-- No automated browser tests
-- M1.1 live key/focus-loss checks and M1.2 live movement/collision/grounding/resize/console checks remain unverified because no controllable browser was available
+- **Capsule clips into center graybox cube** (PO screenshot) — treat as open collision defect before claiming collision-safe movement
+- Sustained WASD movement feel still laggy; deferred by PO
+- PO M0 formal acceptance still open
+- No committed automated browser suite (ad-hoc Playwright used for M1.3 smoke only)
 - Three/Rapier bundle size advisory deferred
-- Doctor digests must stay aligned with LF-normalized managed files on Windows
 
 ## Next executable PLAN step
 
-M1.3 — Camera and runtime tuning (Cursor, MEDIUM). Consume the authoritative player transform; do not add combat.
+M1.4 — Controller input foundation and M1 verification (Cursor). Keep the center-blocker clipping defect visible; do not start combat.
