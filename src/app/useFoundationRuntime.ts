@@ -1,22 +1,23 @@
-import { useEffect, useState } from 'react'
-import { FixedStepClock } from '../game/core/fixedStepClock'
+import { useEffect, useMemo, useState } from 'react'
+import { PlayerRuntime } from '../game/character/playerRuntime'
 import type { FoundationRuntimeDiagnostic } from '../game/core/foundationDiagnostic'
 import { BrowserMovementInput } from '../input/browserMovementInput'
 
-const INITIAL_DIAGNOSTIC: FoundationRuntimeDiagnostic = {
-  simulation: {
-    stepCount: 0,
-    simulationTimeSeconds: 0,
-    accumulatorSeconds: 0,
-  },
-  movementIntent: { horizontal: 0, forward: 0 },
+interface FoundationRuntimeIntegration {
+  readonly runtime: PlayerRuntime
+  readonly diagnostic: FoundationRuntimeDiagnostic
 }
 
-export function useFoundationRuntime(): FoundationRuntimeDiagnostic {
-  const [diagnostic, setDiagnostic] = useState(INITIAL_DIAGNOSTIC)
+export function useFoundationRuntime(): FoundationRuntimeIntegration {
+  const runtime = useMemo(() => new PlayerRuntime(), [])
+  const [diagnostic, setDiagnostic] = useState<FoundationRuntimeDiagnostic>(
+    () => ({
+      ...runtime.snapshot(),
+      movementIntent: { horizontal: 0, forward: 0 },
+    }),
+  )
 
   useEffect(() => {
-    const clock = new FixedStepClock()
     const movementInput = new BrowserMovementInput(window, document)
     let previousFrameTime = performance.now()
     let animationFrameId = 0
@@ -29,11 +30,13 @@ export function useFoundationRuntime(): FoundationRuntimeDiagnostic {
         (frameTime - previousFrameTime) / 1_000,
       )
       previousFrameTime = frameTime
-      const simulation = clock.advance(frameDeltaSeconds, () => undefined)
+      const movementIntent = movementInput.movementIntent()
+      const snapshot = runtime.advanceFrame(frameDeltaSeconds, movementIntent)
 
       setDiagnostic({
-        simulation,
-        movementIntent: movementInput.movementIntent(),
+        simulation: snapshot.simulation,
+        player: snapshot.player,
+        movementIntent,
       })
       animationFrameId = requestAnimationFrame(advanceFrame)
     }
@@ -44,7 +47,7 @@ export function useFoundationRuntime(): FoundationRuntimeDiagnostic {
       cancelAnimationFrame(animationFrameId)
       movementInput.disconnect()
     }
-  }, [])
+  }, [runtime])
 
-  return diagnostic
+  return { runtime, diagnostic }
 }

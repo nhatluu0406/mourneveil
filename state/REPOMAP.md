@@ -11,7 +11,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - PLAN.md (73L)
 - README.md (35L)
 - SETUP.md (152L)
-- STACK.md (60L)
+- STACK.md (61L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (38L)
@@ -185,26 +185,22 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (45L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
+    - App.tsx (50L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (116L)
-    - useFoundationRuntime.ts (50L) -- symbols: useFoundationRuntime; imports: ../game/core/fixedStepClock, ../game/core/foundationDiagnostic, ../input/browserMovementInput
+    - useFoundationRuntime.ts (53L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserMovementInput
   - **src/debug/** (1 files)
-    - FoundationPanel.tsx (51L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic
+    - FoundationPanel.tsx (71L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic
   - **src/game/** (0 files)
+    - **src/game/character/** (4 files)
+      - playerMotor.test.ts (95L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ./playerMotor
+      - playerMotor.ts (131L) -- symbols: PLAYER_MOVE_SPEED, PLAYER_ACCELERATION, PLAYER_DECELERATION, PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED; imports: ../../input/playerMovementIntent
+      - playerRuntime.test.ts (53L) -- imports: ../../input/playerMovementIntent, ./playerMotor, ./playerRuntime
+      - playerRuntime.ts (66L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ./playerMotor
     - **src/game/core/** (4 files)
       - fixedStepClock.test.ts (58L) -- imports: ./fixedStepClock
       - fixedStepClock.ts (83L) -- symbols: FIXED_STEP_SECONDS, MAX_FRAME_DELTA_SECONDS, MAX_CATCH_UP_STEPS, SimulationTimeSnapshot, FixedStepAdvance
-      - foundationDiagnostic.test.ts (26L) -- imports: ./foundationDiagnostic
-      - foundationDiagnostic.ts (34L) -- symbols: MILESTONE, WORKING_TITLE, FoundationRuntimeDiagnostic, FoundationDiagnostic, createFoundationDiagnostic; imports: ../../input/playerMovementIntent, ./fixedStepClock
-  - **src/input/** (4 files)
-    - browserMovementInput.test.ts (48L) -- imports: ./browserMovementInput
-    - browserMovementInput.ts (112L) -- symbols: BrowserMovementInput; imports: ./playerMovementIntent
-    - playerMovementIntent.test.ts (52L) -- imports: ./playerMovementIntent
-    - playerMovementIntent.ts (62L) -- symbols: PlayerMovementIntent, MovementInputState, MovementDirection, createMovementInputState, setMovementDirection
-  - **src/render/** (1 files)
-    - Scene.tsx (52L) -- symbols: Scene
-- **state/** (2 files)
-  - CURR
+      - foundationDiagnostic.test.ts (28L) -- imports: ../character/playerMotor, ./foundationDiagnostic
+      - foundationDiagnostic.ts (36L) -- symbols: MILESTONE, WORKING_TITLE, FoundationR
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

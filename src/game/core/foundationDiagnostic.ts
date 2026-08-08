@@ -1,12 +1,14 @@
 import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
+import type { PlayerMotorState } from '../character/playerMotor'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M1.1' as const
+export const MILESTONE = 'M1.2' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
   readonly simulation: SimulationTimeSnapshot
   readonly movementIntent: PlayerMovementIntent
+  readonly player: PlayerMotorState
 }
 
 export interface FoundationDiagnostic {

@@ -4,28 +4,22 @@ Updated: 2026-08-08 by Codex
 Task: m1-graybox-movement
 
 ## Status
-M1.1 is implemented: a bounded 60 Hz fixed-step clock, normalized semantic movement intent, WASD/arrow browser input with reset/focus safety, and a development diagnostic. Focused tests and `npm run verify` pass. The dev endpoint returned HTTP 200; live browser interaction remains unverified because the browser controller reported no available instance. M1.2 has not started.
+M1.2 is implemented. The fixed-step player runtime consumes M1.1 intent, advances a pure acceleration/deceleration motor, and delegates displacement clipping plus grounding to a Rapier kinematic character controller. One rendered capsule, perimeter walls, and the existing center blocker form the deterministic graybox fixture. Automated gates pass; live interaction remains unverified because browser discovery returned no available browser.
 
 ## Locked decisions
-- Source-of-truth: Git HEAD → STACK.md → PLAN.md → active task HANDOFF/CHECKPOINT → ADRs → product docs → current-state.md → chat/old reports
-- M1 scope is graybox movement only; combat is M2+
-- M1.1/M1.2 prefer Codex; M1.3/M1.4 prefer Cursor
-- `install.json` digests match LF-normalized managed files (not Windows CRLF install-time bytes)
-- Simulation time is fixed at 60 Hz; frame deltas clamp to 250 ms; catch-up is capped at 8 steps; excess whole-step backlog is discarded while fractional remainder is retained
-- Movement intent exposes normalized `horizontal`/`forward` axes; raw WASD/arrow codes remain in the browser adapter; blur, hidden-tab, explicit reset, and disconnect clear held state
+- Simulation timing remains the M1.1 bounded 60 Hz policy
+- Player position, velocity, grounded state, and sampled intent live in `PlayerRuntime`/`PlayerMotorState`, not React or Three.js
+- The motor proposes displacement; Rapier resolves it using a kinematic capsule, 2 cm contact offset, 10 cm ground snap, sliding, and a 45 degree walkable-slope limit
+- M1 movement tuning is 4 m/s maximum speed, 18 m/s² acceleration, 24 m/s² deceleration, 24 m/s² gravity, and 30 m/s terminal fall speed; values remain eligible for later tuning
+- No interpolation, camera follow, jumping, sprinting, animation, or combat was added
 
-## In flight
-- PLAN step 1 (M1.1 Simulation and input authority) — complete
-- PLAN step 2 (M1.2 Graybox character controller) — next; not started
-- Worktree: main; no feature branch; no push
-
-## Known traps
-- On Windows, LeanLoop doctor digests must track `eol=lf` working-tree bytes; reinstalling on Windows without refreshing digests can revive CRLF hash drift
-- `state/CURRENT_TASK` and `state/tasks/*/CHECKPOINT.md` are local-only (gitignored)
-- Do not treat Product Owner M0 acceptance as done without an explicit PO note
-- git_guard will refuse a dirty main tree — use a worktree for M1 implementation if other changes appear
-- M1.1 manual browser checks still needed: counter/time advances, WASD/arrows update and release to neutral, focus loss resets input, primitive stays fixed, no console errors
+## Verification
+- `npm run test -- src/game/character src/physics`: 2 files, 7 tests passed
+- `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, and `npm run verify`: passed; full suite is 6 files / 18 tests
+- Dev endpoint `http://127.0.0.1:4173/`: HTTP 200
+- Browser checks unverified: visible player/movement/stop, diagonal feel, wall/corner collision, floor support, focus-loss recovery, resize, and console
+- Existing Vite chunk-size advisory remains deferred
 
 ## Next session starts with
-1. Read STACK.md, PLAN.md, and this HANDOFF; inspect current Git state
-2. Execute PLAN step 2 (M1.2) with Codex, consuming the M1.1 contracts; do not start M1.3 or combat
+1. Read STACK.md, PLAN.md, and this HANDOFF; inspect Git state
+2. Execute PLAN step 3 (M1.3 Camera and runtime tuning) with Cursor; do not start M1.4 or combat

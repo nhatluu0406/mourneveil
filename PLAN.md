@@ -24,7 +24,7 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
   - verifier: `npm run test -- src/game/core src/input && npm run typecheck && npm run lint`
   - completion evidence: passing pure tests for clock/intent/focus-reset; diagnostic visible in local runtime; PLAN step ticked; HANDOFF updated
 
-- [ ] 2. M1.2 — Graybox character controller
+- [x] 2. M1.2 — Graybox character controller
   - depends: 1
   - risk: HIGH
   - preferred agent: Codex

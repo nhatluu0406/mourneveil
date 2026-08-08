@@ -9,11 +9,16 @@ import { useFoundationRuntime } from './useFoundationRuntime'
 export function App() {
   const [rendererReady, setRendererReady] = useState(false)
   const [physicsReady, setPhysicsReady] = useState(false)
-  const runtime = useFoundationRuntime()
+  const { runtime, diagnostic: runtimeDiagnostic } = useFoundationRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
   const diagnostic = useMemo(
-    () => createFoundationDiagnostic(rendererReady, physicsReady, runtime),
-    [rendererReady, physicsReady, runtime],
+    () =>
+      createFoundationDiagnostic(
+        rendererReady,
+        physicsReady,
+        runtimeDiagnostic,
+      ),
+    [rendererReady, physicsReady, runtimeDiagnostic],
   )
 
   return (
@@ -35,7 +40,7 @@ export function App() {
           }}
         >
           <Suspense fallback={null}>
-            <Scene onPhysicsReady={reportPhysicsReady} />
+            <Scene onPhysicsReady={reportPhysicsReady} runtime={runtime} />
           </Suspense>
         </Canvas>
       </RenderErrorBoundary>

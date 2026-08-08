@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { createPlayerMotorState } from '../character/playerMotor'
 import { createFoundationDiagnostic } from './foundationDiagnostic'
 
 describe('createFoundationDiagnostic', () => {
@@ -10,11 +11,12 @@ describe('createFoundationDiagnostic', () => {
         accumulatorSeconds: 0,
       },
       movementIntent: { horizontal: 0, forward: 1 },
+      player: createPlayerMotorState(),
     }
 
     expect(createFoundationDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M1.1',
+      milestone: 'M1.2',
       rendererReady: true,
       physicsReady: false,
       foundationReady: false,

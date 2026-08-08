@@ -45,6 +45,26 @@ export function FoundationPanel({ diagnostic }: FoundationPanelProps) {
             {diagnostic.runtime.movementIntent.forward.toFixed(2)})
           </dd>
         </div>
+        <div>
+          <dt>Player position</dt>
+          <dd>
+            ({diagnostic.runtime.player.position.x.toFixed(2)},{' '}
+            {diagnostic.runtime.player.position.y.toFixed(2)},{' '}
+            {diagnostic.runtime.player.position.z.toFixed(2)})
+          </dd>
+        </div>
+        <div>
+          <dt>Player velocity</dt>
+          <dd>
+            ({diagnostic.runtime.player.velocity.x.toFixed(2)},{' '}
+            {diagnostic.runtime.player.velocity.y.toFixed(2)},{' '}
+            {diagnostic.runtime.player.velocity.z.toFixed(2)})
+          </dd>
+        </div>
+        <div>
+          <dt>Grounded</dt>
+          <dd>{diagnostic.runtime.player.grounded ? 'yes' : 'no'}</dd>
+        </div>
       </dl>
     </aside>
   )
