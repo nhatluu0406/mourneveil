@@ -11,7 +11,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - PLAN.md (73L)
 - README.md (35L)
 - SETUP.md (152L)
-- STACK.md (59L)
+- STACK.md (60L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (38L)
@@ -161,7 +161,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (47L)
-    - current-state.md (30L)
+    - current-state.md (31L)
     - definition-of-done.md (52L)
     - workflow.md (70L)
   - **docs/product/** (2 files)
@@ -184,29 +184,27 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - **src/** (2 files)
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
-  - **src/app/** (3 files)
-    - App.tsx (43L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
+  - **src/app/** (4 files)
+    - App.tsx (45L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (116L)
+    - useFoundationRuntime.ts (50L) -- symbols: useFoundationRuntime; imports: ../game/core/fixedStepClock, ../game/core/foundationDiagnostic, ../input/browserMovementInput
   - **src/debug/** (1 files)
-    - FoundationPanel.tsx (36L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic
+    - FoundationPanel.tsx (51L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic
   - **src/game/** (0 files)
-    - **src/game/core/** (2 files)
-      - foundationDiagnostic.test.ts (16L) -- imports: ./foundationDiagnostic
-      - foundationDiagnostic.ts (23L) -- symbols: MILESTONE, WORKING_TITLE, FoundationDiagnostic, createFoundationDiagnostic
+    - **src/game/core/** (4 files)
+      - fixedStepClock.test.ts (58L) -- imports: ./fixedStepClock
+      - fixedStepClock.ts (83L) -- symbols: FIXED_STEP_SECONDS, MAX_FRAME_DELTA_SECONDS, MAX_CATCH_UP_STEPS, SimulationTimeSnapshot, FixedStepAdvance
+      - foundationDiagnostic.test.ts (26L) -- imports: ./foundationDiagnostic
+      - foundationDiagnostic.ts (34L) -- symbols: MILESTONE, WORKING_TITLE, FoundationRuntimeDiagnostic, FoundationDiagnostic, createFoundationDiagnostic; imports: ../../input/playerMovementIntent, ./fixedStepClock
+  - **src/input/** (4 files)
+    - browserMovementInput.test.ts (48L) -- imports: ./browserMovementInput
+    - browserMovementInput.ts (112L) -- symbols: BrowserMovementInput; imports: ./playerMovementIntent
+    - playerMovementIntent.test.ts (52L) -- imports: ./playerMovementIntent
+    - playerMovementIntent.ts (62L) -- symbols: PlayerMovementIntent, MovementInputState, MovementDirection, createMovementInputState, setMovementDirection
   - **src/render/** (1 files)
     - Scene.tsx (52L) -- symbols: Scene
 - **state/** (2 files)
-  - CURRENT_TASK (1L)
-  - REPOMAP.md (210L)
-  - **state/tasks/** (0 files)
-    - **state/tasks/m1-graybox-movement/** (2 files)
-      - CHECKPOINT.md (10L)
-      - HANDOFF.md (27L)
-      - **state/tasks/m1-graybox-movement/reports/** (0 files)
+  - CURR
 
-## Local dependency hints
-- `src/main.tsx` -> `./app/App`
-- `src/app/App.tsx` -> `../debug/FoundationPanel`, `../game/core/foundationDiagnostic`, `../render/Scene`
-- `src/debug/FoundationPanel.tsx` -> `../game/core/foundationDiagnostic`
-- `src/game/core/foundationDiagnostic.test.ts` -> `./foundationDiagnostic`
+... (truncated; deepen with targeted grep/read rather than raising the global map budget)

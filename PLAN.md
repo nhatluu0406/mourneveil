@@ -13,7 +13,7 @@ Task slug: `m1-graybox-movement` (`python3 scripts/leanloop/task.py start m1-gra
 ## Steps
 <!-- risk: LOW|MEDIUM|HIGH ; isolation: inline|sequential|worktree -->
 
-- [ ] 1. M1.1 — Simulation and input authority
+- [x] 1. M1.1 — Simulation and input authority
   - depends: —
   - risk: HIGH
   - preferred agent: Codex

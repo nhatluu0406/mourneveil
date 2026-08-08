@@ -4,14 +4,16 @@ import { FoundationPanel } from '../debug/FoundationPanel'
 import { createFoundationDiagnostic } from '../game/core/foundationDiagnostic'
 import { Scene } from '../render/Scene'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
+import { useFoundationRuntime } from './useFoundationRuntime'
 
 export function App() {
   const [rendererReady, setRendererReady] = useState(false)
   const [physicsReady, setPhysicsReady] = useState(false)
+  const runtime = useFoundationRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
   const diagnostic = useMemo(
-    () => createFoundationDiagnostic(rendererReady, physicsReady),
-    [rendererReady, physicsReady],
+    () => createFoundationDiagnostic(rendererReady, physicsReady, runtime),
+    [rendererReady, physicsReady, runtime],
   )
 
   return (

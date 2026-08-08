@@ -30,6 +30,21 @@ export function FoundationPanel({ diagnostic }: FoundationPanelProps) {
             {readinessLabel(diagnostic.physicsReady)}
           </dd>
         </div>
+        <div>
+          <dt>Simulation</dt>
+          <dd data-running={diagnostic.runtime.simulation.stepCount > 0}>
+            {diagnostic.runtime.simulation.stepCount > 0 ? 'running' : 'starting'} · tick{' '}
+            {diagnostic.runtime.simulation.stepCount} ·{' '}
+            {diagnostic.runtime.simulation.simulationTimeSeconds.toFixed(2)} s
+          </dd>
+        </div>
+        <div>
+          <dt>Movement intent</dt>
+          <dd>
+            ({diagnostic.runtime.movementIntent.horizontal.toFixed(2)},{' '}
+            {diagnostic.runtime.movementIntent.forward.toFixed(2)})
+          </dd>
+        </div>
       </dl>
     </aside>
   )

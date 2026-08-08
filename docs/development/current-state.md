@@ -1,15 +1,15 @@
 # Current State
 
 - Updated: 2026-08-08
-- Milestone: M0 complete in repo; M1 planned, not started
+- Milestone: M1 in progress; M1.1 complete in repo
 - Active LeanLoop task: `m1-graybox-movement`
-- Status: workflow aligned to LeanLoop (`STACK.md`, `PLAN.md`, task HANDOFF). Product Owner local M0 browser verification still required before formal M0 acceptance.
+- Status: M1.1 fixed-step simulation and semantic movement-input contracts are implemented and mechanically verified. Product Owner local M0 browser verification remains open.
 
 ## What exists
 
 - Local web-game foundation: React shell, R3F scene, Rapier world, M0 foundation diagnostic, CI via `.github/workflows/ci.yml`
-- Implemented paths today: `src/app/`, `src/render/`, `src/game/core/`, `src/debug/`
-- No movement, combat, audio, save, or production art
+- Implemented paths today: `src/app/`, `src/render/`, `src/game/core/`, `src/input/`, `src/debug/`
+- Fixed-step simulation timing and keyboard-to-semantic movement intent exist; no character locomotion, combat, audio, save, or production art
 
 ## Where truth lives
 
@@ -22,9 +22,10 @@
 
 - PO M0 browser acceptance not recorded as done
 - No automated browser tests
+- M1.1 live key, focus-loss, diagnostic, and console checks remain unverified because no controllable browser was available
 - Three/Rapier bundle size advisory deferred
 - Doctor digests must stay aligned with LF-normalized managed files on Windows
 
 ## Next executable PLAN step
 
-M1.1 — Simulation and input authority (Codex, HIGH). Do not start character movement until that contract is green.
+M1.2 — Graybox character controller (Codex, HIGH). Consume the M1.1 contracts; do not start camera tuning or combat.
