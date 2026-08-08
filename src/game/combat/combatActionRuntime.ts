@@ -17,7 +17,11 @@ export type CombatActionStartFailureReason =
   | 'resource-unavailable'
 
 export type CombatActionStartResult =
-  | { readonly accepted: true; readonly actionId: CombatActionId }
+  | {
+      readonly accepted: true
+      readonly actionId: CombatActionId
+      readonly executionId: number
+    }
   | {
       readonly accepted: false
       readonly actionId: CombatActionId
@@ -37,6 +41,7 @@ export interface CombatContactState {
 
 export interface CombatActionSnapshot {
   readonly actionId: CombatActionId | null
+  readonly executionId: number | null
   readonly phase: CombatActionPhase | 'idle'
   readonly phaseElapsedSteps: number
   readonly phaseRemainingSteps: number
@@ -47,6 +52,7 @@ export interface CombatActionSnapshot {
 
 interface ActiveActionState {
   readonly definition: CombatActionDefinition
+  readonly executionId: number
   phase: CombatActionPhase
   phaseElapsedSteps: number
   totalElapsedSteps: number
@@ -54,6 +60,7 @@ interface ActiveActionState {
 
 const IDLE_SNAPSHOT: CombatActionSnapshot = Object.freeze({
   actionId: null,
+  executionId: null,
   phase: 'idle',
   phaseElapsedSteps: 0,
   phaseRemainingSteps: 0,
@@ -66,6 +73,7 @@ export class CombatActionRuntime {
   private readonly definitions = new Map<CombatActionId, CombatActionDefinition>()
   private readonly cooldowns = new Map<CombatActionId, number>()
   private activeAction: ActiveActionState | null = null
+  private nextExecutionId = 1
 
   constructor(definitions: readonly CombatActionDefinition[]) {
     for (const sourceDefinition of definitions) {
@@ -108,11 +116,17 @@ export class CombatActionRuntime {
 
     this.activeAction = {
       definition,
+      executionId: this.nextExecutionId,
       phase: 'startup',
       phaseElapsedSteps: 0,
       totalElapsedSteps: 0,
     }
-    return { accepted: true, actionId: definition.id }
+    this.nextExecutionId += 1
+    return {
+      accepted: true,
+      actionId: definition.id,
+      executionId: this.activeAction.executionId,
+    }
   }
 
   advanceFixedStep(): void {
@@ -152,6 +166,7 @@ export class CombatActionRuntime {
   reset(): void {
     this.activeAction = null
     this.cooldowns.clear()
+    this.nextExecutionId = 1
   }
 
   snapshot(): CombatActionSnapshot {
@@ -165,6 +180,7 @@ export class CombatActionRuntime {
       action.phase === 'active' && action.definition.contactWindowId !== null
     return {
       actionId: action.definition.id,
+      executionId: action.executionId,
       phase: action.phase,
       phaseElapsedSteps: action.phaseElapsedSteps,
       phaseRemainingSteps: duration - action.phaseElapsedSteps,

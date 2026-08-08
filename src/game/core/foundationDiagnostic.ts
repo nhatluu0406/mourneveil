@@ -3,9 +3,11 @@ import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
 import type { PlayerMotorState } from '../character/playerMotor'
 import type { PlayerAttackSpatialSnapshot } from '../combat/playerAttackActions'
 import type { CombatActionSnapshot } from '../combat/combatActionRuntime'
+import type { CombatContactSnapshot } from '../combat/combatContact'
+import type { TrainingTargetSnapshot } from '../combat/trainingTarget'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M2.2' as const
+export const MILESTONE = 'M2.3' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
@@ -15,6 +17,8 @@ export interface FoundationRuntimeDiagnostic {
   readonly player: PlayerMotorState
   readonly combat: CombatActionSnapshot
   readonly attack: PlayerAttackSpatialSnapshot
+  readonly contact: CombatContactSnapshot
+  readonly trainingTarget: TrainingTargetSnapshot
 }
 
 export interface FoundationDiagnostic {

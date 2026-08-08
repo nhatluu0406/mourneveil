@@ -31,6 +31,39 @@ function advancePattern(
 }
 
 describe('PlayerRuntime', () => {
+  it('resolves active contact after movement in the fixed simulation step', () => {
+    const runtime = new PlayerRuntime()
+    runtime.attachCollisionResolver(resolveOnFlatGround)
+    runtime.attachCombatContactQuery(({ hurtboxes }) =>
+      hurtboxes.map((hurtbox) => ({
+        hurtboxId: hurtbox.id,
+        targetId: hurtbox.ownerId,
+      })),
+    )
+    runtime.requestPlayerAttack({ type: 'player-attack', attack: 'light' })
+
+    for (let step = 1; step < PLAYER_LIGHT_ATTACK.action.startupSteps; step += 1) {
+      expect(
+        runtime.advanceFrame(FIXED_STEP_SECONDS, {
+          horizontal: 0,
+          forward: 0,
+        }).hitEvents,
+      ).toEqual([])
+    }
+    const activeStep = runtime.advanceFrame(FIXED_STEP_SECONDS, {
+      horizontal: 0,
+      forward: 0,
+    })
+
+    expect(activeStep.hitEvents).toHaveLength(1)
+    expect(activeStep.hitEvents[0].simulationStep).toBe(
+      PLAYER_LIGHT_ATTACK.action.startupSteps,
+    )
+    expect(activeStep.trainingTarget.health.current).toBe(
+      activeStep.trainingTarget.health.maximum - PLAYER_LIGHT_ATTACK.damage,
+    )
+  })
+
   it('produces equivalent movement from different render-delta patterns', () => {
     const intent = { horizontal: 0, forward: 1 }
     const manySmallFrames = advancePattern(
@@ -61,7 +94,11 @@ describe('PlayerRuntime', () => {
 
     expect(
       runtime.requestPlayerAttack({ type: 'player-attack', attack: 'light' }),
-    ).toEqual({ accepted: true, actionId: PLAYER_LIGHT_ATTACK_ID })
+    ).toEqual({
+      accepted: true,
+      actionId: PLAYER_LIGHT_ATTACK_ID,
+      executionId: 1,
+    })
     expect(
       runtime.requestPlayerAttack({ type: 'player-attack', attack: 'heavy' }),
     ).toEqual({

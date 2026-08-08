@@ -58,7 +58,11 @@ export function App() {
           </Suspense>
         </Canvas>
       </RenderErrorBoundary>
-      <FoundationPanel diagnostic={diagnostic} camera={cameraDiagnostic} />
+      <FoundationPanel
+        diagnostic={diagnostic}
+        camera={cameraDiagnostic}
+        onResetTrainingTarget={() => runtime.resetTrainingTarget()}
+      />
     </main>
   )
 }

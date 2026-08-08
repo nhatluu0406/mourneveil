@@ -39,7 +39,7 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
   - verifier: focused player-combat tests plus `npm run verify && git diff --check`
   - completion evidence: deterministic action requests and phase progression verified; runtime proof recorded
 
-- [ ] 3. M2.3 — Contact and damage proof
+- [x] 3. M2.3 — Contact and damage proof
   - depends: 2
   - risk: HIGH
   - preferred agent: Codex
@@ -50,6 +50,7 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
   - non-goals: player health; healing/regeneration; armor/resistances/status effects; general-purpose health framework; production health UI; enemy AI/death framework; hit reactions; loot; broad hitbox system
   - verifier: focused contact/damage tests plus `npm run verify && git diff --check`
   - completion evidence: deterministic contact fixture and single-hit policy verified; training-target defeat path proven; runtime proof recorded
+  - evidence: execution IDs, Rapier sphere queries, per-execution target dedup, 20/35 light/heavy damage, clamped target health, and fixed-step sequencing covered; focused sets and full 18-file/73-test verification green; Vite HTTP 200; browser interaction unavailable
 
 - [ ] 4. M2.4 — Dodge and defensive mechanic
   - depends: 3
@@ -96,10 +97,11 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
 - 2026-08-09 | Player facing follows meaningful movement, persists while neutral, and is frozen while startup/active/recovery suppress locomotion intent | Stable deterministic attack direction without camera or mouse-world aiming
 - 2026-08-09 | Each attack owns a facing-relative sphere definition; spatial contact is exposed only when its authoritative contact window is active | Gives M2.3 a narrow query contract without hit or damage resolution
 - 2026-08-09 | M2 non-goals ban player/general health systems, but M2.3 may implement a narrow training-target health contract for contact/damage proof | Removes false PLAN conflict blocking M2.3 without authorizing a reusable health/survival framework
+- 2026-08-09 | Attack executions use simulation-owned monotonic IDs; Rapier reports active-sphere/hurtbox candidates, while simulation deduplicates target hits and applies deterministic light/heavy damage of 20/35 | Proves contact and damage without render, callback frequency, or wall-clock authority
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
 - Failed branch owner: orchestrator on the integration tree; never mix unrelated dirty-main changes
 
 ## Next milestone
-- M2.3 — Contact and damage proof
+- M2.4 — Dodge and defensive mechanic

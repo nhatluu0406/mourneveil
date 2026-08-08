@@ -28,6 +28,7 @@ export interface PlayerAttackDefinition {
   readonly kind: PlayerAttackKind
   readonly action: CombatActionDefinition
   readonly contactShape: PlayerAttackContactShapeDefinition
+  readonly damage: number
 }
 
 export interface ActivePlayerAttackContactShape
@@ -59,11 +60,15 @@ function definePlayerAttack(
   ) {
     throw new RangeError('Player attack contact shape dimensions must be positive')
   }
+  if (!Number.isFinite(definition.damage) || definition.damage <= 0) {
+    throw new RangeError('Player attack damage must be a finite positive number')
+  }
 
   return Object.freeze({
     kind: definition.kind,
     action,
     contactShape: Object.freeze({ ...shape }),
+    damage: definition.damage,
   })
 }
 
@@ -88,6 +93,7 @@ export const PLAYER_LIGHT_ATTACK = definePlayerAttack({
     forwardOffset: 0.82,
     radius: 0.52,
   },
+  damage: 20,
 })
 
 export const PLAYER_HEAVY_ATTACK = definePlayerAttack({
@@ -111,6 +117,7 @@ export const PLAYER_HEAVY_ATTACK = definePlayerAttack({
     forwardOffset: 0.98,
     radius: 0.68,
   },
+  damage: 35,
 })
 
 export const PLAYER_ATTACK_DEFINITIONS = Object.freeze([

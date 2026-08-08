@@ -61,6 +61,8 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
           player: snapshot.player,
           combat: snapshot.combat,
           attack: snapshot.attack,
+          contact: snapshot.contact,
+          trainingTarget: snapshot.trainingTarget,
           movementIntent: composed.intent,
           activeInputSource: composed.source,
         })

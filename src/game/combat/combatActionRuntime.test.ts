@@ -27,7 +27,7 @@ function start(runtime: CombatActionRuntime): void {
       { type: 'start-action', actionId: TEST_ACTION.id },
       () => ({ allowed: true }),
     ),
-  ).toEqual({ accepted: true, actionId: TEST_ACTION.id })
+  ).toMatchObject({ accepted: true, actionId: TEST_ACTION.id })
 }
 
 function advance(runtime: CombatActionRuntime, steps: number): void {
@@ -37,6 +37,28 @@ function advance(runtime: CombatActionRuntime, steps: number): void {
 }
 
 describe('CombatActionRuntime', () => {
+  it('assigns deterministic identities to separate action executions', () => {
+    const runtime = new CombatActionRuntime([TEST_ACTION])
+    const first = runtime.request({
+      type: 'start-action',
+      actionId: TEST_ACTION.id,
+    })
+    advance(
+      runtime,
+      TEST_ACTION.startupSteps +
+        TEST_ACTION.activeSteps +
+        TEST_ACTION.recoverySteps,
+    )
+    const second = runtime.request({
+      type: 'start-action',
+      actionId: TEST_ACTION.id,
+    })
+
+    expect(first).toMatchObject({ accepted: true, executionId: 1 })
+    expect(second).toMatchObject({ accepted: true, executionId: 2 })
+    expect(runtime.snapshot().executionId).toBe(2)
+  })
+
   it('starts in startup and follows exact fixed-step phase boundaries', () => {
     const runtime = createRuntime()
     start(runtime)

@@ -22,7 +22,7 @@ describe('player attack definitions', () => {
     const runtime = new CombatActionRuntime([attack.action])
     expect(
       runtime.request({ type: 'start-action', actionId: attack.action.id }),
-    ).toEqual({ accepted: true, actionId: attack.action.id })
+    ).toEqual({ accepted: true, actionId: attack.action.id, executionId: 1 })
 
     expect(runtime.snapshot().phase).toBe('startup')
     advance(runtime, attack.action.startupSteps)
@@ -56,6 +56,9 @@ describe('player attack definitions', () => {
       PLAYER_LIGHT_ATTACK.action.recoverySteps,
     )
     expect(heavySteps).toBeGreaterThan(lightSteps)
+    expect(PLAYER_HEAVY_ATTACK.damage).toBeGreaterThan(
+      PLAYER_LIGHT_ATTACK.damage,
+    )
   })
 
   it('rejects another attack without queueing and restarts after completion', () => {

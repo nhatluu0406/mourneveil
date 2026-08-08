@@ -4,6 +4,7 @@ import type { CameraDiagnostic } from '../render/followCamera'
 interface FoundationPanelProps {
   diagnostic: FoundationDiagnostic
   camera: CameraDiagnostic | null
+  onResetTrainingTarget: () => void
 }
 
 function readinessLabel(ready: boolean): string {
@@ -13,6 +14,7 @@ function readinessLabel(ready: boolean): string {
 export function FoundationPanel({
   diagnostic,
   camera,
+  onResetTrainingTarget,
 }: FoundationPanelProps) {
   return (
     <aside className="foundation-panel" aria-label="Foundation diagnostic">
@@ -125,7 +127,34 @@ export function FoundationPanel({
               : 'free'}
           </dd>
         </div>
+        <div>
+          <dt>Training target</dt>
+          <dd>{diagnostic.runtime.trainingTarget.id}</dd>
+        </div>
+        <div>
+          <dt>Target health</dt>
+          <dd>
+            {diagnostic.runtime.trainingTarget.health.current}/
+            {diagnostic.runtime.trainingTarget.health.maximum} ·{' '}
+            {diagnostic.runtime.trainingTarget.health.alive ? 'alive' : 'defeated'}
+          </dd>
+        </div>
+        <div>
+          <dt>Last hit</dt>
+          <dd>
+            {diagnostic.runtime.contact.lastHit
+              ? `${diagnostic.runtime.contact.lastHit.actionId} #${diagnostic.runtime.contact.lastHit.executionId}`
+              : 'none'}
+          </dd>
+        </div>
+        <div>
+          <dt>Target hit count</dt>
+          <dd>{diagnostic.runtime.trainingTarget.hitCount}</dd>
+        </div>
       </dl>
+      <button type="button" onClick={onResetTrainingTarget}>
+        Reset training target
+      </button>
     </aside>
   )
 }

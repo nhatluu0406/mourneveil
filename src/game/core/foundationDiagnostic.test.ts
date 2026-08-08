@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { createPlayerMotorState } from '../character/playerMotor'
 import { CombatActionRuntime } from '../combat/combatActionRuntime'
 import { createPlayerAttackSpatialSnapshot } from '../combat/playerAttackActions'
+import { CombatContactRuntime } from '../combat/combatContact'
+import { TrainingTargetRuntime } from '../combat/trainingTarget'
 import { createFoundationDiagnostic } from './foundationDiagnostic'
 
 describe('createFoundationDiagnostic', () => {
@@ -21,11 +23,13 @@ describe('createFoundationDiagnostic', () => {
         createPlayerMotorState().position,
         createPlayerMotorState().facing,
       ),
+      contact: new CombatContactRuntime().snapshot(),
+      trainingTarget: new TrainingTargetRuntime().snapshot(),
     }
 
     expect(createFoundationDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M2.2',
+      milestone: 'M2.3',
       rendererReady: true,
       physicsReady: false,
       foundationReady: false,
