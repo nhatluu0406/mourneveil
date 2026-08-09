@@ -45,6 +45,7 @@ import {
   stepPlayerMotor,
   stepPlayerDodgeMotor,
   type CharacterCollisionResolver,
+  type PlayerFacingDirection,
   type PlayerMotorState,
 } from './playerMotor'
 
@@ -77,6 +78,8 @@ export class PlayerRuntime {
   private playerState = createPlayerMotorState()
   private collisionResolver: CharacterCollisionResolver | null = null
   private contactQuery: CombatContactQuery | null = null
+  /** Frozen aim for the committed attack execution; null while combat is idle. */
+  private attackExecutionFacing: PlayerFacingDirection | null = null
 
   requestCombatAction(
     request: CombatActionRequest,
@@ -99,6 +102,7 @@ export class PlayerRuntime {
       actionId: attack.action.id,
     })
     if (result.accepted) {
+      this.attackExecutionFacing = { ...request.aimDirection }
       this.playerState = {
         ...this.playerState,
         facing: { ...request.aimDirection },
@@ -125,6 +129,7 @@ export class PlayerRuntime {
     })
     this.defenseRuntime.acceptDodge(result, direction)
     if (result.accepted) {
+      this.attackExecutionFacing = null
       this.playerState = { ...this.playerState, facing: { ...direction } }
     }
     return result
@@ -135,7 +140,11 @@ export class PlayerRuntime {
   }
 
   interruptCombatAction(): CombatActionEndResult {
-    return this.combatRuntime.requestInterruption()
+    const result = this.combatRuntime.requestInterruption()
+    if (this.combatRuntime.snapshot().phase === 'idle') {
+      this.attackExecutionFacing = null
+    }
+    return result
   }
 
   attachCollisionResolver(resolver: CharacterCollisionResolver): () => void {
@@ -170,6 +179,9 @@ export class PlayerRuntime {
     const frame = this.clock.advance(frameDeltaSeconds, (fixedStepSeconds, nextStepCount) => {
       this.combatRuntime.advanceFixedStep()
       const combat = this.combatRuntime.snapshot()
+      if (combat.phase === 'idle') {
+        this.attackExecutionFacing = null
+      }
       this.defenseRuntime.advanceFixedStep(combat)
       if (this.collisionResolver !== null) {
         const defense = this.defenseRuntime.snapshot(combat)
@@ -202,7 +214,7 @@ export class PlayerRuntime {
         const attack = createPlayerAttackSpatialSnapshot(
           combat,
           this.playerState.position,
-          this.playerState.facing,
+          this.attackExecutionFacing,
         )
         hitEvents.push(
           ...this.contactRuntime.resolvePlayerContact({
@@ -221,6 +233,9 @@ export class PlayerRuntime {
 
   snapshot(): PlayerRuntimeSnapshot {
     const combat = this.combatRuntime.snapshot()
+    if (combat.phase === 'idle') {
+      this.attackExecutionFacing = null
+    }
     return {
       simulation: this.clock.snapshot(),
       player: this.playerState,
@@ -228,7 +243,7 @@ export class PlayerRuntime {
       attack: createPlayerAttackSpatialSnapshot(
         combat,
         this.playerState.position,
-        this.playerState.facing,
+        this.attackExecutionFacing,
       ),
       contact: this.contactRuntime.snapshot(),
       trainingTarget: this.trainingTargetRuntime.snapshot(),

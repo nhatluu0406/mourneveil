@@ -1,24 +1,23 @@
 # Current State
 
 - Updated: 2026-08-09
-- Milestone: **M2 Combat Proof in progress — M2.4 complete**
+- Milestone: **M2 Combat Proof in progress — M2.5 complete**
 - Active LeanLoop task: `m2-combat-proof`
-- Status: mouse-world attack aim, canvas input ownership, stuck-input lifecycle recovery, dodge, and guard now extend the accepted M2.3 authority chain.
+- Status: attack aim, contact, and presentation now share one frozen execution-facing snapshot; PO directional miss and white-geometry issues addressed with browser proof.
 
 ## What exists
 
-- Light/heavy attacks snapshot click-projected world aim and retain M2.3 one-hit damage behavior
-- Canvas-only pointer combat excludes diagnostic UI and clears held input on unreliable pointer/focus lifecycle
-- Collision-resolved 2/8/8-step dodge with sampled direction and active-only invulnerability
-- Idle-only held-RMB guard with deterministic 35% locomotion scale
-- Development aim/input/defense diagnostics and primitive guard projection
+- Accepted attacks freeze semantic aim into `attackExecutionFacing` for presentation and contact
+- Light/heavy graybox presentation with clearer forward-biased sweeps and presentation-only hit flash/recoil + tiny camera impulse
+- Training-target facing marker removed; player facing marker recolored as an explicit debug chevron
+- Canvas Reset-target isolation and border/input lifecycle recovery preserved from M2.4
 
 ## Known limitations
 
-- Browser control was unavailable; multi-direction aiming, UI isolation, border replay, dodge/guard feel, resize, and console checks remain manual
-- No incoming enemy attacks, stamina, parry, player health, controller combat input, or production defense presentation
-- Physical controller M1 play-pass and bundle-size advisory remain deferred
+- No enemy AI/attacks, player health, stamina, parry, lock-on, combos, controller combat, or production VFX/animation
+- Authoritative hit-stop was not added (presentation-only feedback preferred)
+- Bundle-size advisory remains non-blocking
 
 ## Next executable work
 
-M2.5 — Combat presentation and feel (Cursor). Preserve simulation/input/contact authority; include the pending M2.4 browser replay before presentation acceptance.
+M2.6 — Combat verification. Do not add features; produce the reproducible Combat Proof happy path and explicit M2 limitations.

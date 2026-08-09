@@ -158,6 +158,18 @@ export function transformPlayerAttackContactShape(
   }
 }
 
+/** True when the authoritative contact sphere can reach a sphere hurtbox. */
+export function attackContactOverlapsSphere(
+  contact: Pick<ActivePlayerAttackContactShape, 'center' | 'radius'>,
+  hurtbox: { readonly center: Vector3Value; readonly radius: number },
+): boolean {
+  const dx = contact.center.x - hurtbox.center.x
+  const dy = contact.center.y - hurtbox.center.y
+  const dz = contact.center.z - hurtbox.center.z
+  const limit = contact.radius + hurtbox.radius
+  return dx * dx + dy * dy + dz * dz <= limit * limit
+}
+
 export function constrainMovementIntentForAttack(
   movementIntent: PlayerMovementIntent,
   combatPhase: CombatActionSnapshot['phase'],
@@ -167,14 +179,19 @@ export function constrainMovementIntentForAttack(
     : { horizontal: 0, forward: 0 }
 }
 
+/**
+ * Builds attack spatial data from an explicit execution-facing snapshot.
+ * Callers must pass the frozen accepted aim while an attack is committed —
+ * never live movement facing, mouse aim, or rendered rotation.
+ */
 export function createPlayerAttackSpatialSnapshot(
   combat: CombatActionSnapshot,
   playerPosition: Vector3Value,
-  facing: PlayerFacingDirection,
+  executionFacing: PlayerFacingDirection | null,
 ): PlayerAttackSpatialSnapshot {
   const attack = playerAttackForActionId(combat.actionId)
   const movementConstrained = combat.phase !== 'idle'
-  if (attack === null) {
+  if (attack === null || executionFacing === null) {
     return {
       movementConstrained,
       executionFacing: null,
@@ -183,12 +200,13 @@ export function createPlayerAttackSpatialSnapshot(
     }
   }
 
+  const facing = { ...executionFacing }
   const contactIsActive =
     combat.contact.enabled &&
     combat.contact.windowId === attack.contactShape.windowId
   return {
     movementConstrained,
-    executionFacing: { ...facing },
+    executionFacing: facing,
     contactShapeId: attack.contactShape.id,
     activeContactShape: contactIsActive
       ? transformPlayerAttackContactShape(

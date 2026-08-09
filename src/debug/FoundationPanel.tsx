@@ -82,7 +82,7 @@ export function FoundationPanel({
           <dd>{diagnostic.runtime.player.grounded ? 'yes' : 'no'}</dd>
         </div>
         <div>
-          <dt>Facing</dt>
+          <dt>Live facing</dt>
           <dd>
             ({diagnostic.runtime.player.facing.x.toFixed(2)},{' '}
             {diagnostic.runtime.player.facing.z.toFixed(2)})
@@ -121,10 +121,18 @@ export function FoundationPanel({
         <div>
           <dt>Attack shape</dt>
           <dd>
-            {diagnostic.runtime.attack.contactShapeId ?? 'none'} Â·{' '}
+            {diagnostic.runtime.attack.contactShapeId ?? 'none'} ·{' '}
             {diagnostic.runtime.attack.activeContactShape
               ? 'active'
               : 'inactive'}
+          </dd>
+        </div>
+        <div>
+          <dt>Contact center</dt>
+          <dd>
+            {diagnostic.runtime.attack.activeContactShape
+              ? `(${diagnostic.runtime.attack.activeContactShape.center.x.toFixed(2)}, ${diagnostic.runtime.attack.activeContactShape.center.z.toFixed(2)})`
+              : 'none'}
           </dd>
         </div>
         <div>
@@ -136,7 +144,7 @@ export function FoundationPanel({
           </dd>
         </div>
         <div>
-          <dt>Attack facing</dt>
+          <dt>Execution facing</dt>
           <dd>
             {diagnostic.runtime.attack.executionFacing
               ? `(${diagnostic.runtime.attack.executionFacing.x.toFixed(2)}, ${diagnostic.runtime.attack.executionFacing.z.toFixed(2)})`

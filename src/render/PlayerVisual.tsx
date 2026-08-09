@@ -10,7 +10,10 @@ import {
   PLAYER_FACING_MARKER_POSITION,
   PLAYER_FACING_MARKER_SIZE,
 } from './playerVisualConfig'
-import { computePlayerAttackPresentationPose } from './playerAttackPresentation'
+import {
+  computePlayerAttackPresentationPose,
+  resolveAttackPresentationFacing,
+} from './playerAttackPresentation'
 
 export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
   const facingGroupRef = useRef<Group>(null)
@@ -40,18 +43,18 @@ export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
     }
     guardMarker.visible = snapshot.defense.guarding
 
-    facingGroup.rotation.y = Math.atan2(
-      snapshot.player.facing.x,
-      -snapshot.player.facing.z,
-    )
+    const facing = resolveAttackPresentationFacing(snapshot.attack, snapshot.player)
+    facingGroup.rotation.y = Math.atan2(facing.x, -facing.z)
     const pose = computePlayerAttackPresentationPose(snapshot.combat)
     weapon.visible = pose.weaponVisible
+    weapon.position.set(0, 0.48, pose.weaponForwardOffset)
     weaponSweep.rotation.y = pose.weaponYawRadians
     weaponMaterial.color.set(pose.color)
 
     const activeShape = snapshot.attack.activeContactShape
     contactShape.visible = activeShape !== null
     if (activeShape !== null) {
+      // Local -Z matches execution-facing forward used by the authoritative sphere.
       contactShape.position.set(0, 0, -activeShape.forwardOffset)
       contactShape.scale.setScalar(activeShape.radius)
     }
@@ -70,6 +73,7 @@ export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
         />
         <meshStandardMaterial color="#d2a36a" roughness={0.62} metalness={0.04} />
       </mesh>
+      {/* Debug-only facing chevron — not a weapon or camera prop. */}
       <mesh
         castShadow
         position={[
@@ -85,12 +89,12 @@ export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
             PLAYER_FACING_MARKER_SIZE.z,
           ]}
         />
-        <meshStandardMaterial color="#f3ead7" roughness={0.5} />
+        <meshStandardMaterial color="#3d6d74" roughness={0.55} metalness={0.08} />
       </mesh>
       <group ref={weaponSweepRef}>
         <mesh ref={weaponRef} castShadow position={[0, 0.48, -0.72]}>
-          <boxGeometry args={[0.09, 0.09, 0.9]} />
-          <meshStandardMaterial ref={weaponMaterialRef} roughness={0.42} />
+          <boxGeometry args={[0.08, 0.08, 0.95]} />
+          <meshStandardMaterial ref={weaponMaterialRef} roughness={0.38} metalness={0.35} />
         </mesh>
       </group>
       <mesh ref={contactShapeRef} position={[0, 0, -0.82]} visible={false}>

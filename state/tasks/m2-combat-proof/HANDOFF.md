@@ -1,28 +1,31 @@
 # HANDOFF
 <!-- Durable end-of-session state for one task. -->
-Updated: 2026-08-09 by Codex
+Updated: 2026-08-09 by Cursor
 Task: m2-combat-proof
 
 ## Status
-M2.4 implementation and automated verification are complete. Mouse-world aim, input ownership/lifecycle recovery, dodge, and guard preserve M2.3 contact/damage authority.
+M2.5 implementation and verification complete. PO aim/contact correctness gate passed in a real Chromium browser; graybox presentation/hit feedback kept presentation-only.
 
-Classification: **M2.4 COMPLETE — M2.5 NEXT**
+Classification: **M2.5 COMPLETE — M2.6 NEXT**
 
 ## Locked decisions
-- Attacks project canvas pointer coordinates to the ground plane, convert the hit point to semantic aim, and snapshot it only after action acceptance.
-- Combat pointer listeners belong to the canvas. UI never enters that path; pointer capture plus cancel/leave/outside-release, blur, pagehide, and hidden-tab lifecycle clear held combat input and reset keyboard state when ownership becomes unreliable.
-- The border/action stall was stale keyboard state: a missed forward key-up plus pressed reverse direction normalized to neutral. Combat was idle, suppression was false, velocity/requested/corrected horizontal movement were zero, and grounding remained true. Shared surface lifecycle reset clears the stale pair; no physics rule changed.
-- Dodge: Space press edge; 2 startup / 8 active / 8 recovery steps; direction sampled from movement or facing fallback; 8 m/s active displacement through the existing Rapier resolver; active-only invulnerability; no voluntary cancel.
-- Guard: held canvas RMB, idle-only entry, release-to-idle on the next fixed step, 35% movement scale. Attacks/dodge cannot start while guard is held; guard cannot enter during committed actions.
+- Accepted attacks own frozen `attackExecutionFacing`; presentation orientation and contact-shape orientation both consume that snapshot only.
+- Screen-to-world aim uses canvas bounds → NDC → current gameplay camera ray → y=0 plane; `camera.updateMatrixWorld(true)` before projection.
+- Contact sphere sizes unchanged (light 0.82/0.52, heavy 0.98/0.68); rear extent stays forward of the player (~0.30).
+- White primitives: player cream facing marker → teal debug chevron; training-target orientation box removed; weapon remains distinct; contact wireframe is active-window debug only.
+- Hit feedback is presentation-only (target flash/recoil + tiny camera impulse). No authoritative hit-stop / clock redesign.
+
+## Root causes addressed
+- Large weapon yaw sweep made attacks look off-axis while contact followed facing; clicks during an in-flight commit were rejected so facing appeared “stuck.”
+- Misleading near-white facing markers on player and target read as gameplay props.
 
 ## Verification
-- Focused input/defense/contact/Rapier sets passed; full suite: 22 files / 84 tests.
-- Lint, typecheck, build, `npm run verify`, diff check, strict doctor, and sync check passed.
-- Vite served HTTP 200 at `127.0.0.1:4173`. No controllable browser was available, so the requested interactive replay and console/resize observations remain manual.
-- Existing bundle-size advisory remains non-blocking.
+- Focused aim/contact + full suite: 23 files / 98 tests.
+- `npm run verify`, `git diff --check`, strict doctor, sync check passed.
+- Playwright Chromium browser matrix: cardinals/diag execution facing match clicks; toward-target hit (100→80); away and perpendicular miss (100); Reset isolation; border move recovery; dodge/guard; no uncaught console errors.
 
 ## Not implemented
-Enemy attacks/AI, player health, stamina, parry, knockback, combos/buffering, lock-on, controller combat input, production animation/VFX/audio, or M2.5 presentation tuning.
+Enemy AI/attacks, player health, stamina, parry, lock-on, combos/buffering, controller combat, production animation/VFX/audio, authoritative hit-stop, M2.6 fixture pack.
 
 ## Next session starts with
-M2.5 — Combat presentation and feel (Cursor). First replay the pending M2.4 browser matrix; do not change simulation authority to tune presentation.
+M2.6 — Combat verification. Preserve M2.5 authority; do not start new combat features.

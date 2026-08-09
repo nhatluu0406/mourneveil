@@ -1,8 +1,24 @@
 import { PerspectiveCamera } from 'three'
 import { describe, expect, it } from 'vitest'
-import { createPointerWorldAimResolver } from './pointerWorldAim'
+import {
+  createPointerWorldAimResolver,
+  pointerClientToNdc,
+  projectNdcToWorldAimDirection,
+} from './pointerWorldAim'
 
 describe('pointer world aim projection', () => {
+  it('converts canvas-local client coordinates to NDC with Y inversion', () => {
+    expect(
+      pointerClientToNdc(50, 25, { left: 0, top: 0, width: 100, height: 100 }),
+    ).toEqual({ x: 0, y: 0.5 })
+    expect(
+      pointerClientToNdc(10, 20, { left: 10, top: 20, width: 0, height: 100 }),
+    ).toBeNull()
+    expect(
+      pointerClientToNdc(10, 20, { left: 10, top: 20, width: 200, height: 100 }),
+    ).toEqual({ x: -1, y: 1 })
+  })
+
   it('projects the pointer onto the gameplay plane and returns semantic direction', () => {
     const camera = new PerspectiveCamera(45, 1, 0.1, 100)
     camera.position.set(0, 10, 10)
@@ -23,5 +39,27 @@ describe('pointer world aim projection', () => {
     )
 
     expect(resolve(50, 50)).toEqual({ x: 1, z: 0 })
+  })
+
+  it('aims along each cardinal ground direction from a top-down camera', () => {
+    const camera = new PerspectiveCamera(45, 1, 0.1, 100)
+    camera.position.set(0, 20, 0)
+    camera.lookAt(0, 0, 0)
+    camera.updateMatrixWorld(true)
+    const player = { x: 0, y: 0.82, z: 0 }
+
+    const cases = [
+      [{ x: 0, y: 0.25 }, { x: 0, z: -1 }],
+      [{ x: 0, y: -0.25 }, { x: 0, z: 1 }],
+      [{ x: -0.25, y: 0 }, { x: -1, z: 0 }],
+      [{ x: 0.25, y: 0 }, { x: 1, z: 0 }],
+    ] as const
+
+    for (const [ndc, expected] of cases) {
+      const aim = projectNdcToWorldAimDirection(ndc, camera, player)
+      expect(aim).not.toBeNull()
+      expect(aim!.x).toBeCloseTo(expected.x, 1)
+      expect(aim!.z).toBeCloseTo(expected.z, 1)
+    }
   })
 })

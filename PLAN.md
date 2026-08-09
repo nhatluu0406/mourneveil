@@ -64,16 +64,18 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
   - completion evidence: all three blocking input regressions, timing/cancel/interrupt interactions, dodge collision/invulnerability, and guard lifecycle verified; runtime proof recorded
   - evidence: canvas-only pointer input and semantic ground-plane aim replace window-wide LMB; pointer exit/cancel/outside release resets stale held input; attacks snapshot accepted aim; Space dodge uses 2/8/8 fixed steps with active-only invulnerability and Rapier collision; held RMB guard constrains movement to 35%; focused and full 22-file/84-test verification green; browser replay unavailable and remains manual
 
-- [ ] 5. M2.5 — Combat presentation and feel
+- [x] 5. M2.5 — Combat runtime correctness and presentation feel
   - depends: 4
-  - risk: MEDIUM
+  - risk: MEDIUM (with HIGH-priority PO correctness gate)
   - preferred agent: Cursor
   - isolation: sequential
-  - owns/allows: presentation-only combat readability, primitive feedback, scoped feel tuning under fixed contracts
-  - outcome: Combat Proof actions and results are readable without presentation becoming authority
-  - non-goals: production animation pipeline, final VFX/audio, camera redesign
-  - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY: local combat readability pass
+  - owns/allows: aim/contact facing authority alignment, debug geometry cleanup, presentation-only combat readability, primitive hit feedback, scoped feel tuning under fixed contracts
+  - outcome: click aim, attack visual, and authoritative contact share one execution-facing snapshot; away/perp attacks miss; Combat Proof actions/results are readable without presentation becoming authority
+  - first acceptance gate (PO findings): visible attack direction follows click; contact matches the same execution facing; attacking away from the target deals no damage; Reset-target UI stays isolated; border stuck regression remains fixed; browser verification required
+  - non-goals: production animation pipeline, final VFX/audio, camera redesign, enemy AI, player health, stamina, controller combat, M2.6
+  - verifier: focused aim/contact regressions + M1/M2 suites + `npm run verify && git diff --check` plus HUMAN-VERIFY browser combat correctness/readability pass
   - completion evidence: runtime observations recorded; no authority drift
+  - evidence: frozen `attackExecutionFacing` drives presentation + contact; camera `updateMatrixWorld` before ray aim; weapon sweep reduced so readable axis matches contact; training-target facing marker removed; player facing marker recolored as debug chevron; presentation-only hit flash/recoil + tiny camera impulse; 23 files / 98 tests; Playwright browser matrix green (cardinals/diag aim, toward hit / away+perp miss, Reset isolation, border recovery, dodge/guard, no console errors)
 
 - [ ] 6. M2.6 — Combat verification
   - depends: 5
@@ -101,10 +103,12 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
 - 2026-08-09 | Attack executions use simulation-owned monotonic IDs; Rapier reports active-sphere/hurtbox candidates, while simulation deduplicates target hits and applies deterministic light/heavy damage of 20/35 | Proves contact and damage without render, callback frequency, or wall-clock authority
 - 2026-08-09 | Canvas pointer ownership produces semantic ground-plane aim; accepted attacks freeze that aim, while pointer lifecycle resets all held gameplay input | Prevents UI click leakage, animation authority, and missed-release input stalls
 - 2026-08-09 | Dodge is a strict non-cancelling 2/8/8-step action with collision-resolved active movement and active-only invulnerability; guard is an idle-only held state with constrained locomotion | Establishes deterministic defensive authority without stamina, parry, or incoming-damage systems
+- 2026-08-09 | Accepted attacks own a frozen execution-facing snapshot that exclusively drives presentation orientation and contact-shape orientation; live movement facing/mouse/render rotation cannot retarget an in-flight execution | Closes PO aim/contact disagreement without a second combat state machine
+- 2026-08-09 | M2.5 hit feedback and camera impulse are presentation-only and must not author damage or pause fixed-step authority | Keeps feel improvements from corrupting combat/simulation contracts
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
 - Failed branch owner: orchestrator on the integration tree; never mix unrelated dirty-main changes
 
 ## Next milestone
-- M2.5 — Combat presentation and feel
+- M2.6 — Combat verification
