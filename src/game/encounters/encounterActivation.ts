@@ -57,7 +57,7 @@ export class EncounterActivationRuntime {
     if (encounter === undefined) return false
     return positionInBounds(
       playerPosition,
-      expandBounds(zoneBounds(encounter.zoneId, this.level), 0.35),
+      expandBounds(zoneBounds(encounter.zoneId, this.level), 0.55),
     )
   }
 

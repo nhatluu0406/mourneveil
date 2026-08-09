@@ -21,7 +21,7 @@ await page.reload({ waitUntil: 'networkidle' })
 await page.waitForTimeout(800)
 
 const milestone = await page.locator('.development-panel').innerText()
-milestone.includes('M5 Connected Level') && milestone.includes('M5.4')
+milestone.includes('M5 Connected Level')
   ? pass('centralized milestone visible in compact panel')
   : fail(`milestone text: ${milestone.slice(0, 120)}`)
 

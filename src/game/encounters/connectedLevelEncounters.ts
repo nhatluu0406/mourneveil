@@ -32,10 +32,13 @@ export interface ConnectedEncounterDefinition {
 }
 
 export const M5_ENEMY_PLACEMENTS: readonly ConnectedEnemyPlacement[] = Object.freeze([
-  definePlacement('enemy.skirmisher.1', 'encounter.m5.mixed', 'skirmisher', 0, -3, -1, 0, 'item.weapon.oathblade'),
-  definePlacement('enemy.brute.1', 'encounter.m5.mixed', 'brute', 2.2, -4.5, -1, 0, 'item.charm.vitality'),
-  definePlacement('enemy.skirmisher.introduction', 'encounter.m5.introduction', 'skirmisher', -9.5, 2.5, -1, 0, null),
-  definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7, -4, -1, 0, null),
+  // Mixed court: skirmisher holds the near approach; brute anchors the south pocket.
+  definePlacement('enemy.skirmisher.1', 'encounter.m5.mixed', 'skirmisher', 1.4, -2.6, -1, 0, 'item.weapon.oathblade'),
+  definePlacement('enemy.brute.1', 'encounter.m5.mixed', 'brute', 2.6, -5.4, -1, 0, 'item.charm.vitality'),
+  // Introduction: stand-off just inside Outer Watch so arrival crossing feels intentional.
+  definePlacement('enemy.skirmisher.introduction', 'encounter.m5.introduction', 'skirmisher', -10.2, 3.1, 1, 0, null),
+  // Pressure: final-approach sentry near the ash-walk cairn, before the sealed gate.
+  definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7.6, -3.4, -1, 0, null),
 ])
 
 export const M5_ENCOUNTERS: readonly ConnectedEncounterDefinition[] = Object.freeze([

@@ -78,7 +78,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: browser readability gate; lint; typecheck; focused UI/visual unit checks where present; `git diff --check`
   - evidence: PASS — collapsible compact dev panel; inventory displayNames + no horizontal overflow; training target removed from normal contact targets; graybox landmarks/gate markers/taller checkpoint; `gate-m54-readability.mjs` VERDICT PASS
 
-- [ ] 5. M5.5 — Encounter and traversal tuning
+- [x] 5. M5.5 — Encounter and traversal tuning
   - depends: 4 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -87,6 +87,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - outcome: deliberate combat/traversal rhythm with skirmisher+brute only
   - non-goals: waves, new roles, item system expansion
   - verifier: focused encounter/placement tests; browser soak; lint; typecheck; `git diff --check`
+  - evidence: PASS — retuned intro/mixed/pressure stand-offs; egress margin 0.55; `gate-m55-tuning.mjs` PASS; M5.3.1 correctness gate still PASS
 
 - [ ] 6. M5.6 — Full M5 playthrough and verification
   - depends: 5 PASS
