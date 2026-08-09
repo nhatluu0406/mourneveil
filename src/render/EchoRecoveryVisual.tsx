@@ -1,10 +1,10 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef, useState } from 'react'
 import type { Group } from 'three'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 
 interface EchoRecoveryVisualProps {
-  runtime: PlayerRuntime
+  runtime: GameRuntime
 }
 
 export function EchoRecoveryVisual({ runtime }: EchoRecoveryVisualProps) {

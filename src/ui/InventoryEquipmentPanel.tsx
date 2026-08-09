@@ -1,18 +1,20 @@
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type {
+  GameRuntime,
+  GameRuntimeSnapshot,
+} from '../game/runtime/GameRuntime'
 import { getItemDefinition, type EquipSlot, type ItemId } from '../game/items/itemDefinition'
-import type { FoundationDiagnostic } from '../game/core/foundationDiagnostic'
 
 interface InventoryEquipmentPanelProps {
-  diagnostic: FoundationDiagnostic
-  runtime: PlayerRuntime
+  snapshot: GameRuntimeSnapshot
+  runtime: GameRuntime
 }
 
 export function InventoryEquipmentPanel({
-  diagnostic,
+  snapshot,
   runtime,
 }: InventoryEquipmentPanelProps) {
   const { inventory, equipment, resolvedAttackDamage, playerHealth } =
-    diagnostic.runtime
+    snapshot
 
   const equip = (itemId: ItemId): void => {
     runtime.equipItem(itemId)

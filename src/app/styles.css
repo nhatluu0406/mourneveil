@@ -35,7 +35,7 @@ body {
   display: block;
 }
 
-.foundation-panel,
+.development-panel,
 .render-fallback {
   color: #f4efe4;
   background: rgb(14 18 23 / 88%);
@@ -44,7 +44,7 @@ body {
   box-shadow: 0 1rem 3rem rgb(0 0 0 / 30%);
 }
 
-.foundation-panel {
+.development-panel {
   position: absolute;
   z-index: 1;
   top: 1rem;
@@ -56,7 +56,7 @@ body {
   backdrop-filter: blur(0.75rem);
 }
 
-.foundation-panel__eyebrow {
+.development-panel__eyebrow {
   margin: 0 0 0.2rem;
   color: #b9c3bb;
   font-size: 0.72rem;
@@ -65,36 +65,36 @@ body {
   text-transform: uppercase;
 }
 
-.foundation-panel h1 {
+.development-panel h1 {
   margin: 0 0 0.9rem;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.65rem;
   font-weight: 500;
 }
 
-.foundation-panel dl {
+.development-panel dl {
   display: grid;
   gap: 0.4rem;
   margin: 0;
 }
 
-.foundation-panel dl div {
+.development-panel dl div {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.foundation-panel dt {
+.development-panel dt {
   color: #c2c8c1;
 }
 
-.foundation-panel dd {
+.development-panel dd {
   margin: 0;
   color: #d9c7a4;
   font-weight: 700;
 }
 
-.foundation-panel dd[data-ready="true"] {
+.development-panel dd[data-ready="true"] {
   color: #9fdda8;
 }
 

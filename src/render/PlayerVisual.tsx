@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group, Mesh, MeshStandardMaterial } from 'three'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import {
   PLAYER_CAPSULE_HALF_HEIGHT,
   PLAYER_CAPSULE_RADIUS,
@@ -15,7 +15,7 @@ import {
   resolveAttackPresentationFacing,
 } from './playerAttackPresentation'
 
-export function PlayerVisual({ runtime }: { runtime: PlayerRuntime }) {
+export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const facingGroupRef = useRef<Group>(null)
   const weaponSweepRef = useRef<Group>(null)
   const weaponRef = useRef<Mesh>(null)

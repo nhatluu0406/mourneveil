@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PlayerRuntime } from '../character/playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 import { GameSaveService, MemorySaveStorage } from './gameSaveService'
 import { migrateAndValidateSave } from './migrateSave'
 import { createDefaultSaveV1, type SaveFileV1 } from './saveSchema'
@@ -14,7 +14,7 @@ describe('versioned local save', () => {
   })
 
   it('round-trips V1 through storage and restores persistent gameplay facts', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.requestCheckpointInteraction({ type: 'player-checkpoint-interaction' })
     runtime.debugDefeatEnemy('enemy.skirmisher.1')
     runtime.debugSetPlayerPosition({
@@ -43,7 +43,7 @@ describe('versioned local save', () => {
     const service = new GameSaveService(storage)
     service.save(withRecovery)
 
-    const restored = new PlayerRuntime()
+    const restored = new GameRuntime()
     const loaded = service.load()
     expect(loaded.ok).toBe(true)
     if (!loaded.ok) return

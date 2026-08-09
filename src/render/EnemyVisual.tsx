@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group, Mesh, MeshStandardMaterial } from 'three'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { meleeRoleByRuntimeId } from '../game/enemies/enemyRoles'
 import { createEnemyAttackPresentationSnapshot } from './enemyAttackPresentation'
 
@@ -18,7 +18,7 @@ export function EnemyVisual({
   runtime,
   enemyId,
 }: {
-  readonly runtime: PlayerRuntime
+  readonly runtime: GameRuntime
   readonly enemyId: string
 }) {
   const facingRef = useRef<Group>(null)

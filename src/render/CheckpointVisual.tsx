@@ -1,9 +1,9 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { MeshStandardMaterial } from 'three'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 
-export function CheckpointVisual({ runtime }: { readonly runtime: PlayerRuntime }) {
+export function CheckpointVisual({ runtime }: { readonly runtime: GameRuntime }) {
   const materialRef = useRef<MeshStandardMaterial>(null)
   const checkpoint = runtime.snapshot().checkpoint
 

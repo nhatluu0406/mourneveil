@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import { BRUTE_ROLE, SKIRMISHER_ROLE } from '../enemies/enemyRoles'
 import type { CharacterCollisionResolver } from './playerMotor'
-import { PlayerRuntime } from './playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 
 const FLAT_GROUND: CharacterCollisionResolver = (_position, translation) => ({
   translation: { ...translation, y: 0 },
@@ -17,7 +17,7 @@ const LIGHT = {
 }
 const HEAVY = { ...LIGHT, attack: 'heavy' as const }
 
-function defeatSkirmisher(runtime: PlayerRuntime): void {
+function defeatSkirmisher(runtime: GameRuntime): void {
   runtime.attachCombatContactQuery(({ hurtboxes }) =>
     hurtboxes
       .filter((hurtbox) => hurtbox.ownerId === SKIRMISHER_ROLE.runtimeId)
@@ -35,7 +35,7 @@ function defeatSkirmisher(runtime: PlayerRuntime): void {
 
 describe('player checkpoint and respawn integration', () => {
   it('requires checkpoint activation and restores transform, health, combat, and encounter', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
     expect(runtime.requestRespawn(RESPAWN)).toEqual({
       accepted: false,
@@ -82,7 +82,7 @@ describe('player checkpoint and respawn integration', () => {
   })
 
   it('supports repeated death and respawn cycles without stale action state', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.requestCheckpointInteraction(INTERACT)
 
     for (let cycle = 0; cycle < 3; cycle += 1) {

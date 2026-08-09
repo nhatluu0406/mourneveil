@@ -1,10 +1,10 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 
 interface LootPickupVisualProps {
-  runtime: PlayerRuntime
+  runtime: GameRuntime
 }
 
 export function LootPickupVisual({ runtime }: LootPickupVisualProps) {

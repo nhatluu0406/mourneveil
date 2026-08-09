@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { PlayerRuntime } from '../character/playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 import { BRUTE_ROLE, SKIRMISHER_ROLE } from '../enemies/enemyRoles'
 import { createGrayboxEncounterSnapshot } from './grayboxEncounter'
 
 describe('player runtime graybox encounter projection', () => {
   it('projects an active mixed encounter and restores it on melee fixture reset', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     expect(runtime.snapshot().encounter).toMatchObject({
       id: 'encounter.graybox.mixed',
       phase: 'active',

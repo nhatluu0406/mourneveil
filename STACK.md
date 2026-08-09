@@ -35,6 +35,7 @@
 - Player recovery authority: canonical player health owns alive/dead and deterministic damage/restore; death clears player action/defense/contact and stops movement while simulation stays live; one authored checkpoint owns the active respawn reference, and simulation-owned respawn restores player state and deterministically resets the mixed encounter; the limited flask is a fixed-step committed action whose active step alone consumes one charge and heals, with checkpoint interaction/respawn refilling charges; provisional Echoes currency is simulation-owned, enemy definitions grant a one-time defeat reward, and death drops carried Echoes into at most one world recovery that proximity pickup restores exactly once (a later death replaces or clears the prior drop; respawn/checkpoint rest never auto-return dropped Echoes); authored item definitions feed a small inventory with weapon+charm equipment slots whose modifiers resolve attack damage and max health through one canonical derivation path; defeated graybox enemies may spawn one authored loot pickup exactly once per encounter lifecycle; SaveFileV1 persists only stable facts (checkpoint, flask charges, Echoes, active recovery, inventory, equipment, loot spawn memory) through a narrow localStorage adapter with version validation and safe fallback — encounter enemies reset on load and transient combat/input/physics state is never serialized
 - React is shell/UI projection — not combat/simulation authority
 - Flow: device input → intents → simulation resolves outcomes → render/UI/audio/VFX consume typed state/events
+- Application integration → `game/runtime` session coordinator → player/combat/enemy/encounter/world/item/save domain runtimes
 - Physics reports collision facts; simulation assigns gameplay meaning
 - Authored definitions immutable; runtime entities hold instance state
 - Prefer explicit module contracts over a global event bus or shared mutable store
@@ -42,7 +43,7 @@
 - Product/architecture contracts: `docs/product/`, `docs/architecture/`
 
 ## Module ownership (create only when a milestone needs the path)
-- `src/app/` bootstrap · `src/game/core/` sim clock/contracts/events · `src/game/character/` player
+- `src/app/` bootstrap/browser integration · `src/game/runtime/` game/session orchestration · `src/game/core/` low-level simulation clock/contracts/events · `src/game/character/` player
 - `src/game/combat/` · `src/game/enemies/` · `src/game/encounters/` · `src/game/world/` · `src/game/items/` · `src/game/save/`
 - `src/input/` intents · `src/physics/` Rapier adapter · `src/render/` R3F · `src/ui/` · `src/audio/` · `src/content/` · `src/debug/`
 - Naming: modules/folders kebab or domain folders; React components `PascalCase.tsx`; pure logic `camelCase.ts`; co-located `*.test.ts`

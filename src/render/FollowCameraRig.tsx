@@ -1,6 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useRef } from 'react'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import {
   FOLLOW_CAMERA_MODE,
   FOLLOW_DAMPING,
@@ -11,7 +11,7 @@ import {
 } from './followCamera'
 
 interface FollowCameraRigProps {
-  runtime: PlayerRuntime
+  runtime: GameRuntime
   onDiagnostic?: (diagnostic: CameraDiagnostic) => void
 }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PlayerRuntime } from '../character/playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import type { CharacterCollisionResolver } from '../character/playerMotor'
 import { PLAYER_DODGE_ACTION, PLAYER_DODGE_ACTION_ID } from './playerDefense'
@@ -9,7 +9,7 @@ const flatGround: CharacterCollisionResolver = (_position, desired) => ({
   grounded: true,
 })
 
-function advance(runtime: PlayerRuntime, steps: number, horizontal = 0, forward = 0) {
+function advance(runtime: GameRuntime, steps: number, horizontal = 0, forward = 0) {
   for (let step = 0; step < steps; step += 1) {
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal, forward })
   }
@@ -17,7 +17,7 @@ function advance(runtime: PlayerRuntime, steps: number, horizontal = 0, forward 
 
 describe('player defensive actions', () => {
   it('snapshots accepted mouse aim for the full attack execution', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(flatGround)
     expect(
       runtime.requestPlayerAttack({
@@ -39,7 +39,7 @@ describe('player defensive actions', () => {
   })
 
   it('samples dodge direction once and exposes invulnerability only while active', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(flatGround)
     const startingX = runtime.snapshot().player.position.x
     expect(
@@ -71,7 +71,7 @@ describe('player defensive actions', () => {
   })
 
   it('falls back to facing for a neutral dodge and keeps its direction fixed', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(flatGround)
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: -1 })
     const facing = runtime.snapshot().player.facing
@@ -85,7 +85,7 @@ describe('player defensive actions', () => {
   })
 
   it('guards only while idle, constrains movement, and releases cleanly', () => {
-    const guarded = new PlayerRuntime()
+    const guarded = new GameRuntime()
     guarded.attachCollisionResolver(flatGround)
     guarded.setGuardIntent(true)
     advance(guarded, 30, 1, 0)
@@ -111,7 +111,7 @@ describe('player defensive actions', () => {
   })
 
   it('does not enter guard during a committed attack but enters after completion if held', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(flatGround)
     runtime.requestPlayerAttack({
       type: 'player-attack',

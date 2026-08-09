@@ -8,7 +8,7 @@ import {
   type RapierRigidBody,
 } from '@react-three/rapier'
 import { useEffect, useRef } from 'react'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { meleeRoleByRuntimeId } from '../game/enemies/enemyRoles'
 import { EnemyVisual } from '../render/EnemyVisual'
 import {
@@ -21,7 +21,7 @@ export function EnemyPhysicsBody({
   runtime,
   enemyId,
 }: {
-  readonly runtime: PlayerRuntime
+  readonly runtime: GameRuntime
   readonly enemyId: string
 }) {
   const bodyRef = useRef<RapierRigidBody>(null)

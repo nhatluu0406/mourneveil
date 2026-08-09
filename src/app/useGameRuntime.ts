@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { PlayerRuntime } from '../game/character/playerRuntime'
-import type { FoundationRuntimeDiagnostic } from '../game/core/foundationDiagnostic'
+import {
+  GameRuntime,
+  type GameRuntimeSnapshot,
+} from '../game/runtime/GameRuntime'
 import {
   GameSaveService,
   LocalStorageSaveStorage,
@@ -9,18 +11,28 @@ import { BrowserAttackInput } from '../input/browserAttackInput'
 import type { AimDirectionResolver, CombatInputSnapshot } from '../input/browserAttackInput'
 import { BrowserGamepadInput } from '../input/browserGamepadInput'
 import { BrowserMovementInput } from '../input/browserMovementInput'
-import { composeMovementIntents } from '../input/composeMovementIntents'
+import {
+  composeMovementIntents,
+  type ActiveMovementInputSource,
+} from '../input/composeMovementIntents'
+import type { PlayerMovementIntent } from '../input/playerMovementIntent'
 
-interface FoundationRuntimeIntegration {
-  readonly runtime: PlayerRuntime
-  readonly diagnostic: FoundationRuntimeDiagnostic
+export interface GameRuntimeIntegrationSnapshot extends GameRuntimeSnapshot {
+  readonly movementIntent: PlayerMovementIntent
+  readonly activeInputSource: ActiveMovementInputSource
+  readonly combatInput: CombatInputSnapshot
+}
+
+interface GameRuntimeIntegration {
+  readonly runtime: GameRuntime
+  readonly snapshot: GameRuntimeIntegrationSnapshot
   readonly attachGameplayInput: (
     surface: HTMLElement,
     resolveAimDirection: AimDirectionResolver,
   ) => void
 }
 
-export function useFoundationRuntime(): FoundationRuntimeIntegration {
+export function useGameRuntime(): GameRuntimeIntegration {
   const saveService = useMemo(
     () =>
       new GameSaveService(
@@ -35,7 +47,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
     [],
   )
   const runtime = useMemo(() => {
-    const next = new PlayerRuntime()
+    const next = new GameRuntime()
     const loaded = saveService.load()
     if (loaded.ok) next.applySave(loaded.save)
     next.setPersistHandler(() => {
@@ -49,7 +61,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
     surface: HTMLElement
     resolveAimDirection: AimDirectionResolver
   } | null>(null)
-  const [diagnostic, setDiagnostic] = useState<FoundationRuntimeDiagnostic>(
+  const [snapshot, setSnapshot] = useState<GameRuntimeIntegrationSnapshot>(
     () => ({
       ...runtime.snapshot(),
       movementIntent: { horizontal: 0, forward: 0 },
@@ -82,7 +94,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
     const gamepadInput = new BrowserGamepadInput(window, document)
     let previousFrameTime = performance.now()
     let animationFrameId = 0
-    let framesSinceDiagnostic = 0
+    let framesSinceProjection = 0
 
     keyboardInput.connect()
     keyboardInputRef.current = keyboardInput
@@ -148,10 +160,10 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
       )
 
       // Keep simulation every frame; throttle React panel updates to cut sustained-input jank.
-      framesSinceDiagnostic += 1
-      if (framesSinceDiagnostic >= 6) {
-        framesSinceDiagnostic = 0
-        setDiagnostic({
+      framesSinceProjection += 1
+      if (framesSinceProjection >= 6) {
+        framesSinceProjection = 0
+        setSnapshot({
           ...snapshot,
           movementIntent: composed.intent,
           activeInputSource: composed.source,
@@ -175,7 +187,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
 
   return {
     runtime,
-    diagnostic,
+    snapshot,
     attachGameplayInput,
   }
 }

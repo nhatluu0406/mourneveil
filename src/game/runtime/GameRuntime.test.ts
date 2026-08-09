@@ -5,8 +5,8 @@ import {
   PLAYER_LIGHT_ATTACK,
   PLAYER_LIGHT_ATTACK_ID,
 } from '../combat/playerAttackActions'
-import type { CharacterCollisionResolver } from './playerMotor'
-import { PlayerRuntime } from './playerRuntime'
+import type { CharacterCollisionResolver } from '../character/playerMotor'
+import { GameRuntime } from './GameRuntime'
 
 const AIM_FORWARD = { x: 0, z: -1 } as const
 
@@ -25,8 +25,8 @@ const resolveOnFlatGround: CharacterCollisionResolver = (
 function advancePattern(
   frameDeltas: readonly number[],
   intent: PlayerMovementIntent,
-): PlayerRuntime {
-  const runtime = new PlayerRuntime()
+): GameRuntime {
+  const runtime = new GameRuntime()
   runtime.attachCollisionResolver(resolveOnFlatGround)
 
   for (const frameDelta of frameDeltas) {
@@ -36,12 +36,12 @@ function advancePattern(
   return runtime
 }
 
-describe('PlayerRuntime', () => {
+describe('GameRuntime', () => {
   it.each([
     ['light', 20],
     ['heavy', 35],
   ] as const)('applies authoritative player %s damage to the enemy hurtbox', (attack, damage) => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCombatContactQuery(({ hurtboxes }) =>
       hurtboxes
         .filter((hurtbox) => hurtbox.ownerId === runtime.snapshot().enemy.id)
@@ -56,7 +56,7 @@ describe('PlayerRuntime', () => {
   })
 
   it('resolves active contact after movement in the fixed simulation step', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(resolveOnFlatGround)
     runtime.attachCombatContactQuery(({ hurtboxes }) =>
       hurtboxes
@@ -106,7 +106,7 @@ describe('PlayerRuntime', () => {
   })
 
   it('does not advance the motor until collision authority is attached', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     const initialPlayer = runtime.snapshot().player
 
     runtime.advanceFrame(1 / 30, { horizontal: 1, forward: 0 })
@@ -116,7 +116,7 @@ describe('PlayerRuntime', () => {
   })
 
   it('maps semantic light requests through combat authority', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
 
     expect(
       runtime.requestPlayerAttack(attackRequest('light')),
@@ -135,7 +135,7 @@ describe('PlayerRuntime', () => {
   })
 
   it('locks movement intent and facing through committed attack phases', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(resolveOnFlatGround)
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 1, forward: 0 })
     expect(runtime.snapshot().player.facing).toEqual({ x: 1, z: 0 })
@@ -152,7 +152,7 @@ describe('PlayerRuntime', () => {
   })
 
   it('restores movement after completion and gameplay interruption', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(resolveOnFlatGround)
     runtime.requestPlayerAttack(attackRequest('light'))
 
@@ -178,7 +178,7 @@ describe('PlayerRuntime', () => {
   })
 
   it('enters canonical death and rejects movement, attack, dodge, and guard', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(resolveOnFlatGround)
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 1, forward: 0 })
     runtime.requestPlayerAttack(attackRequest('light'))

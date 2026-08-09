@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { PlayerRuntime } from '../game/character/playerRuntime'
+import { GameRuntime } from '../game/runtime/GameRuntime'
 import { FIXED_STEP_SECONDS } from '../game/core/fixedStepClock'
 import { PLAYER_LIGHT_ATTACK } from '../game/combat/playerAttackActions'
 import { BrowserAttackInput } from './browserAttackInput'
@@ -39,7 +39,7 @@ describe('combat input lifecycle at a world border', () => {
     movement.connect()
     combat.connect()
 
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     let lastRequested = { x: 0, y: 0, z: 0 }
     let lastCorrected = { x: 0, y: 0, z: 0 }
     runtime.attachCollisionResolver((position, desired) => {

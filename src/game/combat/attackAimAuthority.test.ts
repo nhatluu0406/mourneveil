@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PlayerRuntime } from '../character/playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 import type { CharacterCollisionResolver } from '../character/playerMotor'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import { CombatActionRuntime } from './combatActionRuntime'
@@ -18,7 +18,7 @@ const flatGround: CharacterCollisionResolver = (_position, desired) => ({
   grounded: true,
 })
 
-function advanceToActive(runtime: PlayerRuntime, attack: 'light' | 'heavy'): void {
+function advanceToActive(runtime: GameRuntime, attack: 'light' | 'heavy'): void {
   const definition = attack === 'light' ? PLAYER_LIGHT_ATTACK : PLAYER_HEAVY_ATTACK
   for (let step = 0; step < definition.action.startupSteps; step += 1) {
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
@@ -27,7 +27,7 @@ function advanceToActive(runtime: PlayerRuntime, attack: 'light' | 'heavy'): voi
 
 describe('attack aim authority', () => {
   it('snapshots accepted semantic aim for presentation and contact', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(flatGround)
     runtime.requestPlayerAttack({
       type: 'player-attack',
@@ -50,7 +50,7 @@ describe('attack aim authority', () => {
   })
 
   it('does not rotate an active execution when live facing would change', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(flatGround)
     runtime.requestPlayerAttack({
       type: 'player-attack',

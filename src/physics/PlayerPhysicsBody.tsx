@@ -7,7 +7,7 @@ import {
   type RapierRigidBody,
 } from '@react-three/rapier'
 import { useEffect, useRef } from 'react'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { PlayerVisual } from '../render/PlayerVisual'
 import {
   CHARACTER_COLLISION_OFFSET,
@@ -18,7 +18,7 @@ import {
 import { useCombatHurtboxRegistration } from './combatHurtboxRegistry'
 
 interface PlayerPhysicsBodyProps {
-  runtime: PlayerRuntime
+  runtime: GameRuntime
 }
 
 export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {

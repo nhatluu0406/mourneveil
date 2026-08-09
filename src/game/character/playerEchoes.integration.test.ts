@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import { BRUTE_ROLE, SKIRMISHER_ROLE } from '../enemies/enemyRoles'
 import type { CharacterCollisionResolver } from './playerMotor'
-import { PlayerRuntime } from './playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 
 const FLAT_GROUND: CharacterCollisionResolver = (_position, translation) => ({
   translation: { ...translation, y: 0 },
@@ -16,7 +16,7 @@ const HEAVY = {
 const INTERACT = { type: 'player-checkpoint-interaction' as const }
 const RESPAWN = { type: 'player-respawn' as const }
 
-function forceContactOn(runtime: PlayerRuntime, enemyId: string): void {
+function forceContactOn(runtime: GameRuntime, enemyId: string): void {
   runtime.attachCombatContactQuery(({ hurtboxes }) =>
     hurtboxes
       .filter((hurtbox) => hurtbox.ownerId === enemyId)
@@ -24,7 +24,7 @@ function forceContactOn(runtime: PlayerRuntime, enemyId: string): void {
   )
 }
 
-function defeatEnemy(runtime: PlayerRuntime, enemyId: string, attacks: number): void {
+function defeatEnemy(runtime: GameRuntime, enemyId: string, attacks: number): void {
   forceContactOn(runtime, enemyId)
   for (let attack = 0; attack < attacks; attack += 1) {
     while (!runtime.requestPlayerAttack(HEAVY).accepted) {
@@ -38,7 +38,7 @@ function defeatEnemy(runtime: PlayerRuntime, enemyId: string, attacks: number): 
 
 describe('Echo reward, death drop, and recovery', () => {
   it('rewards distinct enemy values once per defeat lifecycle', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
     expect(SKIRMISHER_ROLE.definition.echoReward).toBe(25)
     expect(BRUTE_ROLE.definition.echoReward).toBe(60)
@@ -65,7 +65,7 @@ describe('Echo reward, death drop, and recovery', () => {
   })
 
   it('drops carried Echoes on death, recovers once, and replaces on second death', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
     runtime.requestCheckpointInteraction(INTERACT)
     defeatEnemy(runtime, SKIRMISHER_ROLE.runtimeId, 2)

@@ -4,14 +4,14 @@ import {
   type RapierCollider,
 } from '@react-three/rapier'
 import { useRef } from 'react'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { TrainingTargetVisual } from '../render/TrainingTargetVisual'
 import { useCombatHurtboxRegistration } from './combatHurtboxRegistry'
 
 export function TrainingTargetPhysicsBody({
   runtime,
 }: {
-  runtime: PlayerRuntime
+  runtime: GameRuntime
 }) {
   const colliderRef = useRef<RapierCollider>(null)
   const target = runtime.snapshot().trainingTarget

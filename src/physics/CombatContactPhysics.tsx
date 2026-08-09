@@ -1,6 +1,6 @@
 import { useRapier } from '@react-three/rapier'
 import { useEffect, useMemo, type ReactNode } from 'react'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { createRapierCombatContactQuery } from './combatContactQuery'
 import {
   CombatHurtboxRegistryContext,
@@ -12,7 +12,7 @@ export function CombatContactPhysics({
   runtime,
 }: {
   readonly children: ReactNode
-  readonly runtime: PlayerRuntime
+  readonly runtime: GameRuntime
 }) {
   const { world, rapier } = useRapier()
   const registry = useMemo(() => new RapierCombatHurtboxRegistry(), [])

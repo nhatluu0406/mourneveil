@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group, MeshStandardMaterial } from 'three'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 
 export const TRAINING_TARGET_VISUAL_RADIUS = 0.34
 export const TRAINING_TARGET_VISUAL_HEIGHT = 1.2
@@ -9,7 +9,7 @@ export const TRAINING_TARGET_VISUAL_HEIGHT = 1.2
 const HIT_FLASH_SECONDS = 0.12
 const HIT_RECOIL_SECONDS = 0.18
 
-export function TrainingTargetVisual({ runtime }: { runtime: PlayerRuntime }) {
+export function TrainingTargetVisual({ runtime }: { runtime: GameRuntime }) {
   const groupRef = useRef<Group>(null)
   const materialRef = useRef<MeshStandardMaterial>(null)
   const lastHitRevisionRef = useRef(0)

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { PlayerRuntime } from '../character/playerRuntime'
-import { createFoundationDiagnostic } from './foundationDiagnostic'
+import { GameRuntime } from '../game/runtime/GameRuntime'
+import { createDevelopmentDiagnostic } from './developmentDiagnostic'
 
-describe('createFoundationDiagnostic', () => {
-  it('reports foundation readiness only after renderer and physics are ready', () => {
+describe('createDevelopmentDiagnostic', () => {
+  it('reports runtime readiness only after renderer and physics are ready', () => {
     const runtime = {
-      ...new PlayerRuntime().snapshot(),
+      ...new GameRuntime().snapshot(),
       movementIntent: { horizontal: 0, forward: 1 },
       activeInputSource: 'keyboard' as const,
       combatInput: {
@@ -23,15 +23,15 @@ describe('createFoundationDiagnostic', () => {
       },
     }
 
-    expect(createFoundationDiagnostic(true, false, runtime)).toEqual({
+    expect(createDevelopmentDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M4.6',
+      milestone: 'M4',
       rendererReady: true,
       physicsReady: false,
-      foundationReady: false,
+      runtimeReady: false,
       runtime,
     })
 
-    expect(createFoundationDiagnostic(true, true, runtime).foundationReady).toBe(true)
+    expect(createDevelopmentDiagnostic(true, true, runtime).runtimeReady).toBe(true)
   })
 })

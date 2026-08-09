@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import type { CombatHitEvent } from '../combat/combatContact'
 import type { CharacterCollisionResolver } from './playerMotor'
-import { PlayerRuntime } from './playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 
 const FLAT_GROUND: CharacterCollisionResolver = (_position, translation) => ({
   translation: { ...translation, y: 0 },
@@ -10,8 +10,8 @@ const FLAT_GROUND: CharacterCollisionResolver = (_position, translation) => ({
 })
 const NEUTRAL = { horizontal: 0, forward: 0 } as const
 
-function createApproachingRuntime(): PlayerRuntime {
-  const runtime = new PlayerRuntime()
+function createApproachingRuntime(): GameRuntime {
+  const runtime = new GameRuntime()
   runtime.attachCollisionResolver(FLAT_GROUND)
   runtime.attachEnemyCollisionResolver(runtime.snapshot().enemy.id, FLAT_GROUND)
   runtime.attachCombatContactQuery(({ hurtboxes }) =>
@@ -31,7 +31,7 @@ function createApproachingRuntime(): PlayerRuntime {
   return runtime
 }
 
-function advanceUntilIncoming(runtime: PlayerRuntime, maximumSteps = 120): CombatHitEvent {
+function advanceUntilIncoming(runtime: GameRuntime, maximumSteps = 120): CombatHitEvent {
   for (let step = 0; step < maximumSteps; step += 1) {
     const events = runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL).incomingHitEvents
     if (events.length > 0) return events[0]

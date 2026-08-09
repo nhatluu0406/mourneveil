@@ -1,8 +1,8 @@
-import type { FoundationDiagnostic } from '../game/core/foundationDiagnostic'
+import type { DevelopmentDiagnostic } from './developmentDiagnostic'
 import type { CameraDiagnostic } from '../render/followCamera'
 
-interface FoundationPanelProps {
-  diagnostic: FoundationDiagnostic
+interface DevelopmentPanelProps {
+  diagnostic: DevelopmentDiagnostic
   camera: CameraDiagnostic | null
   onResetTrainingTarget: () => void
   onResetMeleeFixture: () => void
@@ -13,16 +13,16 @@ function readinessLabel(ready: boolean): string {
   return ready ? 'ready' : 'initializing'
 }
 
-export function FoundationPanel({
+export function DevelopmentPanel({
   diagnostic,
   camera,
   onResetTrainingTarget,
   onResetMeleeFixture,
   onRestorePlayerForDevelopment,
-}: FoundationPanelProps) {
+}: DevelopmentPanelProps) {
   return (
-    <aside className="foundation-panel" aria-label="Foundation diagnostic">
-      <p className="foundation-panel__eyebrow">Working title</p>
+    <aside className="development-panel" aria-label="Development diagnostic">
+      <p className="development-panel__eyebrow">Working title</p>
       <h1>{diagnostic.workingTitle}</h1>
       <dl>
         <div>

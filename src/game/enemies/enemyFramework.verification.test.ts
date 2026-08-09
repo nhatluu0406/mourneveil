@@ -4,7 +4,7 @@ import { PlayerHealthRuntime } from '../character/playerHealth'
 import { CombatContactRuntime, type CombatContactQuery } from '../combat/combatContact'
 import { attackContactOverlapsSphere } from '../combat/playerAttackActions'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
-import { PlayerRuntime } from '../character/playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 import {
   advanceMeleeEnemy,
   createEnemyAttackSpatialSnapshot,
@@ -178,7 +178,7 @@ describe('M3 enemy framework verification', () => {
   })
 
   it('projects encounter active/complete/reset without early completion', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     for (const id of runtime.enemyIds()) {
       runtime.attachEnemyCollisionResolver(id, FLAT_GROUND)
     }
@@ -207,7 +207,7 @@ describe('M3 enemy framework verification', () => {
   })
 
   it('resets development player health without restoring defeated enemies', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.restorePlayerForDevelopment()
     expect(runtime.snapshot().playerHealth.health.alive).toBe(true)
     // defeat one enemy via definition max health through contact is heavy; use encounter helper only
@@ -227,7 +227,7 @@ describe('M3 enemy framework verification', () => {
   })
 
   it('keeps player-runtime multi-enemy simulation finite across a long frame horizon', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
     for (const id of runtime.enemyIds()) {
       runtime.attachEnemyCollisionResolver(id, FLAT_GROUND)

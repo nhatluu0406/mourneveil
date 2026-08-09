@@ -1,6 +1,6 @@
 import { Physics, RigidBody, useRapier } from '@react-three/rapier'
 import { useEffect } from 'react'
-import type { PlayerRuntime } from '../game/character/playerRuntime'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { FIXED_STEP_SECONDS } from '../game/core/fixedStepClock'
 import { GRAYBOX_CENTER_BLOCKER_SIZE } from '../physics/grayboxCollision'
 import { PlayerPhysicsBody } from '../physics/PlayerPhysicsBody'
@@ -16,7 +16,7 @@ import { LootPickupVisual } from './LootPickupVisual'
 interface SceneProps {
   onPhysicsReady: () => void
   onCameraDiagnostic?: (diagnostic: CameraDiagnostic) => void
-  runtime: PlayerRuntime
+  runtime: GameRuntime
 }
 
 function PhysicsReadySignal({ onReady }: { onReady: () => void }) {
@@ -61,7 +61,7 @@ function OrientationMarker() {
   )
 }
 
-function FoundationWorld({ onPhysicsReady, runtime }: SceneProps) {
+function GameWorld({ onPhysicsReady, runtime }: SceneProps) {
   return (
     <Physics gravity={[0, -9.81, 0]} timeStep={FIXED_STEP_SECONDS}>
       <PhysicsReadySignal onReady={onPhysicsReady} />
@@ -95,7 +95,7 @@ function FoundationWorld({ onPhysicsReady, runtime }: SceneProps) {
       <BoundaryWall position={[5.75, 0.75, 0]} size={[0.5, 1.5, 12]} />
       <BoundaryWall position={[0, 0.75, -5.75]} size={[11, 1.5, 0.5]} />
       <BoundaryWall position={[0, 0.75, 5.75]} size={[11, 1.5, 0.5]} />
-        <CombatContactPhysics runtime={runtime}>
+      <CombatContactPhysics runtime={runtime}>
         <PlayerPhysicsBody runtime={runtime} />
         <TrainingTargetPhysicsBody runtime={runtime} />
         {runtime.enemyIds().map((enemyId) => (
@@ -122,7 +122,7 @@ export function Scene({
         shadow-mapSize={[1024, 1024]}
       />
       <FollowCameraRig runtime={runtime} onDiagnostic={onCameraDiagnostic} />
-      <FoundationWorld onPhysicsReady={onPhysicsReady} runtime={runtime} />
+      <GameWorld onPhysicsReady={onPhysicsReady} runtime={runtime} />
     </>
   )
 }

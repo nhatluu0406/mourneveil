@@ -5,9 +5,9 @@ import { SKIRMISHER_ROLE, BRUTE_ROLE } from '../enemies/enemyRoles'
 import type { CharacterCollisionResolver } from './playerMotor'
 import {
   BRUTE_LOOT_ITEM_ID,
-  PlayerRuntime,
+  GameRuntime,
   SKIRMISHER_LOOT_ITEM_ID,
-} from './playerRuntime'
+} from '../runtime/GameRuntime'
 
 const FLAT_GROUND: CharacterCollisionResolver = (_position, translation) => ({
   translation: { ...translation, y: 0 },
@@ -28,7 +28,7 @@ describe('loot inventory and equipment', () => {
   })
 
   it('spawns loot once, picks up once, and equips with ownership and modifiers', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
     expect(runtime.resolvedAttackDamage()).toEqual({ light: 20, heavy: 35 })
 

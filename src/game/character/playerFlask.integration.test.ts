@@ -3,11 +3,11 @@ import { PLAYER_FLASK_USE_REQUEST } from '../../input/playerFlaskIntent'
 import { PLAYER_CHECKPOINT_INTERACTION_REQUEST, PLAYER_RESPAWN_REQUEST } from '../../input/playerRecoveryIntent'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import { PLAYER_FLASK_DEFINITION } from './playerFlask'
-import { PlayerRuntime } from './playerRuntime'
+import { GameRuntime } from '../runtime/GameRuntime'
 
 const NEUTRAL = { horizontal: 0, forward: 0 } as const
 
-function finishCurrentAction(runtime: PlayerRuntime): void {
+function finishCurrentAction(runtime: GameRuntime): void {
   for (let step = 0; step < 120 && runtime.snapshot().combat.phase !== 'idle'; step += 1) {
     runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
   }
@@ -16,7 +16,7 @@ function finishCurrentAction(runtime: PlayerRuntime): void {
 
 describe('player flask integration', () => {
   it('commits use, heals at the authoritative active step, clamps, and consumes one charge', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.applyPlayerDamage(30)
     expect(runtime.requestPlayerFlaskUse(PLAYER_FLASK_USE_REQUEST)).toMatchObject({
       accepted: true,
@@ -36,7 +36,7 @@ describe('player flask integration', () => {
   })
 
   it('rejects full health, committed action, guard, death, and exhausted charges', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     expect(runtime.requestPlayerFlaskUse(PLAYER_FLASK_USE_REQUEST)).toMatchObject({
       accepted: false,
       reason: 'resource-unavailable',
@@ -84,7 +84,7 @@ describe('player flask integration', () => {
   })
 
   it('refills on checkpoint activation/rest and on checkpoint respawn', () => {
-    const runtime = new PlayerRuntime()
+    const runtime = new GameRuntime()
     runtime.applyPlayerDamage(50)
     runtime.requestPlayerFlaskUse(PLAYER_FLASK_USE_REQUEST)
     finishCurrentAction(runtime)

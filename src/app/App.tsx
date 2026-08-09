@@ -1,34 +1,14 @@
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { FoundationPanel } from '../debug/FoundationPanel'
-import { createFoundationDiagnostic } from '../game/core/foundationDiagnostic'
-import {
-  PLAYER_CHECKPOINT_INTERACTION_REQUEST,
-  PLAYER_RESPAWN_REQUEST,
-} from '../input/playerRecoveryIntent'
-import { PLAYER_FLASK_USE_REQUEST } from '../input/playerFlaskIntent'
+import { DevelopmentPanel } from '../debug/DevelopmentPanel'
+import { installDevelopmentBrowserGate } from '../debug/browserGate'
+import { createDevelopmentDiagnostic } from '../debug/developmentDiagnostic'
 import { Scene } from '../render/Scene'
 import type { CameraDiagnostic } from '../render/followCamera'
 import { createPointerWorldAimResolver } from '../render/pointerWorldAim'
 import { InventoryEquipmentPanel } from '../ui/InventoryEquipmentPanel'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
-import { useFoundationRuntime } from './useFoundationRuntime'
-
-declare global {
-  interface Window {
-    __MOURNEVEIL_GATE__?: {
-      snapshot: () => unknown
-      applyDamage: (damage: number) => void
-      useFlask: () => void
-      interactCheckpoint: () => void
-      respawn: () => void
-      defeatEnemy: (enemyId: string) => void
-      setPlayerPosition: (position: { x: number; y: number; z: number }) => void
-      equipItem: (itemId: string) => unknown
-      unequipSlot: (slot: 'weapon' | 'charm') => unknown
-    }
-  }
-}
+import { useGameRuntime } from './useGameRuntime'
 
 export function App() {
   const [rendererReady, setRendererReady] = useState(false)
@@ -37,50 +17,26 @@ export function App() {
     useState<CameraDiagnostic | null>(null)
   const {
     runtime,
-    diagnostic: runtimeDiagnostic,
+    snapshot: runtimeSnapshot,
     attachGameplayInput,
-  } = useFoundationRuntime()
+  } = useGameRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
   const reportCameraDiagnostic = useCallback((diagnostic: CameraDiagnostic) => {
     setCameraDiagnostic(diagnostic)
   }, [])
   const diagnostic = useMemo(
     () =>
-      createFoundationDiagnostic(
+      createDevelopmentDiagnostic(
         rendererReady,
         physicsReady,
-        runtimeDiagnostic,
+        runtimeSnapshot,
       ),
-    [rendererReady, physicsReady, runtimeDiagnostic],
+    [rendererReady, physicsReady, runtimeSnapshot],
   )
 
   useEffect(() => {
-    window.__MOURNEVEIL_GATE__ = {
-      snapshot: () => runtime.snapshot(),
-      applyDamage: (damage: number) => {
-        runtime.applyPlayerDamage(damage)
-      },
-      useFlask: () => {
-        runtime.requestPlayerFlaskUse(PLAYER_FLASK_USE_REQUEST)
-      },
-      interactCheckpoint: () => {
-        runtime.requestCheckpointInteraction(PLAYER_CHECKPOINT_INTERACTION_REQUEST)
-      },
-      respawn: () => {
-        runtime.requestRespawn(PLAYER_RESPAWN_REQUEST)
-      },
-      defeatEnemy: (enemyId: string) => {
-        runtime.debugDefeatEnemy(enemyId)
-      },
-      setPlayerPosition: (position: { x: number; y: number; z: number }) => {
-        runtime.debugSetPlayerPosition(position)
-      },
-      equipItem: (itemId: string) => runtime.equipItem(itemId),
-      unequipSlot: (slot: 'weapon' | 'charm') => runtime.unequipSlot(slot),
-    }
-    return () => {
-      delete window.__MOURNEVEIL_GATE__
-    }
+    if (!import.meta.env.DEV) return
+    return installDevelopmentBrowserGate(runtime)
   }, [runtime])
 
   return (
@@ -122,14 +78,16 @@ export function App() {
           </Suspense>
         </Canvas>
       </RenderErrorBoundary>
-      <FoundationPanel
-        diagnostic={diagnostic}
-        camera={cameraDiagnostic}
-        onResetTrainingTarget={() => runtime.resetTrainingTarget()}
-        onRestorePlayerForDevelopment={() => runtime.restorePlayerForDevelopment()}
-        onResetMeleeFixture={() => runtime.resetMeleeFixture()}
-      />
-      <InventoryEquipmentPanel diagnostic={diagnostic} runtime={runtime} />
+      {import.meta.env.DEV ? (
+        <DevelopmentPanel
+          diagnostic={diagnostic}
+          camera={cameraDiagnostic}
+          onResetTrainingTarget={() => runtime.resetTrainingTarget()}
+          onRestorePlayerForDevelopment={() => runtime.restorePlayerForDevelopment()}
+          onResetMeleeFixture={() => runtime.resetMeleeFixture()}
+        />
+      ) : null}
+      <InventoryEquipmentPanel snapshot={runtimeSnapshot} runtime={runtime} />
     </main>
   )
 }

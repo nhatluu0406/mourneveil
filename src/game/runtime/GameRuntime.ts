@@ -76,17 +76,20 @@ import {
   EchoRecoveryRuntime,
   type EchoRecoverySnapshot,
 } from '../world/echoRecovery'
-import { PlayerHealthRuntime, type PlayerHealthSnapshot } from './playerHealth'
+import {
+  PlayerHealthRuntime,
+  type PlayerHealthSnapshot,
+} from '../character/playerHealth'
 import {
   PLAYER_FLASK_DEFINITION,
   PLAYER_FLASK_ACTION_ID,
   PlayerFlaskRuntime,
   type PlayerFlaskSnapshot,
-} from './playerFlask'
+} from '../character/playerFlask'
 import {
   EchoesCurrencyRuntime,
   type EchoesSnapshot,
-} from './playerCurrency'
+} from '../character/playerCurrency'
 import type { EquipSlot, ItemId } from '../items/itemDefinition'
 import { getItemDefinition } from '../items/itemDefinition'
 import {
@@ -115,12 +118,12 @@ import {
   type CharacterCollisionResolver,
   type PlayerFacingDirection,
   type PlayerMotorState,
-} from './playerMotor'
+} from '../character/playerMotor'
 
 export const SKIRMISHER_LOOT_ITEM_ID = 'item.weapon.oathblade' as const
 export const BRUTE_LOOT_ITEM_ID = 'item.charm.vitality' as const
 
-export interface PlayerRuntimeSnapshot {
+export interface GameRuntimeSnapshot {
   readonly simulation: SimulationTimeSnapshot
   readonly player: PlayerMotorState
   readonly combat: CombatActionSnapshot
@@ -150,13 +153,13 @@ export interface PlayerRuntimeSnapshot {
   }
 }
 
-export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
+export interface GameRuntimeAdvance extends GameRuntimeSnapshot {
   readonly frame: FixedStepAdvance
   readonly hitEvents: readonly CombatHitEvent[]
   readonly incomingHitEvents: readonly CombatHitEvent[]
 }
 
-export class PlayerRuntime {
+export class GameRuntime {
   private readonly clock = new FixedStepClock()
   private readonly combatRuntime = new CombatActionRuntime(
     [
@@ -555,7 +558,7 @@ export class PlayerRuntime {
   advanceFrame(
     frameDeltaSeconds: number,
     movementIntent: PlayerMovementIntent,
-  ): PlayerRuntimeAdvance {
+  ): GameRuntimeAdvance {
     const hitEvents: CombatHitEvent[] = []
     const incomingHitEvents: CombatHitEvent[] = []
     const frame = this.clock.advance(frameDeltaSeconds, (fixedStepSeconds, nextStepCount) => {
@@ -682,7 +685,7 @@ export class PlayerRuntime {
     return { ...this.snapshot(), frame, hitEvents, incomingHitEvents }
   }
 
-  snapshot(): PlayerRuntimeSnapshot {
+  snapshot(): GameRuntimeSnapshot {
     const combat = this.combatRuntime.snapshot()
     if (combat.phase === 'idle') {
       this.attackExecutionFacing = null

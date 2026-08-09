@@ -52,7 +52,7 @@ async function snap(page) {
 }
 
 async function panelReady(page) {
-  const text = await page.locator('aside.foundation-panel').innerText()
+  const text = await page.locator('aside.development-panel').innerText()
   return {
     renderer: /Renderer\nready/i.test(text),
     physics: /Physics\nready/i.test(text),
@@ -366,7 +366,7 @@ async function main() {
   })
 
   await page.goto(BASE, { waitUntil: 'networkidle' })
-  await page.waitForSelector('aside.foundation-panel')
+  await page.waitForSelector('aside.development-panel')
   {
     const start = Date.now()
     let ready = false
@@ -379,10 +379,10 @@ async function main() {
       }
       await page.waitForTimeout(150)
     }
-    if (!ready) fail('foundation not ready')
+    if (!ready) fail('runtime not ready')
   }
   if (!(await snap(page))) fail('gate hook missing')
-  else ok('foundation ready + gate hook')
+  else ok('runtime ready + gate hook')
 
   await activateCheckpoint(page)
   {
