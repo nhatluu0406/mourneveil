@@ -1,29 +1,24 @@
 # Current State
 
 - Updated: 2026-08-10
-- Milestone: **M4 Core RPG Loop — PRODUCT OWNER ACCEPTED / CLOSED**
+- Milestone: **M5 Connected Level — implementation complete; PRODUCT OWNER ACCEPTANCE PENDING**
 - Active LeanLoop task: `m5-connected-level`
-- Status: M4 is closed; M5.1-M5.3 passed. M5.4-M5.6 remain; M5.4 is next and has not started.
+- Status: M5.1–M5.6 passed with browser gates. No M5 tag yet. Do not start M6 until PO accepts.
 
 ## What exists
 
-- Accepted M1 Graybox Movement, M2 Combat Proof, M3 Enemy Framework, and M4 Core RPG Loop
-- Canonical player health/death, checkpoint/respawn, healing flask, and Echoes recovery
-- Authored loot → inventory → weapon/charm equipment through canonical derived modifiers
-- Versioned local save (`SaveFileV1`) behind the save service/storage boundary
-- Truthful `game/runtime` session coordinator and development-only browser mutation/diagnostic surfaces
-- Deterministic CI contract: Node 22 + npm 10.9.2 + clean `npm ci` + `npm run verify`
-- Local endpoint `http://127.0.0.1:4173/`
+- Connected graybox level with zones, checkpoint, shortcut, final gate, SaveFileV2 world flags
+- Melee solid-world occlusion; encounter activation + egress leash; authored enemy route anchors
+- Compact collapsible development diagnostics; inventory display names
+- Browser gates: `gate-m531-correctness`, `gate-m54-readability`, `gate-m55-tuning`, `gate-m56-playthrough`
 
 ## Known limitations
 
-- Local collision-aware steering only; no navmesh
-- Two proven normal melee roles; no elite or boss yet
-- Connected primitive graybox level with three small encounters, one refuge checkpoint, one shortcut, and a final arena gate
-- No leveling/XP/merchants/crafting/random loot/production HUD
-- Controller implementation/manual acceptance deferred to later input hardening
+- Authored navigation anchors only (no navmesh/A*)
+- Two melee roles; no boss/elite/ranged
+- Controller deferred; production art/audio deferred
 - Vite main-chunk >500 kB advisory remains non-blocking
 
 ## Next executable work
 
-Cursor M5.4 — Level readability and environmental composition. M5.5 tuning and M5.6 full playthrough follow sequentially.
+Product Owner acceptance of M5. After accept and push, create `v0.5.0-connected-level`. Then M6 only with explicit authorization.

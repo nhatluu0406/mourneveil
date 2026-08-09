@@ -8,10 +8,10 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (94L)
+- PLAN.md (117L)
 - README.md (34L)
 - SETUP.md (44L)
-- STACK.md (74L)
+- STACK.md (75L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (44L)
@@ -168,12 +168,16 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - vertical-slice.md (41L)
     - vision.md (79L)
 - **scripts/** (0 files)
-  - **scripts/browser/** (6 files)
+  - **scripts/browser/** (10 files)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
     - gate-m46-save.mjs (124L)
     - gate-m52-world.mjs (69L)
+    - gate-m531-correctness.mjs (157L)
+    - gate-m54-readability.mjs (74L)
+    - gate-m55-tuning.mjs (116L)
+    - gate-m56-playthrough.mjs (240L)
     - gate0-m41-m43.mjs (444L)
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
@@ -192,18 +196,17 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - **src/app/** (4 files)
     - App.tsx (93L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
-    - styles.css (177L)
+    - styles.css (211L)
     - useGameRuntime.ts (209L) -- symbols: GameRuntimeIntegrationSnapshot, useGameRuntime; imports: ../game/runtime/GameRuntime, ../game/save/gameSaveService, ../input/browserAttackInput
   - **src/debug/** (4 files)
-    - DevelopmentPanel.tsx (341L) -- symbols: DevelopmentPanel; imports: ./developmentDiagnostic, ../render/followCamera
+    - DevelopmentPanel.tsx (183L) -- symbols: DevelopmentPanel; imports: ./developmentDiagnostic, ../render/followCamera
     - browserGate.ts (55L) -- symbols: installDevelopmentBrowserGate; imports: ../game/runtime/GameRuntime, ../input/playerFlaskIntent, ../input/playerRecoveryIntent
     - developmentDiagnostic.test.ts (37L) -- imports: ../game/runtime/GameRuntime, ./developmentDiagnostic
-    - developmentDiagnostic.ts (28L) -- symbols: DEVELOPMENT_MILESTONE, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
+    - developmentDiagnostic.ts (29L) -- symbols: DEVELOPMENT_MILESTONE, DEVELOPMENT_MILESTONE_STEP, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
   - **src/game/** (0 files)
     - **src/game/character/** (13 files)
       - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
       - playerCurrency.test.ts (32L) -- imports: ./playerCurrency
-      - playerCurrency.ts (58L) -- symbols: ECHOES_CURRENCY_ID, EchoesSnapshot, EchoesCurrencyRuntime
-      - playerEchoes.integration.test.ts (128L) -- imports: ../core/fixedStepClock, ../enemies/enemyRoles, ./play
+      - playerCurrency.ts (58L) -- sym
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

@@ -89,7 +89,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: focused encounter/placement tests; browser soak; lint; typecheck; `git diff --check`
   - evidence: PASS — retuned intro/mixed/pressure stand-offs; egress margin 0.55; `gate-m55-tuning.mjs` PASS; M5.3.1 correctness gate still PASS
 
-- [ ] 6. M5.6 — Full M5 playthrough and verification
+- [x] 6. M5.6 — Full M5 playthrough and verification
   - depends: 5 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -98,6 +98,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - outcome: M5 READY FOR PRODUCT OWNER ACCEPTANCE (no tag/push in this task)
   - non-goals: M6, Git tag `v0.5.0-connected-level`
   - verifier: `npm run lint`; `npm run typecheck`; `npm run test`; `npm run build`; `npm run verify`; `git diff --check`; LeanLoop doctor/sync; full browser playthrough gate
+  - evidence: PASS — `gate-m56-playthrough.mjs` VERDICT PASS; lint/typecheck/203 tests/build green; doctor/sync green; M5.3.1/M5.4/M5.5/M5.2 browser gates green; Product Owner acceptance pending; no tag/push
 
 ## Parallel groups
 

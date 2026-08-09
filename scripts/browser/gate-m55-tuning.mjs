@@ -88,12 +88,20 @@ moved
   : fail(`mixed nav soak stuck ${JSON.stringify(samples.slice(-3))}`)
 
 // Shortcut recovery path: open from mixed side, die, respawn, confirm shortcut open.
-await gate(page, 'setPlayerPosition', { x: -2, y: 0.82, z: -1.2 })
+await gate(page, 'setPlayerPosition', { x: 0, y: 0.82, z: -3 })
+await soak(page, 300)
+await gate(page, 'setPlayerPosition', { x: -1.9, y: 0.82, z: -1.0 })
+await soak(page, 300)
+state = await snapshot(page)
+state.world.currentZoneId === 'zone.mixed-combat'
+  ? pass('standing on mixed side before shortcut')
+  : fail(`expected mixed zone, got ${state.world.currentZoneId}`)
 await gate(page, 'interactWorld')
+await soak(page, 100)
 state = await snapshot(page)
 state.world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed')
   ? pass('shortcut opened from authored far side')
-  : fail('shortcut open failed')
+  : fail(`shortcut open failed zone=${state.world.currentZoneId}`)
 
 await gate(page, 'setPlayerPosition', { x: -5.5, y: 0.82, z: 0 })
 await gate(page, 'interactWorld')
