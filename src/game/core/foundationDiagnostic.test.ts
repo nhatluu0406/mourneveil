@@ -25,7 +25,7 @@ describe('createFoundationDiagnostic', () => {
 
     expect(createFoundationDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M4.3',
+      milestone: 'M4.4',
       rendererReady: true,
       physicsReady: false,
       foundationReady: false,

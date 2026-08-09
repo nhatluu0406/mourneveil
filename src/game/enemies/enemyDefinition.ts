@@ -29,6 +29,8 @@ export interface EnemyDefinition {
   readonly stoppingRange: number
   readonly attackRange: number
   readonly attackActionIds: readonly CombatActionId[]
+  /** Provisional Echo reward granted once when this enemy is defeated. */
+  readonly echoReward: number
 }
 
 export function defineEnemy(definition: EnemyDefinition): EnemyDefinition {
@@ -52,6 +54,7 @@ export function defineEnemy(definition: EnemyDefinition): EnemyDefinition {
   if (definition.tags.length === 0 || definition.attackActionIds.length === 0) {
     throw new TypeError('Enemy requires at least one tag and attack action id')
   }
+  assertNonNegativeInteger(definition.echoReward, 'Enemy echo reward')
   definition.tags.forEach((tag) => assertNonEmpty(tag, 'Enemy tag'))
   definition.attackActionIds.forEach((id) => assertNonEmpty(id, 'Attack action id'))
 
@@ -65,6 +68,12 @@ export function defineEnemy(definition: EnemyDefinition): EnemyDefinition {
       offset: Object.freeze({ ...definition.hurtbox.offset }),
     }),
   })
+}
+
+function assertNonNegativeInteger(value: number, label: string): void {
+  if (!Number.isInteger(value) || value < 0) {
+    throw new RangeError(`${label} must be a non-negative integer`)
+  }
 }
 
 function assertNonEmpty(value: string, label: string): void {

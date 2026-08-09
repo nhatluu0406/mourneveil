@@ -222,6 +222,18 @@ export function FoundationPanel({
           </dd>
         </div>
         <div>
+          <dt>Echoes</dt>
+          <dd>{diagnostic.runtime.echoes.carried} carried</dd>
+        </div>
+        <div>
+          <dt>Echo recovery</dt>
+          <dd>
+            {diagnostic.runtime.echoRecovery.active
+              ? `${diagnostic.runtime.echoRecovery.amount} at (${diagnostic.runtime.echoRecovery.position?.x.toFixed(1)}, ${diagnostic.runtime.echoRecovery.position?.z.toFixed(1)})`
+              : 'none'}
+          </dd>
+        </div>
+        <div>
           <dt>Enemy</dt>
           <dd>
             {diagnostic.runtime.enemy.id} · {diagnostic.runtime.enemy.state} · tgt{' '}

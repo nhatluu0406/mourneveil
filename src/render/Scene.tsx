@@ -10,6 +10,7 @@ import { EnemyPhysicsBody } from '../physics/EnemyPhysicsBody'
 import { FollowCameraRig } from './FollowCameraRig'
 import type { CameraDiagnostic } from './followCamera'
 import { CheckpointVisual } from './CheckpointVisual'
+import { EchoRecoveryVisual } from './EchoRecoveryVisual'
 
 interface SceneProps {
   onPhysicsReady: () => void
@@ -75,6 +76,7 @@ function FoundationWorld({ onPhysicsReady, runtime }: SceneProps) {
       />
       <OrientationMarker />
       <CheckpointVisual runtime={runtime} />
+      <EchoRecoveryVisual runtime={runtime} />
       <RigidBody type="fixed" colliders="cuboid">
         <mesh castShadow receiveShadow position={[0, 0.75, 0]}>
           <boxGeometry

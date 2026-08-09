@@ -9,13 +9,15 @@ import type { CombatContactSnapshot } from '../combat/combatContact'
 import type { TrainingTargetSnapshot } from '../combat/trainingTarget'
 import type { PlayerHealthSnapshot } from '../character/playerHealth'
 import type { PlayerFlaskSnapshot } from '../character/playerFlask'
+import type { EchoesSnapshot } from '../character/playerCurrency'
 import type { EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import type { EnemyAttackSpatialSnapshot } from '../enemies/meleeEnemy'
 import type { GrayboxEncounterSnapshot } from '../encounters/grayboxEncounter'
 import type { CheckpointSnapshot } from '../world/checkpoint'
+import type { EchoRecoverySnapshot } from '../world/echoRecovery'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M4.3' as const
+export const MILESTONE = 'M4.4' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
@@ -39,6 +41,8 @@ export interface FoundationRuntimeDiagnostic {
   readonly incomingContact: CombatContactSnapshot
   readonly checkpoint: CheckpointSnapshot
   readonly flask: PlayerFlaskSnapshot
+  readonly echoes: EchoesSnapshot
+  readonly echoRecovery: EchoRecoverySnapshot
 }
 
 export interface FoundationDiagnostic {

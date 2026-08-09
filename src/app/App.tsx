@@ -1,12 +1,31 @@
 import { Canvas } from '@react-three/fiber'
-import { Suspense, useCallback, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { FoundationPanel } from '../debug/FoundationPanel'
 import { createFoundationDiagnostic } from '../game/core/foundationDiagnostic'
+import {
+  PLAYER_CHECKPOINT_INTERACTION_REQUEST,
+  PLAYER_RESPAWN_REQUEST,
+} from '../input/playerRecoveryIntent'
+import { PLAYER_FLASK_USE_REQUEST } from '../input/playerFlaskIntent'
 import { Scene } from '../render/Scene'
 import type { CameraDiagnostic } from '../render/followCamera'
 import { createPointerWorldAimResolver } from '../render/pointerWorldAim'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useFoundationRuntime } from './useFoundationRuntime'
+
+declare global {
+  interface Window {
+    __MOURNEVEIL_GATE__?: {
+      snapshot: () => unknown
+      applyDamage: (damage: number) => void
+      useFlask: () => void
+      interactCheckpoint: () => void
+      respawn: () => void
+      defeatEnemy: (enemyId: string) => void
+      setPlayerPosition: (position: { x: number; y: number; z: number }) => void
+    }
+  }
+}
 
 export function App() {
   const [rendererReady, setRendererReady] = useState(false)
@@ -31,6 +50,33 @@ export function App() {
       ),
     [rendererReady, physicsReady, runtimeDiagnostic],
   )
+
+  useEffect(() => {
+    window.__MOURNEVEIL_GATE__ = {
+      snapshot: () => runtime.snapshot(),
+      applyDamage: (damage: number) => {
+        runtime.applyPlayerDamage(damage)
+      },
+      useFlask: () => {
+        runtime.requestPlayerFlaskUse(PLAYER_FLASK_USE_REQUEST)
+      },
+      interactCheckpoint: () => {
+        runtime.requestCheckpointInteraction(PLAYER_CHECKPOINT_INTERACTION_REQUEST)
+      },
+      respawn: () => {
+        runtime.requestRespawn(PLAYER_RESPAWN_REQUEST)
+      },
+      defeatEnemy: (enemyId: string) => {
+        runtime.debugDefeatEnemy(enemyId)
+      },
+      setPlayerPosition: (position: { x: number; y: number; z: number }) => {
+        runtime.debugSetPlayerPosition(position)
+      },
+    }
+    return () => {
+      delete window.__MOURNEVEIL_GATE__
+    }
+  }, [runtime])
 
   return (
     <main className="app-shell">

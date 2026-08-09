@@ -71,6 +71,10 @@ import {
   type CheckpointSnapshot,
   type PlayerRespawnResult,
 } from '../world/checkpoint'
+import {
+  EchoRecoveryRuntime,
+  type EchoRecoverySnapshot,
+} from '../world/echoRecovery'
 import { PlayerHealthRuntime, type PlayerHealthSnapshot } from './playerHealth'
 import {
   PLAYER_FLASK_DEFINITION,
@@ -78,6 +82,10 @@ import {
   PlayerFlaskRuntime,
   type PlayerFlaskSnapshot,
 } from './playerFlask'
+import {
+  EchoesCurrencyRuntime,
+  type EchoesSnapshot,
+} from './playerCurrency'
 import {
   createPlayerMotorState,
   stopPlayerMotor,
@@ -107,6 +115,8 @@ export interface PlayerRuntimeSnapshot {
   readonly incomingContact: CombatContactSnapshot
   readonly checkpoint: CheckpointSnapshot
   readonly flask: PlayerFlaskSnapshot
+  readonly echoes: EchoesSnapshot
+  readonly echoRecovery: EchoRecoverySnapshot
 }
 
 export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
@@ -130,6 +140,9 @@ export class PlayerRuntime {
   private readonly trainingTargetRuntime = new TrainingTargetRuntime()
   private readonly checkpointRuntime = new CheckpointRuntime()
   private readonly flaskRuntime = new PlayerFlaskRuntime()
+  private readonly echoesRuntime = new EchoesCurrencyRuntime()
+  private readonly echoRecoveryRuntime = new EchoRecoveryRuntime()
+  private readonly echoRewardedEnemyIds = new Set<string>()
   private playerState = createPlayerMotorState(
     GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
   )
@@ -279,6 +292,7 @@ export class PlayerRuntime {
       enemy.reset(role?.spawnPosition ?? enemy.snapshot().position)
       this.enemyContactRuntimeFor(enemy.id).reset()
     }
+    this.echoRewardedEnemyIds.clear()
   }
 
   /** Development-only restore; gameplay recovery must use checkpoint respawn. */
@@ -294,6 +308,25 @@ export class PlayerRuntime {
       this.enterPlayerDefeatedState()
     }
     return result
+  }
+
+  /** Development/gate helper: instantly defeat an encounter enemy and grant its Echo reward once. */
+  debugDefeatEnemy(enemyId: string): void {
+    const enemy = this.enemyRuntimes.find((entry) => entry.id === enemyId)
+    if (enemy === undefined) return
+    if (!enemy.snapshot().alive) {
+      this.grantEchoRewardsForDefeatedEnemies()
+      return
+    }
+    enemy.applyDamage(enemy.snapshot().health.current)
+    this.grantEchoRewardsForDefeatedEnemies()
+  }
+
+  /** Development/gate helper: place the living player at an authored graybox position. */
+  debugSetPlayerPosition(position: { readonly x: number; readonly y: number; readonly z: number }): void {
+    if (!this.playerHealthRuntime.snapshot().health.alive) return
+    this.playerState = createPlayerMotorState(position)
+    this.playerHealthRuntime.updatePosition(position)
   }
 
   requestPlayerFlaskUse(request: PlayerFlaskUseRequest): CombatActionStartResult {
@@ -400,6 +433,13 @@ export class PlayerRuntime {
         }
       }
       this.playerHealthRuntime.updatePosition(this.playerState.position)
+      if (playerAlive) {
+        const pickup = this.echoRecoveryRuntime.tryPickup(
+          this.playerState.position,
+          true,
+        )
+        if (pickup.accepted) this.echoesRuntime.add(pickup.amount)
+      }
       for (const enemyRuntime of this.enemyRuntimes) {
         advanceMeleeEnemy(
           enemyRuntime,
@@ -425,6 +465,7 @@ export class PlayerRuntime {
             query: this.contactQuery,
           }),
         )
+        this.grantEchoRewardsForDefeatedEnemies()
         if (playerAlive) {
           for (const enemyRuntime of this.enemyRuntimes) {
             const enemy = enemyRuntime.snapshot()
@@ -521,6 +562,18 @@ export class PlayerRuntime {
       },
       checkpoint: this.checkpointRuntime.snapshot(),
       flask: this.flaskRuntime.snapshot(),
+      echoes: this.echoesRuntime.snapshot(),
+      echoRecovery: this.echoRecoveryRuntime.snapshot(),
+    }
+  }
+
+  private grantEchoRewardsForDefeatedEnemies(): void {
+    for (const enemy of this.enemyRuntimes) {
+      const snapshot = enemy.snapshot()
+      if (snapshot.alive || this.echoRewardedEnemyIds.has(enemy.id)) continue
+      this.echoRewardedEnemyIds.add(enemy.id)
+      const reward = enemy.definition.echoReward
+      if (reward > 0) this.echoesRuntime.add(reward)
     }
   }
 
@@ -533,6 +586,8 @@ export class PlayerRuntime {
   }
 
   private enterPlayerDefeatedState(): void {
+    const dropped = this.echoesRuntime.dropAll()
+    this.echoRecoveryRuntime.dropAt(this.playerState.position, dropped)
     this.resetPlayerActionState()
     this.playerState = stopPlayerMotor(this.playerState)
   }
