@@ -2,8 +2,8 @@
 
 - Updated: 2026-08-10
 - Milestone: **M4 Core RPG Loop — PRODUCT OWNER ACCEPTED / CLOSED**
-- Active LeanLoop task: `m4-core-rpg-loop`
-- Status: M4.1–M4.7 complete; repository integrity passed. M5 is next and not started.
+- Active LeanLoop task: `m5-connected-level`
+- Status: M4 is closed; M5.1 connected-world authority passed. M5.2 placement integration is next; M5.3-M5.6 have not started.
 
 ## What exists
 
@@ -25,4 +25,4 @@
 
 ## Next executable work
 
-Plan M5 Connected Level as the next milestone batch. M5 implementation has not started.
+Execute PLAN step M5.2, then continue to M5.3 only when its internal gate passes.

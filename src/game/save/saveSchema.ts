@@ -2,7 +2,9 @@ import type { Vector3Value } from '../character/playerMotor'
 import type { ItemId } from '../items/itemDefinition'
 
 export const SAVE_VERSION_V1 = 1 as const
-export const SAVE_STORAGE_KEY = 'mourneveil.save.v1'
+export const SAVE_VERSION_V2 = 2 as const
+export const LEGACY_SAVE_STORAGE_KEY_V1 = 'mourneveil.save.v1'
+export const SAVE_STORAGE_KEY = 'mourneveil.save.v2'
 
 export interface SaveEchoRecoveryV1 {
   readonly active: boolean
@@ -33,8 +35,31 @@ export interface SaveFileV1 {
   readonly lootPickup: SaveLootPickupV1
 }
 
+export interface SaveWorldV2 {
+  readonly openedShortcutIds: readonly string[]
+  readonly finalGateReached: boolean
+}
+
+export interface SaveFileV2 {
+  readonly version: typeof SAVE_VERSION_V2
+  readonly activeCheckpointId: string | null
+  readonly checkpointActivated: boolean
+  readonly flaskCharges: number
+  readonly echoesCarried: number
+  readonly echoRecovery: SaveEchoRecoveryV1
+  readonly inventory: readonly { readonly itemId: ItemId; readonly quantity: number }[]
+  readonly equipment: {
+    readonly weaponItemId: ItemId | null
+    readonly charmItemId: ItemId | null
+  }
+  readonly lootPickup: SaveLootPickupV1
+  readonly world: SaveWorldV2
+}
+
+export type SaveFile = SaveFileV2
+
 export type SaveLoadResult =
-  | { readonly ok: true; readonly save: SaveFileV1 }
+  | { readonly ok: true; readonly save: SaveFileV2; readonly migratedFromVersion: 1 | null }
   | { readonly ok: false; readonly reason: 'missing' | 'malformed' | 'unsupported-version' }
 
 export function createDefaultSaveV1(): SaveFileV1 {
@@ -53,6 +78,18 @@ export function createDefaultSaveV1(): SaveFileV1 {
       itemId: null,
       position: null,
       spawnedFromEnemyId: null,
+    },
+  }
+}
+
+export function createDefaultSaveV2(): SaveFileV2 {
+  const v1 = createDefaultSaveV1()
+  return {
+    ...v1,
+    version: SAVE_VERSION_V2,
+    world: {
+      openedShortcutIds: [],
+      finalGateReached: false,
     },
   }
 }

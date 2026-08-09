@@ -107,9 +107,13 @@ import {
   type LootPickupSnapshot,
 } from '../items/lootPickup'
 import {
-  createDefaultSaveV1,
-  type SaveFileV1,
+  createDefaultSaveV2,
+  type SaveFileV2,
 } from '../save/saveSchema'
+import {
+  ConnectedWorldRuntime,
+  type ConnectedWorldSnapshot,
+} from '../world/connectedWorldRuntime'
 import {
   createPlayerMotorState,
   stopPlayerMotor,
@@ -147,6 +151,7 @@ export interface GameRuntimeSnapshot {
   readonly inventory: InventorySnapshot
   readonly equipment: EquipmentSnapshot
   readonly lootPickup: LootPickupSnapshot
+  readonly world: ConnectedWorldSnapshot
   readonly resolvedAttackDamage: {
     readonly light: number
     readonly heavy: number
@@ -179,6 +184,7 @@ export class GameRuntime {
   private readonly inventoryRuntime = new PlayerInventoryRuntime()
   private readonly equipmentRuntime = new PlayerEquipmentRuntime()
   private readonly lootPickupRuntime = new LootPickupRuntime()
+  private readonly worldRuntime = new ConnectedWorldRuntime()
   private readonly echoRewardedEnemyIds = new Set<string>()
   private lootInstanceCounter = 0
   private playerState = createPlayerMotorState(
@@ -199,7 +205,7 @@ export class GameRuntime {
     this.persistHandler = handler
   }
 
-  captureSave(): SaveFileV1 {
+  captureSave(): SaveFileV2 {
     const checkpoint = this.checkpointRuntime.snapshot()
     const flask = this.flaskRuntime.snapshot()
     const echoes = this.echoesRuntime.snapshot()
@@ -207,7 +213,7 @@ export class GameRuntime {
     const equipment = this.equipmentRuntime.snapshot()
     const loot = this.lootPickupRuntime.snapshot()
     return {
-      version: 1,
+      version: 2,
       activeCheckpointId: checkpoint.currentCheckpointId,
       checkpointActivated: checkpoint.activated,
       flaskCharges: flask.currentCharges,
@@ -229,13 +235,17 @@ export class GameRuntime {
         position: loot.position,
         spawnedFromEnemyId: loot.spawnedFromEnemyId,
       },
+      world: {
+        openedShortcutIds: this.worldRuntime.snapshot().openedShortcutIds,
+        finalGateReached: this.worldRuntime.snapshot().finalGateReached,
+      },
     }
   }
 
   /**
    * Restores persistent facts only. Encounter enemies reset; transient combat/input cleared.
    */
-  applySave(save: SaveFileV1 = createDefaultSaveV1()): void {
+  applySave(save: SaveFileV2 = createDefaultSaveV2()): void {
     this.resetPlayerActionState()
     this.playerState = createPlayerMotorState(
       GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
@@ -247,6 +257,7 @@ export class GameRuntime {
         ? GRAYBOX_CHECKPOINT_DEFINITION.id
         : null,
     )
+    this.worldRuntime.restore(save.world)
     this.flaskRuntime.setCharges(save.flaskCharges)
     this.echoesRuntime.setCarried(save.echoesCarried)
     this.echoRecoveryRuntime.restore(save.echoRecovery)
@@ -465,6 +476,7 @@ export class GameRuntime {
     if (!this.playerHealthRuntime.snapshot().health.alive) return
     this.playerState = createPlayerMotorState(position)
     this.playerHealthRuntime.updatePosition(position)
+    this.worldRuntime.updatePlayerPosition(position)
   }
 
   equipItem(itemId: ItemId): EquipResult {
@@ -602,6 +614,7 @@ export class GameRuntime {
         }
       }
       this.playerHealthRuntime.updatePosition(this.playerState.position)
+      this.worldRuntime.updatePlayerPosition(this.playerState.position)
       if (playerAlive) {
         const pickup = this.echoRecoveryRuntime.tryPickup(
           this.playerState.position,
@@ -691,6 +704,7 @@ export class GameRuntime {
       this.attackExecutionFacing = null
     }
     this.playerHealthRuntime.updatePosition(this.playerState.position)
+    this.worldRuntime.updatePlayerPosition(this.playerState.position)
     const enemies = this.enemyRuntimes.map((enemy) => enemy.snapshot())
     const enemyAttacks = enemies.map((enemy) => createEnemyAttackSpatialSnapshot(enemy))
     const enemy = enemies[0]
@@ -746,6 +760,7 @@ export class GameRuntime {
       inventory: this.inventoryRuntime.snapshot(),
       equipment: this.equipmentRuntime.snapshot(),
       lootPickup: this.lootPickupRuntime.snapshot(),
+      world: this.worldRuntime.snapshot(),
       resolvedAttackDamage: this.resolvedAttackDamage(),
     }
   }

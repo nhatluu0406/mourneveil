@@ -1,7 +1,10 @@
 import {
   SAVE_VERSION_V1,
+  SAVE_VERSION_V2,
   createDefaultSaveV1,
+  createDefaultSaveV2,
   type SaveFileV1,
+  type SaveFileV2,
   type SaveLoadResult,
 } from './saveSchema'
 
@@ -19,18 +22,53 @@ export function migrateAndValidateSave(raw: unknown): SaveLoadResult {
   if (!('version' in record)) {
     return { ok: false, reason: 'malformed' }
   }
-  if (record.version !== SAVE_VERSION_V1) {
+  if (record.version !== SAVE_VERSION_V1 && record.version !== SAVE_VERSION_V2) {
     return { ok: false, reason: 'unsupported-version' }
   }
   try {
-    const save = validateSaveV1(record)
-    return { ok: true, save }
+    if (record.version === SAVE_VERSION_V1) {
+      return {
+        ok: true,
+        save: migrateV1ToV2(validateSaveV1(record)),
+        migratedFromVersion: SAVE_VERSION_V1,
+      }
+    }
+    return {
+      ok: true,
+      save: validateSaveV2(record),
+      migratedFromVersion: null,
+    }
   } catch {
     return { ok: false, reason: 'malformed' }
   }
 }
 
+export function migrateV1ToV2(save: SaveFileV1): SaveFileV2 {
+  return {
+    ...save,
+    version: SAVE_VERSION_V2,
+    world: {
+      openedShortcutIds: [],
+      finalGateReached: false,
+    },
+  }
+}
+
+function validateSaveV2(record: Record<string, unknown>): SaveFileV2 {
+  const defaults = createDefaultSaveV2()
+  const common = validateCommonSave(record)
+  return {
+    version: SAVE_VERSION_V2,
+    ...common,
+    world: asWorld(record.world, defaults.world),
+  }
+}
+
 function validateSaveV1(record: Record<string, unknown>): SaveFileV1 {
+  return { version: SAVE_VERSION_V1, ...validateCommonSave(record) }
+}
+
+function validateCommonSave(record: Record<string, unknown>): Omit<SaveFileV1, 'version'> {
   const defaults = createDefaultSaveV1()
   const checkpointActivated = Boolean(record.checkpointActivated)
   const activeCheckpointId =
@@ -44,7 +82,6 @@ function validateSaveV1(record: Record<string, unknown>): SaveFileV1 {
   const equipment = asEquipment(record.equipment)
   const lootPickup = asLoot(record.lootPickup)
   return {
-    version: SAVE_VERSION_V1,
     activeCheckpointId,
     checkpointActivated,
     flaskCharges,
@@ -53,6 +90,18 @@ function validateSaveV1(record: Record<string, unknown>): SaveFileV1 {
     inventory,
     equipment,
     lootPickup,
+  }
+}
+
+function asWorld(value: unknown, fallback: SaveFileV2['world']): SaveFileV2['world'] {
+  if (value === null || typeof value !== 'object') return fallback
+  const record = value as Record<string, unknown>
+  const openedShortcutIds = Array.isArray(record.openedShortcutIds)
+    ? [...new Set(record.openedShortcutIds.filter((id): id is string => typeof id === 'string'))]
+    : []
+  return {
+    openedShortcutIds,
+    finalGateReached: Boolean(record.finalGateReached),
   }
 }
 
