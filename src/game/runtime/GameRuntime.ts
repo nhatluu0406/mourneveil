@@ -223,6 +223,7 @@ export class GameRuntime {
   private occlusionQuery: CombatOcclusionQuery | null = null
   /** Frozen aim for the committed attack execution; null while combat is idle. */
   private attackExecutionFacing: PlayerFacingDirection | null = null
+  private movementOverride: PlayerMovementIntent | null = null
   private persistHandler: (() => void) | null = null
 
   setPersistHandler(handler: (() => void) | null): void {
@@ -526,6 +527,11 @@ export class GameRuntime {
     this.worldRuntime.updatePlayerPosition(position)
   }
 
+  /** Development/gate: sticky movement consumed by advanceFrame until cleared. */
+  debugSetMovementOverride(intent: PlayerMovementIntent | null): void {
+    this.movementOverride = intent === null ? null : { ...intent }
+  }
+
   equipItem(itemId: ItemId): EquipResult {
     const result = this.equipmentRuntime.equip(itemId, this.inventoryRuntime)
     if (result.accepted) {
@@ -644,6 +650,7 @@ export class GameRuntime {
     frameDeltaSeconds: number,
     movementIntent: PlayerMovementIntent,
   ): GameRuntimeAdvance {
+    const resolvedMovement = this.movementOverride ?? movementIntent
     const hitEvents: CombatHitEvent[] = []
     const incomingHitEvents: CombatHitEvent[] = []
     const frame = this.clock.advance(frameDeltaSeconds, (fixedStepSeconds, nextStepCount) => {
@@ -673,8 +680,8 @@ export class GameRuntime {
         } else {
           const constrainedMovementIntent = constrainMovementIntentForAttack(
             {
-              horizontal: movementIntent.horizontal * defense.movementScale,
-              forward: movementIntent.forward * defense.movementScale,
+              horizontal: resolvedMovement.horizontal * defense.movementScale,
+              forward: resolvedMovement.forward * defense.movementScale,
             },
             combat.phase,
           )

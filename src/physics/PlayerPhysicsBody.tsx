@@ -1,3 +1,4 @@
+import { useFrame } from '@react-three/fiber'
 import {
   BallCollider,
   CapsuleCollider,
@@ -70,6 +71,13 @@ export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
       world.removeCharacterController(controller)
     }
   }, [runtime, world])
+
+  useFrame(() => {
+    const rigidBody = rigidBodyRef.current
+    if (rigidBody === null) return
+    const position = runtime.snapshot().player.position
+    rigidBody.setTranslation(position, false)
+  })
 
   return (
     <RigidBody

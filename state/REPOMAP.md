@@ -8,7 +8,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (117L)
+- PLAN.md (118L)
 - README.md (34L)
 - SETUP.md (44L)
 - STACK.md (75L)
@@ -161,14 +161,14 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (29L)
+    - current-state.md (26L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
     - vertical-slice.md (41L)
     - vision.md (79L)
 - **scripts/** (0 files)
-  - **scripts/browser/** (10 files)
+  - **scripts/browser/** (11 files)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
@@ -176,8 +176,9 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m52-world.mjs (69L)
     - gate-m531-correctness.mjs (157L)
     - gate-m54-readability.mjs (74L)
-    - gate-m55-tuning.mjs (116L)
+    - gate-m55-tuning.mjs (124L)
     - gate-m56-playthrough.mjs (240L)
+    - gate-m561-correctness.mjs (276L)
     - gate0-m41-m43.mjs (444L)
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
@@ -200,13 +201,12 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - useGameRuntime.ts (209L) -- symbols: GameRuntimeIntegrationSnapshot, useGameRuntime; imports: ../game/runtime/GameRuntime, ../game/save/gameSaveService, ../input/browserAttackInput
   - **src/debug/** (4 files)
     - DevelopmentPanel.tsx (183L) -- symbols: DevelopmentPanel; imports: ./developmentDiagnostic, ../render/followCamera
-    - browserGate.ts (55L) -- symbols: installDevelopmentBrowserGate; imports: ../game/runtime/GameRuntime, ../input/playerFlaskIntent, ../input/playerRecoveryIntent
+    - browserGate.ts (84L) -- symbols: installDevelopmentBrowserGate; imports: ../game/runtime/GameRuntime, ../input/playerFlaskIntent, ../input/playerMovementIntent
     - developmentDiagnostic.test.ts (37L) -- imports: ../game/runtime/GameRuntime, ./developmentDiagnostic
     - developmentDiagnostic.ts (29L) -- symbols: DEVELOPMENT_MILESTONE, DEVELOPMENT_MILESTONE_STEP, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
   - **src/game/** (0 files)
     - **src/game/character/** (13 files)
       - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
       - playerCurrency.test.ts (32L) -- imports: ./playerCurrency
-      - playerCurrency.ts (58L) -- sym
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

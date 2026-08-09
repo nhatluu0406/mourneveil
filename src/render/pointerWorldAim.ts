@@ -3,7 +3,11 @@ import type { Vector3Value } from '../game/character/playerMotor'
 import { worldAimPointToDirection, type PlayerAimDirection } from '../input/playerAimIntent'
 import type { AimDirectionResolver } from '../input/browserAttackInput'
 
-const GAMEPLAY_PLANE = new Plane(new Vector3(0, 1, 0), 0)
+const GAMEPLAY_PLANE_NORMAL = new Vector3(0, 1, 0)
+const raycasterScratch = new Raycaster()
+const pointerScratch = new Vector2()
+const intersectionScratch = new Vector3()
+const planeScratch = new Plane()
 
 export interface ClientRectLike {
   readonly left: number
@@ -15,6 +19,12 @@ export interface ClientRectLike {
 export interface NormalizedDeviceCoordinates {
   readonly x: number
   readonly y: number
+}
+
+export interface PointerAimProjection {
+  readonly ndc: NormalizedDeviceCoordinates
+  readonly worldPoint: Vector3Value
+  readonly aimDirection: PlayerAimDirection
 }
 
 /** Canvas-local client coordinates → NDC. Uses the canvas bounds, not the window. */
@@ -30,21 +40,56 @@ export function pointerClientToNdc(
   }
 }
 
+/**
+ * Project pointer NDC onto the horizontal gameplay plane at the player's
+ * authoritative height so aim matches the visible character footing.
+ */
 export function projectNdcToWorldAimDirection(
   ndc: NormalizedDeviceCoordinates,
   camera: Camera,
   playerPosition: Vector3Value,
-  raycaster: Raycaster = new Raycaster(),
-  pointer: Vector2 = new Vector2(),
-  intersection: Vector3 = new Vector3(),
+  raycaster: Raycaster = raycasterScratch,
+  pointer: Vector2 = pointerScratch,
+  intersection: Vector3 = intersectionScratch,
 ): PlayerAimDirection | null {
+  const projection = projectNdcToGameplayAim(
+    ndc,
+    camera,
+    playerPosition,
+    raycaster,
+    pointer,
+    intersection,
+  )
+  return projection?.aimDirection ?? null
+}
+
+export function projectNdcToGameplayAim(
+  ndc: NormalizedDeviceCoordinates,
+  camera: Camera,
+  playerPosition: Vector3Value,
+  raycaster: Raycaster = raycasterScratch,
+  pointer: Vector2 = pointerScratch,
+  intersection: Vector3 = intersectionScratch,
+): PointerAimProjection | null {
   pointer.set(ndc.x, ndc.y)
+  if ('updateProjectionMatrix' in camera && typeof camera.updateProjectionMatrix === 'function') {
+    camera.updateProjectionMatrix()
+  }
   camera.updateMatrixWorld(true)
   raycaster.setFromCamera(pointer, camera)
-  if (raycaster.ray.intersectPlane(GAMEPLAY_PLANE, intersection) === null) {
+  // Plane: y = playerPosition.y  →  normal·p + constant = 0 with constant = -y
+  planeScratch.set(GAMEPLAY_PLANE_NORMAL, -playerPosition.y)
+  if (raycaster.ray.intersectPlane(planeScratch, intersection) === null) {
     return null
   }
-  return worldAimPointToDirection(playerPosition, intersection)
+  const worldPoint = {
+    x: intersection.x,
+    y: intersection.y,
+    z: intersection.z,
+  }
+  const aimDirection = worldAimPointToDirection(playerPosition, worldPoint)
+  if (aimDirection === null) return null
+  return { ndc, worldPoint, aimDirection }
 }
 
 export function createPointerWorldAimResolver(

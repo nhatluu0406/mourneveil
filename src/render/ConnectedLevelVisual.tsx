@@ -1,7 +1,10 @@
 import { RigidBody } from '@react-three/rapier'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { MOURNEVEIL_CONNECTED_LEVEL } from '../game/world/connectedLevel'
-import { activeConnectedLevelColliders } from '../physics/connectedLevelCollision'
+import {
+  CONNECTED_LEVEL_LANDMARKS,
+  activeConnectedLevelColliders,
+} from '../physics/connectedLevelCollision'
 
 const COLORS = {
   floor: '#1a221e',
@@ -11,15 +14,6 @@ const COLORS = {
   'final-gate': '#8a4d63',
 } as const
 
-const LANDMARKS = [
-  { id: 'landmark.arrival-post', position: [-14.2, 0.95, 7.4] as const, size: [0.35, 1.9, 0.35] as const, color: '#6f8578' },
-  { id: 'landmark.watch-column', position: [-10.4, 1.1, 1.2] as const, size: [0.45, 2.2, 0.45] as const, color: '#748a7a' },
-  { id: 'landmark.court-obelisk', position: [1.1, 1.15, -6.4] as const, size: [0.4, 2.3, 0.4] as const, color: '#8a6b52' },
-  { id: 'landmark.approach-cairn', position: [8.4, 0.85, -2.4] as const, size: [0.7, 1.5, 0.7] as const, color: '#6e5858' },
-  { id: 'landmark.arena-frame-left', position: [11.2, 1.35, -5.4] as const, size: [0.35, 2.7, 0.35] as const, color: '#6a4f5d' },
-  { id: 'landmark.arena-frame-right', position: [11.2, 1.35, -2.6] as const, size: [0.35, 2.7, 0.35] as const, color: '#6a4f5d' },
-] as const
-
 export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntime }) {
   const world = runtime.snapshot().world
   const shortcutOpen = world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed')
@@ -28,11 +22,16 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
     shortcutOpen,
     finalGateOpen,
   })
+  const landmarkIds = new Set(CONNECTED_LEVEL_LANDMARKS.map((entry) => entry.id))
+
   return (
     <>
       {colliders.map((collider) => {
         const isGate =
           collider.kind === 'shortcut-gate' || collider.kind === 'final-gate'
+        const color =
+          collider.color ??
+          (landmarkIds.has(collider.id) ? COLORS.blocker : COLORS[collider.kind])
         return (
           <RigidBody
             key={collider.id}
@@ -43,7 +42,7 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
             <mesh castShadow={collider.kind !== 'floor'} receiveShadow>
               <boxGeometry args={collider.size} />
               <meshStandardMaterial
-                color={COLORS[collider.kind]}
+                color={color}
                 roughness={isGate ? 0.55 : 0.9}
                 metalness={isGate ? 0.18 : 0.02}
                 emissive={
@@ -78,14 +77,7 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
         )
       })}
 
-      {LANDMARKS.map((landmark) => (
-        <mesh key={landmark.id} castShadow position={[...landmark.position]}>
-          <boxGeometry args={[...landmark.size]} />
-          <meshStandardMaterial color={landmark.color} roughness={0.82} />
-        </mesh>
-      ))}
-
-      {/* Decorative crown pieces on major dividers — presentation only. */}
+      {/* Decorative crown pieces sit above authored divider colliders — not solids. */}
       <mesh position={[-3, 1.65, 1]} castShadow>
         <boxGeometry args={[0.35, 0.4, 4]} />
         <meshStandardMaterial color="#4f5a54" roughness={0.88} />

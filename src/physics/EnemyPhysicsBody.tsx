@@ -68,11 +68,17 @@ export function EnemyPhysicsBody({
 
   useFrame(() => {
     const body = bodyRef.current
+    const bodyCollider = bodyColliderRef.current
+    const hurtboxCollider = hurtboxColliderRef.current
     if (body === null) return
     const live =
       runtime.snapshot().enemies.find((entry) => entry.id === enemyId) ?? null
     if (live === null) return
     body.setTranslation(live.position, false)
+    // Defeated enemies must not remain solid world blockers or hurtbox targets.
+    const enabled = live.alive
+    bodyCollider?.setEnabled(enabled)
+    hurtboxCollider?.setEnabled(enabled)
   })
 
   if (role === null) return null

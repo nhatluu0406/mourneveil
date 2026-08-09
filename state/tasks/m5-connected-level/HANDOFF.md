@@ -5,48 +5,53 @@ Task: m5-connected-level
 
 ## Status
 
-M5.1–M5.6 PASS in-repo. **Product Owner acceptance pending.** Do not tag or start M6 until PO accepts.
+**M5.6.1 PASS.** M5 READY FOR PRODUCT OWNER ACCEPTANCE. Do not tag, push, or start M6 until PO accepts the corrected build.
 
-## M5.3.1
+## M5.6.1 — Connected-level correctness repair
 
-- Through-wall root cause: melee pipeline accepted Rapier hurtbox overlap alone; thin connected-level walls allowed contact spheres to overlap through solids.
-- Fix: `createRapierCombatOcclusionQuery` + contact resolve requires overlap AND solid fixed-world ray clear (`ONLY_FIXED | EXCLUDE_SENSORS`).
-- Far-damage exact root cause: all encounters simulated from session start; browser evidence showed `enemy.skirmisher.introduction` left Outer Watch, closed to ~1.05m at the refuge, and applied repeated 10 dmg hits (health 100→0). Not phantom range damage.
-- Fix: zone activation + egress leash (`EncounterActivationRuntime`); inactive enemies neither perceive nor attack.
-- Navigation root cause: local 45° probes deadlocked against long dividers/blockers.
-- Fix: immutable authored route anchors from zone connections + local detours; mutable per-enemy route state in `GameRuntime`.
-- Browser: `scripts/browser/gate-m531-correctness.mjs` PASS.
+### Collision A (watch-column) + B (approach-cairn)
 
-## M5.4
+- Root cause: M5.4 landmarks were **visual-only** meshes with no matching Rapier colliders (`CONNECTED_LEVEL_LANDMARKS` missing from collider set).
+- Secondary: defeated enemy capsules stayed **solid**, trapping the player against corpses near the watch-column spawn.
+- Fix: landmarks authored once in `connectedLevelCollision.ts` and shared by visuals + physics; defeated enemies disable body/hurtbox colliders; player RigidBody syncs authoritative transform each frame.
+- Authoring: `horizontalFootprintOverlapsSolid` + `connectedLevelAuthoring.test.ts`; moved open `connection.arrival-first-combat` to `(-11, 5)` out of `wall.arrival-choke`.
+- Regression: Rapier landmark integration tests; browser `gate-m561-correctness.mjs` A/B PASS (stop at solid faces).
 
-- Graybox landmarks, taller checkpoint beacon, open/closed gate markers, removed physics-grid look.
-- Collapsible compact development panel; inventory uses `displayName`; no horizontal overflow.
-- Training target removed from normal M5 contact targets (fixture reset retained in expanded debug panel).
-- Milestone source: `developmentDiagnostic.ts` (`DEVELOPMENT_MILESTONE` + `DEVELOPMENT_MILESTONE_STEP`).
-- Browser: `gate-m54-readability.mjs` PASS.
+### Mouse aim (C)
 
-## M5.5
+- Root cause (first incorrect stage): **presentation yaw**. `PlayerVisual` used `atan2(facing.x, -facing.z)` instead of `localNegativeZFacingYaw` (`atan2(-facing.x, -facing.z)`), so local −Z / contact marker pointed opposite for ±X aim. Authoritative execution facing was already correct.
+- Secondary: aim plane now at player Y; projection refresh before raycast.
+- Browser: cardinals + diagonals + pointer re-aim + Details/resize PASS.
 
-- Retuned intro/mixed/pressure stand-offs; egress margin 0.55.
-- Browser soak: `gate-m55-tuning.mjs` PASS; M5.3.1 still PASS.
+### Automatic HP drain (D)
 
-## M5.6
+- Exact source: `enemy.skirmisher.introduction` melee after zone activation at watch-column (~1.05 m), while player was clipped inside the **non-colliding** landmark (looked safe; LOS was clear through empty air).
+- Occlusion + landmark colliders block through-prop hits; soak at column footprint keeps HP stable when LOS is blocked.
+- Not fixed with invulnerability/clamps.
 
-- Fresh-run playthrough: arrival → fights → checkpoint → loot/equip → shortcut → death/respawn → echo recover → pressure → final gate/arena → reload → 3 death cycles → combat/UI regression.
-- Browser: `gate-m56-playthrough.mjs` PASS.
+### Encounter / navigation
 
-## Remaining navigation limitations
+- Activation + egress leash unchanged and still green (`gate-m531`).
+- Authored routes validated outside solids; open arrival connection offset; gated/shortcut anchors validated when open.
 
-- Authored anchors/detours only — not a navmesh; concave/unauthored pockets can still require additional nodes.
-- Enemies do not pursue across zone egress (by policy).
+### Browser evidence
 
-## Commits
+- `gate-m561-correctness.mjs` PASS
+- `gate-m531-correctness.mjs` PASS
+- `gate-m54-readability.mjs` PASS
+- `gate-m55-tuning.mjs` PASS (re-run alone after one flaky sequential fail)
+- `gate-m56-playthrough.mjs` PASS
 
-- `d91c79e` fix(world): enforce combat occlusion and enemy navigation
-- `60a0bb3` feat(world): improve connected level readability
-- `76e84e4` feat(encounter): tune connected level encounters
-- (pending) test(world): complete M5 connected level verification
+## Remaining limitations
+
+- Authored anchors/detours only — not navmesh/A*
+- Controller deferred; no M6 presentation
+- Vite main-chunk >500 kB advisory remains non-blocking
+
+## Commits (this step)
+
+- pending: `fix(world): restore connected level gameplay correctness`
 
 ## Next action
 
-Product Owner runtime acceptance. After accept + push, PO creates tag `v0.5.0-connected-level`. Do not start M6 in this task.
+Product Owner acceptance of corrected M5. After accept + push, PO creates tag `v0.5.0-connected-level`. Do not start M6.

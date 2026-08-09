@@ -1,5 +1,6 @@
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { PLAYER_FLASK_USE_REQUEST } from '../input/playerFlaskIntent'
+import type { PlayerMovementIntent } from '../input/playerMovementIntent'
 import {
   PLAYER_CHECKPOINT_INTERACTION_REQUEST,
   PLAYER_RESPAWN_REQUEST,
@@ -17,6 +18,16 @@ declare global {
       respawn: () => void
       defeatEnemy: (enemyId: string) => void
       setPlayerPosition: (position: { x: number; y: number; z: number }) => void
+      restorePlayer: () => void
+      requestAttack: (
+        aimDirection: { x: number; z: number },
+        attack?: 'light' | 'heavy',
+      ) => unknown
+      advance: (
+        steps?: number,
+        movement?: { horizontal: number; forward: number },
+      ) => unknown
+      setMovementOverride: (movement: PlayerMovementIntent | null) => void
       equipItem: (itemId: string) => unknown
       unequipSlot: (slot: 'weapon' | 'charm') => unknown
     }
@@ -44,6 +55,24 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     },
     setPlayerPosition: (position) => {
       runtime.debugSetPlayerPosition(position)
+    },
+    restorePlayer: () => {
+      runtime.restorePlayerForDevelopment()
+    },
+    requestAttack: (aimDirection: { x: number; z: number }, attack: 'light' | 'heavy' = 'light') =>
+      runtime.requestPlayerAttack({
+        type: 'player-attack',
+        attack,
+        aimDirection,
+      }),
+    advance: (steps = 1, movement = { horizontal: 0, forward: 0 }) => {
+      for (let step = 0; step < steps; step += 1) {
+        runtime.advanceFrame(1 / 60, movement)
+      }
+      return runtime.snapshot()
+    },
+    setMovementOverride: (movement) => {
+      runtime.debugSetMovementOverride(movement)
     },
     equipItem: (itemId) => runtime.equipItem(itemId),
     unequipSlot: (slot) => runtime.unequipSlot(slot),

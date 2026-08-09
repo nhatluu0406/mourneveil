@@ -14,6 +14,7 @@ import {
   computePlayerAttackPresentationPose,
   resolveAttackPresentationFacing,
 } from './playerAttackPresentation'
+import { localNegativeZFacingYaw } from './enemyAttackPresentation'
 
 export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const facingGroupRef = useRef<Group>(null)
@@ -44,7 +45,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     guardMarker.visible = snapshot.defense.guarding
 
     const facing = resolveAttackPresentationFacing(snapshot.attack, snapshot.player)
-    facingGroup.rotation.y = Math.atan2(facing.x, -facing.z)
+    facingGroup.rotation.y = localNegativeZFacingYaw(facing)
     const pose = computePlayerAttackPresentationPose(snapshot.combat)
     weapon.visible = pose.weaponVisible
     weapon.position.set(0, 0.48, pose.weaponForwardOffset)

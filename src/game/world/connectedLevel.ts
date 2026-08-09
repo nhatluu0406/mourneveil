@@ -96,7 +96,7 @@ export const MOURNEVEIL_CONNECTED_LEVEL: ConnectedLevelDefinition = Object.freez
     ], '#332a35', { label: 'Sealed Arena' }),
   ]),
   connections: Object.freeze([
-    defineConnection('connection.arrival-first-combat', 'open', 'zone.arrival', 'zone.first-combat', -11, 4),
+    defineConnection('connection.arrival-first-combat', 'open', 'zone.arrival', 'zone.first-combat', -11, 5),
     defineConnection('connection.first-combat-checkpoint', 'open', 'zone.first-combat', 'zone.checkpoint', -8, 1),
     defineConnection('connection.checkpoint-mixed-long', 'open', 'zone.checkpoint', 'zone.mixed-combat', -5, -4),
     defineConnection(

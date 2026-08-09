@@ -180,6 +180,51 @@ describe('Rapier melee solid-world occlusion', () => {
     open.free()
   })
 
+  it('blocks introduction melee through the watch-column landmark solid', () => {
+    const fixture = createLevelFixture({ shortcutOpen: false, finalGateOpen: false })
+    const player = new PlayerHealthRuntime({ x: -10.4, y: 0.82, z: 1.2 })
+    fixture.registerPlayer(player)
+    const attacker = { x: -10.2, y: 0.82, z: 2.55 }
+    expect(
+      fixture.occlusion({
+        origin: attacker,
+        target: player.snapshot().hurtbox.center,
+      }),
+    ).toBe('blocked')
+
+    const enemy = createMeleeEnemyRuntime()
+    enemy.reset(attacker)
+    enemy.transition('pursue', 'player')
+    enemy.startAction(MELEE_ENEMY_ATTACK.id, { x: 0, z: -1 })
+    for (let step = 0; step < MELEE_ENEMY_ATTACK.startupSteps; step += 1) {
+      enemy.advanceAction()
+    }
+    const attack = createEnemyAttackSpatialSnapshot(enemy.snapshot())
+    const shape: ActiveCombatContactShape = {
+      ...attack.activeContactShape!,
+      center: { x: -10.4, y: 0.82, z: 1.55 },
+      radius: 1.1,
+    }
+    expect(
+      fixture.query({ contactShape: shape, hurtboxes: [player.snapshot().hurtbox] }),
+    ).toHaveLength(1)
+    const contacts = new CombatContactRuntime()
+    expect(
+      contacts.resolveContact({
+        attackerId: enemy.id,
+        combat: enemy.snapshot().action,
+        contactShape: shape,
+        simulationStep: 90,
+        targets: [player],
+        query: fixture.query,
+        damage: 12,
+        attackOrigin: attacker,
+        occlusionQuery: fixture.occlusion,
+      }),
+    ).toEqual([])
+    fixture.free()
+  })
+
   it('keeps one-hit-per-execution across multiple active steps when clear', () => {
     const fixture = createWallFixture()
     const target = createTarget('once-target', { x: 2.2, y: 0.82, z: 0 })

@@ -89,16 +89,16 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: focused encounter/placement tests; browser soak; lint; typecheck; `git diff --check`
   - evidence: PASS — retuned intro/mixed/pressure stand-offs; egress margin 0.55; `gate-m55-tuning.mjs` PASS; M5.3.1 correctness gate still PASS
 
-- [x] 6. M5.6 — Full M5 playthrough and verification
-  - depends: 5 PASS
-  - risk: MEDIUM
+- [x] 6.1. M5.6.1 — Connected-level correctness repair
+  - depends: 6 PASS + Product Owner blockers A–D
+  - risk: HIGH
   - preferred agent: Cursor
   - isolation: sequential
-  - owns/allows: full fresh-run browser playthrough evidence, death/save regressions, verification docs/state, browser regression gates
-  - outcome: M5 READY FOR PRODUCT OWNER ACCEPTANCE (no tag/push in this task)
-  - non-goals: M6, Git tag `v0.5.0-connected-level`
-  - verifier: `npm run lint`; `npm run typecheck`; `npm run test`; `npm run build`; `npm run verify`; `git diff --check`; LeanLoop doctor/sync; full browser playthrough gate
-  - evidence: PASS — `gate-m56-playthrough.mjs` VERDICT PASS; lint/typecheck/203 tests/build green; doctor/sync green; M5.3.1/M5.4/M5.5/M5.2 browser gates green; Product Owner acceptance pending; no tag/push
+  - owns/allows: landmark/solid collision authoring, player/enemy transform sync, pointer-aim projection repair, HP-drain source fix, Rapier/browser regressions
+  - outcome: no solid penetration at demonstrated props; mouse aim matches click; no unexplained HP drain; M5 regressions green
+  - non-goals: M6, navmesh, new roles, polish, tag/push
+  - verifier: focused collision/aim/HP tests; `gate-m561-correctness.mjs`; lint; typecheck; full test; build; doctor/sync
+  - evidence: PASS — landmarks share collider+visual; defeated enemies disable solid colliders; PlayerVisual uses `localNegativeZFacingYaw`; HP soak at watch-column stable under occlusion; `gate-m561` + M5.3.1/M5.4/M5.5/M5.6 gates PASS; arrival connection moved to (−11, 5)
 
 ## Parallel groups
 
