@@ -1,6 +1,6 @@
 import type { GameRuntimeIntegrationSnapshot } from '../app/useGameRuntime'
 
-export const DEVELOPMENT_MILESTONE = 'M4' as const
+export const DEVELOPMENT_MILESTONE = 'M5' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface DevelopmentDiagnostic {

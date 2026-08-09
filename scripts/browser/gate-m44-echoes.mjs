@@ -55,6 +55,7 @@ async function main() {
   await page.waitForTimeout(1500)
   if (!(await page.evaluate(() => !!window.__MOURNEVEIL_GATE__))) fail('gate missing')
 
+  await gate(page, 'setPlayerPosition', { x: -6, y: 0.82, z: 0 })
   await press(page, 'KeyF')
   await page.waitForTimeout(200)
 

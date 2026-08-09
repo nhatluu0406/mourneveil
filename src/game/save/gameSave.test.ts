@@ -20,6 +20,7 @@ describe('versioned local save', () => {
 
   it('round-trips V2 through storage and restores persistent gameplay facts', () => {
     const runtime = new GameRuntime()
+    runtime.debugSetPlayerPosition(runtime.snapshot().checkpoint.respawnPosition)
     runtime.requestCheckpointInteraction({ type: 'player-checkpoint-interaction' })
     runtime.debugDefeatEnemy('enemy.skirmisher.1')
     runtime.debugSetPlayerPosition({

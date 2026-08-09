@@ -5,7 +5,7 @@ Task: m5-connected-level
 
 ## Status
 
-M5.1 PASS. M5.2 PASS. M5.3 is next; M5.4-M5.6 have not started.
+M5.1 PASS. M5.2 PASS. M5.3 PASS. M5.4-M5.6 have not started.
 
 ## M5.1
 
@@ -24,6 +24,22 @@ M5.1 PASS. M5.2 PASS. M5.3 is next; M5.4-M5.6 have not started.
 - Gate: 26 focused tests, full 45-file/183-test M1-M4 suite, lint, typecheck, and diff check PASS.
 - Browser: unavailable. Playwright Chromium executable is not installed; in-app browser discovery returned no instances. The M5.2 route-state gate script is committed but could not launch.
 
+## M5.3
+
+- New/default sessions start at `zone.arrival`; activated saves restore at the canonical refuge checkpoint. Load resets transient encounter/contact/action state.
+- Runtime layout is a 34×19 fixed-Rapier graybox with perimeter walls, a northern arrival choke, an open first-fight/refuge space, a southern long route into the mixed court, a far-side shortcut, sparse navigation-safe blockers, final approach, and final arena gate.
+- Shortcut/final gate collider presence projects the simulation-owned world flags. No render state authors progression.
+- Existing enemy definitions populate open spaces compatible with direct pursuit and 45-degree local steering. No navmesh, teleport correction, or new enemy role was added.
+- Echo deaths use the collision-resolved player position; legacy/debug positions outside authored zone interiors clamp deterministically to the nearest safe zone interior. Loot/inventory/equipment and V2 world/recovery state reload coherently.
+- Gate: 23 focused runtime/world/save tests including real Rapier long-route, closed/open gate, and perimeter proof; full 48-file/190-test suite, lint, typecheck, build, verify, and diff check PASS.
+- Browser: mandatory only when controllable; unavailable here. Project Playwright lacks its Chromium executable and in-app browser discovery returned `[]`, so entry-to-gate visual playthrough, camera observation, reload observation, and console inspection remain manual.
+
+## Known constraints
+
+- Navigation remains direct pursuit with local steering; layout intentionally avoids mazes and tight multi-turn routing.
+- Primitive zones overlap visually at connection seams and await M5.4 readability/composition work.
+- Production bundle still emits the pre-existing >500 kB advisory.
+
 ## Locked scope
 
 - Execute M5.1 → M5.2 → M5.3 sequentially with internal gates.
@@ -32,4 +48,4 @@ M5.1 PASS. M5.2 PASS. M5.3 is next; M5.4-M5.6 have not started.
 
 ## Next action
 
-Commit M5.2, then build the collision-backed connected graybox level for M5.3.
+Commit M5.3. Next: Cursor M5.4 level readability/environmental composition, then M5.5 tuning and M5.6 full browser playthrough/verification.

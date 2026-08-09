@@ -41,6 +41,7 @@ describe('player checkpoint and respawn integration', () => {
       accepted: false,
       reason: 'actor-alive',
     })
+    runtime.debugSetPlayerPosition(runtime.snapshot().checkpoint.respawnPosition)
     expect(runtime.requestCheckpointInteraction(INTERACT)).toEqual({
       accepted: true,
       checkpointId: 'checkpoint.m5.refuge',
@@ -85,6 +86,7 @@ describe('player checkpoint and respawn integration', () => {
 
   it('supports repeated death and respawn cycles without stale action state', () => {
     const runtime = new GameRuntime()
+    runtime.debugSetPlayerPosition(runtime.snapshot().checkpoint.respawnPosition)
     runtime.requestCheckpointInteraction(INTERACT)
 
     for (let cycle = 0; cycle < 3; cycle += 1) {

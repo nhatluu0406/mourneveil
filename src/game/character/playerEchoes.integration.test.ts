@@ -67,6 +67,7 @@ describe('Echo reward, death drop, and recovery', () => {
   it('drops carried Echoes on death, recovers once, and replaces on second death', () => {
     const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
+    runtime.debugSetPlayerPosition(runtime.snapshot().checkpoint.respawnPosition)
     runtime.requestCheckpointInteraction(INTERACT)
     defeatEnemy(runtime, SKIRMISHER_ROLE.runtimeId, 2)
     expect(runtime.snapshot().echoes.carried).toBe(25)

@@ -98,7 +98,7 @@ export function DevelopmentPanel({
             LMB {diagnostic.runtime.combatInput.primaryButtonHeld ? 'held' : 'up'} · RMB{' '}
             {diagnostic.runtime.combatInput.guardHeld ? 'held' : 'up'} · Space{' '}
             {diagnostic.runtime.combatInput.dodgeKeyHeld ? 'held' : 'up'}
-            {' '}· E flask · F checkpoint · R respawn
+            {' '}· E flask · F interact · R respawn
           </dd>
         </div>
         <div>
@@ -213,6 +213,14 @@ export function DevelopmentPanel({
           </dd>
         </div>
         <div>
+          <dt>World route</dt>
+          <dd>
+            {diagnostic.runtime.world.currentZoneId ?? 'between zones'} · shortcut{' '}
+            {diagnostic.runtime.world.openedShortcutIds.length > 0 ? 'open' : 'closed'} · final gate{' '}
+            {diagnostic.runtime.world.finalGateReached ? 'open' : 'sealed'}
+          </dd>
+        </div>
+        <div>
           <dt>Healing flask</dt>
           <dd>
             {diagnostic.runtime.flask.currentCharges}/
@@ -284,9 +292,9 @@ export function DevelopmentPanel({
         <div>
           <dt>Encounter</dt>
           <dd>
-            {diagnostic.runtime.encounter.phase} · defeated{' '}
-            {diagnostic.runtime.encounter.defeatedEnemyIds.length}/
-            {diagnostic.runtime.encounter.enemyIds.length}
+            {diagnostic.runtime.encounters
+              .map((encounter) => `${encounter.id.replace('encounter.m5.', '')}:${encounter.phase}`)
+              .join(' · ')}
           </dd>
         </div>
         <div>

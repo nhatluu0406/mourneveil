@@ -52,6 +52,7 @@ async function main() {
   await page.waitForTimeout(1500)
 
   // spawn → checkpoint
+  await gate(page, 'setPlayerPosition', { x: -6, y: 0.82, z: 0 })
   await press(page, 'KeyF')
   await page.waitForTimeout(150)
   let s = await snap(page)

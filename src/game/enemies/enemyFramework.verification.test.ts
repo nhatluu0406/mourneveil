@@ -228,6 +228,7 @@ describe('M3 enemy framework verification', () => {
 
   it('keeps player-runtime multi-enemy simulation finite across a long frame horizon', () => {
     const runtime = new GameRuntime()
+    runtime.debugSetPlayerPosition({ x: -2, y: 0.82, z: -3 })
     runtime.attachCollisionResolver(FLAT_GROUND)
     for (const id of runtime.enemyIds()) {
       runtime.attachEnemyCollisionResolver(id, FLAT_GROUND)

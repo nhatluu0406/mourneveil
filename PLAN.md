@@ -45,7 +45,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: `npm run lint`; `npm run typecheck`; focused placement/respawn/shortcut/encounter/reward tests; M4 regressions; browser route gate when available; `git diff --check`; focused diff review
   - evidence: PASS — canonical refuge checkpoint, far-side F shortcut, three authored placements using existing skirmisher/brute roles, persistent final-gate reach, encounter recreation, V2 multi-source loot memory, and semantic world interaction; 26 focused tests and full 183-test M1-M4 suite plus lint/typecheck/diff check green; browser unavailable (no installed Playwright Chromium and no in-app browser instances)
 
-- [ ] 3. M5.3 — Complete graybox level runtime
+- [x] 3. M5.3 — Complete graybox level runtime
   - depends: 2 PASS
   - risk: HIGH
   - preferred agent: Codex
@@ -54,6 +54,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - outcome: entry→first fight→checkpoint→mixed fight→shortcut→final approach/gate is traversable; death/respawn/recovery/loot/save remain coherent
   - non-goals: visual polish, encounter tuning pass, production assets, M5.4+
   - verifier: focused level/world/physics/save integration tests; M1-M4 regressions; mandatory browser playthrough when controllable; `npm run lint`; `npm run typecheck`; `npm run test`; `npm run build`; `npm run verify`; `git diff --check`; LeanLoop doctor/sync
+  - evidence: PASS — new sessions spawn at arrival; collision-backed 34×19 graybox provides arrival choke, three encounter spaces, refuge, long route, shortcut, final approach, and gated arena; safe Echo fallback clamps legacy/debug positions; 23 focused integration tests and real Rapier route/gate/perimeter proof green; full 48-file/190-test suite, lint, typecheck, build, and verify green; browser playthrough unavailable because no controllable browser instance/executable exists
 
 - [ ] 4. M5.4 — Level readability and environmental composition
   - depends: 3
@@ -85,6 +86,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
 - 2026-08-10 | M4 Core RPG Loop is Product Owner accepted/closed; initialize M5 Connected Level | Explicit Product Owner authorization
 - 2026-08-10 | Save world progression through SaveFileV2 with explicit V1 migration | V1 shape is immutable; opened shortcut is a new stable fact
 - 2026-08-10 | Checkpoint rest/death respawn recreate all connected-level enemies, preserve opened shortcuts and loot-once memory, and never grant Echoes during reset | Keeps traversal progress and rewards deterministic across recovery cycles
+- 2026-08-10 | Shape the graybox around direct pursuit and local steering: open encounter rooms, sparse blockers, and no route that requires navmesh | Respects the accepted M3 navigation boundary
 
 ## Escalation
 

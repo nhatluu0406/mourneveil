@@ -90,6 +90,7 @@ describe('player flask integration', () => {
     finishCurrentAction(runtime)
     expect(runtime.snapshot().flask.currentCharges).toBe(2)
 
+    runtime.debugSetPlayerPosition(runtime.snapshot().checkpoint.respawnPosition)
     expect(
       runtime.requestCheckpointInteraction(PLAYER_CHECKPOINT_INTERACTION_REQUEST),
     ).toMatchObject({ accepted: true })

@@ -3,7 +3,7 @@
 - Updated: 2026-08-10
 - Milestone: **M4 Core RPG Loop — PRODUCT OWNER ACCEPTED / CLOSED**
 - Active LeanLoop task: `m5-connected-level`
-- Status: M4 is closed; M5.1-M5.2 passed. M5.3 connected graybox runtime is next; M5.4-M5.6 have not started.
+- Status: M4 is closed; M5.1-M5.3 passed. M5.4-M5.6 remain; M5.4 is next and has not started.
 
 ## What exists
 
@@ -18,11 +18,12 @@
 ## Known limitations
 
 - Local collision-aware steering only; no navmesh
-- Two proven normal melee roles; no elite, boss, connected level, or shortcut yet
+- Two proven normal melee roles; no elite or boss yet
+- Connected primitive graybox level with three small encounters, one refuge checkpoint, one shortcut, and a final arena gate
 - No leveling/XP/merchants/crafting/random loot/production HUD
 - Controller implementation/manual acceptance deferred to later input hardening
 - Vite main-chunk >500 kB advisory remains non-blocking
 
 ## Next executable work
 
-Execute PLAN step M5.3. Do not start M5.4 in the current Codex batch.
+Cursor M5.4 — Level readability and environmental composition. M5.5 tuning and M5.6 full playthrough follow sequentially.

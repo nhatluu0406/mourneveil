@@ -8,10 +8,10 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (132L)
+- PLAN.md (94L)
 - README.md (34L)
 - SETUP.md (44L)
-- STACK.md (71L)
+- STACK.md (74L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (44L)
@@ -161,19 +161,20 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (28L)
+    - current-state.md (29L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
     - vertical-slice.md (41L)
     - vision.md (79L)
 - **scripts/** (0 files)
-  - **scripts/browser/** (5 files)
-    - gate-m4-e2e.mjs (135L)
-    - gate-m44-echoes.mjs (130L)
+  - **scripts/browser/** (6 files)
+    - gate-m4-e2e.mjs (139L)
+    - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
-    - gate-m46-save.mjs (120L)
-    - gate0-m41-m43.mjs (443L)
+    - gate-m46-save.mjs (124L)
+    - gate-m52-world.mjs (69L)
+    - gate0-m41-m43.mjs (444L)
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -194,16 +195,15 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - styles.css (177L)
     - useGameRuntime.ts (209L) -- symbols: GameRuntimeIntegrationSnapshot, useGameRuntime; imports: ../game/runtime/GameRuntime, ../game/save/gameSaveService, ../input/browserAttackInput
   - **src/debug/** (4 files)
-    - DevelopmentPanel.tsx (333L) -- symbols: DevelopmentPanel; imports: ./developmentDiagnostic, ../render/followCamera
-    - browserGate.ts (52L) -- symbols: installDevelopmentBrowserGate; imports: ../game/runtime/GameRuntime, ../input/playerFlaskIntent, ../input/playerRecoveryIntent
+    - DevelopmentPanel.tsx (341L) -- symbols: DevelopmentPanel; imports: ./developmentDiagnostic, ../render/followCamera
+    - browserGate.ts (55L) -- symbols: installDevelopmentBrowserGate; imports: ../game/runtime/GameRuntime, ../input/playerFlaskIntent, ../input/playerRecoveryIntent
     - developmentDiagnostic.test.ts (37L) -- imports: ../game/runtime/GameRuntime, ./developmentDiagnostic
     - developmentDiagnostic.ts (28L) -- symbols: DEVELOPMENT_MILESTONE, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
   - **src/game/** (0 files)
     - **src/game/character/** (13 files)
-      - enemyIncomingCombat.integration.test.ts (112L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
+      - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
       - playerCurrency.test.ts (32L) -- imports: ./playerCurrency
       - playerCurrency.ts (58L) -- symbols: ECHOES_CURRENCY_ID, EchoesSnapshot, EchoesCurrencyRuntime
-      - playerEchoes.integration.test.ts (127L) -- imports: ../core/fixedStepClock, ../enemies/enemyRoles, ./playerMotor
-      - playerFlask.in
+      - playerEchoes.integration.test.ts (128L) -- imports: ../core/fixedStepClock, ../enemies/enemyRoles, ./play
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

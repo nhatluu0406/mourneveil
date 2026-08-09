@@ -117,6 +117,7 @@ async function gateCall(page, method, arg) {
 
 async function activateCheckpoint(page) {
   await waitForSnap(page, (s) => s.combatPhase === 'idle', 4000, 'idle before checkpoint')
+  await gateCall(page, 'setPlayerPosition', { x: -6, y: 0.82, z: 0 })
   await pressGameplayKey(page, 'KeyF')
   const state = await waitForSnap(
     page,

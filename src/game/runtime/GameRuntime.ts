@@ -119,6 +119,8 @@ import {
   type ConnectedWorldSnapshot,
   type ShortcutOpenResult,
 } from '../world/connectedWorldRuntime'
+import { MOURNEVEIL_CONNECTED_LEVEL } from '../world/connectedLevel'
+import { resolveConnectedRecoveryPosition } from '../world/connectedRecoveryPlacement'
 import {
   createPlayerMotorState,
   stopPlayerMotor,
@@ -194,7 +196,7 @@ export class GameRuntime {
   private readonly echoRewardedEnemyIds = new Set<string>()
   private lootInstanceCounter = 0
   private playerState = createPlayerMotorState(
-    CONNECTED_LEVEL_CHECKPOINT_DEFINITION.respawnPosition,
+    MOURNEVEIL_CONNECTED_LEVEL.entryPosition,
   )
   private readonly playerHealthRuntime = new PlayerHealthRuntime(
     this.playerState.position,
@@ -254,10 +256,6 @@ export class GameRuntime {
    */
   applySave(save: SaveFileV2 = createDefaultSaveV2()): void {
     this.resetPlayerActionState()
-    this.playerState = createPlayerMotorState(
-      CONNECTED_LEVEL_CHECKPOINT_DEFINITION.respawnPosition,
-    )
-    this.playerHealthRuntime.updatePosition(this.playerState.position)
     this.checkpointRuntime.restore(
       save.checkpointActivated,
       save.activeCheckpointId === CONNECTED_LEVEL_CHECKPOINT_DEFINITION.id ||
@@ -265,10 +263,20 @@ export class GameRuntime {
         ? CONNECTED_LEVEL_CHECKPOINT_DEFINITION.id
         : null,
     )
+    this.playerState = createPlayerMotorState(
+      this.checkpointRuntime.activeRespawnPosition() ?? MOURNEVEIL_CONNECTED_LEVEL.entryPosition,
+    )
+    this.playerHealthRuntime.updatePosition(this.playerState.position)
     this.worldRuntime.restore(save.world)
     this.flaskRuntime.setCharges(save.flaskCharges)
     this.echoesRuntime.setCarried(save.echoesCarried)
-    this.echoRecoveryRuntime.restore(save.echoRecovery)
+    this.echoRecoveryRuntime.restore({
+      ...save.echoRecovery,
+      position:
+        save.echoRecovery.position === null
+          ? null
+          : resolveConnectedRecoveryPosition(save.echoRecovery.position),
+    })
     const owned = save.inventory.filter((entry) => getItemDefinition(entry.itemId) !== null)
     this.inventoryRuntime.replaceAll(owned)
     const weapon =
@@ -874,7 +882,10 @@ export class GameRuntime {
 
   private enterPlayerDefeatedState(): void {
     const dropped = this.echoesRuntime.dropAll()
-    this.echoRecoveryRuntime.dropAt(this.playerState.position, dropped)
+    this.echoRecoveryRuntime.dropAt(
+      resolveConnectedRecoveryPosition(this.playerState.position),
+      dropped,
+    )
     this.resetPlayerActionState()
     this.playerState = stopPlayerMotor(this.playerState)
     this.markPersistentChange()
