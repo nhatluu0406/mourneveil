@@ -2,6 +2,10 @@ import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
 import type { PlayerAttackRequest } from '../../input/playerAttackIntent'
 import type { PlayerDodgeRequest } from '../../input/playerDefenseIntent'
 import type {
+  PlayerCheckpointInteractionRequest,
+  PlayerRespawnRequest,
+} from '../../input/playerRecoveryIntent'
+import type {
   CombatActionRequest,
   CombatResourceValidator,
 } from '../combat/combatAction'
@@ -59,6 +63,13 @@ import {
   GRAYBOX_ENEMY_ROLES,
 } from '../enemies/enemyRoles'
 import type { EnemyRuntime, EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
+import {
+  CheckpointRuntime,
+  GRAYBOX_CHECKPOINT_DEFINITION,
+  type CheckpointInteractionResult,
+  type CheckpointSnapshot,
+  type PlayerRespawnResult,
+} from '../world/checkpoint'
 import { PlayerHealthRuntime, type PlayerHealthSnapshot } from './playerHealth'
 import {
   createPlayerMotorState,
@@ -87,6 +98,7 @@ export interface PlayerRuntimeSnapshot {
   readonly enemyAttacks: readonly EnemyAttackSpatialSnapshot[]
   readonly encounter: GrayboxEncounterSnapshot
   readonly incomingContact: CombatContactSnapshot
+  readonly checkpoint: CheckpointSnapshot
 }
 
 export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
@@ -107,7 +119,10 @@ export class PlayerRuntime {
   private readonly contactRuntime = new CombatContactRuntime()
   private readonly enemyContactRuntimes = new Map<string, CombatContactRuntime>()
   private readonly trainingTargetRuntime = new TrainingTargetRuntime()
-  private playerState = createPlayerMotorState()
+  private readonly checkpointRuntime = new CheckpointRuntime()
+  private playerState = createPlayerMotorState(
+    GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
+  )
   private readonly playerHealthRuntime = new PlayerHealthRuntime(
     this.playerState.position,
   )
@@ -245,6 +260,10 @@ export class PlayerRuntime {
 
   resetMeleeFixture(): void {
     this.restorePlayerForDevelopment()
+    this.resetGrayboxEncounter()
+  }
+
+  resetGrayboxEncounter(): void {
     for (const enemy of this.enemyRuntimes) {
       const role = meleeRoleByRuntimeId(enemy.id)
       enemy.reset(role?.spawnPosition ?? enemy.snapshot().position)
@@ -268,6 +287,37 @@ export class PlayerRuntime {
       this.enterPlayerDefeatedState()
     }
     return result
+  }
+
+  requestCheckpointInteraction(
+    request: PlayerCheckpointInteractionRequest,
+  ): CheckpointInteractionResult {
+    void request
+    return this.checkpointRuntime.interact(
+      this.playerState.position,
+      this.playerHealthRuntime.snapshot().health.alive,
+    )
+  }
+
+  requestRespawn(request: PlayerRespawnRequest): PlayerRespawnResult {
+    void request
+    if (this.playerHealthRuntime.snapshot().health.alive) {
+      return { accepted: false, reason: 'actor-alive' }
+    }
+    const respawnPosition = this.checkpointRuntime.activeRespawnPosition()
+    if (respawnPosition === null) {
+      return { accepted: false, reason: 'no-active-checkpoint' }
+    }
+
+    this.playerState = createPlayerMotorState(respawnPosition)
+    this.playerHealthRuntime.updatePosition(respawnPosition)
+    this.playerHealthRuntime.restoreToMaximum()
+    this.resetPlayerActionState()
+    this.resetGrayboxEncounter()
+    return {
+      accepted: true,
+      checkpointId: this.checkpointRuntime.definition.id,
+    }
   }
 
   advanceFrame(
@@ -430,6 +480,7 @@ export class PlayerRuntime {
         ),
         lastHit: lastIncoming.lastHit,
       },
+      checkpoint: this.checkpointRuntime.snapshot(),
     }
   }
 
@@ -442,10 +493,14 @@ export class PlayerRuntime {
   }
 
   private enterPlayerDefeatedState(): void {
+    this.resetPlayerActionState()
+    this.playerState = stopPlayerMotor(this.playerState)
+  }
+
+  private resetPlayerActionState(): void {
     this.combatRuntime.reset()
     this.defenseRuntime.reset()
     this.contactRuntime.reset()
     this.attackExecutionFacing = null
-    this.playerState = stopPlayerMotor(this.playerState)
   }
 }

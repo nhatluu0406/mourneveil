@@ -11,9 +11,10 @@ import type { PlayerHealthSnapshot } from '../character/playerHealth'
 import type { EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import type { EnemyAttackSpatialSnapshot } from '../enemies/meleeEnemy'
 import type { GrayboxEncounterSnapshot } from '../encounters/grayboxEncounter'
+import type { CheckpointSnapshot } from '../world/checkpoint'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M4.1' as const
+export const MILESTONE = 'M4.2' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
@@ -35,6 +36,7 @@ export interface FoundationRuntimeDiagnostic {
   readonly enemyAttacks: readonly EnemyAttackSpatialSnapshot[]
   readonly encounter: GrayboxEncounterSnapshot
   readonly incomingContact: CombatContactSnapshot
+  readonly checkpoint: CheckpointSnapshot
 }
 
 export interface FoundationDiagnostic {

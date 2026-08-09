@@ -32,7 +32,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - verifier: focused player health/runtime + enemy lifecycle tests, `npm run lint`, `npm run typecheck`, `git diff --check`
   - evidence: canonical `PlayerHealthRuntime` replaces the M3 development naming; stable health/hurtbox identity, clamped damage, explicit alive/dead state, restore boundary, and death-owned combat/defense/motor stop; 58 focused tests plus lint/typecheck/diff check green
 
-- [ ] 2. M4.2 — Checkpoint and respawn
+- [x] 2. M4.2 — Checkpoint and respawn
   - depends: 1
   - risk: HIGH
   - preferred agent: Codex
@@ -41,6 +41,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - outcome: death → retry restores player transform/health, clears stale player action/input state, and recreates the graybox encounter without browser reload or React remount authority
   - non-goals: multiple checkpoints, persistence, bonfire menu, quest/interact framework
   - verifier: focused checkpoint/respawn/encounter reset tests, M4.1 regressions, `npm run lint`, `npm run typecheck`, HUMAN-VERIFY repeated browser death/respawn when browser control is available
+  - evidence: one `checkpoint.graybox.entry` activates through semantic F interaction; dead-only semantic R respawn restores authored transform/full health, clears player action/defense/contact state, and resets both enemy runtimes/contact dedup at their authored spawns; 34 focused tests plus lint/typecheck/diff check green; Vite HTTP 200 but in-app browser list empty, so manual cycle unverified
 
 - [ ] 3. M4.3 — Healing flask
   - depends: 2

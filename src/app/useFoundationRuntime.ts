@@ -88,6 +88,19 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
       const combatInput = combatInputRef.current
       const attackRequest = combatInput?.consumeAttackRequest() ?? null
       const dodgeRequest = combatInput?.consumeDodgeRequest() ?? null
+      const checkpointRequest =
+        combatInput?.consumeCheckpointInteractionRequest() ?? null
+      const respawnRequest = combatInput?.consumeRespawnRequest() ?? null
+      if (checkpointRequest !== null) {
+        runtime.requestCheckpointInteraction(checkpointRequest)
+      }
+      if (respawnRequest !== null) {
+        const result = runtime.requestRespawn(respawnRequest)
+        if (result.accepted) {
+          keyboardInput.reset()
+          combatInput?.reset()
+        }
+      }
       runtime.setGuardIntent(combatInput?.guardHeld() ?? false)
       if (attackRequest !== null) {
         runtime.requestPlayerAttack(attackRequest)
@@ -138,7 +151,11 @@ function neutralCombatInputSnapshot(): CombatInputSnapshot {
     primaryButtonHeld: false,
     guardHeld: false,
     dodgeKeyHeld: false,
+    checkpointKeyHeld: false,
+    respawnKeyHeld: false,
     pendingAttack: false,
     pendingDodge: false,
+    pendingCheckpointInteraction: false,
+    pendingRespawn: false,
   }
 }

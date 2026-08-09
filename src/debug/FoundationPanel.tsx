@@ -98,6 +98,7 @@ export function FoundationPanel({
             LMB {diagnostic.runtime.combatInput.primaryButtonHeld ? 'held' : 'up'} · RMB{' '}
             {diagnostic.runtime.combatInput.guardHeld ? 'held' : 'up'} · Space{' '}
             {diagnostic.runtime.combatInput.dodgeKeyHeld ? 'held' : 'up'}
+            {' '}· F checkpoint · R respawn
           </dd>
         </div>
         <div>
@@ -201,6 +202,14 @@ export function FoundationPanel({
             {diagnostic.runtime.playerHealth.health.current}/
             {diagnostic.runtime.playerHealth.health.maximum} ·{' '}
             {diagnostic.runtime.playerHealth.lifeState}
+          </dd>
+        </div>
+        <div>
+          <dt>Checkpoint</dt>
+          <dd>
+            {diagnostic.runtime.checkpoint.id} ·{' '}
+            {diagnostic.runtime.checkpoint.activated ? 'active' : 'inactive'} · current{' '}
+            {diagnostic.runtime.checkpoint.currentCheckpointId ?? 'none'}
           </dd>
         </div>
         <div>

@@ -12,8 +12,12 @@ describe('createFoundationDiagnostic', () => {
         primaryButtonHeld: false,
         guardHeld: false,
         dodgeKeyHeld: false,
+        checkpointKeyHeld: false,
+        respawnKeyHeld: false,
         pendingAttack: false,
         pendingDodge: false,
+        pendingCheckpointInteraction: false,
+        pendingRespawn: false,
       },
     }
 

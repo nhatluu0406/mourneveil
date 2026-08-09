@@ -96,6 +96,20 @@ describe('BrowserAttackInput', () => {
     expect(input.consumeDodgeRequest()).toEqual({ type: 'player-dodge' })
   })
 
+  it('maps F and R to semantic checkpoint and respawn edges', () => {
+    const { input, windowTarget } = createInput()
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
+    expect(input.consumeCheckpointInteractionRequest()).toEqual({
+      type: 'player-checkpoint-interaction',
+    })
+    expect(input.consumeRespawnRequest()).toEqual({ type: 'player-respawn' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
+    expect(input.consumeCheckpointInteractionRequest()).toBeNull()
+    expect(input.consumeRespawnRequest()).toBeNull()
+  })
+
   it('holds RMB guard, suppresses surface context menu, and releases cleanly', () => {
     const { input, surface } = createInput()
     dispatchEventWithProperties(surface, 'pointerdown', { button: 2, pointerId: 4 })
@@ -121,8 +135,12 @@ describe('BrowserAttackInput', () => {
       primaryButtonHeld: false,
       guardHeld: false,
       dodgeKeyHeld: false,
+      checkpointKeyHeld: false,
+      respawnKeyHeld: false,
       pendingAttack: false,
       pendingDodge: false,
+      pendingCheckpointInteraction: false,
+      pendingRespawn: false,
     })
 
     dispatchEventWithProperties(surface, 'pointerleave', { buttons: 0 })

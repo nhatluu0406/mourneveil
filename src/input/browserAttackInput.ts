@@ -4,10 +4,18 @@ import {
 } from './playerAttackIntent'
 import type { PlayerAimDirection } from './playerAimIntent'
 import { PLAYER_DODGE_REQUEST, type PlayerDodgeRequest } from './playerDefenseIntent'
+import {
+  PLAYER_CHECKPOINT_INTERACTION_REQUEST,
+  PLAYER_RESPAWN_REQUEST,
+  type PlayerCheckpointInteractionRequest,
+  type PlayerRespawnRequest,
+} from './playerRecoveryIntent'
 
 const PRIMARY_MOUSE_BUTTON = 0
 const SECONDARY_MOUSE_BUTTON = 2
 const DODGE_CODE = 'Space'
+const CHECKPOINT_INTERACTION_CODE = 'KeyF'
+const RESPAWN_CODE = 'KeyR'
 
 export type AimDirectionResolver = (
   clientX: number,
@@ -18,16 +26,24 @@ export interface CombatInputSnapshot {
   readonly primaryButtonHeld: boolean
   readonly guardHeld: boolean
   readonly dodgeKeyHeld: boolean
+  readonly checkpointKeyHeld: boolean
+  readonly respawnKeyHeld: boolean
   readonly pendingAttack: boolean
   readonly pendingDodge: boolean
+  readonly pendingCheckpointInteraction: boolean
+  readonly pendingRespawn: boolean
 }
 
 export class BrowserAttackInput {
   private primaryButtonHeld = false
   private guardHeldState = false
   private dodgeKeyHeld = false
+  private checkpointKeyHeld = false
+  private respawnKeyHeld = false
   private pendingAttack: PlayerAttackRequest | null = null
   private pendingDodge: PlayerDodgeRequest | null = null
+  private pendingCheckpointInteraction: PlayerCheckpointInteractionRequest | null = null
+  private pendingRespawn: PlayerRespawnRequest | null = null
   private connected = false
 
   constructor(
@@ -89,6 +105,18 @@ export class BrowserAttackInput {
     return request
   }
 
+  consumeCheckpointInteractionRequest(): PlayerCheckpointInteractionRequest | null {
+    const request = this.pendingCheckpointInteraction
+    this.pendingCheckpointInteraction = null
+    return request
+  }
+
+  consumeRespawnRequest(): PlayerRespawnRequest | null {
+    const request = this.pendingRespawn
+    this.pendingRespawn = null
+    return request
+  }
+
   guardHeld(): boolean {
     return this.guardHeldState
   }
@@ -98,8 +126,12 @@ export class BrowserAttackInput {
       primaryButtonHeld: this.primaryButtonHeld,
       guardHeld: this.guardHeldState,
       dodgeKeyHeld: this.dodgeKeyHeld,
+      checkpointKeyHeld: this.checkpointKeyHeld,
+      respawnKeyHeld: this.respawnKeyHeld,
       pendingAttack: this.pendingAttack !== null,
       pendingDodge: this.pendingDodge !== null,
+      pendingCheckpointInteraction: this.pendingCheckpointInteraction !== null,
+      pendingRespawn: this.pendingRespawn !== null,
     }
   }
 
@@ -107,8 +139,12 @@ export class BrowserAttackInput {
     this.primaryButtonHeld = false
     this.guardHeldState = false
     this.dodgeKeyHeld = false
+    this.checkpointKeyHeld = false
+    this.respawnKeyHeld = false
     this.pendingAttack = null
     this.pendingDodge = null
+    this.pendingCheckpointInteraction = null
+    this.pendingRespawn = null
   }
 
   private readonly handlePointerDown = (event: PointerEvent): void => {
@@ -165,14 +201,26 @@ export class BrowserAttackInput {
   }
 
   private readonly handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.code !== DODGE_CODE || this.dodgeKeyHeld || isInteractiveTarget(event.target)) return
-    event.preventDefault()
-    this.dodgeKeyHeld = true
-    this.pendingDodge = PLAYER_DODGE_REQUEST
+    if (isInteractiveTarget(event.target)) return
+    if (event.code === DODGE_CODE && !this.dodgeKeyHeld) {
+      event.preventDefault()
+      this.dodgeKeyHeld = true
+      this.pendingDodge = PLAYER_DODGE_REQUEST
+    } else if (event.code === CHECKPOINT_INTERACTION_CODE && !this.checkpointKeyHeld) {
+      event.preventDefault()
+      this.checkpointKeyHeld = true
+      this.pendingCheckpointInteraction = PLAYER_CHECKPOINT_INTERACTION_REQUEST
+    } else if (event.code === RESPAWN_CODE && !this.respawnKeyHeld) {
+      event.preventDefault()
+      this.respawnKeyHeld = true
+      this.pendingRespawn = PLAYER_RESPAWN_REQUEST
+    }
   }
 
   private readonly handleKeyUp = (event: KeyboardEvent): void => {
     if (event.code === DODGE_CODE) this.dodgeKeyHeld = false
+    if (event.code === CHECKPOINT_INTERACTION_CODE) this.checkpointKeyHeld = false
+    if (event.code === RESPAWN_CODE) this.respawnKeyHeld = false
   }
 
   private readonly handleFocusLoss = (): void => {
