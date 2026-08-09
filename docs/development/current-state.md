@@ -1,26 +1,25 @@
 # Current State
 
 - Updated: 2026-08-10
-- Milestone: **M5 Connected Level closed for presentation handoff; M6 Presentation in progress after M5.6.2**
-- Active LeanLoop task: `m5-connected-level` (M6 steps live in `PLAN.md`)
-- Status: Tag `v0.5.0-connected-level` present. M5.6.2 regional HP audit PASS (no hazard; pressure skirmisher attributed). M6 authorized.
+- Milestone: **M6 Presentation — READY FOR PRODUCT OWNER ACCEPTANCE**
+- Active LeanLoop task: `m5-connected-level` (M5.6.2 + M6.1–M6.6 complete in `PLAN.md`)
+- Status: Tag `v0.5.0-connected-level` present. M5.6.2 regional HP audit PASS. M6 presentation + HUD + identity + feedback verified.
 
 ## What exists
 
-- Connected graybox level with zones, checkpoint, shortcut, final gate, SaveFileV2 world flags
-- Melee solid-world occlusion; encounter activation + egress leash; authored enemy route anchors
-- Landmark solids share visual/collider authorship; defeated enemies no longer remain solid blockers
-- Regional HP soak gate proves neutralized zones never drain; live final-approach damage is authored pressure melee only
-- Compact collapsible development diagnostics; inventory display names
-- Browser gates: `gate-m531` … `gate-m561`, `gate-m562-regional-hp`
+- Connected level gameplay authority from M5, unchanged
+- Distinct procedural actor/world presentation language and dark-fantasy palette
+- Gameplay HUD (HP/flask/Echoes/gear/prompts); DEV Details collapsed by default
+- Invisible introduction/pressure skirmisher presentation bug fixed (definitionId role lookup)
+- Browser gates through `gate-m66-production-boundary`
 
 ## Known limitations
 
 - Authored navigation anchors only (no navmesh/A*)
 - Two melee roles; no boss/elite/ranged
 - Controller deferred; production art/audio deferred
-- Presentation still graybox pending M6
+- Vite main-chunk size advisory non-blocking
 
 ## Next executable work
 
-M6.1 — Actor and world presentation foundation (`PLAN.md`).
+Product Owner M6 acceptance. Do not start M7 without authorization.

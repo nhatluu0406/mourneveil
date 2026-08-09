@@ -8,7 +8,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (118L)
+- PLAN.md (214L)
 - README.md (34L)
 - SETUP.md (44L)
 - STACK.md (75L)
@@ -161,14 +161,14 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (26L)
+    - current-state.md (25L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
     - vertical-slice.md (41L)
     - vision.md (79L)
 - **scripts/** (0 files)
-  - **scripts/browser/** (11 files)
+  - **scripts/browser/** (16 files)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
@@ -179,7 +179,9 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m55-tuning.mjs (124L)
     - gate-m56-playthrough.mjs (240L)
     - gate-m561-correctness.mjs (276L)
-    - gate0-m41-m43.mjs (444L)
+    - gate-m562-regional-hp.mjs (113L)
+    - gate-m61-presentation.mjs (135L)
+    - ... +4 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -195,9 +197,9 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (93L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
+    - App.tsx (95L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
-    - styles.css (211L)
+    - styles.css (338L)
     - useGameRuntime.ts (209L) -- symbols: GameRuntimeIntegrationSnapshot, useGameRuntime; imports: ../game/runtime/GameRuntime, ../game/save/gameSaveService, ../input/browserAttackInput
   - **src/debug/** (4 files)
     - DevelopmentPanel.tsx (183L) -- symbols: DevelopmentPanel; imports: ./developmentDiagnostic, ../render/followCamera
@@ -207,6 +209,5 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - **src/game/** (0 files)
     - **src/game/character/** (13 files)
       - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
-      - playerCurrency.test.ts (32L) -- imports: ./playerCurrency
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

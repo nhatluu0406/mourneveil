@@ -134,7 +134,7 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
 
 ## Steps
 
-- [ ] 1. M6.1 — Actor and world presentation foundation
+- [x] 1. M6.1 — Actor and world presentation foundation
   - risk: MEDIUM
   - preferred agent: Cursor
   - isolation: sequential
@@ -142,8 +142,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - outcome: Details collapsed, tester identifies player/skirmisher/brute/checkpoint/Echo/loot/shortcut/final gate
   - non-goals: combat authority changes; production assets
   - verifier: browser identity gate; lint; typecheck; `git diff --check`
+  - evidence: PASS — EnemyVisual resolves by definitionId (fixes invisible introduction/pressure); distinct player/skirmisher/brute silhouettes; shrine checkpoint; Echo octahedron; compact loot; gate language; `gate-m61-presentation` PASS
 
-- [ ] 2. M6.2 — Gameplay HUD and combat readability
+- [x] 2. M6.2 — Gameplay HUD and combat readability
   - depends: 1 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -151,8 +152,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: gameplay HUD, inventory readability, combat projection states, Details policy
   - outcome: play without Details; HP/flask/Echoes/weapon/charm/prompts readable; combat states readable
   - verifier: browser HUD/combat gate; lint; typecheck; `git diff --check`
+  - evidence: PASS — GameplayHud HP bar/flasks/Echoes/gear/prompts; collapsible loadout; Details collapsed+DEV-only; `gate-m62-hud` PASS
 
-- [ ] 3. M6.3 — Dark-fantasy environment and visual identity
+- [x] 3. M6.3 — Dark-fantasy environment and visual identity
   - depends: 2 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -160,8 +162,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: palette/theme, zone composition, lighting, grid policy
   - outcome: route/zone identity readable; no visual/collider contradiction
   - verifier: browser identity playthrough; lint; typecheck; `git diff --check`
+  - evidence: PASS — `mourneveilPalette`; fog + dual-key lighting; zone decorative landmarks without new solids; gate/checkpoint lights
 
-- [ ] 4. M6.4 — Combat presentation and interaction polish
+- [x] 4. M6.4 — Combat presentation and interaction polish
   - depends: 3 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -169,8 +172,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: attack/telegraph/hit/guard/dodge/interaction feedback (presentation-only)
   - outcome: repeated actions readable without Details
   - verifier: browser feedback gate; lint; typecheck; `git diff --check`
+  - evidence: PASS — heavier light/heavy poses; damage/guard camera impulse; player/enemy hit flash; dodge pose; distinct telegraphs
 
-- [ ] 5. M6.5 — Full visual/gameplay browser verification
+- [x] 5. M6.5 — Full visual/gameplay browser verification
   - depends: 4 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -178,8 +182,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: end-to-end SaveFileV2 playthrough; M5 correctness re-runs
   - outcome: full loop playable with Details collapsed; no console errors
   - verifier: presentation playthrough + M5 gates; lint; typecheck; test; build
+  - evidence: PASS — `gate-m65-presentation`; `gate-m531`/`gate-m561`/`gate-m562` PASS; verify 226 tests green
 
-- [ ] 6. M6.6 — Hardening and M6 acceptance gate
+- [x] 6. M6.6 — Hardening and M6 acceptance gate
   - depends: 5 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -187,6 +192,7 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: bounded visual/UI cleanup; production boundary; soak
   - outcome: production build lacks DEV mutations/Details; HUD present; soak clean
   - verifier: `npm run verify`; production preview; doctor/sync; `git diff --check`
+  - evidence: PASS — production preview boundary PASS (no gate/Details; HUD+inventory present); doctor/sync OK
 
 ## Parallel groups
 

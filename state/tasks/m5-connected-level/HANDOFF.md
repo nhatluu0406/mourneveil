@@ -1,49 +1,44 @@
 # HANDOFF
 
 Updated: 2026-08-10 by Cursor
-Task: m5-connected-level → transitioning to M6 presentation
+Task: m5-connected-level / M6 presentation macro-batch
 
 ## Status
 
-**M5.6.2 PASS.** No environmental hazard system. Regional HP drain is authored enemy melee only. M6 may begin.
+**M6 READY FOR PRODUCT OWNER ACCEPTANCE.** Do not start M7. Do not push/tag from this session.
 
-## M5.6.2 — Regional HP / hazard audit
+## Regional damage audit (M5.6.2)
 
-### Hazard audit
+- No environmental hazard/trap system exists.
+- Player HP changes only via enemy incoming melee (`applyPlayerDamage`) or DEV gate.
+- PO final-approach drain = authored `enemy.skirmisher.pressure`.
+- Secondary presentation defect: introduction/pressure visuals used `meleeRoleByRuntimeId` and rendered nothing — fixed in M6.1 via definitionId lookup.
+- Gate: `gate-m562-regional-hp` PASS.
 
-- Repository has **no** trap/environmental-damage system (STACK/PLAN/code).
-- Player HP mutates only via `GameRuntime.applyPlayerDamage` (debug gate + enemy incoming melee resolve).
-- Checkpoint/zone/shortcut/final-gate/loot/Echo sensors are not damage sources.
+## Presentation architecture
 
-### Exact damage source(s)
+- Palette: `src/render/mourneveilPalette.ts`
+- Actors: procedural silhouettes in `PlayerVisual` / `EnemyVisual` (gameplay capsules unchanged)
+- World landmarks: checkpoint shrine, Echo octahedron, loot chest, shortcut/final-gate language
+- HUD: `GameplayHud` + collapsible loadout; Details DEV-only collapsed
+- Feedback: presentation-only attack poses, telegraphs, hit flash, camera impulse, dodge pose
 
-| Region | Neutralized soak | Live soak attribution |
-| --- | --- | --- |
-| All authored zones | HP unchanged | — |
-| Final approach (PO location) | HP unchanged | `enemy.skirmisher.pressure` / `enemy.skirmisher.attack` dmg 10 |
-| First combat near intro | — | `enemy.skirmisher.introduction` |
-| Mixed center | — | `enemy.skirmisher.1` + `enemy.brute.1` |
+## Browser evidence
 
-### Root cause of PO observation
+- `gate-m61-presentation` PASS
+- `gate-m62-hud` PASS
+- `gate-m65-presentation` PASS
+- `gate-m66-production-boundary` PASS
+- `gate-m531` / `gate-m561` / `gate-m562` PASS
+- `npm run verify` PASS (226 tests)
 
-Legitimate `encounter.m5.pressure` skirmisher melee in `zone.final-approach`, not a silent region hazard. Presentation readability of that threat is deferred to M6 (not an authority defect).
+## Remaining presentation debt
 
-### Evidence
-
-- Tests: `src/game/world/regionalDamage.integration.test.ts` PASS
-- Browser: `scripts/browser/gate-m562-regional-hp.mjs` VERDICT PASS
-- No HIGH-risk combat/world-authority redesign required
-
-## Remaining limitations
-
-- Authored anchors/detours only — not navmesh/A*
+- No production character models/animation packs/audio
+- Authored navigation anchors only
+- Vite chunk-size advisory remains non-blocking
 - Controller deferred
-- Graybox presentation still technical until M6
 
-## Commits
+## Next milestone only
 
-- `fix(world): eliminate unexplained regional damage`
-
-## Next action
-
-Execute M6.1–M6.6 presentation macro-batch on `main`. Do not start M7. Do not push/tag.
+Product Owner acceptance of M6. Then M7 only with explicit authorization.
