@@ -6,6 +6,7 @@ import { createDevelopmentDiagnostic } from '../debug/developmentDiagnostic'
 import { Scene } from '../render/Scene'
 import type { CameraDiagnostic } from '../render/followCamera'
 import { createPointerWorldAimResolver } from '../render/pointerWorldAim'
+import { GameplayHud } from '../ui/GameplayHud'
 import { InventoryEquipmentPanel } from '../ui/InventoryEquipmentPanel'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useGameRuntime } from './useGameRuntime'
@@ -78,6 +79,7 @@ export function App() {
           </Suspense>
         </Canvas>
       </RenderErrorBoundary>
+      <GameplayHud snapshot={runtimeSnapshot} />
       {import.meta.env.DEV ? (
         <DevelopmentPanel
           diagnostic={diagnostic}

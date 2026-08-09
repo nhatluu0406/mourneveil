@@ -209,3 +209,130 @@ body {
   word-break: break-word;
   font-weight: 650;
 }
+
+.inventory-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.inventory-panel__row.is-equipped .inventory-panel__name {
+  color: #d7e7c8;
+}
+
+.gameplay-hud {
+  position: absolute;
+  z-index: 1;
+  left: 1rem;
+  bottom: 1rem;
+  width: min(22rem, calc(100vw - 2rem));
+  display: grid;
+  gap: 0.45rem;
+  pointer-events: none;
+  color: #f4efe4;
+  font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+}
+
+.gameplay-hud--hit .gameplay-hud__bar-fill {
+  filter: brightness(1.25);
+}
+
+.gameplay-hud__vitals {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  background: rgb(10 14 18 / 72%);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 0.65rem;
+  backdrop-filter: blur(0.5rem);
+}
+
+.gameplay-hud__bar {
+  position: relative;
+  height: 1.05rem;
+  overflow: hidden;
+  border-radius: 0.3rem;
+  background: rgb(255 255 255 / 8%);
+}
+
+.gameplay-hud__bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8a3030, #d45b4a);
+  transition: width 80ms linear;
+}
+
+.gameplay-hud__bar-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+}
+
+.gameplay-hud__flasks {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.gameplay-hud__flask {
+  width: 0.7rem;
+  height: 1rem;
+  border-radius: 0.2rem 0.2rem 0.35rem 0.35rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 6%);
+}
+
+.gameplay-hud__flask.is-filled {
+  background: linear-gradient(180deg, #7ec8e3, #3f7d86);
+  box-shadow: 0 0 0.45rem rgb(90 180 200 / 35%);
+}
+
+.gameplay-hud__echoes {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.gameplay-hud__echoes-label {
+  color: #9eb4c0;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gameplay-hud__gear {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  color: #d7c7a4;
+  background: rgb(10 14 18 / 55%);
+  border-radius: 0.45rem;
+}
+
+.gameplay-hud__charm {
+  color: #b7d4ae;
+}
+
+.gameplay-hud__prompt,
+.gameplay-hud__death {
+  width: fit-content;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: rgb(18 24 20 / 82%);
+  border: 1px solid rgb(255 255 255 / 16%);
+}
+
+.gameplay-hud__death {
+  color: #ffb0a4;
+  border-color: rgb(255 100 80 / 35%);
+}
