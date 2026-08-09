@@ -2,8 +2,9 @@ import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group, Mesh, MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
-import { meleeRoleByRuntimeId } from '../game/enemies/enemyRoles'
+import { meleeRoleByDefinitionId } from '../game/enemies/enemyRoles'
 import { createEnemyAttackPresentationSnapshot } from './enemyAttackPresentation'
+import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 
 const STATE_MIX = {
   idle: 0,
@@ -26,13 +27,14 @@ export function EnemyVisual({
   const materialRef = useRef<MeshStandardMaterial>(null)
   const telegraphRef = useRef<Mesh>(null)
   const contactRef = useRef<Mesh>(null)
-  const role = meleeRoleByRuntimeId(enemyId)
 
   useFrame(() => {
     const runtimeSnapshot = runtime.snapshot()
     const enemyIndex = runtimeSnapshot.enemies.findIndex((entry) => entry.id === enemyId)
-    if (enemyIndex < 0 || role === null) return
+    if (enemyIndex < 0) return
     const enemy = runtimeSnapshot.enemies[enemyIndex]
+    const role = meleeRoleByDefinitionId(enemy.definitionId)
+    if (role === null) return
     const enemyAttack = runtimeSnapshot.enemyAttacks[enemyIndex]
     const attackPresentation = createEnemyAttackPresentationSnapshot(enemy, enemyAttack)
     const facing = facingRef.current
@@ -46,18 +48,33 @@ export function EnemyVisual({
       material === null ||
       telegraph === null ||
       contact === null
-    ) return
+    )
+      return
 
     facing.rotation.y = attackPresentation.yawRadians
-    body.scale.setScalar(role.presentation.bodyScale)
-    body.scale.y = (enemy.alive ? 1 : 0.28) * role.presentation.bodyScale
-    material.color.set(role.presentation.primaryColor)
+    const isBrute = role.role === 'brute'
+    const width = isBrute ? 1.22 : 0.82
+    const height = enemy.alive ? (isBrute ? 1.08 : 0.95) : 0.22
+    body.scale.set(width, height, isBrute ? 1.15 : 0.88)
+    body.rotation.z = enemy.alive ? 0 : Math.PI / 2
+    body.position.y = enemy.alive ? 0 : -0.4
+    const palette = isBrute ? MOURNEVEIL_PALETTE.brute : MOURNEVEIL_PALETTE.skirmisher
+    material.color.set(palette.body)
     material.color.offsetHSL(0, 0, -STATE_MIX[enemy.state] * 0.35)
+    const damagedFlash =
+      enemy.alive &&
+      runtimeSnapshot.contact.lastHit !== null &&
+      runtimeSnapshot.contact.lastHit.targetId === enemy.id &&
+      runtimeSnapshot.simulation.stepCount - runtimeSnapshot.contact.lastHit.simulationStep < 10
+    material.emissive.set(damagedFlash ? MOURNEVEIL_PALETTE.damage : '#000000')
+    material.emissiveIntensity = damagedFlash ? 0.65 : 0
     telegraph.visible = attackPresentation.telegraphVisible
-    // Debug contact sphere is presentation-only and only during the active window.
-    contact.visible = attackPresentation.contactVisible
+    contact.visible = import.meta.env.DEV && attackPresentation.contactVisible
   })
 
+  const enemy =
+    runtime.snapshot().enemies.find((entry) => entry.id === enemyId) ?? null
+  const role = enemy === null ? null : meleeRoleByDefinitionId(enemy.definitionId)
   if (role === null) return null
 
   const isBrute = role.role === 'brute'
@@ -65,32 +82,57 @@ export function EnemyVisual({
   return (
     <group ref={facingRef}>
       <group ref={bodyRef}>
-        <mesh castShadow receiveShadow>
-          <capsuleGeometry
-            args={[
-              role.definition.body.radius,
-              role.definition.body.halfHeight * 2,
-              8,
-              16,
-            ]}
-          />
-          <meshStandardMaterial ref={materialRef} roughness={isBrute ? 0.82 : 0.58} />
-        </mesh>
         {isBrute ? (
-          <mesh castShadow position={[0, 0.55, 0]}>
-            <boxGeometry args={[0.95, 0.35, 0.7]} />
-            <meshStandardMaterial color="#6d3d30" roughness={0.85} />
-          </mesh>
+          <>
+            <mesh castShadow receiveShadow>
+              <capsuleGeometry args={[0.42, 0.7, 6, 12]} />
+              <meshStandardMaterial ref={materialRef} roughness={0.85} />
+            </mesh>
+            <mesh castShadow position={[0, 0.55, 0.05]}>
+              <boxGeometry args={[0.95, 0.38, 0.55]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.pauldron} roughness={0.88} />
+            </mesh>
+            <mesh castShadow position={[-0.42, 0.35, 0]}>
+              <boxGeometry args={[0.28, 0.45, 0.35]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.9} />
+            </mesh>
+            <mesh castShadow position={[0.42, 0.35, 0]}>
+              <boxGeometry args={[0.28, 0.45, 0.35]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.9} />
+            </mesh>
+            <mesh castShadow position={[0.35, 0.15, -0.55]}>
+              <boxGeometry args={[0.22, 0.7, 0.22]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.weapon} roughness={0.7} />
+            </mesh>
+          </>
         ) : (
-          <mesh castShadow position={[0, 0.15, -0.38]}>
-            <coneGeometry args={[0.16, 0.5, 6]} />
-            <meshStandardMaterial color="#b7c7b8" roughness={0.4} metalness={0.25} />
-          </mesh>
+          <>
+            <mesh castShadow receiveShadow>
+              <capsuleGeometry args={[0.22, 0.55, 6, 12]} />
+              <meshStandardMaterial ref={materialRef} roughness={0.55} />
+            </mesh>
+            <mesh castShadow position={[0, 0.48, 0]}>
+              <sphereGeometry args={[0.16, 10, 8]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.skirmisher.accent} roughness={0.5} />
+            </mesh>
+            <mesh castShadow position={[-0.22, 0.2, 0]} rotation={[0, 0, 0.35]}>
+              <capsuleGeometry args={[0.05, 0.34, 4, 8]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.skirmisher.body} roughness={0.55} />
+            </mesh>
+            <mesh castShadow position={[0.22, 0.2, 0]} rotation={[0, 0, -0.35]}>
+              <capsuleGeometry args={[0.05, 0.34, 4, 8]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.skirmisher.body} roughness={0.55} />
+            </mesh>
+            <mesh castShadow position={[0.18, 0.08, -0.42]} rotation={[0.4, 0, 0]}>
+              <coneGeometry args={[0.1, 0.55, 6]} />
+              <meshStandardMaterial
+                color={MOURNEVEIL_PALETTE.skirmisher.blade}
+                roughness={0.35}
+                metalness={0.3}
+              />
+            </mesh>
+          </>
         )}
-        <mesh castShadow position={[0, 0.25, -0.42]} visible={isBrute}>
-          <boxGeometry args={[0.22, 0.55, 0.22]} />
-          <meshStandardMaterial color="#a35a45" roughness={0.7} />
-        </mesh>
       </group>
       <mesh
         ref={telegraphRef}
@@ -99,12 +141,17 @@ export function EnemyVisual({
         visible={false}
       >
         <circleGeometry
-          args={[0.7 + role.definition.body.radius, 20, Math.PI / 4, Math.PI / 2]}
+          args={[
+            (isBrute ? 0.95 : 0.62) + role.definition.body.radius * 0.2,
+            20,
+            Math.PI / 4,
+            isBrute ? Math.PI * 0.7 : Math.PI / 2,
+          ]}
         />
         <meshBasicMaterial
-          color={role.presentation.telegraphColor}
+          color={isBrute ? MOURNEVEIL_PALETTE.brute.telegraph : MOURNEVEIL_PALETTE.skirmisher.telegraph}
           transparent
-          opacity={0.8}
+          opacity={0.82}
           side={2}
         />
       </mesh>
@@ -116,7 +163,7 @@ export function EnemyVisual({
       >
         <sphereGeometry args={[1, 16, 10]} />
         <meshBasicMaterial
-          color={role.presentation.contactColor}
+          color={isBrute ? MOURNEVEIL_PALETTE.brute.contact : MOURNEVEIL_PALETTE.skirmisher.contact}
           transparent
           opacity={0.25}
           wireframe

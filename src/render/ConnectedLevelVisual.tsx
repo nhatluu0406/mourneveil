@@ -5,13 +5,14 @@ import {
   CONNECTED_LEVEL_LANDMARKS,
   activeConnectedLevelColliders,
 } from '../physics/connectedLevelCollision'
+import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 
 const COLORS = {
-  floor: '#1a221e',
-  wall: '#5f6b64',
-  blocker: '#8a7457',
-  'shortcut-gate': '#c4893d',
-  'final-gate': '#8a4d63',
+  floor: MOURNEVEIL_PALETTE.environment.floor,
+  wall: MOURNEVEIL_PALETTE.environment.wall,
+  blocker: MOURNEVEIL_PALETTE.environment.blocker,
+  'shortcut-gate': MOURNEVEIL_PALETTE.shortcut.closed,
+  'final-gate': MOURNEVEIL_PALETTE.finalGate.sealed,
 } as const
 
 export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntime }) {
@@ -47,9 +48,9 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
                 metalness={isGate ? 0.18 : 0.02}
                 emissive={
                   collider.kind === 'final-gate'
-                    ? '#3a1824'
+                    ? MOURNEVEIL_PALETTE.finalGate.emissive
                     : collider.kind === 'shortcut-gate'
-                      ? '#3a2810'
+                      ? MOURNEVEIL_PALETTE.shortcut.emissive
                       : '#000000'
                 }
               />
@@ -77,38 +78,109 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
         )
       })}
 
-      {/* Decorative crown pieces sit above authored divider colliders — not solids. */}
+      {/* Decorative framing and zone landmarks — never collision-solid. */}
       <mesh position={[-3, 1.65, 1]} castShadow>
         <boxGeometry args={[0.35, 0.4, 4]} />
-        <meshStandardMaterial color="#4f5a54" roughness={0.88} />
+        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.88} />
       </mesh>
       <mesh position={[10, 1.65, 0]} castShadow>
         <boxGeometry args={[0.35, 0.4, 5]} />
         <meshStandardMaterial color="#52444c" roughness={0.88} />
       </mesh>
+      {/* Arrival columns */}
+      <mesh position={[-14.2, 1.1, 7.6]} castShadow>
+        <cylinderGeometry args={[0.22, 0.28, 2.2, 8]} />
+        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.9} />
+      </mesh>
+      <mesh position={[-12.4, 1.1, 7.8]} castShadow>
+        <cylinderGeometry args={[0.18, 0.24, 2.0, 8]} />
+        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.wall} roughness={0.9} />
+      </mesh>
+      {/* Outer watch ruined wall scrap */}
+      <mesh position={[-9.2, 0.7, 4.6]} castShadow>
+        <boxGeometry args={[1.4, 1.2, 0.28]} />
+        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.92} />
+      </mesh>
+      {/* Mixed court floor border plinths */}
+      <mesh position={[1, 0.12, -1.4]} castShadow>
+        <boxGeometry args={[3.2, 0.18, 0.35]} />
+        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={0.95} />
+      </mesh>
+      <mesh position={[1, 0.12, -6.5]} castShadow>
+        <boxGeometry args={[3.2, 0.18, 0.35]} />
+        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={0.95} />
+      </mesh>
+      {/* Ash walk broken masonry */}
+      <mesh position={[6.2, 0.45, -6.2]} castShadow>
+        <boxGeometry args={[0.9, 0.7, 0.45]} />
+        <meshStandardMaterial color="#4a3a38" roughness={0.93} />
+      </mesh>
+      <mesh position={[8.8, 0.35, -1.6]} castShadow>
+        <boxGeometry args={[0.7, 0.5, 0.4]} />
+        <meshStandardMaterial color="#453532" roughness={0.93} />
+      </mesh>
+      {/* Final arena gate plinths */}
+      <mesh position={[12.2, 0.55, -6.4]} castShadow>
+        <boxGeometry args={[0.55, 1.0, 0.55]} />
+        <meshStandardMaterial color="#3a2c38" roughness={0.88} />
+      </mesh>
+      <mesh position={[12.2, 0.55, -1.6]} castShadow>
+        <boxGeometry args={[0.55, 1.0, 0.55]} />
+        <meshStandardMaterial color="#3a2c38" roughness={0.88} />
+      </mesh>
 
+      {/* Shortcut language */}
+      <mesh position={[-3, 1.35, -1.3]} castShadow>
+        <boxGeometry args={[0.55, 2.4, 0.18]} />
+        <meshStandardMaterial
+          color={shortcutOpen ? MOURNEVEIL_PALETTE.shortcut.open : MOURNEVEIL_PALETTE.shortcut.closed}
+          emissive={MOURNEVEIL_PALETTE.shortcut.emissive}
+          emissiveIntensity={shortcutOpen ? 0.35 : 0.55}
+          roughness={0.5}
+        />
+      </mesh>
       {shortcutOpen ? (
         <mesh position={[-3, 0.08, -1.3]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.55, 0.85, 20]} />
-          <meshStandardMaterial color="#d7a35a" emissive="#5a3a12" roughness={0.55} />
+          <ringGeometry args={[0.55, 0.9, 20]} />
+          <meshStandardMaterial
+            color={MOURNEVEIL_PALETTE.shortcut.open}
+            emissive={MOURNEVEIL_PALETTE.shortcut.emissive}
+            roughness={0.55}
+          />
         </mesh>
       ) : (
-        <mesh position={[-3, 1.7, -1.3]}>
-          <boxGeometry args={[0.2, 0.35, 1.2]} />
-          <meshStandardMaterial color="#e0a45a" emissive="#4a3010" roughness={0.5} />
+        <mesh position={[-3, 2.7, -1.3]}>
+          <boxGeometry args={[0.7, 0.2, 0.25]} />
+          <meshStandardMaterial color={MOURNEVEIL_PALETTE.warning} roughness={0.45} />
         </mesh>
       )}
+
+      {/* Final gate language */}
+      <mesh position={[10, 1.55, -4]} castShadow>
+        <boxGeometry args={[0.7, 2.8, 0.22]} />
+        <meshStandardMaterial
+          color={
+            finalGateOpen ? MOURNEVEIL_PALETTE.finalGate.open : MOURNEVEIL_PALETTE.finalGate.sealed
+          }
+          emissive={MOURNEVEIL_PALETTE.finalGate.emissive}
+          emissiveIntensity={finalGateOpen ? 0.3 : 0.65}
+          roughness={0.48}
+        />
+      </mesh>
+      <mesh position={[10, 3.15, -4]} castShadow>
+        <boxGeometry args={[1.4, 0.28, 0.35]} />
+        <meshStandardMaterial color="#3a2430" roughness={0.7} />
+      </mesh>
       {finalGateOpen ? (
         <mesh position={[10, 0.08, -4]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.7, 1.05, 22]} />
-          <meshStandardMaterial color="#c27a96" emissive="#401828" roughness={0.5} />
+          <ringGeometry args={[0.7, 1.15, 22]} />
+          <meshStandardMaterial
+            color={MOURNEVEIL_PALETTE.finalGate.open}
+            emissive={MOURNEVEIL_PALETTE.finalGate.emissive}
+            roughness={0.5}
+          />
         </mesh>
-      ) : (
-        <mesh position={[10, 1.85, -4]}>
-          <boxGeometry args={[0.25, 0.45, 1.5]} />
-          <meshStandardMaterial color="#c27a96" emissive="#401828" roughness={0.48} />
-        </mesh>
-      )}
+      ) : null}
     </>
   )
 }

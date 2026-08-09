@@ -1,7 +1,8 @@
 import { useFrame } from '@react-three/fiber'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import type { Group } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
+import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 
 interface EchoRecoveryVisualProps {
   runtime: GameRuntime
@@ -9,39 +10,47 @@ interface EchoRecoveryVisualProps {
 
 export function EchoRecoveryVisual({ runtime }: EchoRecoveryVisualProps) {
   const groupRef = useRef<Group>(null)
-  const [label, setLabel] = useState('0')
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     const recovery = runtime.snapshot().echoRecovery
     const group = groupRef.current
     if (group === null) return
     group.visible = recovery.active && recovery.position !== null
     if (!recovery.active || recovery.position === null) return
-    group.position.set(recovery.position.x, 0.55, recovery.position.z)
-    const next = String(recovery.amount)
-    setLabel((current) => (current === next ? current : next))
+    const bob = Math.sin(clock.elapsedTime * 2.4) * 0.08
+    group.position.set(recovery.position.x, 0.62 + bob, recovery.position.z)
+    group.rotation.y = clock.elapsedTime * 1.2
   })
 
   return (
     <group ref={groupRef} visible={false}>
       <mesh castShadow>
-        <octahedronGeometry args={[0.28, 0]} />
+        <octahedronGeometry args={[0.34, 0]} />
         <meshStandardMaterial
-          color="#7ec8e3"
-          emissive="#24566a"
-          emissiveIntensity={0.55}
-          roughness={0.35}
-          metalness={0.2}
+          color={MOURNEVEIL_PALETTE.echo.core}
+          emissive={MOURNEVEIL_PALETTE.echo.aura}
+          emissiveIntensity={0.7}
+          roughness={0.28}
+          metalness={0.25}
         />
       </mesh>
-      <mesh position={[0, 0.42, 0]}>
-        <sphereGeometry args={[0.08, 8, 8]} />
-        <meshStandardMaterial color="#e8f7ff" emissive="#9ad7ef" emissiveIntensity={0.8} />
+      <mesh position={[0, 0.48, 0]}>
+        <tetrahedronGeometry args={[0.14, 0]} />
+        <meshStandardMaterial
+          color={MOURNEVEIL_PALETTE.echo.tip}
+          emissive={MOURNEVEIL_PALETTE.echo.core}
+          emissiveIntensity={0.9}
+        />
       </mesh>
-      {/* amount encoded via scale so diagnostics remain authoritative */}
-      <mesh position={[0, -0.35, 0]} scale={[Number(label) > 0 ? 1 : 0.01, 0.08, 1]}>
-        <boxGeometry args={[0.55, 0.06, 0.55]} />
-        <meshStandardMaterial color="#3d6f82" roughness={0.8} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.45, 0]}>
+        <ringGeometry args={[0.28, 0.42, 18]} />
+        <meshStandardMaterial
+          color={MOURNEVEIL_PALETTE.echo.aura}
+          emissive={MOURNEVEIL_PALETTE.echo.aura}
+          emissiveIntensity={0.45}
+          transparent
+          opacity={0.85}
+        />
       </mesh>
     </group>
   )
