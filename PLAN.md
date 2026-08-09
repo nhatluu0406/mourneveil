@@ -77,16 +77,17 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
   - completion evidence: runtime observations recorded; no authority drift
   - evidence: frozen `attackExecutionFacing` drives presentation + contact; camera `updateMatrixWorld` before ray aim; weapon sweep reduced so readable axis matches contact; training-target facing marker removed; player facing marker recolored as debug chevron; presentation-only hit flash/recoil + tiny camera impulse; 23 files / 98 tests; Playwright browser matrix green (cardinals/diag aim, toward hit / away+perp miss, Reset isolation, border recovery, dodge/guard, no console errors)
 
-- [ ] 6. M2.6 — Combat verification
+- [x] 6. M2.6 — Combat verification
   - depends: 5
   - risk: MEDIUM
   - preferred agent: Cursor
   - isolation: sequential
-  - owns/allows: deterministic verification fixture and concise milestone evidence only
+  - owns/allows: deterministic verification fixture and concise milestone evidence only; preserve approved local Vite host/port pin
   - outcome: complete Combat Proof happy path is reproducible and M2 limitations are explicit
-  - non-goals: new combat features, content expansion, deployment
-  - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY: Product Owner Combat Proof playthrough
-  - completion evidence: automated gates and manual acceptance pathway recorded; M2 ready for acceptance
+  - non-goals: new combat features, content expansion, deployment, M3
+  - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY Playwright Combat Proof at `http://127.0.0.1:4173/`
+  - completion evidence: automated gates and browser acceptance pathway recorded; M2 ready for Product Owner acceptance
+  - evidence: Vite pinned to `127.0.0.1:4173` (`strictPort`); full 23-file/98-test verify + doctor/sync green; Playwright Chromium matrix PASS (movement, light/heavy, directions, directional hit/miss, aim freeze, target lifecycle, dodge, guard, interaction/lifecycle regressions, no uncaught errors); acceptance matrix at `state/tasks/m2-combat-proof/reports/`
 
 ## Parallel groups
 - none — M2 steps share combat authority and execute sequentially
@@ -105,10 +106,11 @@ Task slug: `m2-combat-proof` (`python3 scripts/leanloop/task.py start m2-combat-
 - 2026-08-09 | Dodge is a strict non-cancelling 2/8/8-step action with collision-resolved active movement and active-only invulnerability; guard is an idle-only held state with constrained locomotion | Establishes deterministic defensive authority without stamina, parry, or incoming-damage systems
 - 2026-08-09 | Accepted attacks own a frozen execution-facing snapshot that exclusively drives presentation orientation and contact-shape orientation; live movement facing/mouse/render rotation cannot retarget an in-flight execution | Closes PO aim/contact disagreement without a second combat state machine
 - 2026-08-09 | M2.5 hit feedback and camera impulse are presentation-only and must not author damage or pause fixed-step authority | Keeps feel improvements from corrupting combat/simulation contracts
+- 2026-08-09 | Local Vite development binds predictably to `127.0.0.1:4173` with `strictPort` | Deterministic local verification endpoint; avoids reserved-port bind failures without dynamic fallback
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
 - Failed branch owner: orchestrator on the integration tree; never mix unrelated dirty-main changes
 
 ## Next milestone
-- M2.6 — Combat verification
+- Product Owner acceptance of M2 Combat Proof (no M3 started)

@@ -4,28 +4,45 @@ Updated: 2026-08-09 by Cursor
 Task: m2-combat-proof
 
 ## Status
-M2.5 implementation and verification complete. PO aim/contact correctness gate passed in a real Chromium browser; graybox presentation/hit feedback kept presentation-only.
+M2.1–M2.6 complete. Combat Proof verified with automated suite + Playwright Chromium at the canonical local endpoint.
 
-Classification: **M2.5 COMPLETE — M2.6 NEXT**
+Classification: **M2 READY FOR PRODUCT OWNER ACCEPTANCE** (agent does not grant PO acceptance)
 
-## Locked decisions
-- Accepted attacks own frozen `attackExecutionFacing`; presentation orientation and contact-shape orientation both consume that snapshot only.
-- Screen-to-world aim uses canvas bounds → NDC → current gameplay camera ray → y=0 plane; `camera.updateMatrixWorld(true)` before projection.
-- Contact sphere sizes unchanged (light 0.82/0.52, heavy 0.98/0.68); rear extent stays forward of the player (~0.30).
-- White primitives: player cream facing marker → teal debug chevron; training-target orientation box removed; weapon remains distinct; contact wireframe is active-window debug only.
-- Hit feedback is presentation-only (target flash/recoil + tiny camera impulse). No authoritative hit-stop / clock redesign.
+## Final input mappings
+- WASD / left-stick: move
+- LMB (canvas): light attack edge
+- Shift+LMB (canvas): heavy attack edge
+- Space: dodge edge
+- RMB hold (canvas): guard
+- UI Reset training target: health only; no combat intents
 
-## Root causes addressed
-- Large weapon yaw sweep made attacks look off-axis while contact followed facing; clicks during an in-flight commit were rejected so facing appeared “stuck.”
-- Misleading near-white facing markers on player and target read as gameplay props.
+## Attack / damage authority
+- Fixed-step combat action runtime owns phases; render never advances actions
+- Accepted aim freezes into `attackExecutionFacing` for presentation + contact
+- Light 8/4/14 · damage 20 · sphere 0.82/0.52
+- Heavy 18/6/30 · damage 35 · sphere 0.98/0.68
+- One hit per target per execution; defeated target clamps at 0
 
-## Verification
-- Focused aim/contact + full suite: 23 files / 98 tests.
-- `npm run verify`, `git diff --check`, strict doctor, sync check passed.
-- Playwright Chromium browser matrix: cardinals/diag execution facing match clicks; toward-target hit (100→80); away and perpendicular miss (100); Reset isolation; border move recovery; dodge/guard; no uncaught console errors.
+## Dodge / guard policy
+- Dodge 2/8/8, collision-resolved active move, active-only invulnerability, no voluntary cancel
+- Guard idle-only held RMB, 35% locomotion scale; blocks attack/dodge start while held
 
-## Not implemented
-Enemy AI/attacks, player health, stamina, parry, lock-on, combos/buffering, controller combat, production animation/VFX/audio, authoritative hit-stop, M2.6 fixture pack.
+## Canonical local endpoint
+- `npm run dev` → **http://127.0.0.1:4173/** (`vite.config.ts` host/port + `strictPort`)
 
-## Next session starts with
-M2.6 — Combat verification. Preserve M2.5 authority; do not start new combat features.
+## Verified browser evidence
+- Report: `state/tasks/m2-combat-proof/reports/m2-browser-accept.json`
+- Matrix: `state/tasks/m2-combat-proof/reports/m2-acceptance-matrix.md`
+- All passSummary keys true; consoleErrors empty
+
+## Remaining non-blocking debt
+- Combat feel polish (production animation/VFX/audio, hit-stop architecture, controller combat play-pass)
+- Bundle-size advisory
+- Physical controller verification deferred
+- Enemy AI/attacks, player health, stamina, parry, lock-on, combos not in M2
+
+## Product Owner acceptance
+Pending explicit PO playthrough/sign-off.
+
+## Next
+Do **not** start M3 until Product Owner accepts M2.

@@ -9,7 +9,7 @@ import type { CombatContactSnapshot } from '../combat/combatContact'
 import type { TrainingTargetSnapshot } from '../combat/trainingTarget'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M2.5' as const
+export const MILESTONE = 'M2.6' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {

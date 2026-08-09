@@ -15,7 +15,7 @@
 
 ## Commands (agents use only these)
 - install: `npm ci` (or `npm install` for fresh local setup)
-- dev: `npm run dev`
+- dev: `npm run dev` → `http://127.0.0.1:4173/` (host/port pinned in `vite.config.ts`)
 - lint: `npm run lint`
 - typecheck: `npm run typecheck`
 - test: `npm run test`

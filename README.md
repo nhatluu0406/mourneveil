@@ -4,9 +4,7 @@ Mourneveil is the working title for a local-first, browser-based 3D action RPG v
 
 ## Current phase
 
-Milestone M0 foundation is in the repo; M1 (Graybox Movement Foundation) is planned in `PLAN.md` and not yet implemented.
-
-The repository contains the local web-game foundation: a React application shell, a React Three Fiber scene, a mounted Rapier physics world, a deterministic foundation diagnostic, and automated verification. It intentionally contains no gameplay.
+Milestone **M2 Combat Proof** implementation is complete and awaiting Product Owner acceptance. See `docs/development/current-state.md` and `PLAN.md`.
 
 ## Requirements
 
@@ -20,11 +18,11 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite. No environment variables or external services are required.
+Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). The Vite server is pinned to that host and port. No environment variables or external services are required.
 
 ## Commands
 
-- `npm run dev` starts the local Vite development server.
+- `npm run dev` starts the local Vite development server at `http://127.0.0.1:4173/`.
 - `npm run lint` checks source and configuration files with ESLint.
 - `npm run typecheck` checks TypeScript without emitting files.
 - `npm run test` runs the Vitest suite once.
