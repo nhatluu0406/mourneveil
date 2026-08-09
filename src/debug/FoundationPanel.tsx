@@ -223,6 +223,14 @@ export function FoundationPanel({
           </dd>
         </div>
         <div>
+          <dt>Encounter</dt>
+          <dd>
+            {diagnostic.runtime.encounter.phase} · defeated{' '}
+            {diagnostic.runtime.encounter.defeatedEnemyIds.length}/
+            {diagnostic.runtime.encounter.enemyIds.length}
+          </dd>
+        </div>
+        <div>
           <dt>Enemy distance/facing</dt>
           <dd>
             {diagnostic.runtime.enemyDistanceToPlayer.toFixed(2)} · live (

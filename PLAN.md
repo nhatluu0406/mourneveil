@@ -73,8 +73,20 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - completion evidence: exact facing root cause recorded; execution-facing, pursuit/stop hysteresis, and obstacle behavior verified; browser smoke recorded
   - evidence: corrected mirrored local -Z presentation yaw; explicit per-execution facing now drives telegraph/contact/guard; authored 1.28 m stop and 1.48 m pursuit-resume thresholds prevent flapping; deterministic collision probes route around the center blocker and respect player/perimeter bodies in real Rapier tests; 130/130 full tests and build green; browser backend unavailable, local endpoint HTTP 200 only
 
-- [ ] 4. M3.4 — Enemy role variants
+- [x] 3.1. M3.3.1 — Enemy runtime liveness regression
   - depends: 3
+  - risk: HIGH
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: liveness root-cause fix, diagnostic milestone accuracy, regression tests, browser soak gate
+  - outcome: living enemy with living target cannot permanently stall in a non-terminal state; defeated-player path still advances committed action clocks into idle
+  - non-goals: timeout resets, teleports, forced re-aggro, controller work, M3.4 variants
+  - verifier: focused liveness tests + browser soak + `npm run verify && git diff --check`
+  - completion evidence: exact root cause recorded; browser multi-cycle soak pass
+  - evidence: root cause was `advanceMeleeEnemy` gated on `playerAlive`, freezing mid-attack/recovery while simulation kept running; also soft-lock escapes for null resolver / near-zero collision step inside attack range; milestone diagnostic → M3.3.1; browser gate pass (defeat→idle, reset cycles, roam); commit `6d709aa`
+
+- [x] 4. M3.4 — Enemy role variants
+  - depends: 3.1
   - risk: MEDIUM
   - preferred agent: Cursor
   - isolation: sequential
@@ -83,8 +95,9 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - non-goals: large roster, boss, loot tables
   - verifier: variant definition tests + `npm run verify && git diff --check`
   - completion evidence: variants share M3.1 authority without forked runtimes
+  - evidence: existing melee converted to skirmisher; brute added; shared `advanceMeleeEnemy` + `EnemyRuntime`; per-enemy collision resolvers and contact runtimes; browser dual-role smoke pass; commit `106d063`
 
-- [ ] 5. M3.5 — Encounter proof and enemy presentation
+- [x] 5. M3.5 — Encounter proof and enemy presentation
   - depends: 4
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -94,6 +107,7 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - non-goals: production VFX/audio, cinematic camera, content pipeline
   - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY browser encounter pass
   - completion evidence: runtime observations recorded; no authority drift
+  - evidence: `encounter.graybox.mixed` completes only when both roles defeated; role-tinted graybox presentation; telegraph/contact only during startup/active; browser soak saw both roles live + reset restores active; Vite chunk advisory non-blocking
 
 - [ ] 6. M3.6 — M3 verification
   - depends: 5
@@ -116,6 +130,8 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
 - 2026-08-09 | Player incoming-damage/health for enemy attacks remains an explicit unresolved PLAN gate | Prevents repeating the M2 training-target-health scope conflict
 - 2026-08-09 | Authorize minimal deterministic player combat health only for M3 enemy incoming-melee proof | Product Owner explicitly allowed max/current health, alive/defeated, clamped damage, and development reset/diagnostic while prohibiting broader health/RPG systems
 - 2026-08-09 | Accepted enemy attacks own one enemy-to-player facing snapshot; telegraph, contact, and defense consume it while pursuit uses authored stop/resume hysteresis and simulation-owned local collision steering | Fixes the M3.2 directional mismatch without presentation authority or a navmesh framework
+- 2026-08-09 | Enemy AI must keep advancing when the player is defeated; do not gate `advanceMeleeEnemy` on player alive | Prevents permanent non-terminal stall while the simulation clock remains running
+- 2026-08-09 | Graybox roles are data packages (skirmisher/brute) over one melee runtime; multi-enemy needs per-instance collision and contact dedup | Proves M3 architecture is data-driven without forked state machines
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate

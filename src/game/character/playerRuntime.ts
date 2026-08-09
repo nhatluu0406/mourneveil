@@ -50,8 +50,13 @@ import {
   type EnemyAttackSpatialSnapshot,
 } from '../enemies/meleeEnemy'
 import {
+  createGrayboxEncounterSnapshot,
+  type GrayboxEncounterSnapshot,
+} from '../encounters/grayboxEncounter'
+import {
   createGrayboxEnemyRuntimes,
   meleeRoleByRuntimeId,
+  GRAYBOX_ENEMY_ROLES,
 } from '../enemies/enemyRoles'
 import type { EnemyRuntime, EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import {
@@ -82,6 +87,7 @@ export interface PlayerRuntimeSnapshot {
   readonly enemyDistanceToPlayer: number
   readonly enemies: readonly EnemyRuntimeSnapshot[]
   readonly enemyAttacks: readonly EnemyAttackSpatialSnapshot[]
+  readonly encounter: GrayboxEncounterSnapshot
   readonly incomingContact: CombatContactSnapshot
 }
 
@@ -395,6 +401,10 @@ export class PlayerRuntime {
       ),
       enemies,
       enemyAttacks,
+      encounter: createGrayboxEncounterSnapshot(
+        GRAYBOX_ENEMY_ROLES.map((role) => role.runtimeId),
+        enemies,
+      ),
       incomingContact: {
         totalHitCount: [...this.enemyContactRuntimes.values()].reduce(
           (sum, runtime) => sum + runtime.snapshot().totalHitCount,

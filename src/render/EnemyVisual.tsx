@@ -54,6 +54,7 @@ export function EnemyVisual({
     material.color.set(role.presentation.primaryColor)
     material.color.offsetHSL(0, 0, -STATE_MIX[enemy.state] * 0.35)
     telegraph.visible = attackPresentation.telegraphVisible
+    // Debug contact sphere is presentation-only and only during the active window.
     contact.visible = attackPresentation.contactVisible
   })
 
