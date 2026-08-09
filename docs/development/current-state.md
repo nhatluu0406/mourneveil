@@ -1,26 +1,26 @@
 # Current State
 
 - Updated: 2026-08-10
-- Milestone: **M5 Connected Level — M5.6.1 correctness repair complete; PRODUCT OWNER ACCEPTANCE PENDING**
-- Active LeanLoop task: `m5-connected-level`
-- Status: M5.1–M5.6.1 passed with browser gates. No M5 tag yet. Do not start M6 until PO accepts.
+- Milestone: **M5 Connected Level closed for presentation handoff; M6 Presentation in progress after M5.6.2**
+- Active LeanLoop task: `m5-connected-level` (M6 steps live in `PLAN.md`)
+- Status: Tag `v0.5.0-connected-level` present. M5.6.2 regional HP audit PASS (no hazard; pressure skirmisher attributed). M6 authorized.
 
 ## What exists
 
 - Connected graybox level with zones, checkpoint, shortcut, final gate, SaveFileV2 world flags
 - Melee solid-world occlusion; encounter activation + egress leash; authored enemy route anchors
 - Landmark solids share visual/collider authorship; defeated enemies no longer remain solid blockers
-- Pointer aim presentation uses frozen execution facing with correct local −Z yaw
+- Regional HP soak gate proves neutralized zones never drain; live final-approach damage is authored pressure melee only
 - Compact collapsible development diagnostics; inventory display names
-- Browser gates: `gate-m531-correctness`, `gate-m54-readability`, `gate-m55-tuning`, `gate-m56-playthrough`, `gate-m561-correctness`
+- Browser gates: `gate-m531` … `gate-m561`, `gate-m562-regional-hp`
 
 ## Known limitations
 
 - Authored navigation anchors only (no navmesh/A*)
 - Two melee roles; no boss/elite/ranged
 - Controller deferred; production art/audio deferred
-- Vite main-chunk >500 kB advisory remains non-blocking
+- Presentation still graybox pending M6
 
 ## Next executable work
 
-Product Owner acceptance of corrected M5. After accept and push, create `v0.5.0-connected-level`. Then M6 only with explicit authorization.
+M6.1 — Actor and world presentation foundation (`PLAN.md`).

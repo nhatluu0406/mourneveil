@@ -100,9 +100,97 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: focused collision/aim/HP tests; `gate-m561-correctness.mjs`; lint; typecheck; full test; build; doctor/sync
   - evidence: PASS — landmarks share collider+visual; defeated enemies disable solid colliders; PlayerVisual uses `localNegativeZFacingYaw`; HP soak at watch-column stable under occlusion; `gate-m561` + M5.3.1/M5.4/M5.5/M5.6 gates PASS; arrival connection moved to (−11, 5)
 
+- [x] 6.2. M5.6.2 — Unexplained regional damage / hazard audit
+  - depends: 6.1 PASS + Product Owner final-approach HP report
+  - risk: HIGH
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: damage-path audit, regional HP soak tests/browser gate, attribution diagnostics; no invented hazard system
+  - outcome: every regional HP loss attributed; no silent sensor/zone damage; no HIGH-risk authority redesign required before M6
+  - non-goals: inventing traps; M6 presentation; combat redesign
+  - verifier: `regionalDamage.integration.test.ts`; `gate-m562-regional-hp.mjs`; lint; typecheck; `git diff --check`
+  - evidence: PASS — no environmental hazard system exists; neutralized soaks in all authored zones keep HP stable; live final-approach drain attributes exclusively to `enemy.skirmisher.pressure` (`encounter.m5.pressure`); inactive/defeated enemies cannot damage; one-hit-per-execution holds; save/respawn do not duplicate sources
+
+# PLAN: M6 Presentation and Playable Identity
+<!-- Presentation milestone. Do not change combat/world authority. -->
+
+## Goal
+
+Move Mourneveil from technical graybox toward a coherent dark-fantasy playable vertical slice without replacing stable gameplay authority.
+
+## Scope
+
+- Distinct procedural actor/world silhouettes and landmarks
+- Gameplay HUD + combat readability; Details panel remains collapsed-by-default and DEV-only
+- Centralized dark-fantasy palette, lighting, environment composition
+- Combat/interaction presentation polish driven by authoritative events
+- Full browser playthrough + M5 correctness regressions + production boundary
+
+## Non-goals
+
+- Production character models, animation packs, audio, postprocessing stack
+- Boss/new roles/ranged/leveling/quests/minimap/controller/deployment/navmesh
+- M7
+
+## Steps
+
+- [ ] 1. M6.1 — Actor and world presentation foundation
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: player/enemy silhouettes, defeated presentation, checkpoint/Echo/loot/gate visuals (procedural only)
+  - outcome: Details collapsed, tester identifies player/skirmisher/brute/checkpoint/Echo/loot/shortcut/final gate
+  - non-goals: combat authority changes; production assets
+  - verifier: browser identity gate; lint; typecheck; `git diff --check`
+
+- [ ] 2. M6.2 — Gameplay HUD and combat readability
+  - depends: 1 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: gameplay HUD, inventory readability, combat projection states, Details policy
+  - outcome: play without Details; HP/flask/Echoes/weapon/charm/prompts readable; combat states readable
+  - verifier: browser HUD/combat gate; lint; typecheck; `git diff --check`
+
+- [ ] 3. M6.3 — Dark-fantasy environment and visual identity
+  - depends: 2 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: palette/theme, zone composition, lighting, grid policy
+  - outcome: route/zone identity readable; no visual/collider contradiction
+  - verifier: browser identity playthrough; lint; typecheck; `git diff --check`
+
+- [ ] 4. M6.4 — Combat presentation and interaction polish
+  - depends: 3 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: attack/telegraph/hit/guard/dodge/interaction feedback (presentation-only)
+  - outcome: repeated actions readable without Details
+  - verifier: browser feedback gate; lint; typecheck; `git diff --check`
+
+- [ ] 5. M6.5 — Full visual/gameplay browser verification
+  - depends: 4 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: end-to-end SaveFileV2 playthrough; M5 correctness re-runs
+  - outcome: full loop playable with Details collapsed; no console errors
+  - verifier: presentation playthrough + M5 gates; lint; typecheck; test; build
+
+- [ ] 6. M6.6 — Hardening and M6 acceptance gate
+  - depends: 5 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: bounded visual/UI cleanup; production boundary; soak
+  - outcome: production build lacks DEV mutations/Details; HUD present; soak clean
+  - verifier: `npm run verify`; production preview; doctor/sync; `git diff --check`
+
 ## Parallel groups
 
-- none — world, save, placement, and runtime integration are sequential authority work
+- none — presentation builds on M5 authority sequentially
 
 ## Decisions
 
@@ -111,6 +199,8 @@ Replace the combat-test arena with one small connected graybox level that suppor
 - 2026-08-10 | Checkpoint rest/death respawn recreate all connected-level enemies, preserve opened shortcuts and loot-once memory, and never grant Echoes during reset | Keeps traversal progress and rewards deterministic across recovery cycles
 - 2026-08-10 | Shape the graybox around direct pursuit and local steering: open encounter rooms, sparse blockers, and no route that requires navmesh | Respects the accepted M3 navigation boundary
 - 2026-08-10 | Melee hits require overlap AND solid-world occlusion clear; M5 encounters activate on zone entry with egress leash; blocked pursuit uses authored connection/detour anchors | Product Owner M5.3.1 blockers B1–B3
+- 2026-08-10 | No environmental hazard/trap system; regional HP loss must attribute to authored enemy melee or be treated as a bug | M5.6.2 Product Owner audit
+- 2026-08-10 | M5 tagged `v0.5.0-connected-level`; authorized M5.6.2 then M6 presentation macro-batch on `main` | Explicit Product Owner authorization
 
 ## Escalation
 

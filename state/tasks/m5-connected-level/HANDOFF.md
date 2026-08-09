@@ -1,57 +1,49 @@
 # HANDOFF
 
 Updated: 2026-08-10 by Cursor
-Task: m5-connected-level
+Task: m5-connected-level → transitioning to M6 presentation
 
 ## Status
 
-**M5.6.1 PASS.** M5 READY FOR PRODUCT OWNER ACCEPTANCE. Do not tag, push, or start M6 until PO accepts the corrected build.
+**M5.6.2 PASS.** No environmental hazard system. Regional HP drain is authored enemy melee only. M6 may begin.
 
-## M5.6.1 — Connected-level correctness repair
+## M5.6.2 — Regional HP / hazard audit
 
-### Collision A (watch-column) + B (approach-cairn)
+### Hazard audit
 
-- Root cause: M5.4 landmarks were **visual-only** meshes with no matching Rapier colliders (`CONNECTED_LEVEL_LANDMARKS` missing from collider set).
-- Secondary: defeated enemy capsules stayed **solid**, trapping the player against corpses near the watch-column spawn.
-- Fix: landmarks authored once in `connectedLevelCollision.ts` and shared by visuals + physics; defeated enemies disable body/hurtbox colliders; player RigidBody syncs authoritative transform each frame.
-- Authoring: `horizontalFootprintOverlapsSolid` + `connectedLevelAuthoring.test.ts`; moved open `connection.arrival-first-combat` to `(-11, 5)` out of `wall.arrival-choke`.
-- Regression: Rapier landmark integration tests; browser `gate-m561-correctness.mjs` A/B PASS (stop at solid faces).
+- Repository has **no** trap/environmental-damage system (STACK/PLAN/code).
+- Player HP mutates only via `GameRuntime.applyPlayerDamage` (debug gate + enemy incoming melee resolve).
+- Checkpoint/zone/shortcut/final-gate/loot/Echo sensors are not damage sources.
 
-### Mouse aim (C)
+### Exact damage source(s)
 
-- Root cause (first incorrect stage): **presentation yaw**. `PlayerVisual` used `atan2(facing.x, -facing.z)` instead of `localNegativeZFacingYaw` (`atan2(-facing.x, -facing.z)`), so local −Z / contact marker pointed opposite for ±X aim. Authoritative execution facing was already correct.
-- Secondary: aim plane now at player Y; projection refresh before raycast.
-- Browser: cardinals + diagonals + pointer re-aim + Details/resize PASS.
+| Region | Neutralized soak | Live soak attribution |
+| --- | --- | --- |
+| All authored zones | HP unchanged | — |
+| Final approach (PO location) | HP unchanged | `enemy.skirmisher.pressure` / `enemy.skirmisher.attack` dmg 10 |
+| First combat near intro | — | `enemy.skirmisher.introduction` |
+| Mixed center | — | `enemy.skirmisher.1` + `enemy.brute.1` |
 
-### Automatic HP drain (D)
+### Root cause of PO observation
 
-- Exact source: `enemy.skirmisher.introduction` melee after zone activation at watch-column (~1.05 m), while player was clipped inside the **non-colliding** landmark (looked safe; LOS was clear through empty air).
-- Occlusion + landmark colliders block through-prop hits; soak at column footprint keeps HP stable when LOS is blocked.
-- Not fixed with invulnerability/clamps.
+Legitimate `encounter.m5.pressure` skirmisher melee in `zone.final-approach`, not a silent region hazard. Presentation readability of that threat is deferred to M6 (not an authority defect).
 
-### Encounter / navigation
+### Evidence
 
-- Activation + egress leash unchanged and still green (`gate-m531`).
-- Authored routes validated outside solids; open arrival connection offset; gated/shortcut anchors validated when open.
-
-### Browser evidence
-
-- `gate-m561-correctness.mjs` PASS
-- `gate-m531-correctness.mjs` PASS
-- `gate-m54-readability.mjs` PASS
-- `gate-m55-tuning.mjs` PASS (re-run alone after one flaky sequential fail)
-- `gate-m56-playthrough.mjs` PASS
+- Tests: `src/game/world/regionalDamage.integration.test.ts` PASS
+- Browser: `scripts/browser/gate-m562-regional-hp.mjs` VERDICT PASS
+- No HIGH-risk combat/world-authority redesign required
 
 ## Remaining limitations
 
 - Authored anchors/detours only — not navmesh/A*
-- Controller deferred; no M6 presentation
-- Vite main-chunk >500 kB advisory remains non-blocking
+- Controller deferred
+- Graybox presentation still technical until M6
 
-## Commits (this step)
+## Commits
 
-- pending: `fix(world): restore connected level gameplay correctness`
+- `fix(world): eliminate unexplained regional damage`
 
 ## Next action
 
-Product Owner acceptance of corrected M5. After accept + push, PO creates tag `v0.5.0-connected-level`. Do not start M6.
+Execute M6.1–M6.6 presentation macro-batch on `main`. Do not start M7. Do not push/tag.
