@@ -98,7 +98,7 @@ export function FoundationPanel({
             LMB {diagnostic.runtime.combatInput.primaryButtonHeld ? 'held' : 'up'} · RMB{' '}
             {diagnostic.runtime.combatInput.guardHeld ? 'held' : 'up'} · Space{' '}
             {diagnostic.runtime.combatInput.dodgeKeyHeld ? 'held' : 'up'}
-            {' '}· F checkpoint · R respawn
+            {' '}· E flask · F checkpoint · R respawn
           </dd>
         </div>
         <div>
@@ -210,6 +210,15 @@ export function FoundationPanel({
             {diagnostic.runtime.checkpoint.id} ·{' '}
             {diagnostic.runtime.checkpoint.activated ? 'active' : 'inactive'} · current{' '}
             {diagnostic.runtime.checkpoint.currentCheckpointId ?? 'none'}
+          </dd>
+        </div>
+        <div>
+          <dt>Healing flask</dt>
+          <dd>
+            {diagnostic.runtime.flask.currentCharges}/
+            {diagnostic.runtime.flask.maximumCharges} charges · heal{' '}
+            {diagnostic.runtime.flask.healAmount} · last{' '}
+            {diagnostic.runtime.flask.lastRestoredHealth}
           </dd>
         </div>
         <div>

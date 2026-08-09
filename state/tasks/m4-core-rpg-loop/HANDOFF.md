@@ -6,7 +6,7 @@ Task: m4-core-rpg-loop
 
 ## Status
 
-M4.1 and M4.2 complete and internally verified; M4.3 is next.
+M4.1–M4.3 complete and verified. M4.4 was not started.
 
 ## M4.1 result
 
@@ -23,6 +23,31 @@ M4.1 and M4.2 complete and internally verified; M4.3 is next.
 - Focused gate: 34 tests, lint, typecheck, and diff check passed.
 - Runtime: local Vite returned HTTP 200; prescribed browser discovery returned no available backend, so repeated manual death/respawn remains unverified.
 
+## M4.3 result
+
+- Centralized flask: 3 maximum charges, 40 healing, E semantic request.
+- Use is a 12-step startup, 1-step authoritative heal/charge-consume phase, and 18-step recovery; movement is committed through the shared action runtime.
+- Dead, full-health, empty, guard, or another committed action rejects use.
+- Checkpoint activation/re-interaction and checkpoint respawn refill all charges; respawn is treated as rest.
+- Focused gate: 47 tests, lint, typecheck, and diff check passed.
+
+## Final verification
+
+- Full suite: 37 files, 159 tests passed.
+- `npm run lint`, `npm run typecheck`, `npm run build`, `npm run verify`, `git diff --check`, LeanLoop doctor strict, and LeanLoop sync check passed.
+- Non-blocking existing Vite main-chunk size advisory remains.
+
+## Encounter reset policy
+
+- Respawn resets both mixed-encounter enemies to authored spawns/health/idle state and clears their outgoing contact dedup.
+- Player action, defense, movement intent/velocity, outgoing contact, and browser held/pending input are cleared.
+- The independent training target is preserved.
+
+## Browser evidence
+
+- Local Vite endpoint returned HTTP 200 during M4.2.
+- In-app browser discovery returned an empty backend list, so fight/death/respawn and E-heal runtime interactions remain manually unverified.
+
 ## Locked scope
 
 - Execute M4.1 → M4.2 → M4.3 sequentially with internal verification gates.
@@ -31,4 +56,4 @@ M4.1 and M4.2 complete and internally verified; M4.3 is next.
 
 ## Next action
 
-Commit M4.2, then implement M4.3 healing flask with E use and checkpoint/respawn refill policy.
+M4.4 — Loot pickup proof. Do not start it without a new Product Owner batch.

@@ -14,16 +14,18 @@ describe('createFoundationDiagnostic', () => {
         dodgeKeyHeld: false,
         checkpointKeyHeld: false,
         respawnKeyHeld: false,
+        flaskKeyHeld: false,
         pendingAttack: false,
         pendingDodge: false,
         pendingCheckpointInteraction: false,
         pendingRespawn: false,
+        pendingFlaskUse: false,
       },
     }
 
     expect(createFoundationDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M3.6',
+      milestone: 'M4.3',
       rendererReady: true,
       physicsReady: false,
       foundationReady: false,

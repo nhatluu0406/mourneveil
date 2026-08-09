@@ -8,15 +8,15 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (141L)
+- PLAN.md (97L)
 - README.md (33L)
 - SETUP.md (152L)
-- STACK.md (68L)
+- STACK.md (69L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (38L)
-- tmp_m36_browser_accept.json (180L)
-- ... +5 more
+- tsconfig.app.json (24L)
+- ... +3 more
 - **.agents/** (0 files)
   - **.agents/skills/** (0 files)
     - **.agents/skills/codebase-map/** (1 files)
@@ -188,17 +188,18 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - App.tsx (83L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (118L)
-    - useFoundationRuntime.ts (144L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserAttackInput
+    - useFoundationRuntime.ts (172L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserAttackInput
   - **src/debug/** (1 files)
-    - FoundationPanel.tsx (276L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
+    - FoundationPanel.tsx (294L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
   - **src/game/** (0 files)
-    - **src/game/character/** (7 files)
+    - **src/game/character/** (12 files)
       - enemyIncomingCombat.integration.test.ts (112L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
-      - playerCombatHealth.test.ts (29L) -- imports: ./playerCombatHealth
-      - playerCombatHealth.ts (58L) -- symbols: PLAYER_COMBAT_ID, PLAYER_MAXIMUM_HEALTH, PLAYER_HURTBOX_ID, PLAYER_HURTBOX_RADIUS, PlayerCombatSnapshot; imports: ../combat/combatHealth, ../combat/combatTarget, ./playerMotor
-      - playerMotor.test.ts (103L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ./playerMotor
-      - playerMotor.ts (206L) -- symbols: PLAYER_MOVE_SPEED, PLAYER_ACCELERATION, PLAYER_DECELERATION, PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED; imports: ../../input/playerMovementIntent
-      - playerRuntime.test.ts (179L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ../combat/playerAttackActions
-      - playerRuntime.ts (430L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMoveme
+      - playerCombatHealth.test.ts (41L) -- imports: ./playerHealth
+      - playerCombatHealth.ts (9L) -- imports: ./playerHealth
+      - playerFlask.integration.test.ts (112L) -- imports: ../../input/playerFlaskIntent, ../../input/playerRecoveryIntent, ../core/fixedStepClock
+      - playerFlask.test.ts (25L) -- imports: ../combat/combatHealth, ./playerFlask
+      - playerFlask.ts (104L) -- symbols: PLAYER_FLASK_ACTION_ID, PLAYER_FLASK_RESOURCE_ID, PlayerFlaskDefinition, PLAYER_FLASK_DEFINITION, PlayerFlaskSnapshot; imports: ../combat/combatAction, ../combat/combatActionRuntime, ../combat/combatHealth
+      - playerHealth.ts (66L) -- symbols: PLAYER_ID, PLAYER_MAXIMUM_HEALTH, PLAYER_HURTBOX_ID, PLAYER_HURTBOX_RADIUS, PlayerHealthSnapshot; imports: ../combat/combatHealth, ../combat/combatTarget, ./playerMotor
+      - playerMotor.test.ts (103L) -- imports: ../../input/playerM
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

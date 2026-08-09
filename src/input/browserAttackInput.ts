@@ -10,12 +10,14 @@ import {
   type PlayerCheckpointInteractionRequest,
   type PlayerRespawnRequest,
 } from './playerRecoveryIntent'
+import { PLAYER_FLASK_USE_REQUEST, type PlayerFlaskUseRequest } from './playerFlaskIntent'
 
 const PRIMARY_MOUSE_BUTTON = 0
 const SECONDARY_MOUSE_BUTTON = 2
 const DODGE_CODE = 'Space'
 const CHECKPOINT_INTERACTION_CODE = 'KeyF'
 const RESPAWN_CODE = 'KeyR'
+const FLASK_CODE = 'KeyE'
 
 export type AimDirectionResolver = (
   clientX: number,
@@ -28,10 +30,12 @@ export interface CombatInputSnapshot {
   readonly dodgeKeyHeld: boolean
   readonly checkpointKeyHeld: boolean
   readonly respawnKeyHeld: boolean
+  readonly flaskKeyHeld: boolean
   readonly pendingAttack: boolean
   readonly pendingDodge: boolean
   readonly pendingCheckpointInteraction: boolean
   readonly pendingRespawn: boolean
+  readonly pendingFlaskUse: boolean
 }
 
 export class BrowserAttackInput {
@@ -40,10 +44,12 @@ export class BrowserAttackInput {
   private dodgeKeyHeld = false
   private checkpointKeyHeld = false
   private respawnKeyHeld = false
+  private flaskKeyHeld = false
   private pendingAttack: PlayerAttackRequest | null = null
   private pendingDodge: PlayerDodgeRequest | null = null
   private pendingCheckpointInteraction: PlayerCheckpointInteractionRequest | null = null
   private pendingRespawn: PlayerRespawnRequest | null = null
+  private pendingFlaskUse: PlayerFlaskUseRequest | null = null
   private connected = false
 
   constructor(
@@ -117,6 +123,12 @@ export class BrowserAttackInput {
     return request
   }
 
+  consumeFlaskUseRequest(): PlayerFlaskUseRequest | null {
+    const request = this.pendingFlaskUse
+    this.pendingFlaskUse = null
+    return request
+  }
+
   guardHeld(): boolean {
     return this.guardHeldState
   }
@@ -128,10 +140,12 @@ export class BrowserAttackInput {
       dodgeKeyHeld: this.dodgeKeyHeld,
       checkpointKeyHeld: this.checkpointKeyHeld,
       respawnKeyHeld: this.respawnKeyHeld,
+      flaskKeyHeld: this.flaskKeyHeld,
       pendingAttack: this.pendingAttack !== null,
       pendingDodge: this.pendingDodge !== null,
       pendingCheckpointInteraction: this.pendingCheckpointInteraction !== null,
       pendingRespawn: this.pendingRespawn !== null,
+      pendingFlaskUse: this.pendingFlaskUse !== null,
     }
   }
 
@@ -141,10 +155,12 @@ export class BrowserAttackInput {
     this.dodgeKeyHeld = false
     this.checkpointKeyHeld = false
     this.respawnKeyHeld = false
+    this.flaskKeyHeld = false
     this.pendingAttack = null
     this.pendingDodge = null
     this.pendingCheckpointInteraction = null
     this.pendingRespawn = null
+    this.pendingFlaskUse = null
   }
 
   private readonly handlePointerDown = (event: PointerEvent): void => {
@@ -214,6 +230,10 @@ export class BrowserAttackInput {
       event.preventDefault()
       this.respawnKeyHeld = true
       this.pendingRespawn = PLAYER_RESPAWN_REQUEST
+    } else if (event.code === FLASK_CODE && !this.flaskKeyHeld) {
+      event.preventDefault()
+      this.flaskKeyHeld = true
+      this.pendingFlaskUse = PLAYER_FLASK_USE_REQUEST
     }
   }
 
@@ -221,6 +241,7 @@ export class BrowserAttackInput {
     if (event.code === DODGE_CODE) this.dodgeKeyHeld = false
     if (event.code === CHECKPOINT_INTERACTION_CODE) this.checkpointKeyHeld = false
     if (event.code === RESPAWN_CODE) this.respawnKeyHeld = false
+    if (event.code === FLASK_CODE) this.flaskKeyHeld = false
   }
 
   private readonly handleFocusLoss = (): void => {

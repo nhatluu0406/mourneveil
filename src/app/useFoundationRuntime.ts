@@ -81,25 +81,31 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
         (frameTime - previousFrameTime) / 1_000,
       )
       previousFrameTime = frameTime
-      const composed = composeMovementIntents(
+      let composed = composeMovementIntents(
         keyboardInput.movementIntent(),
         gamepadInput.movementIntent(),
       )
       const combatInput = combatInputRef.current
-      const attackRequest = combatInput?.consumeAttackRequest() ?? null
-      const dodgeRequest = combatInput?.consumeDodgeRequest() ?? null
-      const checkpointRequest =
-        combatInput?.consumeCheckpointInteractionRequest() ?? null
       const respawnRequest = combatInput?.consumeRespawnRequest() ?? null
-      if (checkpointRequest !== null) {
-        runtime.requestCheckpointInteraction(checkpointRequest)
-      }
       if (respawnRequest !== null) {
         const result = runtime.requestRespawn(respawnRequest)
         if (result.accepted) {
           keyboardInput.reset()
+          gamepadInput.reset()
           combatInput?.reset()
+          composed = composeMovementIntents(
+            keyboardInput.movementIntent(),
+            gamepadInput.movementIntent(),
+          )
         }
+      }
+      const attackRequest = combatInput?.consumeAttackRequest() ?? null
+      const dodgeRequest = combatInput?.consumeDodgeRequest() ?? null
+      const checkpointRequest =
+        combatInput?.consumeCheckpointInteractionRequest() ?? null
+      const flaskRequest = combatInput?.consumeFlaskUseRequest() ?? null
+      if (checkpointRequest !== null) {
+        runtime.requestCheckpointInteraction(checkpointRequest)
       }
       runtime.setGuardIntent(combatInput?.guardHeld() ?? false)
       if (attackRequest !== null) {
@@ -107,6 +113,9 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
       }
       if (dodgeRequest !== null) {
         runtime.requestPlayerDodge(dodgeRequest, composed.intent)
+      }
+      if (flaskRequest !== null) {
+        runtime.requestPlayerFlaskUse(flaskRequest)
       }
       const snapshot = runtime.advanceFrame(
         frameDeltaSeconds,
@@ -153,9 +162,11 @@ function neutralCombatInputSnapshot(): CombatInputSnapshot {
     dodgeKeyHeld: false,
     checkpointKeyHeld: false,
     respawnKeyHeld: false,
+    flaskKeyHeld: false,
     pendingAttack: false,
     pendingDodge: false,
     pendingCheckpointInteraction: false,
     pendingRespawn: false,
+    pendingFlaskUse: false,
   }
 }

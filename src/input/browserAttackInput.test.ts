@@ -96,16 +96,20 @@ describe('BrowserAttackInput', () => {
     expect(input.consumeDodgeRequest()).toEqual({ type: 'player-dodge' })
   })
 
-  it('maps F and R to semantic checkpoint and respawn edges', () => {
+  it('maps E, F, and R to semantic flask, checkpoint, and respawn edges', () => {
     const { input, windowTarget } = createInput()
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyE' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
+    expect(input.consumeFlaskUseRequest()).toEqual({ type: 'player-flask-use' })
     expect(input.consumeCheckpointInteractionRequest()).toEqual({
       type: 'player-checkpoint-interaction',
     })
     expect(input.consumeRespawnRequest()).toEqual({ type: 'player-respawn' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyE' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
+    expect(input.consumeFlaskUseRequest()).toBeNull()
     expect(input.consumeCheckpointInteractionRequest()).toBeNull()
     expect(input.consumeRespawnRequest()).toBeNull()
   })
@@ -137,10 +141,12 @@ describe('BrowserAttackInput', () => {
       dodgeKeyHeld: false,
       checkpointKeyHeld: false,
       respawnKeyHeld: false,
+      flaskKeyHeld: false,
       pendingAttack: false,
       pendingDodge: false,
       pendingCheckpointInteraction: false,
       pendingRespawn: false,
+      pendingFlaskUse: false,
     })
 
     dispatchEventWithProperties(surface, 'pointerleave', { buttons: 0 })

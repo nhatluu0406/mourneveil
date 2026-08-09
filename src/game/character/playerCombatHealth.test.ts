@@ -27,4 +27,15 @@ describe('canonical player health', () => {
       center: { x: 2, y: 0.82, z: -1 },
     })
   })
+
+  it('restores living health by a deterministic amount and clamps at maximum', () => {
+    const player = new PlayerHealthRuntime({ x: 0, y: 0.82, z: 0 })
+    player.applyDamage(25)
+    expect(player.restore(40)).toMatchObject({
+      applied: true,
+      restoredHealth: 25,
+      health: { current: 100, alive: true },
+    })
+    expect(player.restore(1)).toMatchObject({ applied: false, restoredHealth: 0 })
+  })
 })

@@ -43,7 +43,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - verifier: focused checkpoint/respawn/encounter reset tests, M4.1 regressions, `npm run lint`, `npm run typecheck`, HUMAN-VERIFY repeated browser death/respawn when browser control is available
   - evidence: one `checkpoint.graybox.entry` activates through semantic F interaction; dead-only semantic R respawn restores authored transform/full health, clears player action/defense/contact state, and resets both enemy runtimes/contact dedup at their authored spawns; 34 focused tests plus lint/typecheck/diff check green; Vite HTTP 200 but in-app browser list empty, so manual cycle unverified
 
-- [ ] 3. M4.3 — Healing flask
+- [x] 3. M4.3 — Healing flask
   - depends: 2
   - risk: HIGH
   - preferred agent: Codex
@@ -52,6 +52,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - outcome: eligible living damaged player consumes one charge and heals deterministically; checkpoint activation/rest refills; death/full health/no charge/committed-action use is rejected
   - non-goals: inventory integration, upgrades, animation assets, status effects
   - verifier: focused flask/input/checkpoint tests, M4.1-M4.2 regressions, then full repository verification gate
+  - evidence: E emits one semantic use edge; centralized 3-charge/40-health flask uses a 12/1/18-step committed action, consumes/heals once on its active step, clamps through canonical health, and rejects dead/full/no-charge/guard/committed-action use; checkpoint interaction/rest and respawn refill; 47 focused tests green; final 159/159 suite, lint, typecheck, build, verify, diff check, doctor strict, and sync check green
 
 - [ ] 4. M4.4 — Loot pickup proof
   - depends: 3
@@ -84,6 +85,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
 - 2026-08-09 | M3 Enemy Framework Product Owner accepted; initialize M4 Core RPG Loop | Product Owner explicitly authorized M4.1-M4.3
 - 2026-08-09 | Promote the existing M3 player combat health instance rather than create a parallel health system | Preserves proven incoming-damage and combat target authority
 - 2026-08-09 | M4.1-M4.3 use one checkpoint, deterministic encounter recreation, and a centralized limited flask | Smallest complete death/recovery loop before loot, equipment, and persistence
+- 2026-08-09 | Respawn counts as checkpoint rest and refills the canonical flask; the mixed encounter is reset while the independent training target is preserved | Makes repeated recovery deterministic without browser reload or broad world reset
 
 ## Escalation
 

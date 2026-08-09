@@ -5,6 +5,7 @@ import type {
   PlayerCheckpointInteractionRequest,
   PlayerRespawnRequest,
 } from '../../input/playerRecoveryIntent'
+import type { PlayerFlaskUseRequest } from '../../input/playerFlaskIntent'
 import type {
   CombatActionRequest,
   CombatResourceValidator,
@@ -72,6 +73,12 @@ import {
 } from '../world/checkpoint'
 import { PlayerHealthRuntime, type PlayerHealthSnapshot } from './playerHealth'
 import {
+  PLAYER_FLASK_DEFINITION,
+  PLAYER_FLASK_ACTION_ID,
+  PlayerFlaskRuntime,
+  type PlayerFlaskSnapshot,
+} from './playerFlask'
+import {
   createPlayerMotorState,
   stopPlayerMotor,
   stepPlayerMotor,
@@ -99,6 +106,7 @@ export interface PlayerRuntimeSnapshot {
   readonly encounter: GrayboxEncounterSnapshot
   readonly incomingContact: CombatContactSnapshot
   readonly checkpoint: CheckpointSnapshot
+  readonly flask: PlayerFlaskSnapshot
 }
 
 export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
@@ -113,6 +121,7 @@ export class PlayerRuntime {
     [
       ...PLAYER_ATTACK_DEFINITIONS.map((definition) => definition.action),
       PLAYER_DODGE_ACTION,
+      PLAYER_FLASK_DEFINITION.action,
     ],
   )
   private readonly defenseRuntime = new PlayerDefenseRuntime()
@@ -120,6 +129,7 @@ export class PlayerRuntime {
   private readonly enemyContactRuntimes = new Map<string, CombatContactRuntime>()
   private readonly trainingTargetRuntime = new TrainingTargetRuntime()
   private readonly checkpointRuntime = new CheckpointRuntime()
+  private readonly flaskRuntime = new PlayerFlaskRuntime()
   private playerState = createPlayerMotorState(
     GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
   )
@@ -271,13 +281,10 @@ export class PlayerRuntime {
     }
   }
 
-  /** Development-only diagnostic until the M4.2 respawn loop replaces it. */
+  /** Development-only restore; gameplay recovery must use checkpoint respawn. */
   restorePlayerForDevelopment(): void {
     this.playerHealthRuntime.restoreToMaximum()
-    this.combatRuntime.reset()
-    this.defenseRuntime.reset()
-    this.contactRuntime.reset()
-    this.attackExecutionFacing = null
+    this.resetPlayerActionState()
     this.playerState = stopPlayerMotor(this.playerState)
   }
 
@@ -289,14 +296,40 @@ export class PlayerRuntime {
     return result
   }
 
+  requestPlayerFlaskUse(request: PlayerFlaskUseRequest): CombatActionStartResult {
+    void request
+    if (!this.defenseRuntime.canStartAction()) {
+      return {
+        accepted: false,
+        actionId: PLAYER_FLASK_ACTION_ID,
+        reason: 'guard-active',
+      }
+    }
+    const result = this.requestCombatAction(
+      { type: 'start-action', actionId: PLAYER_FLASK_ACTION_ID },
+      () => {
+        const eligibility = this.flaskRuntime.validateUse(
+          this.playerHealthRuntime.snapshot().health,
+        )
+        return eligibility.allowed
+          ? { allowed: true }
+          : { allowed: false, reason: eligibility.reason }
+      },
+    )
+    this.flaskRuntime.acceptUse(result)
+    return result
+  }
+
   requestCheckpointInteraction(
     request: PlayerCheckpointInteractionRequest,
   ): CheckpointInteractionResult {
     void request
-    return this.checkpointRuntime.interact(
+    const result = this.checkpointRuntime.interact(
       this.playerState.position,
       this.playerHealthRuntime.snapshot().health.alive,
     )
+    if (result.accepted) this.flaskRuntime.refill()
+    return result
   }
 
   requestRespawn(request: PlayerRespawnRequest): PlayerRespawnResult {
@@ -313,6 +346,7 @@ export class PlayerRuntime {
     this.playerHealthRuntime.updatePosition(respawnPosition)
     this.playerHealthRuntime.restoreToMaximum()
     this.resetPlayerActionState()
+    this.flaskRuntime.refill()
     this.resetGrayboxEncounter()
     return {
       accepted: true,
@@ -334,6 +368,11 @@ export class PlayerRuntime {
         this.attackExecutionFacing = null
       }
       this.defenseRuntime.advanceFixedStep(combat)
+      const flaskHealAmount = this.flaskRuntime.advanceFixedStep(combat)
+      if (flaskHealAmount !== null) {
+        const restoration = this.playerHealthRuntime.restore(flaskHealAmount)
+        this.flaskRuntime.recordRestoration(restoration.restoredHealth)
+      }
       if (playerAlive && this.collisionResolver !== null) {
         const defense = this.defenseRuntime.snapshot(combat)
         if (defense.dodgeDirection !== null) {
@@ -481,6 +520,7 @@ export class PlayerRuntime {
         lastHit: lastIncoming.lastHit,
       },
       checkpoint: this.checkpointRuntime.snapshot(),
+      flask: this.flaskRuntime.snapshot(),
     }
   }
 
@@ -501,6 +541,7 @@ export class PlayerRuntime {
     this.combatRuntime.reset()
     this.defenseRuntime.reset()
     this.contactRuntime.reset()
+    this.flaskRuntime.cancelCommittedUse()
     this.attackExecutionFacing = null
   }
 }
