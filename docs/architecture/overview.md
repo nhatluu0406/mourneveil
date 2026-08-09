@@ -28,6 +28,10 @@ Authoritative state + typed events
 
 Owns bootstrap, lifecycle, top-level error handling, debug-mode selection, and local application configuration.
 
+### Game/session runtime
+
+Owns fixed-step orchestration and composes player, combat, enemy, encounter, world, item, and save domains. It lives above feature domains in `src/game/runtime/`; low-level `game/core` must not depend upward on it.
+
 ### Simulation
 
 Owns authoritative gameplay state and outcomes. It must not depend on React components or browser layout.
@@ -70,6 +74,6 @@ Avoid cross-imports between sibling feature modules. Shared contracts should be 
 - npm lockfile committed
 - Browser local runtime
 - No backend
-- No deployment configuration during M0
+- Deployment remains deferred until local hardening and vertical-slice stability are accepted
 - Primitive/procedural graybox assets
 - Tests for pure gameplay logic without WebGL where practical

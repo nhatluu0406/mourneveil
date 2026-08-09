@@ -1,7 +1,7 @@
-# PLAN: M4 Core RPG Loop
+# PLAN: M4 Core RPG Loop — CLOSED
 <!-- Live execution graph for M4 only. M3 Enemy Framework is Product Owner accepted. -->
 
-Input: M3 accepted by Product Owner on 2026-08-09; M4.1–M4.3 complete; Product Owner authorized M4 browser gate + M4.4–M4.6 batch | Stack: `STACK.md` | Contracts: `docs/product/vertical-slice.md`, `docs/architecture/overview.md`
+Input: M3 accepted by Product Owner on 2026-08-09; M4.1–M4.6 complete; Product Owner authorized M4.7 repository-integrity closure before M5 | Stack: `STACK.md` | Contracts: `docs/product/vertical-slice.md`, `docs/architecture/overview.md`
 Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-rpg-loop`)
 
 ## Scope
@@ -94,6 +94,17 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - verifier: focused save tests; `npm run lint|typecheck|test|build|verify`; `git diff --check`; LeanLoop doctor/sync; HUMAN-VERIFY reload + end-to-end matrix
   - evidence: PASS — SaveFileV1 localStorage; recovery persisted; encounter resets on load; gate-m46-save + gate-m4-e2e PASS; 172 tests; verify green
 
+- [x] 7. M4.7 — Repository integrity, CI determinism, and M5 readiness
+  - depends: 6; Product Owner completed the M4 browser playthrough and authorized milestone closure after this gate
+  - risk: HIGH
+  - isolation: sequential on clean `main`, explicitly authorized by Product Owner
+  - owns/allows: package-manager contract and lockfile, minimal CI, canonical repository docs/state, obsolete bootstrap artifacts, truthful runtime/debug boundaries, focused rename/refactor tests
+  - outcome: npm 10.9.2 clean-installs deterministically on Node 22; current official GitHub actions run the same contract; docs/state match accepted M4; top-level runtime and development-only surfaces have truthful boundaries; all M4 browser gates and production checks remain green
+  - non-goals: M5 gameplay, levels/content/world features, deployment, broad dependency upgrades, gameplay redesign
+  - verifier: canonical npm 10.9.2 `npm ci`; `npm run lint`; `npm run typecheck`; `npm run test`; `npm run build`; `npm run verify`; all committed M4 browser gates; production debug-boundary inspection; `git diff --check`; `python3 scripts/leanloop/doctor.py --strict`; `python3 scripts/leanloop/sync.py --check`
+  - evidence: PASS — Node 22.23.2/npm 10.9.2 clean install; zero audit findings; 172 tests; build/verify; all five M4 browser gates; production gate absent, development panel absent, inventory/canvas present, no console errors; doctor/sync/diff checks green
+  - commits: `56e4075` deterministic CI · `8291cf3` runtime/debug boundaries · `9615bbc` secure browser tooling
+
 ## Parallel groups
 
 - none — M4 gameplay authority steps are sequential
@@ -108,6 +119,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
 - 2026-08-09 | Product Owner authorized Gate 0 + M4.4–M4.6 in one Cursor session on `main` | Completes core RPG loop before M5
 - 2026-08-09 | Provisional currency name is Echoes | Product terminology for vertical slice; not final lore lock
 - 2026-08-09 | Prefer persisting active Echo recovery across reload | Prevents reload exploit restoring lost carried currency
+- 2026-08-10 | M4 Core RPG Loop Product Owner accepted and CLOSED after M4.7 repository-integrity gates passed | Product Owner completed the M4 playthrough and authorized progression after this maintenance gate
 
 ## Escalation
 
@@ -116,4 +128,5 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
 
 ## Next milestone pointer
 
-- M4 complete pending Product Owner acceptance. Do not start M5 until authorized.
+- **M4 Core RPG Loop — PRODUCT OWNER ACCEPTED / CLOSED**
+- **M5 Connected Level — NEXT / not started.** Plan it in the next session; this task does not implement M5.

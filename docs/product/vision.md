@@ -41,8 +41,8 @@ The project must be easy to run, verify, profile, and recover locally before dep
 ## Camera and control direction
 
 - Isometric or high-oblique 3D camera
-- Keyboard and mouse first
-- Controller support before vertical-slice acceptance
+- Keyboard and mouse are the current primary input
+- Controller implementation and manual verification are deferred to later input hardening; controller remains a target before final vertical-slice acceptance
 - No touch target during the initial vertical slice
 - Camera behavior favors combat readability over cinematic freedom
 

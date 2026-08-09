@@ -9,19 +9,19 @@
 ## Runtime & tooling
 - TypeScript (strict) + React 19 + Vite 8
 - Three.js + React Three Fiber + Drei + `@react-three/rapier`
-- Tests: Vitest · Lint: ESLint · Package manager: **npm** (lockfile committed)
-- Node.js 22 · no env vars / backend / cloud services for the slice
+- Tests: Vitest · Lint: ESLint · Package manager: **npm 10.9.2** (lockfile committed)
+- Node.js `>=22.12.0 <23` · no env vars / backend / cloud services for the slice
 - Stack ADR: `docs/architecture/decisions/0001-web-stack.md`
 
 ## Commands (agents use only these)
-- install: `npm ci` (or `npm install` for fresh local setup)
+- install: `npx --yes npm@10.9.2 ci`
 - dev: `npm run dev` → `http://127.0.0.1:4173/` (host/port pinned in `vite.config.ts`)
 - lint: `npm run lint`
 - typecheck: `npm run typecheck`
 - test: `npm run test`
 - build: `npm run build`
 - verify: `npm run verify` (lint → typecheck → test → build)
-- CI: checkout → Node.js 22 → `npm ci` → `npm run verify` (`.github/workflows/ci.yml`)
+- CI: current official checkout/setup-node actions → Node.js 22 → npm 10.9.2 → `npm ci` → `npm run verify` (`.github/workflows/ci.yml`)
 
 ## Authority & flow
 - Graybox locomotion: the fixed-step player motor proposes kinematic displacement; Rapier's character controller exclusively resolves collision and grounding with a 2 cm contact offset, 10 cm ground snap, and 45 degree walkable-slope limit
@@ -53,15 +53,16 @@
 1. Git HEAD + working tree → 2. this file → 3. `PLAN.md` → 4. active LeanLoop task HANDOFF/CHECKPOINT → 5. ADRs → 6. product docs → 7. `docs/development/current-state.md` (milestone summary only) → 8. old reports/chat
 
 ## Agent routing
-- **Codex**: core/high-risk architecture, simulation authority, cross-module integration
-- **Cursor**: scoped implementation, camera/HUD/runtime iteration under stable contracts
-- **Claude**: independent review, analysis, skill/doc critique (read-only unless asked to implement)
+- **Codex**: strategic use for high-risk gameplay/simulation/save architecture and difficult cross-module integration
+- **Cursor**: medium-risk and stable-contract implementation, macro-batches, browser verification, UI/content, scoped refactors, and repository maintenance; strong models may own explicit high-risk contracts
+- **Claude**: deferred from the normal workflow; compatibility files remain for tooling, but Claude is not a required reviewer
 - Single-writer: one coding agent per working tree; parallel work requires separate Git worktrees/branches
 
 ## Git safety
 - No push/merge/history rewrite/branch delete unless the task explicitly authorizes it
 - Commit only via explicit paths (`python3 scripts/leanloop/safe_commit.py`); never `git add .`
 - Conventional Commits; never stage secrets; preserve unrelated user changes
+- Direct work on clean `main` is normal for the authorized solo workflow
 - Dirty main tree → isolate with `python3 scripts/leanloop/worktree.py create <slug>`
 
 ## Verification baseline

@@ -1,152 +1,44 @@
-# Local and GitHub Setup
+# Local Setup
+
+Mourneveil is a public, local-first repository maintained by one Product Owner. No account, environment variable, backend, cloud service, or GitHub ruleset is required for local development.
 
 ## Prerequisites
 
-Install and verify:
+- Git
+- Node.js `>=22.12.0 <23`
+- npm `10.9.2`
+
+Verify the toolchain:
 
 ```powershell
 git --version
 node --version
-npm --version
+npx --yes npm@10.9.2 --version
 ```
 
-Use a current Node.js release that satisfies the current Vite requirement. The project CI will use Node 22.
-
-Optional tools:
+## Clone and install
 
 ```powershell
-gh --version
-codex --version
-claude --version
-```
-
-Cursor can open the repository without a separate CLI.
-
-## Create the GitHub repository
-
-Create a new repository on GitHub:
-
-- Repository name: `mourneveil`
-- Visibility: Private
-- Do not initialize with a README
-- Do not add `.gitignore`
-- Do not add a license yet
-
-The working title can be changed later.
-
-## Clone and add the foundation pack
-
-Example:
-
-```powershell
-cd C:\Workspace
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/mourneveil.git
+git clone https://github.com/nhatluu0406/mourneveil.git
 cd mourneveil
+npx --yes npm@10.9.2 ci
 ```
 
-Extract the contents of this foundation pack into the repository root. Do not keep the outer `mourneveil-foundation-pack` folder inside the repository.
+`npm ci` is the canonical install. Do not regenerate `package-lock.json` with another npm version.
 
-Check:
+## Verify and run
 
 ```powershell
-git status --short
+npx --yes npm@10.9.2 run verify
+npx --yes npm@10.9.2 run dev
 ```
 
-## Create the governance commit
+Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/).
 
-```powershell
-git add .
-git commit -m "chore(repo): add project governance foundation"
-git push -u origin main
-```
+Individual checks are available as `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`.
 
-Before committing, confirm that no credential, `.env`, personal file, or unrelated file is staged:
+## Repository workflow
 
-```powershell
-git diff --cached --name-only
-```
+Read `AGENTS.md`, `STACK.md`, `PLAN.md`, and the active task HANDOFF before making changes. Direct work on a clean `main` is normal for the current solo workflow when the task authorizes it. Preserve unrelated work, use explicit-path commits through `scripts/leanloop/safe_commit.py`, and do not push unless the Product Owner authorizes it.
 
-## GitHub settings
-
-### General
-
-Recommended:
-
-- Default branch: `main`
-- Allow squash merging: enabled
-- Allow merge commits: disabled initially
-- Allow rebase merging: disabled initially
-- Automatically delete head branches: enabled
-
-Squash merge keeps short-lived agent branches from producing noisy integration history.
-
-### Ruleset for `main`
-
-If your GitHub plan supports rulesets on this private repository:
-
-- Target branch: `main`
-- Block force pushes
-- Block branch deletion
-- Require a pull request before merging
-- Require status checks before merging after the first CI run exists
-- Required check: the check produced by `.github/workflows/ci.yml`
-- Do not require multiple human approvals for a solo project
-- Allow repository administrator bypass only for emergencies
-
-If your plan does not support private-repository rulesets, follow the same policy manually. Agents still must not push or merge without explicit permission.
-
-### Security
-
-Enable:
-
-- Secret scanning where available
-- Push protection where available
-- Dependabot alerts
-
-Do not give an agent a broad personal access token when normal local Git authentication is sufficient.
-
-## Run Prompt 000
-
-Open Codex at the repository root and provide the full contents of:
-
-`prompts/000-bootstrap-foundation.md`
-
-Use a fresh session. Do not prepend the entire conversation history.
-
-After Codex returns its report:
-
-1. Do not merge yet.
-2. Run `npm install`.
-3. Run `npm run verify`.
-4. Run `npm run dev`.
-5. Inspect the page locally.
-6. Send the Codex report plus your observations to the Director for review.
-
-## Cursor setup
-
-Open the same repository in Cursor.
-
-Confirm that `.cursor/rules/` is visible. For important tasks, explicitly mention:
-
-- `@AGENTS.md`
-- the relevant file under `.agents/skills/`
-
-Cursor should not modify the tree while Codex is working in it.
-
-## Claude Code setup
-
-From the repository root:
-
-```powershell
-claude
-```
-
-Inside Claude Code, run:
-
-```text
-/context
-```
-
-Confirm that `CLAUDE.md` loaded. It imports `AGENTS.md`.
-
-Use Claude primarily for read-only review until a task explicitly assigns implementation.
+Branches or worktrees are reserved for risky experiments, parallel writers, unrelated dirty work, or changes that benefit from independent rollback and review. Project policy does not currently require a GitHub ruleset; revisit that decision if collaboration expands.

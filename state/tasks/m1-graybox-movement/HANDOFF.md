@@ -4,6 +4,13 @@ Updated: 2026-08-09 by Cursor/Composer
 Task: m1-graybox-movement
 
 ## Status
+
+**M1 CLOSED — Product Owner accepted before accepted M2 work began.**
+
+Closure note added from later canonical project history. The original session status and observations below remain historical.
+
+## Historical session status
+
 M1 software foundation complete through M1.4. Controller left-stick adapter feeds the existing semantic movement intent; keyboard + gamepad compose by sum-then-clamp; lifecycle reset/suppress covered in tests. Keyboard browser verification replayed for sim/input/movement/blocker-contact/camera/resize/console. Physical controller manual verification was skipped this session by Product Owner request and remains required before vertical-slice acceptance. Product Owner M1 acceptance is pending. M2 not started.
 
 Classification: **M1 READY FOR PRODUCT OWNER ACCEPTANCE**

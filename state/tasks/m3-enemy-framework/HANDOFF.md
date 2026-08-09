@@ -4,6 +4,13 @@ Updated: 2026-08-09 by Cursor
 Task: m3-enemy-framework
 
 ## Status
+
+**M3 CLOSED — Product Owner accepted on 2026-08-09 before M4 began.**
+
+Closure note added from later canonical project history. The original session status and observations below remain historical.
+
+## Historical session status
+
 M3.1 through M3.6 complete on `main`.
 
 Classification: **M3 READY FOR PRODUCT OWNER ACCEPTANCE**

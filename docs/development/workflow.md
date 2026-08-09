@@ -1,70 +1,53 @@
 # Development Workflow
 
-## Primary loop
+## Default solo loop
 
-1. Director prepares a focused task packet.
-2. One implementation agent modifies the active working tree.
-3. The agent runs focused tests and the local build.
-4. Product Owner checks the happy path when runtime behavior changed.
-5. Director reviews the report and evidence.
-6. The task is fixed, accepted, or reverted deliberately.
-7. Only accepted work proceeds toward merge.
+```text
+clean main
+↓
+macro-task covering 2–4 tightly related PLAN steps
+↓
+internal verification gate after each step
+↓
+reversible explicit-path commits
+↓
+one final report
+↓
+Product Owner review and push
+```
 
-## Agent roles
+Direct work on clean `main` is normal for the current solo project when the task authorizes it. Only one coding agent may modify the active working tree.
 
-### Codex
+## Macro-batches
 
-Core architecture, simulation, combat contracts, cross-module integration, difficult root-cause debugging, and milestone integration.
+Related PLAN steps may run in one session when:
 
-### Cursor
+- A later step consumes the contract produced by an earlier step.
+- One agent can own the sequence safely.
+- No Product Owner design decision is needed between steps.
+- Every step has an explicit internal verification gate.
 
-Focused implementation under stable contracts, local runtime debugging, HUD, camera tuning, asset wiring, visual integration, and small fixes.
+A failed internal gate stops later steps. Do not continue a batch around a broken dependency, runtime, save, browser, or repository-integrity contract.
 
-### Claude Code
+## When to isolate work
 
-Architecture review, independent code review, edge-case analysis, skill authoring, documentation review, and isolated specialist tasks.
+Use a branch or worktree when:
 
-## Single-writer rule
+- Work is risky or experimental.
+- Parallel writers are explicitly required.
+- Unrelated dirty work must be preserved and isolated.
+- Independent rollback or review materially reduces risk.
 
-Only one coding agent modifies the active working tree at a time.
+Parallel writers require separate worktrees, locked contracts, non-overlapping ownership, and independent acceptance checks.
 
-Parallel work requires:
+## Commits and Git authority
 
-- Explicit authorization
-- Separate worktrees
-- Locked interfaces
-- Non-overlapping files
-- Independent acceptance checks
-
-## Task packet structure
-
-- Role
-- Current repository state
-- Objective
-- Why this task now
-- Read first
-- Allowed scope
-- Non-goals
-- Requirements
-- Acceptance criteria
-- Verification
-- Git permissions
-- Report format
-
-## Commit policy
-
-- Work on short-lived `feat/*`, `fix/*`, `chore/*`, or `docs/*` branches.
-- Local atomic commits are allowed only when the task grants permission and checks pass.
-- Push, pull request, merge, branch deletion, tag creation, and history rewriting require explicit permission.
-- `main` represents an accepted local state.
+- Commit only when the task grants permission and the relevant gate passes.
+- Use `scripts/leanloop/safe_commit.py` with an explicit path allowlist.
+- Keep commits reversible and aligned with internal gates.
+- Push, pull request, merge, tag, branch deletion, and history rewrite require explicit permission.
+- The Product Owner reviews and pushes accepted local work.
 
 ## Milestone acceptance
 
-A milestone is accepted only when:
-
-- Automated checks pass
-- The local production build runs
-- Required deterministic fixtures work
-- Product Owner observations are addressed
-- Canonical docs match the repository
-- Known debt is explicit
+A milestone is accepted only when automated checks, production build, deterministic browser/runtime evidence, canonical documentation, and Product Owner observations agree. Known debt must be explicit.

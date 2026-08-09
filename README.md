@@ -1,33 +1,34 @@
 # Mourneveil
 
-Mourneveil is the working title for a local-first, browser-based 3D action RPG vertical slice.
+Mourneveil is a local-first browser-based 3D action RPG vertical slice focused on deliberate combat, readable enemies, and reliable recovery after failure.
 
-## Current phase
+## Status
 
-Milestone **M2 Combat Proof** is Product Owner accepted. Active work is **M3 Enemy Framework** (planning complete; M3.1 not started). See `docs/development/current-state.md` and `PLAN.md`.
+**M4 Core RPG Loop** is Product Owner accepted and closed. **M5 Connected Level** is next and has not started.
 
 ## Requirements
 
-- Node.js 22
-- npm 10 or newer
+- Node.js `>=22.12.0 <23`
+- npm `10.9.2`
 
-## Local setup
+## Fresh clone
 
 ```powershell
-npm install
-npm run dev
+git clone https://github.com/nhatluu0406/mourneveil.git
+cd mourneveil
+npx --yes npm@10.9.2 ci
+npx --yes npm@10.9.2 run verify
+npx --yes npm@10.9.2 run dev
 ```
 
 Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). The Vite server is pinned to that host and port. No environment variables or external services are required.
 
-## Commands
+## Verification
 
-- `npm run dev` starts the local Vite development server at `http://127.0.0.1:4173/`.
-- `npm run lint` checks source and configuration files with ESLint.
-- `npm run typecheck` checks TypeScript without emitting files.
-- `npm run test` runs the Vitest suite once.
-- `npm run test:watch` runs Vitest in watch mode.
-- `npm run build` type-checks and creates a production build in `dist/`.
-- `npm run verify` runs lint, typecheck, tests, and build in order.
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test`
+- `npm run build`
+- `npm run verify` — runs the complete local repository gate
 
-Read `AGENTS.md` and `STACK.md` before making repository changes. Active plan: `PLAN.md`. Milestone summary: `docs/development/current-state.md`.
+Canonical project law and active state live in `AGENTS.md`, `STACK.md`, `PLAN.md`, and the active task under `state/tasks/`. `docs/development/current-state.md` is the concise milestone summary.

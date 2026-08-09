@@ -21,6 +21,7 @@ A focused task is done when all applicable conditions are true.
 - TypeScript is strict and readable.
 - No dead debug paths, secret values, generated outputs, or placeholder claims remain.
 - Errors and invalid data fail explicitly where appropriate.
+- Production builds do not expose development mutation gates or development-only diagnostic UI.
 
 ## Tests and build
 
@@ -29,6 +30,13 @@ A focused task is done when all applicable conditions are true.
 - Typecheck passes.
 - Tests pass.
 - Production build passes.
+
+When package metadata changes:
+
+- npm `10.9.2` is used.
+- `package-lock.json` is regenerated with npm `10.9.2`.
+- A clean `npm ci` passes with the canonical Node/npm contract.
+- `npm run verify` passes.
 
 ## Runtime
 
@@ -44,6 +52,13 @@ When behavior is visible or interactive:
 - Current state matches reality.
 - Relevant ADRs and product scope remain accurate.
 - Commands and setup steps are reproducible from a fresh clone.
+
+For milestone closure:
+
+- Local verification and required runtime gates pass.
+- Committed canonical documentation matches the accepted repository state.
+- GitHub CI uses the same Node/npm/`npm ci` contract as local verification.
+- After push, a failed CI run blocks further normal milestone work until repository integrity is restored.
 
 ## Git
 

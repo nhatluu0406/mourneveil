@@ -8,13 +8,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (119L)
-- README.md (33L)
-- SETUP.md (152L)
-- STACK.md (69L)
+- PLAN.md (132L)
+- README.md (34L)
+- SETUP.md (44L)
+- STACK.md (71L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (39L)
+- package.json (44L)
 - tsconfig.app.json (24L)
 - ... +3 more
 - **.agents/** (0 files)
@@ -113,7 +113,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - SKILL.md (29L)
 - **.github/** (0 files)
   - **.github/workflows/** (1 files)
-    - ci.yml (20L)
+    - ci.yml (23L)
 - **.leanloop/** (2 files)
   - install.json (88L)
   - managed.json (35L)
@@ -154,21 +154,19 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - STACK.md (31L)
       - WIKI-INSTRUCTIONS.md (17L)
 - **docs/** (1 files)
-  - roadmap.md (91L)
+  - roadmap.md (54L)
   - **docs/architecture/** (1 files)
-    - overview.md (75L)
+    - overview.md (79L)
     - **docs/architecture/decisions/** (1 files)
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
-    - agent-routing.md (47L)
-    - current-state.md (30L)
-    - definition-of-done.md (52L)
-    - workflow.md (70L)
+    - agent-routing.md (38L)
+    - current-state.md (28L)
+    - definition-of-done.md (67L)
+    - workflow.md (53L)
   - **docs/product/** (2 files)
     - vertical-slice.md (41L)
     - vision.md (79L)
-- **prompts/** (1 files)
-  - 000-bootstrap-foundation.md (224L)
 - **scripts/** (0 files)
   - **scripts/browser/** (5 files)
     - gate-m4-e2e.mjs (135L)
@@ -191,22 +189,21 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (135L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../input/playerRecoveryIntent
+    - App.tsx (93L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (177L)
-    - useFoundationRuntime.ts (197L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../game/save/gameSaveService
-  - **src/debug/** (1 files)
-    - FoundationPanel.tsx (333L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
+    - useGameRuntime.ts (209L) -- symbols: GameRuntimeIntegrationSnapshot, useGameRuntime; imports: ../game/runtime/GameRuntime, ../game/save/gameSaveService, ../input/browserAttackInput
+  - **src/debug/** (4 files)
+    - DevelopmentPanel.tsx (333L) -- symbols: DevelopmentPanel; imports: ./developmentDiagnostic, ../render/followCamera
+    - browserGate.ts (52L) -- symbols: installDevelopmentBrowserGate; imports: ../game/runtime/GameRuntime, ../input/playerFlaskIntent, ../input/playerRecoveryIntent
+    - developmentDiagnostic.test.ts (37L) -- imports: ../game/runtime/GameRuntime, ./developmentDiagnostic
+    - developmentDiagnostic.ts (28L) -- symbols: DEVELOPMENT_MILESTONE, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
   - **src/game/** (0 files)
-    - **src/game/character/** (16 files)
+    - **src/game/character/** (13 files)
       - enemyIncomingCombat.integration.test.ts (112L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
-      - playerCombatHealth.test.ts (41L) -- imports: ./playerHealth
-      - playerCombatHealth.ts (9L) -- imports: ./playerHealth
       - playerCurrency.test.ts (32L) -- imports: ./playerCurrency
       - playerCurrency.ts (58L) -- symbols: ECHOES_CURRENCY_ID, EchoesSnapshot, EchoesCurrencyRuntime
       - playerEchoes.integration.test.ts (127L) -- imports: ../core/fixedStepClock, ../enemies/enemyRoles, ./playerMotor
-      - playerFlask.integration.test.ts (112L) -- imports: ../../input/playerFlaskIntent, ../../input/playerRecoveryIntent, ../core/fixedStepClock
-      - playerFlask.test.ts (25L) -- imports: ../combat/combatHealth, ./playerFlask
-      - playerFlask.ts (111L)
+      - playerFlask.in
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

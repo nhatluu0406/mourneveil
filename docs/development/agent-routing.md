@@ -1,47 +1,38 @@
 # Agent Routing
 
-## Send to Codex when
+Route by task risk, contract clarity, and the capability of the available model—not by product name alone.
 
-- A core invariant changes
-- Several modules must be integrated
-- The simulation loop or action authority changes
-- Combat, save migration, or enemy framework is involved
-- A bug survived two focused Cursor attempts
-- A milestone needs final integration
+## Codex
 
-## Send to Cursor when
+Best used strategically for:
 
-- The contract already exists
-- Runtime visual iteration is the main work
-- The task is localized to a small module or UI surface
-- The change is a fixture, asset hookup, camera adjustment, CSS change, or focused bug
-- Fast local edit-run-observe cycles are valuable
+- High-risk gameplay authority and simulation architecture
+- Combat, enemy, save, and migration architecture
+- Difficult cross-module root-cause work
+- High-risk integration where invariants are still being established
 
-## Send to Claude Code when
+Codex quota is limited. Reserve it for work where stronger architecture reasoning materially reduces risk.
 
-- The task is primarily analysis or review
-- Architecture or state-machine edge cases need independent scrutiny
-- A skill or canonical document needs improvement
-- A milestone needs a read-only audit
-- A small isolated specialist implementation has a locked interface
+## Cursor
 
-## Escalation rule
+Cursor can use strong GPT, Claude, Grok, and other supported models. It may own:
 
-Do not repeat the same failed prompt indefinitely.
+- Medium-risk implementation and stable-contract implementation
+- Large related macro-batches with internal gates
+- Browser/runtime verification
+- UI, presentation, and content
+- Scoped refactors
+- CI, documentation, and repository maintenance
+- Selected high-risk tasks when the contract is already explicit
 
-- First failure: refine reproduction and scope.
-- Second failure by the same implementation path: stop.
-- Escalate with Git state, diff, logs, reproduction, and failed hypotheses to the core agent or reviewer.
+Choose the model and workflow that match the task rather than treating Cursor as a small-fix-only tool.
 
-## Context budget
+## Claude compatibility
 
-Agents receive only:
+Claude is deferred from the normal Mourneveil workflow. Keep compatibility files that LeanLoop or project tooling expects, but do not require Claude as an active reviewer. It may be reintroduced later by explicit policy.
 
-- Current task packet
-- `AGENTS.md`
-- Current-state document
-- Relevant ADR/product document
-- Relevant skill
-- Relevant source files and test output
+## Escalation
 
-Do not paste the entire project history into every prompt.
+Do not repeat the same failed path indefinitely. Refine the reproduction after the first failure; after three attempts on the same error, stop, persist the failure and hypotheses in active task state, and escalate.
+
+Agents receive only the current task packet, canonical state, relevant contracts/skills, focused source, and verification evidence.
