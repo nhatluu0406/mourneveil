@@ -67,7 +67,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: focused Rapier occlusion + navigation + activation tests; browser through-wall/far-damage/nav gate; lint; typecheck; `git diff --check`
   - evidence: PASS — through-wall root cause was overlap-only melee contact with no solid occlusion; far-damage root cause was all encounters active from session start so `enemy.skirmisher.introduction` chased to the refuge and hit at ~1.05m; authored zone activation + egress leash stop cross-level chase; authored route anchors replace permanent local-steer wall deadlocks; Rapier occlusion/nav/activation tests green; `scripts/browser/gate-m531-correctness.mjs` VERDICT PASS
 
-- [ ] 4. M5.4 — Level readability and environmental composition
+- [x] 4. M5.4 — Level readability and environmental composition
   - depends: 3.1 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -76,6 +76,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - outcome: connected level reads as a level; UI does not obscure play; no obsolete combat-test artifacts in normal play
   - non-goals: production assets, combat authority changes
   - verifier: browser readability gate; lint; typecheck; focused UI/visual unit checks where present; `git diff --check`
+  - evidence: PASS — collapsible compact dev panel; inventory displayNames + no horizontal overflow; training target removed from normal contact targets; graybox landmarks/gate markers/taller checkpoint; `gate-m54-readability.mjs` VERDICT PASS
 
 - [ ] 5. M5.5 — Encounter and traversal tuning
   - depends: 4 PASS

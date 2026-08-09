@@ -71,9 +71,13 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
             16,
           ]}
         />
-        <meshStandardMaterial color="#d2a36a" roughness={0.62} metalness={0.04} />
+        <meshStandardMaterial color="#d9b07a" roughness={0.55} metalness={0.08} />
       </mesh>
-      {/* Debug-only facing chevron — not a weapon or camera prop. */}
+      <mesh castShadow position={[0, 0.55, 0]}>
+        <sphereGeometry args={[0.28, 12, 10]} />
+        <meshStandardMaterial color="#c99662" roughness={0.6} />
+      </mesh>
+      {/* Facing chevron keeps player silhouette readable from above. */}
       <mesh
         castShadow
         position={[
@@ -89,7 +93,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
             PLAYER_FACING_MARKER_SIZE.z,
           ]}
         />
-        <meshStandardMaterial color="#3d6d74" roughness={0.55} metalness={0.08} />
+        <meshStandardMaterial color="#3f7d86" roughness={0.5} metalness={0.12} />
       </mesh>
       <group ref={weaponSweepRef}>
         <mesh ref={weaponRef} castShadow position={[0, 0.48, -0.72]}>

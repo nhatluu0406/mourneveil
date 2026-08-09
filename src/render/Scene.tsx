@@ -33,10 +33,6 @@ function GameWorld({ onPhysicsReady, runtime }: SceneProps) {
     <Physics gravity={[0, -9.81, 0]} timeStep={FIXED_STEP_SECONDS}>
       <PhysicsReadySignal onReady={onPhysicsReady} />
       <ConnectedLevelVisual runtime={runtime} />
-      <gridHelper
-        args={[34, 34, '#53645b', '#303c36']}
-        position={[0, 0.025, 0.5]}
-      />
       <CheckpointVisual runtime={runtime} />
       <EchoRecoveryVisual runtime={runtime} />
       <LootPickupVisual runtime={runtime} />

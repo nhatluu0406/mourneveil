@@ -9,6 +9,11 @@ interface InventoryEquipmentPanelProps {
   runtime: GameRuntime
 }
 
+function itemLabel(itemId: ItemId | null): string {
+  if (itemId === null) return 'none'
+  return getItemDefinition(itemId)?.displayName ?? itemId
+}
+
 export function InventoryEquipmentPanel({
   snapshot,
   runtime,
@@ -34,7 +39,7 @@ export function InventoryEquipmentPanel({
         <h3>Equipment</h3>
         <div className="inventory-panel__row">
           <span>Weapon</span>
-          <strong>{equipment.weaponItemId ?? 'none'}</strong>
+          <strong className="inventory-panel__name">{itemLabel(equipment.weaponItemId)}</strong>
           {equipment.weaponItemId !== null ? (
             <button type="button" onClick={() => unequip('weapon')}>
               Unequip
@@ -43,7 +48,7 @@ export function InventoryEquipmentPanel({
         </div>
         <div className="inventory-panel__row">
           <span>Charm</span>
-          <strong>{equipment.charmItemId ?? 'none'}</strong>
+          <strong className="inventory-panel__name">{itemLabel(equipment.charmItemId)}</strong>
           {equipment.charmItemId !== null ? (
             <button type="button" onClick={() => unequip('charm')}>
               Unequip
@@ -61,7 +66,7 @@ export function InventoryEquipmentPanel({
               const definition = getItemDefinition(entry.itemId)
               return (
                 <li key={entry.itemId} className="inventory-panel__row">
-                  <span>
+                  <span className="inventory-panel__name">
                     {definition?.displayName ?? entry.itemId} ×{entry.quantity}
                   </span>
                   {definition?.slot !== null && definition?.slot !== undefined ? (

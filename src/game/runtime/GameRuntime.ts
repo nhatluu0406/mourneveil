@@ -769,7 +769,7 @@ export class GameRuntime {
             combat: combatSnapshot,
             attack,
             simulationStep: nextStepCount,
-            targets: [this.trainingTargetRuntime, ...this.enemyRuntimes],
+            targets: [...this.enemyRuntimes],
             query: this.contactQuery,
             damageOverride: this.resolvedDamageForAction(combatSnapshot.actionId),
             attackOrigin: this.playerState.position,

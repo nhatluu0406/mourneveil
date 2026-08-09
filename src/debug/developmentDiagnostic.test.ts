@@ -25,7 +25,7 @@ describe('createDevelopmentDiagnostic', () => {
 
     expect(createDevelopmentDiagnostic(true, false, runtime)).toEqual({
       workingTitle: 'Mourneveil',
-      milestone: 'M5',
+      milestone: 'M5 Connected Level',
       rendererReady: true,
       physicsReady: false,
       runtimeReady: false,

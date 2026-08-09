@@ -60,6 +60,8 @@ export function EnemyVisual({
 
   if (role === null) return null
 
+  const isBrute = role.role === 'brute'
+
   return (
     <group ref={facingRef}>
       <group ref={bodyRef}>
@@ -72,11 +74,22 @@ export function EnemyVisual({
               16,
             ]}
           />
-          <meshStandardMaterial ref={materialRef} roughness={0.68} />
+          <meshStandardMaterial ref={materialRef} roughness={isBrute ? 0.82 : 0.58} />
         </mesh>
-        <mesh castShadow position={[0, 0.25, -0.42]}>
-          <coneGeometry args={[0.18, 0.42, 6]} />
-          <meshStandardMaterial color="#cad0dc" roughness={0.45} metalness={0.2} />
+        {isBrute ? (
+          <mesh castShadow position={[0, 0.55, 0]}>
+            <boxGeometry args={[0.95, 0.35, 0.7]} />
+            <meshStandardMaterial color="#6d3d30" roughness={0.85} />
+          </mesh>
+        ) : (
+          <mesh castShadow position={[0, 0.15, -0.38]}>
+            <coneGeometry args={[0.16, 0.5, 6]} />
+            <meshStandardMaterial color="#b7c7b8" roughness={0.4} metalness={0.25} />
+          </mesh>
+        )}
+        <mesh castShadow position={[0, 0.25, -0.42]} visible={isBrute}>
+          <boxGeometry args={[0.22, 0.55, 0.22]} />
+          <meshStandardMaterial color="#a35a45" roughness={0.7} />
         </mesh>
       </group>
       <mesh

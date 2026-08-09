@@ -58,9 +58,10 @@ describe('GameRuntime', () => {
   it('resolves active contact after movement in the fixed simulation step', () => {
     const runtime = new GameRuntime()
     runtime.attachCollisionResolver(resolveOnFlatGround)
+    const enemyId = runtime.snapshot().enemy.id
     runtime.attachCombatContactQuery(({ hurtboxes }) =>
       hurtboxes
-        .filter((hurtbox) => hurtbox.ownerId === 'training-target.graybox')
+        .filter((hurtbox) => hurtbox.ownerId === enemyId)
         .map((hurtbox) => ({
           hurtboxId: hurtbox.id,
           targetId: hurtbox.ownerId,
@@ -85,8 +86,8 @@ describe('GameRuntime', () => {
     expect(activeStep.hitEvents[0].simulationStep).toBe(
       PLAYER_LIGHT_ATTACK.action.startupSteps,
     )
-    expect(activeStep.trainingTarget.health.current).toBe(
-      activeStep.trainingTarget.health.maximum - PLAYER_LIGHT_ATTACK.damage,
+    expect(activeStep.enemy.health.current).toBe(
+      activeStep.enemy.health.maximum - PLAYER_LIGHT_ATTACK.damage,
     )
   })
 
