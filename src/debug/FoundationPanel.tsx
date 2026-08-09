@@ -234,6 +234,33 @@ export function FoundationPanel({
           </dd>
         </div>
         <div>
+          <dt>Inventory</dt>
+          <dd>
+            {diagnostic.runtime.inventory.entries.length === 0
+              ? 'empty'
+              : diagnostic.runtime.inventory.entries
+                  .map((entry) => `${entry.itemId.replace('item.', '')}×${entry.quantity}`)
+                  .join(' · ')}
+          </dd>
+        </div>
+        <div>
+          <dt>Equipment</dt>
+          <dd>
+            W {diagnostic.runtime.equipment.weaponItemId?.replace('item.weapon.', '') ?? 'none'} · C{' '}
+            {diagnostic.runtime.equipment.charmItemId?.replace('item.charm.', '') ?? 'none'} · dmg{' '}
+            {diagnostic.runtime.resolvedAttackDamage.light}/
+            {diagnostic.runtime.resolvedAttackDamage.heavy}
+          </dd>
+        </div>
+        <div>
+          <dt>Loot pickup</dt>
+          <dd>
+            {diagnostic.runtime.lootPickup.active
+              ? `${diagnostic.runtime.lootPickup.itemId} at (${diagnostic.runtime.lootPickup.position?.x.toFixed(1)}, ${diagnostic.runtime.lootPickup.position?.z.toFixed(1)})`
+              : 'none'}
+          </dd>
+        </div>
+        <div>
           <dt>Enemy</dt>
           <dd>
             {diagnostic.runtime.enemy.id} · {diagnostic.runtime.enemy.state} · tgt{' '}

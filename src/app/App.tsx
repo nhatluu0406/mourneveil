@@ -10,6 +10,7 @@ import { PLAYER_FLASK_USE_REQUEST } from '../input/playerFlaskIntent'
 import { Scene } from '../render/Scene'
 import type { CameraDiagnostic } from '../render/followCamera'
 import { createPointerWorldAimResolver } from '../render/pointerWorldAim'
+import { InventoryEquipmentPanel } from '../ui/InventoryEquipmentPanel'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useFoundationRuntime } from './useFoundationRuntime'
 
@@ -23,6 +24,8 @@ declare global {
       respawn: () => void
       defeatEnemy: (enemyId: string) => void
       setPlayerPosition: (position: { x: number; y: number; z: number }) => void
+      equipItem: (itemId: string) => unknown
+      unequipSlot: (slot: 'weapon' | 'charm') => unknown
     }
   }
 }
@@ -72,6 +75,8 @@ export function App() {
       setPlayerPosition: (position: { x: number; y: number; z: number }) => {
         runtime.debugSetPlayerPosition(position)
       },
+      equipItem: (itemId: string) => runtime.equipItem(itemId),
+      unequipSlot: (slot: 'weapon' | 'charm') => runtime.unequipSlot(slot),
     }
     return () => {
       delete window.__MOURNEVEIL_GATE__
@@ -124,6 +129,7 @@ export function App() {
         onRestorePlayerForDevelopment={() => runtime.restorePlayerForDevelopment()}
         onResetMeleeFixture={() => runtime.resetMeleeFixture()}
       />
+      <InventoryEquipmentPanel diagnostic={diagnostic} runtime={runtime} />
     </main>
   )
 }

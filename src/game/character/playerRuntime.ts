@@ -27,6 +27,7 @@ import {
   PLAYER_ATTACK_DEFINITIONS,
   constrainMovementIntentForAttack,
   createPlayerAttackSpatialSnapshot,
+  playerAttackForActionId,
   playerAttackForRequest,
   type PlayerAttackSpatialSnapshot,
 } from '../combat/playerAttackActions'
@@ -86,6 +87,21 @@ import {
   EchoesCurrencyRuntime,
   type EchoesSnapshot,
 } from './playerCurrency'
+import type { EquipSlot, ItemId } from '../items/itemDefinition'
+import {
+  PlayerInventoryRuntime,
+  type InventorySnapshot,
+} from '../items/playerInventory'
+import {
+  PlayerEquipmentRuntime,
+  type EquipmentSnapshot,
+  type EquipResult,
+  type UnequipResult,
+} from '../items/playerEquipment'
+import {
+  LootPickupRuntime,
+  type LootPickupSnapshot,
+} from '../items/lootPickup'
 import {
   createPlayerMotorState,
   stopPlayerMotor,
@@ -95,6 +111,9 @@ import {
   type PlayerFacingDirection,
   type PlayerMotorState,
 } from './playerMotor'
+
+export const SKIRMISHER_LOOT_ITEM_ID = 'item.weapon.oathblade' as const
+export const BRUTE_LOOT_ITEM_ID = 'item.charm.vitality' as const
 
 export interface PlayerRuntimeSnapshot {
   readonly simulation: SimulationTimeSnapshot
@@ -117,6 +136,13 @@ export interface PlayerRuntimeSnapshot {
   readonly flask: PlayerFlaskSnapshot
   readonly echoes: EchoesSnapshot
   readonly echoRecovery: EchoRecoverySnapshot
+  readonly inventory: InventorySnapshot
+  readonly equipment: EquipmentSnapshot
+  readonly lootPickup: LootPickupSnapshot
+  readonly resolvedAttackDamage: {
+    readonly light: number
+    readonly heavy: number
+  }
 }
 
 export interface PlayerRuntimeAdvance extends PlayerRuntimeSnapshot {
@@ -142,7 +168,11 @@ export class PlayerRuntime {
   private readonly flaskRuntime = new PlayerFlaskRuntime()
   private readonly echoesRuntime = new EchoesCurrencyRuntime()
   private readonly echoRecoveryRuntime = new EchoRecoveryRuntime()
+  private readonly inventoryRuntime = new PlayerInventoryRuntime()
+  private readonly equipmentRuntime = new PlayerEquipmentRuntime()
+  private readonly lootPickupRuntime = new LootPickupRuntime()
   private readonly echoRewardedEnemyIds = new Set<string>()
+  private lootInstanceCounter = 0
   private playerState = createPlayerMotorState(
     GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
   )
@@ -293,6 +323,7 @@ export class PlayerRuntime {
       this.enemyContactRuntimeFor(enemy.id).reset()
     }
     this.echoRewardedEnemyIds.clear()
+    this.lootPickupRuntime.resetLifecycle()
   }
 
   /** Development-only restore; gameplay recovery must use checkpoint respawn. */
@@ -320,6 +351,7 @@ export class PlayerRuntime {
     }
     enemy.applyDamage(enemy.snapshot().health.current)
     this.grantEchoRewardsForDefeatedEnemies()
+    this.spawnLootForDefeatedEnemies()
   }
 
   /** Development/gate helper: place the living player at an authored graybox position. */
@@ -327,6 +359,28 @@ export class PlayerRuntime {
     if (!this.playerHealthRuntime.snapshot().health.alive) return
     this.playerState = createPlayerMotorState(position)
     this.playerHealthRuntime.updatePosition(position)
+  }
+
+  equipItem(itemId: ItemId): EquipResult {
+    const result = this.equipmentRuntime.equip(itemId, this.inventoryRuntime)
+    if (result.accepted) this.syncEquipmentDerivedStats()
+    return result
+  }
+
+  unequipSlot(slot: EquipSlot): UnequipResult {
+    const result = this.equipmentRuntime.unequip(slot)
+    if (result.accepted) this.syncEquipmentDerivedStats()
+    return result
+  }
+
+  resolvedAttackDamage(): { readonly light: number; readonly heavy: number } {
+    const modifiers = this.equipmentRuntime.resolvedModifiers()
+    const light = PLAYER_ATTACK_DEFINITIONS.find((entry) => entry.kind === 'light')!
+    const heavy = PLAYER_ATTACK_DEFINITIONS.find((entry) => entry.kind === 'heavy')!
+    return {
+      light: light.damage + modifiers.lightDamageBonus,
+      heavy: heavy.damage + modifiers.heavyDamageBonus,
+    }
   }
 
   requestPlayerFlaskUse(request: PlayerFlaskUseRequest): CombatActionStartResult {
@@ -439,6 +493,8 @@ export class PlayerRuntime {
           true,
         )
         if (pickup.accepted) this.echoesRuntime.add(pickup.amount)
+        const loot = this.lootPickupRuntime.tryPickup(this.playerState.position, true)
+        if (loot.accepted) this.inventoryRuntime.add(loot.itemId)
       }
       for (const enemyRuntime of this.enemyRuntimes) {
         advanceMeleeEnemy(
@@ -463,9 +519,11 @@ export class PlayerRuntime {
             simulationStep: nextStepCount,
             targets: [this.trainingTargetRuntime, ...this.enemyRuntimes],
             query: this.contactQuery,
+            damageOverride: this.resolvedDamageForAction(combatSnapshot.actionId),
           }),
         )
         this.grantEchoRewardsForDefeatedEnemies()
+        this.spawnLootForDefeatedEnemies()
         if (playerAlive) {
           for (const enemyRuntime of this.enemyRuntimes) {
             const enemy = enemyRuntime.snapshot()
@@ -564,6 +622,46 @@ export class PlayerRuntime {
       flask: this.flaskRuntime.snapshot(),
       echoes: this.echoesRuntime.snapshot(),
       echoRecovery: this.echoRecoveryRuntime.snapshot(),
+      inventory: this.inventoryRuntime.snapshot(),
+      equipment: this.equipmentRuntime.snapshot(),
+      lootPickup: this.lootPickupRuntime.snapshot(),
+      resolvedAttackDamage: this.resolvedAttackDamage(),
+    }
+  }
+
+  private resolvedDamageForAction(actionId: string | null): number | undefined {
+    if (actionId === null) return undefined
+    const attack = playerAttackForActionId(actionId)
+    if (attack === null) return undefined
+    const modifiers = this.equipmentRuntime.resolvedModifiers()
+    if (attack.kind === 'light') return attack.damage + modifiers.lightDamageBonus
+    return attack.damage + modifiers.heavyDamageBonus
+  }
+
+  private syncEquipmentDerivedStats(): void {
+    this.playerHealthRuntime.setMaximumHealthBonus(
+      this.equipmentRuntime.resolvedModifiers().maxHealthBonus,
+    )
+  }
+
+  private spawnLootForDefeatedEnemies(): void {
+    for (const enemy of this.enemyRuntimes) {
+      const snapshot = enemy.snapshot()
+      if (snapshot.alive) continue
+      const itemId =
+        enemy.id === 'enemy.skirmisher.1'
+          ? SKIRMISHER_LOOT_ITEM_ID
+          : enemy.id === 'enemy.brute.1'
+            ? BRUTE_LOOT_ITEM_ID
+            : null
+      if (itemId === null) continue
+      this.lootInstanceCounter += 1
+      this.lootPickupRuntime.spawnFromEnemy(
+        enemy.id,
+        itemId,
+        snapshot.position,
+        `loot.${enemy.id}.${this.lootInstanceCounter}`,
+      )
     }
   }
 

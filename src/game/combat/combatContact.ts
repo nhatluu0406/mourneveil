@@ -61,6 +61,8 @@ export interface ResolvePlayerContactRequest {
   readonly simulationStep: number
   readonly targets: readonly DamageableCombatTarget[]
   readonly query: CombatContactQuery
+  /** When set, overrides authored attack definition damage (equipment modifiers). */
+  readonly damageOverride?: number
 }
 
 export interface CombatDamageResolution {
@@ -106,7 +108,7 @@ export class CombatContactRuntime {
       simulationStep: request.simulationStep,
       targets: request.targets,
       query: request.query,
-      damage: action.damage,
+      damage: request.damageOverride ?? action.damage,
     })
   }
 

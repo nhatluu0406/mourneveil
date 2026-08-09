@@ -11,6 +11,7 @@ import { FollowCameraRig } from './FollowCameraRig'
 import type { CameraDiagnostic } from './followCamera'
 import { CheckpointVisual } from './CheckpointVisual'
 import { EchoRecoveryVisual } from './EchoRecoveryVisual'
+import { LootPickupVisual } from './LootPickupVisual'
 
 interface SceneProps {
   onPhysicsReady: () => void
@@ -77,6 +78,7 @@ function FoundationWorld({ onPhysicsReady, runtime }: SceneProps) {
       <OrientationMarker />
       <CheckpointVisual runtime={runtime} />
       <EchoRecoveryVisual runtime={runtime} />
+      <LootPickupVisual runtime={runtime} />
       <RigidBody type="fixed" colliders="cuboid">
         <mesh castShadow receiveShadow position={[0, 0.75, 0]}>
           <boxGeometry
