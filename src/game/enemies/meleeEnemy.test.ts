@@ -322,4 +322,65 @@ describe('enemy outgoing contact and player defense', () => {
       appliedDamage: MELEE_ENEMY_ATTACK_DAMAGE,
     })
   })
+
+  it('keeps advancing attack/recovery after the target dies and exits to idle', () => {
+    const playerPosition = { x: 1.3, y: 0.82, z: 3 }
+    const enemy = advanceToActive(playerPosition)
+    expect(enemy.snapshot().state).toBe('attack')
+
+    for (let step = 0; step < 200; step += 1) {
+      advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND, { targetAlive: false })
+      const snapshot = enemy.snapshot()
+      if (snapshot.state === 'idle') {
+        expect(snapshot.action.phase).toBe('idle')
+        expect(snapshot.targetId).toBeNull()
+        expect(snapshot.attackExecutionFacing).toBeNull()
+        return
+      }
+      expect(['attack', 'recovery', 'spacing']).toContain(snapshot.state)
+    }
+    throw new Error('Enemy remained in a non-idle state after target death')
+  })
+
+  it('escapes pursue soft-lock when collision returns a near-zero step inside attack range', () => {
+    const farPlayer = { x: -1, y: 0.82, z: 3 }
+    const enemy = createMeleeEnemyRuntime()
+    advanceMeleeEnemy(enemy, farPlayer, STEP, FLAT_GROUND)
+    expect(enemy.snapshot().state).toBe('pursue')
+
+    const nearPlayer = { x: 1.2, y: 0.82, z: 3 }
+    const blocked: CharacterCollisionResolver = () => ({
+      translation: { x: 0, y: 0, z: 0 },
+      grounded: true,
+    })
+    advanceMeleeEnemy(enemy, nearPlayer, STEP, blocked)
+    const snapshot = enemy.snapshot()
+    expect(['spacing', 'attack']).toContain(snapshot.state)
+    expect(snapshot.state).not.toBe('pursue')
+  })
+
+  it('completes multiple attack cycles without trapping in a non-terminal dead-end', () => {
+    const playerPosition = { x: 1.3, y: 0.82, z: 3 }
+    const enemy = createMeleeEnemyRuntime()
+    let attackStarts = 0
+    let previousPhase: string | null = null
+
+    for (let step = 0; step < 600; step += 1) {
+      advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
+      const snapshot = enemy.snapshot()
+      expect(snapshot.alive).toBe(true)
+      expect(snapshot.state).not.toBe('defeated')
+      if (
+        snapshot.state === 'attack' &&
+        snapshot.action.phase === 'startup' &&
+        previousPhase !== 'startup'
+      ) {
+        attackStarts += 1
+      }
+      previousPhase = snapshot.action.phase
+    }
+
+    expect(attackStarts).toBeGreaterThanOrEqual(2)
+    expect(['spacing', 'attack', 'recovery']).toContain(enemy.snapshot().state)
+  })
 })

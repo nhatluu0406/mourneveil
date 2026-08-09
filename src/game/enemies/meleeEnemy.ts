@@ -71,9 +71,24 @@ export function advanceMeleeEnemy(
   playerPosition: Vector3Value,
   fixedStepSeconds: number,
   resolveCollision: CharacterCollisionResolver | null,
+  options: { readonly targetAlive?: boolean } = {},
 ): void {
   let enemy = runtime.snapshot()
   if (!enemy.alive) return
+
+  const targetAlive = options.targetAlive ?? true
+  if (!targetAlive) {
+    // Keep committed action clocks advancing so recovery cannot freeze, then
+    // release the dead target into idle (no permanent non-terminal dead-end).
+    if (enemy.state === 'attack' || enemy.state === 'recovery') {
+      runtime.advanceAction()
+      enemy = runtime.snapshot()
+    }
+    if (enemy.state === 'pursue' || enemy.state === 'spacing') {
+      runtime.transition('idle')
+    }
+    return
+  }
 
   const direction = directionAndDistance(enemy.position, playerPosition)
   if (enemy.state === 'idle') {
@@ -104,7 +119,18 @@ export function advanceMeleeEnemy(
     runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing ?? enemy.facing)
     return
   }
-  if (resolveCollision === null || direction.facing === null) return
+  if (resolveCollision === null || direction.facing === null) {
+    // Without a valid pursuit step, still allow committed melee when already
+    // inside the resume/attack band so pursue cannot soft-lock.
+    if (direction.distance <= runtime.definition.attackRange) {
+      runtime.transition('spacing')
+      runtime.holdSpacing(direction.facing ?? enemy.facing)
+      if (direction.distance <= runtime.definition.stoppingRange) {
+        runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing ?? enemy.facing)
+      }
+    }
+    return
+  }
 
   const horizontalSpeed = runtime.definition.movementSpeed
   const verticalVelocity = Math.max(
@@ -128,6 +154,25 @@ export function advanceMeleeEnemy(
     direction.facing,
     resolveCollision,
   )
+  const movedHorizontal = Math.hypot(collision.translation.x, collision.translation.z)
+  if (
+    desiredTranslation.x !== 0 ||
+    desiredTranslation.z !== 0
+  ) {
+    if (
+      movedHorizontal < maximumTravel * 0.05 &&
+      direction.distance <= runtime.definition.attackRange
+    ) {
+      // Collision soft-lock: enter spacing so the enemy can re-evaluate attack
+      // instead of remaining forever in pursue with a zero step.
+      runtime.transition('spacing')
+      runtime.holdSpacing(direction.facing)
+      if (direction.distance <= runtime.definition.stoppingRange) {
+        runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing)
+      }
+      return
+    }
+  }
   runtime.setMotion(
     {
       x: enemy.position.x + collision.translation.x,

@@ -204,24 +204,31 @@ export function FoundationPanel({
         <div>
           <dt>Enemy</dt>
           <dd>
-            {diagnostic.runtime.enemy.id} · {diagnostic.runtime.enemy.state} ·{' '}
+            {diagnostic.runtime.enemy.id} · {diagnostic.runtime.enemy.state} · tgt{' '}
+            {diagnostic.runtime.enemy.targetId ?? 'none'} ·{' '}
             {diagnostic.runtime.enemy.health.current}/
             {diagnostic.runtime.enemy.health.maximum}
+            {diagnostic.runtime.enemy.alive ? '' : ' · dead'}
           </dd>
         </div>
         <div>
           <dt>Enemy distance/facing</dt>
           <dd>
-            {diagnostic.runtime.enemyDistanceToPlayer.toFixed(2)} · (
+            {diagnostic.runtime.enemyDistanceToPlayer.toFixed(2)} · live (
             {diagnostic.runtime.enemy.facing.x.toFixed(2)},{' '}
-            {diagnostic.runtime.enemy.facing.z.toFixed(2)})
+            {diagnostic.runtime.enemy.facing.z.toFixed(2)}) · exec{' '}
+            {diagnostic.runtime.enemy.attackExecutionFacing
+              ? `(${diagnostic.runtime.enemy.attackExecutionFacing.x.toFixed(2)}, ${diagnostic.runtime.enemy.attackExecutionFacing.z.toFixed(2)})`
+              : 'none'}
           </dd>
         </div>
         <div>
           <dt>Enemy action</dt>
           <dd>
             {diagnostic.runtime.enemy.action.actionId ?? 'none'} ·{' '}
-            {diagnostic.runtime.enemy.action.phase} · contact{' '}
+            {diagnostic.runtime.enemy.action.phase} · step{' '}
+            {diagnostic.runtime.enemy.action.phaseElapsedSteps}/
+            {diagnostic.runtime.enemy.action.phaseRemainingSteps} · contact{' '}
             {diagnostic.runtime.enemyAttack.contactEnabled ? 'enabled' : 'disabled'}
           </dd>
         </div>

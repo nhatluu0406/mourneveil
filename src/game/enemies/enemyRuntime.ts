@@ -35,7 +35,7 @@ export interface EnemyRuntimeSnapshot {
 const ALLOWED_TRANSITIONS: Readonly<Record<EnemyState, readonly EnemyState[]>> = {
   idle: ['pursue', 'defeated'],
   pursue: ['idle', 'spacing', 'attack', 'defeated'],
-  spacing: ['pursue', 'attack', 'defeated'],
+  spacing: ['idle', 'pursue', 'attack', 'defeated'],
   attack: ['recovery', 'defeated'],
   recovery: ['spacing', 'defeated'],
   defeated: [],

@@ -80,4 +80,26 @@ describe('player runtime enemy incoming-melee integration', () => {
     })
     expect(runtime.snapshot().playerCombat.health.current).toBe(100)
   })
+
+  it('continues enemy action clocks after player defeat instead of freezing mid-attack', () => {
+    const runtime = createApproachingRuntime()
+    while (runtime.snapshot().playerCombat.health.alive) {
+      runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
+    }
+    expect(runtime.snapshot().playerCombat.defeated).toBe(true)
+    const frozen = runtime.snapshot().enemy
+    expect(['attack', 'recovery', 'spacing', 'pursue', 'idle']).toContain(frozen.state)
+
+    for (let step = 0; step < 240; step += 1) {
+      runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
+      if (runtime.snapshot().enemy.state === 'idle') break
+    }
+    expect(runtime.snapshot().enemy).toMatchObject({
+      state: 'idle',
+      targetId: null,
+      action: { phase: 'idle' },
+      attackExecutionFacing: null,
+    })
+    expect(runtime.snapshot().simulation.stepCount).toBeGreaterThan(0)
+  })
 })

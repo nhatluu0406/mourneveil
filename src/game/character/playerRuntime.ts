@@ -270,14 +270,13 @@ export class PlayerRuntime {
         }
       }
       this.playerCombatRuntime.updatePosition(this.playerState.position)
-      if (playerAlive) {
-        advanceMeleeEnemy(
-          this.enemyRuntime,
-          this.playerState.position,
-          fixedStepSeconds,
-          this.enemyCollisionResolver,
-        )
-      }
+      advanceMeleeEnemy(
+        this.enemyRuntime,
+        this.playerState.position,
+        fixedStepSeconds,
+        this.enemyCollisionResolver,
+        { targetAlive: playerAlive },
+      )
       if (this.contactQuery !== null) {
         const combat = this.combatRuntime.snapshot()
         const attack = createPlayerAttackSpatialSnapshot(
@@ -296,34 +295,36 @@ export class PlayerRuntime {
         )
         const enemy = this.enemyRuntime.snapshot()
         const enemyAttack = createEnemyAttackSpatialSnapshot(enemy)
-        incomingHitEvents.push(
-          ...this.enemyContactRuntime.resolveContact({
-            attackerId: enemy.id,
-            combat: enemy.action,
-            contactShape: enemyAttack.activeContactShape,
-            simulationStep: nextStepCount,
-            targets: [this.playerCombatRuntime],
-            query: this.contactQuery,
-            damage: MELEE_ENEMY_ATTACK_DAMAGE,
-            resolveDamage: (target, damage) => {
-              const outcome = resolveIncomingMeleeDefense(
-                this.defenseRuntime.snapshot(combat),
-                this.playerState.facing,
-                enemyAttack.executionFacing ?? enemy.facing,
-              )
-              if (outcome === 'damaged') {
-                return { outcome, result: target.applyDamage(damage) }
-              }
-              const health = target.snapshot().health
-              const result: CombatDamageResult = {
-                applied: false,
-                appliedDamage: 0,
-                health,
-              }
-              return { outcome, result }
-            },
-          }),
-        )
+        if (playerAlive) {
+          incomingHitEvents.push(
+            ...this.enemyContactRuntime.resolveContact({
+              attackerId: enemy.id,
+              combat: enemy.action,
+              contactShape: enemyAttack.activeContactShape,
+              simulationStep: nextStepCount,
+              targets: [this.playerCombatRuntime],
+              query: this.contactQuery,
+              damage: MELEE_ENEMY_ATTACK_DAMAGE,
+              resolveDamage: (target, damage) => {
+                const outcome = resolveIncomingMeleeDefense(
+                  this.defenseRuntime.snapshot(combat),
+                  this.playerState.facing,
+                  enemyAttack.executionFacing ?? enemy.facing,
+                )
+                if (outcome === 'damaged') {
+                  return { outcome, result: target.applyDamage(damage) }
+                }
+                const health = target.snapshot().health
+                const result: CombatDamageResult = {
+                  applied: false,
+                  appliedDamage: 0,
+                  health,
+                }
+                return { outcome, result }
+              },
+            }),
+          )
+        }
       }
     })
 
