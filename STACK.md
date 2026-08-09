@@ -21,6 +21,7 @@
 - test: `npm run test`
 - build: `npm run build`
 - verify: `npm run verify` (lint → typecheck → test → build)
+- CI: checkout → Node.js 22 → `npm ci` → `npm run verify` (`.github/workflows/ci.yml`)
 
 ## Authority & flow
 - Graybox locomotion: the fixed-step player motor proposes kinematic displacement; Rapier's character controller exclusively resolves collision and grounding with a 2 cm contact offset, 10 cm ground snap, and 45 degree walkable-slope limit

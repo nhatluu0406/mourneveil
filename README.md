@@ -4,7 +4,7 @@ Mourneveil is the working title for a local-first, browser-based 3D action RPG v
 
 ## Current phase
 
-Milestone **M2 Combat Proof** implementation is complete and awaiting Product Owner acceptance. See `docs/development/current-state.md` and `PLAN.md`.
+Milestone **M2 Combat Proof** is Product Owner accepted. Active work is **M3 Enemy Framework** (planning complete; M3.1 not started). See `docs/development/current-state.md` and `PLAN.md`.
 
 ## Requirements
 
