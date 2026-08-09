@@ -7,13 +7,13 @@ import type { PlayerAttackSpatialSnapshot } from '../combat/playerAttackActions'
 import type { CombatActionSnapshot } from '../combat/combatActionRuntime'
 import type { CombatContactSnapshot } from '../combat/combatContact'
 import type { TrainingTargetSnapshot } from '../combat/trainingTarget'
-import type { PlayerCombatSnapshot } from '../character/playerCombatHealth'
+import type { PlayerHealthSnapshot } from '../character/playerHealth'
 import type { EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import type { EnemyAttackSpatialSnapshot } from '../enemies/meleeEnemy'
 import type { GrayboxEncounterSnapshot } from '../encounters/grayboxEncounter'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M3.6' as const
+export const MILESTONE = 'M4.1' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
@@ -27,7 +27,7 @@ export interface FoundationRuntimeDiagnostic {
   readonly contact: CombatContactSnapshot
   readonly trainingTarget: TrainingTargetSnapshot
   readonly defense: PlayerDefenseSnapshot
-  readonly playerCombat: PlayerCombatSnapshot
+  readonly playerHealth: PlayerHealthSnapshot
   readonly enemy: EnemyRuntimeSnapshot
   readonly enemyAttack: EnemyAttackSpatialSnapshot
   readonly enemyDistanceToPlayer: number

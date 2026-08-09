@@ -176,4 +176,38 @@ describe('PlayerRuntime', () => {
     expect(runtime.snapshot().attack.movementConstrained).toBe(false)
     expect(runtime.snapshot().player.movementIntent.forward).toBe(1)
   })
+
+  it('enters canonical death and rejects movement, attack, dodge, and guard', () => {
+    const runtime = new PlayerRuntime()
+    runtime.attachCollisionResolver(resolveOnFlatGround)
+    runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 1, forward: 0 })
+    runtime.requestPlayerAttack(attackRequest('light'))
+
+    expect(runtime.applyPlayerDamage(999)).toMatchObject({
+      applied: true,
+      appliedDamage: 100,
+      health: { current: 0, alive: false },
+    })
+    const deathPosition = runtime.snapshot().player.position
+    runtime.setGuardIntent(true)
+
+    expect(runtime.requestPlayerAttack(attackRequest('light'))).toMatchObject({
+      accepted: false,
+      reason: 'actor-defeated',
+    })
+    expect(
+      runtime.requestPlayerDodge(
+        { type: 'player-dodge' },
+        { horizontal: 1, forward: 0 },
+      ),
+    ).toMatchObject({ accepted: false, reason: 'actor-defeated' })
+
+    runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 1, forward: 1 })
+    expect(runtime.snapshot()).toMatchObject({
+      player: { position: deathPosition, velocity: { x: 0, y: 0, z: 0 } },
+      playerHealth: { lifeState: 'dead', health: { current: 0, alive: false } },
+      combat: { phase: 'idle', contact: { enabled: false } },
+      defense: { guarding: false, guardIntentHeld: false, invulnerable: false },
+    })
+  })
 })

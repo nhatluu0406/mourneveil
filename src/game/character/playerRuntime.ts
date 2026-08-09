@@ -59,12 +59,10 @@ import {
   GRAYBOX_ENEMY_ROLES,
 } from '../enemies/enemyRoles'
 import type { EnemyRuntime, EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
-import {
-  PlayerCombatHealthRuntime,
-  type PlayerCombatSnapshot,
-} from './playerCombatHealth'
+import { PlayerHealthRuntime, type PlayerHealthSnapshot } from './playerHealth'
 import {
   createPlayerMotorState,
+  stopPlayerMotor,
   stepPlayerMotor,
   stepPlayerDodgeMotor,
   type CharacterCollisionResolver,
@@ -80,7 +78,7 @@ export interface PlayerRuntimeSnapshot {
   readonly contact: CombatContactSnapshot
   readonly trainingTarget: TrainingTargetSnapshot
   readonly defense: PlayerDefenseSnapshot
-  readonly playerCombat: PlayerCombatSnapshot
+  readonly playerHealth: PlayerHealthSnapshot
   /** Primary diagnostic enemy (skirmisher). Prefer `enemies` for multi-role fixtures. */
   readonly enemy: EnemyRuntimeSnapshot
   readonly enemyAttack: EnemyAttackSpatialSnapshot
@@ -110,7 +108,7 @@ export class PlayerRuntime {
   private readonly enemyContactRuntimes = new Map<string, CombatContactRuntime>()
   private readonly trainingTargetRuntime = new TrainingTargetRuntime()
   private playerState = createPlayerMotorState()
-  private readonly playerCombatRuntime = new PlayerCombatHealthRuntime(
+  private readonly playerHealthRuntime = new PlayerHealthRuntime(
     this.playerState.position,
   )
   private readonly enemyRuntimes: EnemyRuntime[] = createGrayboxEnemyRuntimes()
@@ -124,7 +122,7 @@ export class PlayerRuntime {
     request: CombatActionRequest,
     validateResources?: CombatResourceValidator,
   ): CombatActionStartResult {
-    if (!this.playerCombatRuntime.snapshot().health.alive) {
+    if (!this.playerHealthRuntime.snapshot().health.alive) {
       return {
         accepted: false,
         actionId: request.actionId,
@@ -135,7 +133,7 @@ export class PlayerRuntime {
   }
 
   requestPlayerAttack(request: PlayerAttackRequest): CombatActionStartResult {
-    if (!this.playerCombatRuntime.snapshot().health.alive) {
+    if (!this.playerHealthRuntime.snapshot().health.alive) {
       return {
         accepted: false,
         actionId: playerAttackForRequest(request).action.id,
@@ -168,7 +166,7 @@ export class PlayerRuntime {
     request: PlayerDodgeRequest,
     movementIntent: PlayerMovementIntent,
   ): CombatActionStartResult {
-    if (!this.playerCombatRuntime.snapshot().health.alive) {
+    if (!this.playerHealthRuntime.snapshot().health.alive) {
       return { accepted: false, actionId: PLAYER_DODGE_ACTION_ID, reason: 'actor-defeated' }
     }
     if (!this.defenseRuntime.canStartAction()) {
@@ -192,7 +190,9 @@ export class PlayerRuntime {
   }
 
   setGuardIntent(held: boolean): void {
-    this.defenseRuntime.setGuardIntent(held)
+    this.defenseRuntime.setGuardIntent(
+      this.playerHealthRuntime.snapshot().health.alive && held,
+    )
   }
 
   interruptCombatAction(): CombatActionEndResult {
@@ -244,7 +244,7 @@ export class PlayerRuntime {
   }
 
   resetMeleeFixture(): void {
-    this.playerCombatRuntime.reset()
+    this.restorePlayerForDevelopment()
     for (const enemy of this.enemyRuntimes) {
       const role = meleeRoleByRuntimeId(enemy.id)
       enemy.reset(role?.spawnPosition ?? enemy.snapshot().position)
@@ -252,9 +252,22 @@ export class PlayerRuntime {
     }
   }
 
-  /** Development-only: restore player combat health without resetting enemies/encounter. */
-  resetPlayerCombatHealth(): void {
-    this.playerCombatRuntime.reset()
+  /** Development-only diagnostic until the M4.2 respawn loop replaces it. */
+  restorePlayerForDevelopment(): void {
+    this.playerHealthRuntime.restoreToMaximum()
+    this.combatRuntime.reset()
+    this.defenseRuntime.reset()
+    this.contactRuntime.reset()
+    this.attackExecutionFacing = null
+    this.playerState = stopPlayerMotor(this.playerState)
+  }
+
+  applyPlayerDamage(damage: number): CombatDamageResult {
+    const result = this.playerHealthRuntime.applyDamage(damage)
+    if (result.applied && !result.health.alive) {
+      this.enterPlayerDefeatedState()
+    }
+    return result
   }
 
   advanceFrame(
@@ -264,7 +277,7 @@ export class PlayerRuntime {
     const hitEvents: CombatHitEvent[] = []
     const incomingHitEvents: CombatHitEvent[] = []
     const frame = this.clock.advance(frameDeltaSeconds, (fixedStepSeconds, nextStepCount) => {
-      const playerAlive = this.playerCombatRuntime.snapshot().health.alive
+      const playerAlive = this.playerHealthRuntime.snapshot().health.alive
       if (playerAlive) this.combatRuntime.advanceFixedStep()
       const combat = this.combatRuntime.snapshot()
       if (combat.phase === 'idle') {
@@ -297,7 +310,7 @@ export class PlayerRuntime {
           )
         }
       }
-      this.playerCombatRuntime.updatePosition(this.playerState.position)
+      this.playerHealthRuntime.updatePosition(this.playerState.position)
       for (const enemyRuntime of this.enemyRuntimes) {
         advanceMeleeEnemy(
           enemyRuntime,
@@ -333,7 +346,7 @@ export class PlayerRuntime {
                 combat: enemy.action,
                 contactShape: enemyAttack.activeContactShape,
                 simulationStep: nextStepCount,
-                targets: [this.playerCombatRuntime],
+                targets: [this.playerHealthRuntime],
                 query: this.contactQuery,
                 damage: enemyAttackDamage(enemy),
                 resolveDamage: (target, damage) => {
@@ -343,7 +356,7 @@ export class PlayerRuntime {
                     enemyAttack.executionFacing ?? enemy.facing,
                   )
                   if (outcome === 'damaged') {
-                    return { outcome, result: target.applyDamage(damage) }
+                    return { outcome, result: this.applyPlayerDamage(damage) }
                   }
                   const health = target.snapshot().health
                   const result: CombatDamageResult = {
@@ -368,7 +381,7 @@ export class PlayerRuntime {
     if (combat.phase === 'idle') {
       this.attackExecutionFacing = null
     }
-    this.playerCombatRuntime.updatePosition(this.playerState.position)
+    this.playerHealthRuntime.updatePosition(this.playerState.position)
     const enemies = this.enemyRuntimes.map((enemy) => enemy.snapshot())
     const enemyAttacks = enemies.map((enemy) => createEnemyAttackSpatialSnapshot(enemy))
     const enemy = enemies[0]
@@ -397,7 +410,7 @@ export class PlayerRuntime {
       contact: this.contactRuntime.snapshot(),
       trainingTarget: this.trainingTargetRuntime.snapshot(),
       defense: this.defenseRuntime.snapshot(combat),
-      playerCombat: this.playerCombatRuntime.snapshot(),
+      playerHealth: this.playerHealthRuntime.snapshot(),
       enemy,
       enemyAttack,
       enemyDistanceToPlayer: horizontalDistance(
@@ -426,5 +439,13 @@ export class PlayerRuntime {
     const created = new CombatContactRuntime()
     this.enemyContactRuntimes.set(enemyId, created)
     return created
+  }
+
+  private enterPlayerDefeatedState(): void {
+    this.combatRuntime.reset()
+    this.defenseRuntime.reset()
+    this.contactRuntime.reset()
+    this.attackExecutionFacing = null
+    this.playerState = stopPlayerMotor(this.playerState)
   }
 }

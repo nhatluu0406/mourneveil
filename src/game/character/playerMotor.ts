@@ -55,6 +55,14 @@ export function createPlayerMotorState(
   }
 }
 
+export function stopPlayerMotor(state: PlayerMotorState): PlayerMotorState {
+  return {
+    ...state,
+    velocity: { ...ZERO_VECTOR },
+    movementIntent: { ...NEUTRAL_INTENT },
+  }
+}
+
 export function stepPlayerMotor(
   state: PlayerMotorState,
   movementIntent: PlayerMovementIntent,

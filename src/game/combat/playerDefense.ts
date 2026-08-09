@@ -48,6 +48,12 @@ export class PlayerDefenseRuntime {
     this.guardIntentHeld = held
   }
 
+  reset(): void {
+    this.guardIntentHeld = false
+    this.guarding = false
+    this.dodgeExecution = null
+  }
+
   canStartAction(): boolean {
     return !this.guarding && !this.guardIntentHeld
   }

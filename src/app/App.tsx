@@ -75,7 +75,7 @@ export function App() {
         diagnostic={diagnostic}
         camera={cameraDiagnostic}
         onResetTrainingTarget={() => runtime.resetTrainingTarget()}
-        onResetPlayerCombatHealth={() => runtime.resetPlayerCombatHealth()}
+        onRestorePlayerForDevelopment={() => runtime.restorePlayerForDevelopment()}
         onResetMeleeFixture={() => runtime.resetMeleeFixture()}
       />
     </main>

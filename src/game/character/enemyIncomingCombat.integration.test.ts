@@ -48,7 +48,7 @@ describe('player runtime enemy incoming-melee integration', () => {
       outcome: 'damaged',
       appliedDamage: 10,
     })
-    expect(runtime.snapshot().playerCombat.health.current).toBe(90)
+    expect(runtime.snapshot().playerHealth.health.current).toBe(90)
   })
 
   it('uses authoritative dodge active phase to prevent the same contact', () => {
@@ -68,7 +68,7 @@ describe('player runtime enemy incoming-melee integration', () => {
       outcome: 'dodged',
       appliedDamage: 0,
     })
-    expect(runtime.snapshot().playerCombat.health.current).toBe(100)
+    expect(runtime.snapshot().playerHealth.health.current).toBe(100)
   })
 
   it('blocks an incoming attacker inside the authoritative forward guard cone', () => {
@@ -79,7 +79,7 @@ describe('player runtime enemy incoming-melee integration', () => {
       outcome: 'guarded',
       appliedDamage: 0,
     })
-    expect(runtime.snapshot().playerCombat.health.current).toBe(100)
+    expect(runtime.snapshot().playerHealth.health.current).toBe(100)
   })
 
   it('continues enemy action clocks after player defeat instead of freezing mid-attack', () => {
@@ -87,13 +87,13 @@ describe('player runtime enemy incoming-melee integration', () => {
     let defeated = false
     for (let step = 0; step < 2400; step += 1) {
       runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
-      if (!runtime.snapshot().playerCombat.health.alive) {
+      if (!runtime.snapshot().playerHealth.health.alive) {
         defeated = true
         break
       }
     }
     expect(defeated).toBe(true)
-    expect(runtime.snapshot().playerCombat.defeated).toBe(true)
+    expect(runtime.snapshot().playerHealth.lifeState).toBe('dead')
     const frozen = runtime.snapshot().enemy
     expect(['attack', 'recovery', 'spacing', 'pursue', 'idle']).toContain(frozen.state)
 

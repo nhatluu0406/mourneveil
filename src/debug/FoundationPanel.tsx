@@ -6,7 +6,7 @@ interface FoundationPanelProps {
   camera: CameraDiagnostic | null
   onResetTrainingTarget: () => void
   onResetMeleeFixture: () => void
-  onResetPlayerCombatHealth: () => void
+  onRestorePlayerForDevelopment: () => void
 }
 
 function readinessLabel(ready: boolean): string {
@@ -18,7 +18,7 @@ export function FoundationPanel({
   camera,
   onResetTrainingTarget,
   onResetMeleeFixture,
-  onResetPlayerCombatHealth,
+  onRestorePlayerForDevelopment,
 }: FoundationPanelProps) {
   return (
     <aside className="foundation-panel" aria-label="Foundation diagnostic">
@@ -198,9 +198,9 @@ export function FoundationPanel({
         <div>
           <dt>Player health</dt>
           <dd>
-            {diagnostic.runtime.playerCombat.health.current}/
-            {diagnostic.runtime.playerCombat.health.maximum} ·{' '}
-            {diagnostic.runtime.playerCombat.health.alive ? 'alive' : 'defeated'}
+            {diagnostic.runtime.playerHealth.health.current}/
+            {diagnostic.runtime.playerHealth.health.maximum} ·{' '}
+            {diagnostic.runtime.playerHealth.lifeState}
           </dd>
         </div>
         <div>
@@ -265,8 +265,8 @@ export function FoundationPanel({
       <button type="button" onClick={onResetTrainingTarget}>
         Reset training target
       </button>
-      <button type="button" onClick={onResetPlayerCombatHealth}>
-        Reset player health
+      <button type="button" onClick={onRestorePlayerForDevelopment}>
+        Restore player (development)
       </button>
       <button type="button" onClick={onResetMeleeFixture}>
         Reset melee fixture

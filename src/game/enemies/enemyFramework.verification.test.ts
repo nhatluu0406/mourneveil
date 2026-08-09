@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CharacterCollisionResolver } from '../character/playerMotor'
-import { PlayerCombatHealthRuntime } from '../character/playerCombatHealth'
+import { PlayerHealthRuntime } from '../character/playerHealth'
 import { CombatContactRuntime, type CombatContactQuery } from '../combat/combatContact'
 import { attackContactOverlapsSphere } from '../combat/playerAttackActions'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
@@ -118,7 +118,7 @@ describe('M3 enemy framework verification', () => {
   it('isolates health, execution, and contact dedup across skirmisher and brute', () => {
     const skirmisher = createEnemyRuntimeFromRole(SKIRMISHER_ROLE)
     const brute = createEnemyRuntimeFromRole(BRUTE_ROLE)
-    const player = new PlayerCombatHealthRuntime(closeTo(SKIRMISHER_ROLE))
+    const player = new PlayerHealthRuntime(closeTo(SKIRMISHER_ROLE))
     const skirmisherContact = new CombatContactRuntime()
     const bruteContact = new CombatContactRuntime()
 
@@ -208,8 +208,8 @@ describe('M3 enemy framework verification', () => {
 
   it('resets development player health without restoring defeated enemies', () => {
     const runtime = new PlayerRuntime()
-    runtime.resetPlayerCombatHealth()
-    expect(runtime.snapshot().playerCombat.health.alive).toBe(true)
+    runtime.restorePlayerForDevelopment()
+    expect(runtime.snapshot().playerHealth.health.alive).toBe(true)
     // defeat one enemy via definition max health through contact is heavy; use encounter helper only
     // and prove player reset is independent of encounter phase projection.
     const enemies = runtime.snapshot().enemies
@@ -219,10 +219,10 @@ describe('M3 enemy framework verification', () => {
         enemies.map((enemy) => ({ id: enemy.id, alive: enemy.id !== enemies[0].id })),
       ).phase,
     ).toBe('active')
-    runtime.resetPlayerCombatHealth()
-    expect(runtime.snapshot().playerCombat).toMatchObject({
+    runtime.restorePlayerForDevelopment()
+    expect(runtime.snapshot().playerHealth).toMatchObject({
       health: { current: 100, alive: true },
-      defeated: false,
+      lifeState: 'alive',
     })
   })
 

@@ -7,7 +7,7 @@ import {
   createGrayboxEnemyRuntimes,
 } from './enemyRoles'
 import type { CharacterCollisionResolver } from '../character/playerMotor'
-import { PlayerCombatHealthRuntime } from '../character/playerCombatHealth'
+import { PlayerHealthRuntime } from '../character/playerHealth'
 import { CombatContactRuntime, type CombatContactQuery } from '../combat/combatContact'
 import { attackContactOverlapsSphere } from '../combat/playerAttackActions'
 
@@ -60,7 +60,7 @@ describe('enemy role variants', () => {
   it('keeps independent health and hit-dedup across role instances', () => {
     const skirmisher = createEnemyRuntimeFromRole(SKIRMISHER_ROLE)
     const brute = createEnemyRuntimeFromRole(BRUTE_ROLE)
-    const player = new PlayerCombatHealthRuntime({ x: 0, y: 0.82, z: 0 })
+    const player = new PlayerHealthRuntime({ x: 0, y: 0.82, z: 0 })
     const skirmisherContact = new CombatContactRuntime()
     const bruteContact = new CombatContactRuntime()
 

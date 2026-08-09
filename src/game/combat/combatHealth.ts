@@ -10,6 +10,12 @@ export interface CombatDamageResult {
   readonly health: CombatHealthState
 }
 
+export interface CombatHealthRestoreResult {
+  readonly applied: boolean
+  readonly restoredHealth: number
+  readonly health: CombatHealthState
+}
+
 export function createCombatHealth(maximum: number): CombatHealthState {
   assertPositiveFinite(maximum, 'Maximum health')
   return Object.freeze({ maximum, current: maximum, alive: true })
@@ -33,6 +39,28 @@ export function applyCombatDamage(
   return {
     applied: true,
     appliedDamage: health.current - current,
+    health: nextHealth,
+  }
+}
+
+export function restoreCombatHealth(
+  health: CombatHealthState,
+  amount: number,
+): CombatHealthRestoreResult {
+  assertPositiveFinite(amount, 'Health restoration')
+  if (!health.alive || health.current >= health.maximum) {
+    return { applied: false, restoredHealth: 0, health }
+  }
+
+  const current = Math.min(health.maximum, health.current + amount)
+  const nextHealth = Object.freeze({
+    maximum: health.maximum,
+    current,
+    alive: true,
+  })
+  return {
+    applied: true,
+    restoredHealth: current - health.current,
     health: nextHealth,
   }
 }

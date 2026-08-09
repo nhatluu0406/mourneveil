@@ -6,7 +6,7 @@ import {
   transformPlayerAttackContactShape,
 } from '../game/combat/playerAttackActions'
 import type { SphereHurtbox } from '../game/combat/combatTarget'
-import { PlayerCombatHealthRuntime } from '../game/character/playerCombatHealth'
+import { PlayerHealthRuntime } from '../game/character/playerHealth'
 import {
   MELEE_ENEMY_ATTACK,
   createEnemyAttackSpatialSnapshot,
@@ -91,7 +91,7 @@ describe('Rapier combat contact query', () => {
   })
 
   it('queries the player hurtbox from enemy execution-facing contact', () => {
-    const player = new PlayerCombatHealthRuntime({ x: 1.3, y: 0.82, z: 3 })
+    const player = new PlayerHealthRuntime({ x: 1.3, y: 0.82, z: 3 })
     const hurtbox = player.snapshot().hurtbox
     const world = new RAPIER.World({ x: 0, y: 0, z: 0 })
     const collider = world.createCollider(

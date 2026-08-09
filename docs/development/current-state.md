@@ -1,9 +1,9 @@
 # Current State
 
 - Updated: 2026-08-09
-- Milestone: **M3 Enemy Framework — READY FOR PRODUCT OWNER ACCEPTANCE**
-- Active LeanLoop task: `m3-enemy-framework`
-- Status: M3.1–M3.6 complete on `main`. Skirmisher + brute graybox roles, liveness, facing/contact, mixed encounter, and browser soaks verified. Product Owner acceptance pending. M4 not started.
+- Milestone: **M4 Core RPG Loop — IN PROGRESS**
+- Active LeanLoop task: `m4-core-rpg-loop`
+- Status: M3.1–M3.6 Product Owner accepted. M4.1–M4.3 authorized as one sequential gated batch; M4.4 not started.
 
 ## What exists
 
@@ -25,4 +25,4 @@
 
 ## Next executable work
 
-Product Owner acceptance of M3. Do not start M4 until authorized after acceptance.
+Execute PLAN M4.1, then M4.2, then M4.3 through their internal gates. Do not start M4.4 in this batch.

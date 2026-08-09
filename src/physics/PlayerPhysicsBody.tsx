@@ -27,7 +27,7 @@ export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
   const hurtboxColliderRef = useRef<RapierCollider>(null)
   const { world } = useRapier()
   const initialPosition = runtime.snapshot().player.position
-  const playerHurtbox = runtime.snapshot().playerCombat.hurtbox
+  const playerHurtbox = runtime.snapshot().playerHealth.hurtbox
   useCombatHurtboxRegistration(playerHurtbox.id, hurtboxColliderRef)
 
   useEffect(() => {

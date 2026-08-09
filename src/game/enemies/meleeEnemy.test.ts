@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PlayerCombatHealthRuntime } from '../character/playerCombatHealth'
+import { PlayerHealthRuntime } from '../character/playerHealth'
 import type { CharacterCollisionResolver } from '../character/playerMotor'
 import { CombatContactRuntime, type CombatContactQuery } from '../combat/combatContact'
 import type { PlayerDefenseSnapshot } from '../combat/playerDefense'
@@ -55,7 +55,7 @@ function advanceToActive(
 
 function resolveIncoming(
   enemy: ReturnType<typeof createMeleeEnemyRuntime>,
-  player: PlayerCombatHealthRuntime,
+  player: PlayerHealthRuntime,
   playerDefense: PlayerDefenseSnapshot,
 ) {
   const contacts = new CombatContactRuntime()
@@ -152,7 +152,7 @@ describe('first melee enemy behavior', () => {
     expect(active.attackExecutionFacing).toEqual(accepted.attackExecutionFacing)
     expect(attack.executionFacing).toEqual({ x: -1, z: 0 })
     expect(attack.activeContactShape?.center.x).toBeLessThan(active.position.x)
-    const playerBehind = new PlayerCombatHealthRuntime(behind)
+    const playerBehind = new PlayerHealthRuntime(behind)
     expect(resolveIncoming(enemy, playerBehind, defense())).toEqual([])
   })
 
@@ -240,7 +240,7 @@ describe('first melee enemy behavior', () => {
 describe('enemy outgoing contact and player defense', () => {
   it('misses outside range and with wrong-facing execution', () => {
     const enemy = advanceToActive()
-    const outside = new PlayerCombatHealthRuntime({ x: -1, y: 0.82, z: 3 })
+    const outside = new PlayerHealthRuntime({ x: -1, y: 0.82, z: 3 })
     expect(resolveIncoming(enemy, outside, defense())).toEqual([])
 
     const wrongFacing = createMeleeEnemyRuntime()
@@ -249,14 +249,14 @@ describe('enemy outgoing contact and player defense', () => {
     for (let step = 0; step < MELEE_ENEMY_ATTACK.startupSteps; step += 1) {
       wrongFacing.advanceAction()
     }
-    const player = new PlayerCombatHealthRuntime(CLOSE_PLAYER)
+    const player = new PlayerHealthRuntime(CLOSE_PLAYER)
     expect(resolveIncoming(wrongFacing, player, defense())).toEqual([])
   })
 
   it('damages once per execution and permits a new execution to hit again', () => {
     const playerPosition = CLOSE_PLAYER
     const enemy = advanceToActive(playerPosition)
-    const player = new PlayerCombatHealthRuntime(playerPosition)
+    const player = new PlayerHealthRuntime(playerPosition)
     const contacts = new CombatContactRuntime()
 
     const resolve = () => {
@@ -291,14 +291,14 @@ describe('enemy outgoing contact and player defense', () => {
   it('applies normal damage, dodge invulnerability, and directional guard policy', () => {
     const playerPosition = CLOSE_PLAYER
 
-    const normal = new PlayerCombatHealthRuntime(playerPosition)
+    const normal = new PlayerHealthRuntime(playerPosition)
     expect(resolveIncoming(advanceToActive(playerPosition), normal, defense())[0]).toMatchObject({
       outcome: 'damaged',
       appliedDamage: MELEE_ENEMY_ATTACK_DAMAGE,
     })
     expect(normal.snapshot().health.current).toBe(90)
 
-    const dodging = new PlayerCombatHealthRuntime(playerPosition)
+    const dodging = new PlayerHealthRuntime(playerPosition)
     expect(
       resolveIncoming(
         advanceToActive(playerPosition),
@@ -308,7 +308,7 @@ describe('enemy outgoing contact and player defense', () => {
     ).toMatchObject({ outcome: 'dodged', appliedDamage: 0 })
     expect(dodging.snapshot().health.current).toBe(100)
 
-    const guarding = new PlayerCombatHealthRuntime(playerPosition)
+    const guarding = new PlayerHealthRuntime(playerPosition)
     expect(
       resolveIncoming(
         advanceToActive(playerPosition),
@@ -319,7 +319,7 @@ describe('enemy outgoing contact and player defense', () => {
     expect(guarding.snapshot().health.current).toBe(100)
 
     const rearPosition = { x: 3.5, y: 0.82, z: 3 }
-    const rear = new PlayerCombatHealthRuntime(rearPosition)
+    const rear = new PlayerHealthRuntime(rearPosition)
     const rearEnemy = advanceToActive(rearPosition)
     expect(resolveIncoming(rearEnemy, rear, defense({ guarding: true }))[0]).toMatchObject({
       outcome: 'damaged',
