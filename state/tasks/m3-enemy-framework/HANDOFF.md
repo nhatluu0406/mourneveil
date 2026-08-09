@@ -4,53 +4,53 @@ Updated: 2026-08-09 by Cursor
 Task: m3-enemy-framework
 
 ## Status
-M3.3.1, M3.4, and M3.5 complete on `main`. M3.6 has not started.
+M3.1 through M3.6 complete on `main`.
 
-Classification: **M3.3.1 PASS · M3.4 PASS · M3.5 PASS · M3.6 NEXT**
+Classification: **M3 READY FOR PRODUCT OWNER ACCEPTANCE**
 
-## Exact liveness root cause (M3.3.1)
-- `PlayerRuntime.advanceFrame` only called `advanceMeleeEnemy` while `playerAlive` was true.
-- After the player was defeated by enemy melee, the simulation clock kept running, but the enemy stopped advancing mid-attack/recovery (telegraph/contact could remain), matching the PO “pending while sim running” report.
-- Secondary soft-locks: pursue with null collision resolver/facing, or near-zero Rapier-corrected travel inside `attackRange`, could remain in pursue forever.
+## M3.1–M3.6 summary
+- M3.1: immutable definitions + `EnemyRuntime` authority
+- M3.2: first melee pursue/telegraph/attack/recovery/defeat
+- M3.3: execution-facing, spacing hysteresis, local Rapier steering
+- M3.3.1: liveness — do not gate enemy AI on player alive; soft-lock escapes
+- M3.4: skirmisher + brute data packages; shared runtime; multi-instance isolation
+- M3.5: `encounter.graybox.mixed` active/complete + role presentation
+- M3.6: verification matrix, long-run tests, browser soaks A–D, milestone M3.6
 
-## Liveness fix
-- Always advance melee enemies with `{ targetAlive: playerAlive }`.
-- When the target is dead: keep advancing committed attack/recovery clocks, then drop pursue/spacing into idle (allowed `spacing → idle`).
-- When blocked with ~zero step inside attack range (or missing resolver while in-band): enter spacing / accept attack instead of permanent pursue stall.
-- Diagnostic milestone updated through M3.3.1 → M3.4 → M3.5 as steps landed.
-- Regression tests cover target-death exit, blocked-pursue escape, multi-cycle attacks, and player-runtime defeat → idle.
+## Two proven roles
+- Skirmisher: faster, 70 HP, short commitment, tighter spacing, smaller body
+- Brute: slower, 160 HP, long telegraph, heavier damage/contact, larger body
 
-## Variant architecture (M3.4)
-- Shared `EnemyRuntime` + `advanceMeleeEnemy`; no per-role subclasses/state machines.
-- Authored packages in `enemyRoles.ts`: skirmisher (converted former melee baseline) and brute.
-- Differences come from definition/action/contact/damage/presentation data.
-- Multi-enemy fixture: distinct runtime IDs, per-enemy Rapier collision resolvers, per-enemy `CombatContactRuntime` hit-dedup.
+## Liveness contract
+- Living enemy + living target: idle → pursue/spacing/attack → recovery → re-evaluate
+- Dead target: finish committed action clocks, then idle; sim keeps running
+- Reset player health (dev) or melee fixture restores engagement without permanent stall
 
-## Variant definitions
-- Skirmisher: faster, 70 HP, short 18/5/18 attack, tighter spacing, smaller body, green-tint presentation.
-- Brute: slower, 160 HP, long 42/8/36 telegraph, heavier damage/contact, larger body, brown-tint presentation.
+## Steering limitation
+- Local deterministic probes only for current convex graybox; no maze/navmesh guarantee
 
-## Encounter lifecycle (M3.5)
-- `encounter.graybox.mixed` derives `active|complete` from the two fixture enemy alive flags.
-- Completes only when both are defeated; one defeat stays `active`.
-- `resetMeleeFixture` restores both enemies and returns encounter to `active`.
-- No waves, director, loot, or spawning framework.
+## Combat proof
+- Outgoing: player light/heavy → enemy hurtbox, dedup, defeat
+- Incoming: per-role damage, one hit/execution, dodge invuln, forward guard cone
+- Facing: execution snapshot shared by telegraph/contact/guard
 
-## Browser soak results
-- M3.3.1: multi-cycle combat, player defeat → enemy idle while sim running, reset cycles, roam; no console errors.
-- M3.4: both roles spawn; each activates when approached; no console errors.
-- M3.5: extended soak with both roles live; encounter stays coherent; reset restores full health/active; no console/React errors; no obvious stutter/leak symptoms observed.
+## Encounter proof
+- Active while any encounter enemy alive; complete only when both defeated; fixture reset restores both
 
-## Remaining limitations
-- Local steering only; no navmesh/A*/crowd/flanking.
-- Player health remains development proof only (no respawn/heal/HUD).
-- Controller deferred.
-- Vite main-chunk >500 kB advisory non-blocking.
+## Browser soak evidence (M3.6)
+- A: extended reposition soak — both roles live; no console errors
+- B: 3× player defeat → enemy idle while sim running → fixture reset restores
+- C: kill skirmisher first (brute continues); kill both → complete; kill brute first (skirmisher continues)
+- D: blocker/border roam progressed; no console errors
+- Combat/UI: light damage to skirmisher; dodge/guard/focus-loss/reset controls; camera present; milestone M3.6
 
-## Commits this batch
-- `6d709aa` fix(enemy): prevent runtime state stall
-- `106d063` feat(enemy): add graybox enemy roles
-- `a09cce5` feat(encounter): add mixed enemy combat proof
+## Remaining non-blocking debt
+- Bundle-size advisory
+- Controller deferred
+- No production VFX/assets/HUD/respawn
+
+## Product Owner acceptance
+Pending — do not grant acceptance in-agent.
 
 ## Next
-M3.6 — M3 verification / PO acceptance. Do not start M3.6 in this session without a new authorized batch.
+M4 only after PO accepts M3. Do not start M4 in this session.

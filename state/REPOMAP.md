@@ -15,8 +15,8 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (38L)
-- tmp_m331_browser_gate.json (105L)
-- ... +9 more
+- tmp_m36_browser_accept.json (180L)
+- ... +5 more
 - **.agents/** (0 files)
   - **.agents/skills/** (0 files)
     - **.agents/skills/codebase-map/** (1 files)
@@ -185,12 +185,12 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (82L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
+    - App.tsx (83L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (118L)
     - useFoundationRuntime.ts (144L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserAttackInput
   - **src/debug/** (1 files)
-    - FoundationPanel.tsx (271L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
+    - FoundationPanel.tsx (276L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
   - **src/game/** (0 files)
     - **src/game/character/** (7 files)
       - enemyIncomingCombat.integration.test.ts (112L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
@@ -199,6 +199,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - playerMotor.test.ts (103L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ./playerMotor
       - playerMotor.ts (206L) -- symbols: PLAYER_MOVE_SPEED, PLAYER_ACCELERATION, PLAYER_DECELERATION, PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED; imports: ../../input/playerMovementIntent
       - playerRuntime.test.ts (179L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ../combat/playerAttackActions
-      - playerRuntime.ts (425L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMovemen
+      - playerRuntime.ts (430L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMoveme
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

@@ -13,7 +13,7 @@ import type { EnemyAttackSpatialSnapshot } from '../enemies/meleeEnemy'
 import type { GrayboxEncounterSnapshot } from '../encounters/grayboxEncounter'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M3.5' as const
+export const MILESTONE = 'M3.6' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {

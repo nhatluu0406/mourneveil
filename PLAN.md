@@ -109,7 +109,7 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - completion evidence: runtime observations recorded; no authority drift
   - evidence: `encounter.graybox.mixed` completes only when both roles defeated; role-tinted graybox presentation; telegraph/contact only during startup/active; browser soak saw both roles live + reset restores active; Vite chunk advisory non-blocking
 
-- [ ] 6. M3.6 — M3 verification
+- [x] 6. M3.6 — M3 verification
   - depends: 5
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -119,6 +119,7 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - non-goals: new enemy features, M4 planning beyond a pointer
   - verifier: `npm run verify && git diff --check` plus HUMAN-VERIFY Playwright/browser Combat+Enemy proof
   - completion evidence: acceptance matrix recorded; M3 closed or blocked with evidence
+  - evidence: milestone diagnostic M3.6; long-run/isolation/encounter verification tests; browser soaks A–D + combat/UI matrix pass with no console errors; 149/149 tests; full verify green; classification READY FOR PRODUCT OWNER ACCEPTANCE
 
 ## Parallel groups
 - none — M3 authority steps are sequential
@@ -132,6 +133,7 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
 - 2026-08-09 | Accepted enemy attacks own one enemy-to-player facing snapshot; telegraph, contact, and defense consume it while pursuit uses authored stop/resume hysteresis and simulation-owned local collision steering | Fixes the M3.2 directional mismatch without presentation authority or a navmesh framework
 - 2026-08-09 | Enemy AI must keep advancing when the player is defeated; do not gate `advanceMeleeEnemy` on player alive | Prevents permanent non-terminal stall while the simulation clock remains running
 - 2026-08-09 | Graybox roles are data packages (skirmisher/brute) over one melee runtime; multi-enemy needs per-instance collision and contact dedup | Proves M3 architecture is data-driven without forked state machines
+- 2026-08-09 | M3.6 adds development-only `Reset player health` without restoring enemies/encounter | Lets soak/verification continue after player defeat without clearing the mixed encounter fixture
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate

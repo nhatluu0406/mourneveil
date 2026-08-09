@@ -1,29 +1,28 @@
 # Current State
 
 - Updated: 2026-08-09
-- Milestone: **M3 Enemy Framework — M3.3.1 / M3.4 / M3.5 complete; M3.6 next**
+- Milestone: **M3 Enemy Framework — READY FOR PRODUCT OWNER ACCEPTANCE**
 - Active LeanLoop task: `m3-enemy-framework`
-- Status: Data-driven skirmisher + brute graybox roles share one melee runtime; mixed encounter completes when both are defeated; liveness stall after player defeat is fixed.
+- Status: M3.1–M3.6 complete on `main`. Skirmisher + brute graybox roles, liveness, facing/contact, mixed encounter, and browser soaks verified. Product Owner acceptance pending. M4 not started.
 
 ## What exists
 
-- Accepted M2 Combat Proof (aim/contact/dodge/guard + browser matrix)
-- M3.1–M3.3 enemy authority, melee proof, facing/spacing/steering
-- M3.3.1 liveness fix (enemy AI no longer gated off when player defeated)
-- M3.4 skirmisher + brute role packages; per-enemy collision/contact state
-- M3.5 mixed graybox encounter lifecycle + role-readable presentation
-- Narrow deterministic player combat health for enemy incoming-melee proof only
+- Accepted M2 Combat Proof
+- M3 enemy definition/runtime authority, melee proof, facing/spacing/steering, liveness fix
+- Data-driven skirmisher + brute roles; per-enemy collision/contact state
+- Mixed graybox encounter lifecycle (`active` → `complete`) with fixture reset
+- Development-only player combat health + `Reset player health` / `Reset melee fixture`
 - Local Vite endpoint `http://127.0.0.1:4173/`
 - CI: Node 22 → `npm ci` → `npm run verify`
 
 ## Known limitations
 
-- Local steering handles the current convex graybox blocker and boundaries but has no route memory, navmesh, or guarantees for concave/maze layouts
-- Full player death/respawn, healing, RPG stats, production health HUD, and broader health systems remain prohibited/deferred
-- No waves/director/loot/XP; encounter is a fixed two-enemy fixture
-- Controller play-pass and production VFX/animation remain deferred
-- Bundle-size advisory non-blocking
+- Local steering only (no navmesh/A*/crowd/flanking)
+- No waves/loot/XP/inventory/healing/respawn/production HUD
+- Controller deferred
+- Vite main-chunk >500 kB advisory non-blocking
+- Spacing hysteresis band intentionally holds without attacking between stop and resume ranges
 
 ## Next executable work
 
-M3.6 — M3 verification / Product Owner acceptance gate. Do not start without authorization.
+Product Owner acceptance of M3. Do not start M4 until authorized after acceptance.

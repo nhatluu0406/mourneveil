@@ -252,6 +252,11 @@ export class PlayerRuntime {
     }
   }
 
+  /** Development-only: restore player combat health without resetting enemies/encounter. */
+  resetPlayerCombatHealth(): void {
+    this.playerCombatRuntime.reset()
+  }
+
   advanceFrame(
     frameDeltaSeconds: number,
     movementIntent: PlayerMovementIntent,
