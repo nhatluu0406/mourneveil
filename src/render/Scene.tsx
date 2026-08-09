@@ -11,6 +11,7 @@ import { CheckpointVisual } from './CheckpointVisual'
 import { EchoRecoveryVisual } from './EchoRecoveryVisual'
 import { LootPickupVisual } from './LootPickupVisual'
 import { ConnectedLevelVisual } from './ConnectedLevelVisual'
+import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 
 interface SceneProps {
   onPhysicsReady: () => void
@@ -53,13 +54,28 @@ export function Scene({
 }: SceneProps) {
   return (
     <>
-      <color attach="background" args={['#10141a']} />
-      <ambientLight intensity={0.55} />
+      <color attach="background" args={[MOURNEVEIL_PALETTE.background]} />
+      <fog attach="fog" args={[MOURNEVEIL_PALETTE.background, 18, 42]} />
+      <ambientLight intensity={0.38} color={MOURNEVEIL_PALETTE.ambient} />
       <directionalLight
         castShadow
-        intensity={2.35}
-        position={[9, 14, 6]}
+        intensity={1.85}
+        position={[8, 16, 5]}
+        color="#e8dcc8"
         shadow-mapSize={[1024, 1024]}
+      />
+      <directionalLight intensity={0.35} position={[-6, 8, -4]} color="#6d7f92" />
+      <pointLight
+        position={[-5.5, 2.4, 0]}
+        intensity={0.55}
+        distance={8}
+        color={MOURNEVEIL_PALETTE.checkpoint.active}
+      />
+      <pointLight
+        position={[10, 2.8, -4]}
+        intensity={0.7}
+        distance={10}
+        color={MOURNEVEIL_PALETTE.finalGate.open}
       />
       <FollowCameraRig runtime={runtime} onDiagnostic={onCameraDiagnostic} />
       <GameWorld onPhysicsReady={onPhysicsReady} runtime={runtime} />
