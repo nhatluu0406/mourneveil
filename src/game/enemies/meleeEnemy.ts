@@ -45,8 +45,8 @@ export const MELEE_ENEMY_DEFINITION = defineEnemy({
   maximumHealth: 100,
   movementSpeed: 2.1,
   perceptionRange: 4.5,
-  stoppingRange: 1.32,
-  attackRange: 1.32,
+  stoppingRange: 1.28,
+  attackRange: 1.48,
   attackActionIds: [MELEE_ENEMY_ATTACK_ID],
 })
 
@@ -86,9 +86,21 @@ export function advanceMeleeEnemy(
     runtime.advanceAction()
     return
   }
+  if (enemy.state === 'spacing') {
+    if (direction.distance > runtime.definition.attackRange) {
+      runtime.transition('pursue')
+      enemy = runtime.snapshot()
+    } else {
+      runtime.holdSpacing(direction.facing)
+      if (direction.distance <= runtime.definition.stoppingRange) {
+        runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing ?? enemy.facing)
+      }
+      return
+    }
+  }
   if (enemy.state !== 'pursue') return
 
-  if (direction.distance <= runtime.definition.attackRange) {
+  if (direction.distance <= runtime.definition.stoppingRange) {
     runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing ?? enemy.facing)
     return
   }
@@ -99,12 +111,23 @@ export function advanceMeleeEnemy(
     enemy.velocity.y - PLAYER_GRAVITY * fixedStepSeconds,
     -PLAYER_MAX_FALL_SPEED,
   )
+  const maximumTravel = horizontalSpeed * fixedStepSeconds
+  const horizontalTravel = Math.min(
+    maximumTravel,
+    direction.distance - runtime.definition.stoppingRange,
+  )
   const desiredTranslation = {
-    x: direction.facing.x * horizontalSpeed * fixedStepSeconds,
+    x: direction.facing.x * horizontalTravel,
     y: verticalVelocity * fixedStepSeconds,
-    z: direction.facing.z * horizontalSpeed * fixedStepSeconds,
+    z: direction.facing.z * horizontalTravel,
   }
-  const collision = resolveCollision(enemy.position, desiredTranslation)
+  const collision = resolvePursuitCollision(
+    runtime.id,
+    enemy.position,
+    desiredTranslation,
+    direction.facing,
+    resolveCollision,
+  )
   runtime.setMotion(
     {
       x: enemy.position.x + collision.translation.x,
@@ -124,7 +147,9 @@ export function createEnemyAttackSpatialSnapshot(
   enemy: EnemyRuntimeSnapshot,
 ): EnemyAttackSpatialSnapshot {
   const actionMatches = enemy.action.actionId === MELEE_ENEMY_ATTACK_ID
-  const executionFacing = actionMatches ? { ...enemy.facing } : null
+  const executionFacing = actionMatches && enemy.attackExecutionFacing !== null
+    ? { ...enemy.attackExecutionFacing }
+    : null
   const contactEnabled =
     actionMatches &&
     enemy.alive &&
@@ -149,6 +174,71 @@ export function createEnemyAttackSpatialSnapshot(
           }
         : null,
   }
+}
+
+function resolvePursuitCollision(
+  runtimeId: string,
+  position: Vector3Value,
+  desiredTranslation: Vector3Value,
+  pursuitFacing: PlayerFacingDirection,
+  resolveCollision: CharacterCollisionResolver,
+) {
+  const direct = resolveCollision(position, desiredTranslation)
+  const desiredHorizontalDistance = Math.hypot(
+    desiredTranslation.x,
+    desiredTranslation.z,
+  )
+  const directHorizontalDistance = Math.hypot(
+    direct.translation.x,
+    direct.translation.z,
+  )
+  if (
+    desiredHorizontalDistance <= 0 ||
+    directHorizontalDistance >= desiredHorizontalDistance * 0.6
+  ) return direct
+
+  const preferredSign = stableSteeringSign(runtimeId)
+  const candidates = [preferredSign, -preferredSign].map((sign) => {
+    const steeredFacing = normalizeHorizontal({
+      x: pursuitFacing.x - pursuitFacing.z * sign,
+      z: pursuitFacing.z + pursuitFacing.x * sign,
+    })
+    const steeredTranslation = {
+      x: steeredFacing.x * desiredHorizontalDistance,
+      y: desiredTranslation.y,
+      z: steeredFacing.z * desiredHorizontalDistance,
+    }
+    const collision = resolveCollision(position, steeredTranslation)
+    const forwardProgress =
+      collision.translation.x * pursuitFacing.x +
+      collision.translation.z * pursuitFacing.z
+    const horizontalDistance = Math.hypot(
+      collision.translation.x,
+      collision.translation.z,
+    )
+    return {
+      score: horizontalDistance + Math.max(0, forwardProgress),
+      translation: steeredTranslation,
+    }
+  })
+  const best = candidates[0].score >= candidates[1].score ? candidates[0] : candidates[1]
+  return resolveCollision(
+    position,
+    best.score > directHorizontalDistance ? best.translation : desiredTranslation,
+  )
+}
+
+function stableSteeringSign(runtimeId: string): 1 | -1 {
+  let hash = 0
+  for (let index = 0; index < runtimeId.length; index += 1) {
+    hash = (hash * 31 + runtimeId.charCodeAt(index)) | 0
+  }
+  return (hash & 1) === 0 ? 1 : -1
+}
+
+function normalizeHorizontal(value: PlayerFacingDirection): PlayerFacingDirection {
+  const magnitude = Math.hypot(value.x, value.z)
+  return { x: value.x / magnitude, z: value.z / magnitude }
 }
 
 export function horizontalDistance(from: Vector3Value, to: Vector3Value): number {

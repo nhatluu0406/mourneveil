@@ -108,18 +108,13 @@ export class PlayerDefenseRuntime {
 export function resolveIncomingMeleeDefense(
   defense: PlayerDefenseSnapshot,
   playerFacing: PlayerFacingDirection,
-  playerPosition: { readonly x: number; readonly z: number },
-  attackerPosition: { readonly x: number; readonly z: number },
+  attackFacing: PlayerFacingDirection,
 ): IncomingMeleeDefenseOutcome {
   if (defense.invulnerable) return 'dodged'
   if (!defense.guarding) return 'damaged'
 
-  const deltaX = attackerPosition.x - playerPosition.x
-  const deltaZ = attackerPosition.z - playerPosition.z
-  const distance = Math.hypot(deltaX, deltaZ)
-  if (distance === 0) return 'damaged'
-  const incomingX = deltaX / distance
-  const incomingZ = deltaZ / distance
+  const incomingX = -attackFacing.x
+  const incomingZ = -attackFacing.z
   const dot = playerFacing.x * incomingX + playerFacing.z * incomingZ
   return dot >= PLAYER_GUARD_CONE_MINIMUM_DOT ? 'guarded' : 'damaged'
 }

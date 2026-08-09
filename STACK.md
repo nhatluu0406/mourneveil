@@ -31,7 +31,7 @@
 - Gameplay pointer input belongs only to the canvas surface; UI pointer interaction is excluded, and unreliable surface/focus lifecycle clears held gameplay input
 - Defense: Space requests one fixed-step, collision-resolved dodge whose active phase owns invulnerability; held canvas RMB produces simulation-owned guard state and constrained movement
 - Melee contact: after fixed-step movement, Rapier may report overlap between the simulation-owned active attack shape and registered gameplay hurtboxes; simulation emits at most one hit per target per deterministic attack execution and owns damage/health outcomes; render and animation never author hits
-- Enemy melee proof: immutable enemy definitions feed stable mutable instances; fixed-step simulation owns perception, collision-resolved pursuit, action phases, facing snapshots, outgoing contact, health, and defeat; M3 player health is limited to the deterministic incoming-damage proof
+- Enemy melee authority: immutable definitions own movement and spacing thresholds; fixed-step simulation owns perception, Rapier-resolved pursuit/local steering, explicit spacing state, action phases, outgoing contact, health, and defeat; each accepted attack snapshots authoritative enemy-to-player facing once, and telegraph, presentation, contact, and guard-angle evaluation consume that execution snapshot; M3 player health remains limited to the deterministic incoming-damage proof
 - React is shell/UI projection — not combat/simulation authority
 - Flow: device input → intents → simulation resolves outcomes → render/UI/audio/VFX consume typed state/events
 - Physics reports collision facts; simulation assigns gameplay meaning

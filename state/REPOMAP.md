@@ -8,7 +8,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (123L)
+- PLAN.md (125L)
 - README.md (33L)
 - SETUP.md (152L)
 - STACK.md (68L)
@@ -199,6 +199,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - playerMotor.test.ts (103L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ./playerMotor
       - playerMotor.ts (206L) -- symbols: PLAYER_MOVE_SPEED, PLAYER_ACCELERATION, PLAYER_DECELERATION, PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED; imports: ../../input/playerMovementIntent
       - playerRuntime.test.ts (179L) -- imports: ../../input/playerMovementIntent, ../core/fixedStepClock, ../combat/playerAttackActions
-      - playerRuntime.ts (363L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMovementIntent, ..
+      - playerRuntime.ts (362L) -- symbols: PlayerRuntimeSnapshot, PlayerRuntimeAdvance, PlayerRuntime; imports: ../../input/playerMovementIntent, ..
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

@@ -56,7 +56,12 @@ describe('enemy runtime authority', () => {
     const runtime = createRuntime()
     runtime.transition('pursue', 'player')
     expect(runtime.startAction(ATTACK.id, { x: -1, z: 0 })).toMatchObject({ accepted: true })
-    expect(runtime.snapshot()).toMatchObject({ state: 'attack', targetId: 'player' })
+    expect(runtime.snapshot()).toMatchObject({
+      state: 'attack',
+      targetId: 'player',
+      facing: { x: -1, z: 0 },
+      attackExecutionFacing: { x: -1, z: 0 },
+    })
     expect(runtime.snapshot().action.phase).toBe('startup')
 
     runtime.advanceAction()
@@ -66,7 +71,11 @@ describe('enemy runtime authority', () => {
     expect(runtime.snapshot()).toMatchObject({ state: 'recovery' })
     runtime.advanceAction()
     runtime.advanceAction()
-    expect(runtime.snapshot()).toMatchObject({ state: 'pursue', action: { phase: 'idle' } })
+    expect(runtime.snapshot()).toMatchObject({
+      state: 'spacing',
+      action: { phase: 'idle' },
+      attackExecutionFacing: null,
+    })
   })
 
   it('applies clamped damage and defeat halts action authority', () => {

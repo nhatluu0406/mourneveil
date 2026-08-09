@@ -6,10 +6,12 @@ import {
   MELEE_ENEMY_CONTACT_SHAPE,
   MELEE_ENEMY_DEFINITION,
 } from '../game/enemies/meleeEnemy'
+import { createEnemyAttackPresentationSnapshot } from './enemyAttackPresentation'
 
 const STATE_COLORS = {
   idle: '#596582',
   pursue: '#85664d',
+  spacing: '#9b754c',
   attack: '#d98b4b',
   recovery: '#735767',
   defeated: '#302f36',
@@ -23,7 +25,12 @@ export function EnemyVisual({ runtime }: { readonly runtime: PlayerRuntime }) {
   const contactRef = useRef<Mesh>(null)
 
   useFrame(() => {
-    const enemy = runtime.snapshot().enemy
+    const runtimeSnapshot = runtime.snapshot()
+    const enemy = runtimeSnapshot.enemy
+    const attackPresentation = createEnemyAttackPresentationSnapshot(
+      enemy,
+      runtimeSnapshot.enemyAttack,
+    )
     const facing = facingRef.current
     const body = bodyRef.current
     const material = materialRef.current
@@ -37,11 +44,11 @@ export function EnemyVisual({ runtime }: { readonly runtime: PlayerRuntime }) {
       contact === null
     ) return
 
-    facing.rotation.y = Math.atan2(enemy.facing.x, -enemy.facing.z)
+    facing.rotation.y = attackPresentation.yawRadians
     body.scale.y = enemy.alive ? 1 : 0.28
     material.color.set(STATE_COLORS[enemy.state])
-    telegraph.visible = enemy.action.phase === 'startup'
-    contact.visible = runtime.snapshot().enemyAttack.contactEnabled
+    telegraph.visible = attackPresentation.telegraphVisible
+    contact.visible = attackPresentation.contactVisible
   })
 
   return (
@@ -63,8 +70,13 @@ export function EnemyVisual({ runtime }: { readonly runtime: PlayerRuntime }) {
           <meshStandardMaterial color="#cad0dc" roughness={0.45} metalness={0.2} />
         </mesh>
       </group>
-      <mesh ref={telegraphRef} position={[0, 0.03, -0.78]} visible={false}>
-        <ringGeometry args={[0.34, 0.48, 20]} />
+      <mesh
+        ref={telegraphRef}
+        position={[0, -0.79, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        visible={false}
+      >
+        <circleGeometry args={[0.95, 20, Math.PI / 4, Math.PI / 2]} />
         <meshBasicMaterial color="#ff9d4d" transparent opacity={0.8} side={2} />
       </mesh>
       <mesh

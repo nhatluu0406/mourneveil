@@ -11,6 +11,7 @@ import {
   advanceMeleeEnemy,
   createEnemyAttackSpatialSnapshot,
   createMeleeEnemyRuntime,
+  horizontalDistance,
 } from './meleeEnemy'
 
 const STEP = 1 / 60
@@ -67,8 +68,7 @@ function resolveIncoming(
       const outcome = resolveIncomingMeleeDefense(
         playerDefense,
         { x: 1, z: 0 },
-        player.snapshot().hurtbox.center,
-        enemySnapshot.position,
+        createEnemyAttackSpatialSnapshot(enemySnapshot).executionFacing ?? enemySnapshot.facing,
       )
       return outcome === 'damaged'
         ? { outcome, result: target.applyDamage(damage) }
@@ -115,7 +115,7 @@ describe('first melee enemy behavior', () => {
     for (let step = 0; step < MELEE_ENEMY_ATTACK.recoverySteps; step += 1) {
       advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
     }
-    expect(enemy.snapshot()).toMatchObject({ state: 'pursue', action: { phase: 'idle' } })
+    expect(enemy.snapshot()).toMatchObject({ state: 'spacing', action: { phase: 'idle' } })
     advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
     expect(enemy.snapshot()).toMatchObject({
       state: 'attack',
@@ -129,6 +129,107 @@ describe('first melee enemy behavior', () => {
     advanceMeleeEnemy(enemy, { x: 1.3, y: 0.82, z: 3 }, STEP, FLAT_GROUND)
     expect(enemy.snapshot()).toMatchObject({ state: 'defeated', action: { phase: 'idle' } })
     expect(createEnemyAttackSpatialSnapshot(enemy.snapshot()).activeContactShape).toBeNull()
+  })
+
+  it('snapshots accepted facing and does not rotate when the player moves behind', () => {
+    const front = { x: 1.27, y: 0.82, z: 3 }
+    const behind = { x: 3.73, y: 0.82, z: 3 }
+    const enemy = createMeleeEnemyRuntime()
+    advanceMeleeEnemy(enemy, front, STEP, FLAT_GROUND)
+    const accepted = enemy.snapshot()
+
+    expect(accepted.attackExecutionFacing).toEqual({ x: -1, z: 0 })
+    for (let step = 0; step < MELEE_ENEMY_ATTACK.startupSteps; step += 1) {
+      advanceMeleeEnemy(enemy, behind, STEP, FLAT_GROUND)
+    }
+
+    const active = enemy.snapshot()
+    const attack = createEnemyAttackSpatialSnapshot(active)
+    expect(active.attackExecutionFacing).toEqual(accepted.attackExecutionFacing)
+    expect(attack.executionFacing).toEqual({ x: -1, z: 0 })
+    expect(attack.activeContactShape?.center.x).toBeLessThan(active.position.x)
+    const playerBehind = new PlayerCombatHealthRuntime(behind)
+    expect(resolveIncoming(enemy, playerBehind, defense())).toEqual([])
+  })
+
+  it('snapshots a new player direction for a later execution', () => {
+    const firstPosition = { x: 1.27, y: 0.82, z: 3 }
+    const secondPosition = { x: 3.73, y: 0.82, z: 3 }
+    const enemy = createMeleeEnemyRuntime()
+    advanceMeleeEnemy(enemy, firstPosition, STEP, FLAT_GROUND)
+    expect(enemy.snapshot().attackExecutionFacing).toEqual({ x: -1, z: 0 })
+
+    for (
+      let step = 0;
+      step <
+      MELEE_ENEMY_ATTACK.startupSteps +
+        MELEE_ENEMY_ATTACK.activeSteps +
+        MELEE_ENEMY_ATTACK.recoverySteps;
+      step += 1
+    ) advanceMeleeEnemy(enemy, secondPosition, STEP, FLAT_GROUND)
+    advanceMeleeEnemy(enemy, secondPosition, STEP, FLAT_GROUND)
+
+    expect(enemy.snapshot()).toMatchObject({
+      state: 'attack',
+      attackExecutionFacing: { x: 1, z: 0 },
+      action: { executionId: 2, phase: 'startup' },
+    })
+  })
+
+  it('holds authored spacing hysteresis without pursue/attack threshold flapping', () => {
+    const enemy = createMeleeEnemyRuntime()
+    const close = { x: 1.27, y: 0.82, z: 3 }
+    advanceMeleeEnemy(enemy, close, STEP, FLAT_GROUND)
+    for (
+      let step = 0;
+      step <
+      MELEE_ENEMY_ATTACK.startupSteps +
+        MELEE_ENEMY_ATTACK.activeSteps +
+        MELEE_ENEMY_ATTACK.recoverySteps;
+      step += 1
+    ) advanceMeleeEnemy(enemy, close, STEP, FLAT_GROUND)
+
+    const heldPosition = enemy.snapshot().position
+    const hysteresisBand = {
+      x: heldPosition.x -
+        (enemy.definition.stoppingRange + enemy.definition.attackRange) / 2,
+      y: heldPosition.y,
+      z: heldPosition.z,
+    }
+    for (let step = 0; step < 20; step += 1) {
+      advanceMeleeEnemy(enemy, hysteresisBand, STEP, FLAT_GROUND)
+      expect(enemy.snapshot().state).toBe('spacing')
+      expect(enemy.snapshot().position).toEqual(heldPosition)
+    }
+
+    advanceMeleeEnemy(
+      enemy,
+      {
+        x: heldPosition.x - enemy.definition.attackRange - 0.1,
+        y: heldPosition.y,
+        z: heldPosition.z,
+      },
+      STEP,
+      FLAT_GROUND,
+    )
+    expect(enemy.snapshot().state).toBe('pursue')
+  })
+
+  it('clamps pursuit at authored stand-off and stays finite at zero distance', () => {
+    const enemy = createMeleeEnemyRuntime()
+    const playerPosition = { x: 0, y: 0.82, z: 3 }
+    for (let step = 0; step < 120; step += 1) {
+      advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
+      if (enemy.snapshot().state === 'attack') break
+    }
+    expect(horizontalDistance(enemy.snapshot().position, playerPosition)).toBeCloseTo(
+      enemy.definition.stoppingRange,
+    )
+
+    const coincident = createMeleeEnemyRuntime()
+    advanceMeleeEnemy(coincident, coincident.snapshot().position, STEP, FLAT_GROUND)
+    expect(Object.values(coincident.snapshot().facing).every(Number.isFinite)).toBe(true)
+    expect(coincident.snapshot().attackExecutionFacing).toEqual({ x: -1, z: 0 })
   })
 })
 

@@ -309,8 +309,7 @@ export class PlayerRuntime {
               const outcome = resolveIncomingMeleeDefense(
                 this.defenseRuntime.snapshot(combat),
                 this.playerState.facing,
-                this.playerState.position,
-                enemy.position,
+                enemyAttack.executionFacing ?? enemy.facing,
               )
               if (outcome === 'damaged') {
                 return { outcome, result: target.applyDamage(damage) }

@@ -15,13 +15,14 @@ import type { PlayerFacingDirection, Vector3Value } from '../character/playerMot
 import type { EnemyDefinition, EnemyDefinitionId } from './enemyDefinition'
 
 export type EnemyRuntimeId = string
-export type EnemyState = 'idle' | 'pursue' | 'attack' | 'recovery' | 'defeated'
+export type EnemyState = 'idle' | 'pursue' | 'spacing' | 'attack' | 'recovery' | 'defeated'
 
 export interface EnemyRuntimeSnapshot {
   readonly id: EnemyRuntimeId
   readonly definitionId: EnemyDefinitionId
   readonly position: Vector3Value
   readonly facing: PlayerFacingDirection
+  readonly attackExecutionFacing: PlayerFacingDirection | null
   readonly velocity: Vector3Value
   readonly state: EnemyState
   readonly health: CombatHealthState
@@ -33,9 +34,10 @@ export interface EnemyRuntimeSnapshot {
 
 const ALLOWED_TRANSITIONS: Readonly<Record<EnemyState, readonly EnemyState[]>> = {
   idle: ['pursue', 'defeated'],
-  pursue: ['idle', 'attack', 'defeated'],
+  pursue: ['idle', 'spacing', 'attack', 'defeated'],
+  spacing: ['pursue', 'attack', 'defeated'],
   attack: ['recovery', 'defeated'],
-  recovery: ['pursue', 'defeated'],
+  recovery: ['spacing', 'defeated'],
   defeated: [],
 }
 
@@ -43,6 +45,7 @@ export class EnemyRuntime {
   private readonly actions: CombatActionRuntime
   private position: Vector3Value
   private facing: PlayerFacingDirection
+  private attackExecutionFacing: PlayerFacingDirection | null = null
   private velocity: Vector3Value = { x: 0, y: 0, z: 0 }
   private state: EnemyState = 'idle'
   private health: CombatHealthState
@@ -81,6 +84,7 @@ export class EnemyRuntime {
     this.targetId = next === 'idle' || next === 'defeated' ? null : targetId
     if (next === 'defeated') {
       this.velocity = { x: 0, y: 0, z: 0 }
+      this.attackExecutionFacing = null
       this.actions.reset()
     }
   }
@@ -89,13 +93,14 @@ export class EnemyRuntime {
     if (!this.health.alive) {
       return { accepted: false, actionId, reason: 'actor-defeated' }
     }
-    if (this.state !== 'pursue') {
+    if (this.state !== 'pursue' && this.state !== 'spacing') {
       return { accepted: false, actionId, reason: 'action-in-progress' }
     }
     assertUnitFacing(facing)
     const result = this.actions.request({ type: 'start-action', actionId })
     if (result.accepted) {
-      this.facing = { ...facing }
+      this.attackExecutionFacing = { ...facing }
+      this.facing = { ...this.attackExecutionFacing }
       this.velocity = { x: 0, y: 0, z: 0 }
       this.transition('attack')
     }
@@ -107,7 +112,10 @@ export class EnemyRuntime {
     this.actions.advanceFixedStep()
     const phase = this.actions.snapshot().phase
     if (this.state === 'attack' && phase === 'recovery') this.transition('recovery')
-    if (this.state === 'recovery' && phase === 'idle') this.transition('pursue')
+    if (this.state === 'recovery' && phase === 'idle') {
+      this.attackExecutionFacing = null
+      this.transition('spacing')
+    }
   }
 
   setMotion(
@@ -124,6 +132,15 @@ export class EnemyRuntime {
     this.facing = { ...facing }
   }
 
+  holdSpacing(facing: PlayerFacingDirection | null): void {
+    if (this.state !== 'spacing' || !this.health.alive) return
+    if (facing !== null) {
+      assertUnitFacing(facing)
+      this.facing = { ...facing }
+    }
+    this.velocity = { x: 0, y: 0, z: 0 }
+  }
+
   applyDamage(damage: number): CombatDamageResult {
     const result = applyCombatDamage(this.health, damage)
     if (!result.applied) return result
@@ -138,6 +155,7 @@ export class EnemyRuntime {
     this.velocity = { x: 0, y: 0, z: 0 }
     this.state = 'idle'
     this.targetId = null
+    this.attackExecutionFacing = null
     this.health = createCombatHealth(this.definition.maximumHealth)
     this.actions.reset()
   }
@@ -149,6 +167,8 @@ export class EnemyRuntime {
       definitionId: this.definition.id,
       position: { ...this.position },
       facing: { ...this.facing },
+      attackExecutionFacing:
+        this.attackExecutionFacing === null ? null : { ...this.attackExecutionFacing },
       velocity: { ...this.velocity },
       state: this.state,
       health: this.health,

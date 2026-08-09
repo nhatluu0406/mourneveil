@@ -61,16 +61,17 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - completion evidence: deterministic pursue/telegraph/attack/recovery/defeat proven; runtime proof recorded
   - evidence: one grounded melee instance detects by distance, pursues through the Rapier character-controller boundary, snapshots attack facing, resolves one contact per execution, respects authoritative dodge and a 120° forward guard cone, takes existing light/heavy damage, and halts at defeat; focused M3/M2 tests 71/71, M1 regressions 13/13, full suite 118/118, build green; browser backend unavailable, local endpoint HTTP 200 only
 
-- [ ] 3. M3.3 — Enemy movement/navigation and spacing
+- [x] 3. M3.3 — Enemy movement/navigation, spacing, and attack-facing correctness
   - depends: 2
   - risk: HIGH
   - preferred agent: Codex for authority; Cursor for tuning
   - isolation: sequential
-  - owns/allows: collision-safe pursuit, stopping distance, simple graybox obstacle behavior
-  - outcome: melee enemy pursues/spaces without penetrating graybox collision; no general navmesh unless required by evidence
+  - owns/allows: one accepted execution-facing snapshot shared by telegraph/contact, collision-safe pursuit, authored spacing hysteresis, and simple graybox obstacle behavior
+  - outcome: melee enemy attack presentation and contact agree for cardinal/side directions; pursuit/spaces without player or graybox penetration; no general navmesh unless required by evidence
   - non-goals: full navmesh platform, crowd simulation, stealth AI
-  - verifier: focused movement/spacing tests + collision regressions + `npm run verify && git diff --check`
-  - completion evidence: pursuit/stop distance and obstacle behavior verified; browser smoke recorded
+  - verifier: focused enemy-facing and movement/spacing tests + real Rapier enemy collision tests + M3.2/M2/M1 regressions + `npm run verify && git diff --check`
+  - completion evidence: exact facing root cause recorded; execution-facing, pursuit/stop hysteresis, and obstacle behavior verified; browser smoke recorded
+  - evidence: corrected mirrored local -Z presentation yaw; explicit per-execution facing now drives telegraph/contact/guard; authored 1.28 m stop and 1.48 m pursuit-resume thresholds prevent flapping; deterministic collision probes route around the center blocker and respect player/perimeter bodies in real Rapier tests; 130/130 full tests and build green; browser backend unavailable, local endpoint HTTP 200 only
 
 - [ ] 4. M3.4 — Enemy role variants
   - depends: 3
@@ -114,6 +115,7 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
 - 2026-08-09 | CI `npm ci` failure was lockfile incompleteness for `@emnapi/core@1.11.3` and `@emnapi/runtime@1.11.3` peer installs; regenerate lock with npm 10 | Matches GitHub Actions Node 22 / npm 10 clean-install contract without bypassing npm ci
 - 2026-08-09 | Player incoming-damage/health for enemy attacks remains an explicit unresolved PLAN gate | Prevents repeating the M2 training-target-health scope conflict
 - 2026-08-09 | Authorize minimal deterministic player combat health only for M3 enemy incoming-melee proof | Product Owner explicitly allowed max/current health, alive/defeated, clamped damage, and development reset/diagnostic while prohibiting broader health/RPG systems
+- 2026-08-09 | Accepted enemy attacks own one enemy-to-player facing snapshot; telegraph, contact, and defense consume it while pursuit uses authored stop/resume hysteresis and simulation-owned local collision steering | Fixes the M3.2 directional mismatch without presentation authority or a navmesh framework
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate
