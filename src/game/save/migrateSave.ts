@@ -47,6 +47,13 @@ export function migrateV1ToV2(save: SaveFileV1): SaveFileV2 {
   return {
     ...save,
     version: SAVE_VERSION_V2,
+    lootPickup: {
+      ...save.lootPickup,
+      spawnedFromEnemyIds:
+        save.lootPickup.spawnedFromEnemyId === null
+          ? []
+          : [save.lootPickup.spawnedFromEnemyId],
+    },
     world: {
       openedShortcutIds: [],
       finalGateReached: false,
@@ -60,6 +67,7 @@ function validateSaveV2(record: Record<string, unknown>): SaveFileV2 {
   return {
     version: SAVE_VERSION_V2,
     ...common,
+    lootPickup: asLootV2(record.lootPickup),
     world: asWorld(record.world, defaults.world),
   }
 }
@@ -166,6 +174,26 @@ function asLoot(value: unknown): SaveFileV1['lootPickup'] {
     position: asPosition(record.position),
     spawnedFromEnemyId:
       typeof record.spawnedFromEnemyId === 'string' ? record.spawnedFromEnemyId : null,
+  }
+}
+
+function asLootV2(value: unknown): SaveFileV2['lootPickup'] {
+  const legacy = asLoot(value)
+  if (value === null || typeof value !== 'object') {
+    return { ...legacy, spawnedFromEnemyIds: [] }
+  }
+  const record = value as Record<string, unknown>
+  const storedIds = Array.isArray(record.spawnedFromEnemyIds)
+    ? record.spawnedFromEnemyIds.filter((id): id is string => typeof id === 'string')
+    : []
+  return {
+    ...legacy,
+    spawnedFromEnemyIds: [
+      ...new Set([
+        ...storedIds,
+        ...(legacy.spawnedFromEnemyId === null ? [] : [legacy.spawnedFromEnemyId]),
+      ]),
+    ],
   }
 }
 

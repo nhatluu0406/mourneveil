@@ -120,7 +120,7 @@ async function activateCheckpoint(page) {
   await pressGameplayKey(page, 'KeyF')
   const state = await waitForSnap(
     page,
-    (s) => s.checkpointActivated && s.currentCheckpointId === 'checkpoint.graybox.entry',
+    (s) => s.checkpointActivated && s.currentCheckpointId === 'checkpoint.m5.refuge',
     3000,
     'checkpoint active',
   )

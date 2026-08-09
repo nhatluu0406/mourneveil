@@ -3,7 +3,7 @@
 - Updated: 2026-08-10
 - Milestone: **M4 Core RPG Loop — PRODUCT OWNER ACCEPTED / CLOSED**
 - Active LeanLoop task: `m5-connected-level`
-- Status: M4 is closed; M5.1 connected-world authority passed. M5.2 placement integration is next; M5.3-M5.6 have not started.
+- Status: M4 is closed; M5.1-M5.2 passed. M5.3 connected graybox runtime is next; M5.4-M5.6 have not started.
 
 ## What exists
 
@@ -25,4 +25,4 @@
 
 ## Next executable work
 
-Execute PLAN step M5.2, then continue to M5.3 only when its internal gate passes.
+Execute PLAN step M5.3. Do not start M5.4 in the current Codex batch.

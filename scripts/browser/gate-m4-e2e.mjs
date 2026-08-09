@@ -44,7 +44,10 @@ async function main() {
   const errors = []
   page.on('pageerror', (e) => errors.push(String(e)))
   await page.goto(BASE, { waitUntil: 'networkidle' })
-  await page.evaluate(() => localStorage.removeItem('mourneveil.save.v1'))
+  await page.evaluate(() => {
+    localStorage.removeItem('mourneveil.save.v1')
+    localStorage.removeItem('mourneveil.save.v2')
+  })
   await page.reload({ waitUntil: 'networkidle' })
   await page.waitForTimeout(1500)
 

@@ -184,7 +184,7 @@ describe('M3 enemy framework verification', () => {
     }
     expect(runtime.snapshot().encounter.phase).toBe('active')
 
-    const ids = runtime.enemyIds()
+    const ids = runtime.snapshot().encounter.enemyIds
     expect(
       createGrayboxEncounterSnapshot(ids, [
         { id: ids[0], alive: false },
@@ -268,7 +268,7 @@ describe('M3 enemy framework verification', () => {
     }
 
     expect(skirmisherAttacks + bruteAttacks).toBeGreaterThanOrEqual(1)
-    expect(runtime.snapshot().enemies).toHaveLength(2)
+    expect(runtime.snapshot().enemies).toHaveLength(4)
     expect(runtime.snapshot().enemies.every((enemy) => enemy.id.length > 0)).toBe(true)
   })
 })

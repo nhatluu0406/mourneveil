@@ -34,7 +34,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: `npm run lint`; `npm run typecheck`; focused world/save tests; relevant M4 save tests; `git diff --check`; focused diff review
   - evidence: PASS — six immutable authored zones and six explicit connections validate without dangling IDs; shortcut runtime opens once from its authored far side; SaveFileV2 persists stable world flags, migrates V1 explicitly, and rejects malformed/unknown versions safely; 9 focused tests plus lint/typecheck/diff check green
 
-- [ ] 2. M5.2 — Shortcut, checkpoint, and encounter placement
+- [x] 2. M5.2 — Shortcut, checkpoint, and encounter placement
   - depends: 1 PASS
   - risk: HIGH
   - preferred agent: Codex
@@ -43,6 +43,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - outcome: checkpoint anchors progression; shortcut opens only from far side and persists through death/load; encounter resets do not duplicate Echo/loot rewards; final gate is authored and reachable by contract
   - non-goals: presentation polish, new enemy roles, generic door/interact framework, boss
   - verifier: `npm run lint`; `npm run typecheck`; focused placement/respawn/shortcut/encounter/reward tests; M4 regressions; browser route gate when available; `git diff --check`; focused diff review
+  - evidence: PASS — canonical refuge checkpoint, far-side F shortcut, three authored placements using existing skirmisher/brute roles, persistent final-gate reach, encounter recreation, V2 multi-source loot memory, and semantic world interaction; 26 focused tests and full 183-test M1-M4 suite plus lint/typecheck/diff check green; browser unavailable (no installed Playwright Chromium and no in-app browser instances)
 
 - [ ] 3. M5.3 — Complete graybox level runtime
   - depends: 2 PASS
@@ -83,6 +84,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
 
 - 2026-08-10 | M4 Core RPG Loop is Product Owner accepted/closed; initialize M5 Connected Level | Explicit Product Owner authorization
 - 2026-08-10 | Save world progression through SaveFileV2 with explicit V1 migration | V1 shape is immutable; opened shortcut is a new stable fact
+- 2026-08-10 | Checkpoint rest/death respawn recreate all connected-level enemies, preserve opened shortcuts and loot-once memory, and never grant Echoes during reset | Keeps traversal progress and rewards deterministic across recovery cycles
 
 ## Escalation
 

@@ -55,7 +55,7 @@ describe('versioned local save', () => {
     if (!loaded.ok) return
     restored.applySave(loaded.save)
     expect(restored.snapshot()).toMatchObject({
-      checkpoint: { activated: true, currentCheckpointId: 'checkpoint.graybox.entry' },
+      checkpoint: { activated: true, currentCheckpointId: 'checkpoint.m5.refuge' },
       echoes: { carried: 0 },
       echoRecovery: { active: true, amount: 25 },
       equipment: { weaponItemId: 'item.weapon.oathblade' },

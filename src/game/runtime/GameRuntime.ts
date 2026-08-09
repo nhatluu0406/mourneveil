@@ -4,6 +4,7 @@ import type { PlayerDodgeRequest } from '../../input/playerDefenseIntent'
 import type {
   PlayerCheckpointInteractionRequest,
   PlayerRespawnRequest,
+  PlayerWorldInteractionRequest,
 } from '../../input/playerRecoveryIntent'
 import type { PlayerFlaskUseRequest } from '../../input/playerFlaskIntent'
 import type {
@@ -56,18 +57,21 @@ import {
   type EnemyAttackSpatialSnapshot,
 } from '../enemies/meleeEnemy'
 import {
+  createEncounterSnapshot,
   createGrayboxEncounterSnapshot,
+  type EncounterSnapshot,
   type GrayboxEncounterSnapshot,
 } from '../encounters/grayboxEncounter'
 import {
-  createGrayboxEnemyRuntimes,
-  meleeRoleByRuntimeId,
-  GRAYBOX_ENEMY_ROLES,
-} from '../enemies/enemyRoles'
+  M5_ENCOUNTERS,
+  connectedEnemyPlacementByRuntimeId,
+  createConnectedLevelEnemyRuntimes,
+} from '../encounters/connectedLevelEncounters'
 import type { EnemyRuntime, EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import {
   CheckpointRuntime,
-  GRAYBOX_CHECKPOINT_DEFINITION,
+  CONNECTED_LEVEL_CHECKPOINT_DEFINITION,
+  LEGACY_GRAYBOX_CHECKPOINT_ID,
   type CheckpointInteractionResult,
   type CheckpointSnapshot,
   type PlayerRespawnResult,
@@ -113,6 +117,7 @@ import {
 import {
   ConnectedWorldRuntime,
   type ConnectedWorldSnapshot,
+  type ShortcutOpenResult,
 } from '../world/connectedWorldRuntime'
 import {
   createPlayerMotorState,
@@ -143,6 +148,7 @@ export interface GameRuntimeSnapshot {
   readonly enemies: readonly EnemyRuntimeSnapshot[]
   readonly enemyAttacks: readonly EnemyAttackSpatialSnapshot[]
   readonly encounter: GrayboxEncounterSnapshot
+  readonly encounters: readonly EncounterSnapshot[]
   readonly incomingContact: CombatContactSnapshot
   readonly checkpoint: CheckpointSnapshot
   readonly flask: PlayerFlaskSnapshot
@@ -188,12 +194,12 @@ export class GameRuntime {
   private readonly echoRewardedEnemyIds = new Set<string>()
   private lootInstanceCounter = 0
   private playerState = createPlayerMotorState(
-    GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
+    CONNECTED_LEVEL_CHECKPOINT_DEFINITION.respawnPosition,
   )
   private readonly playerHealthRuntime = new PlayerHealthRuntime(
     this.playerState.position,
   )
-  private readonly enemyRuntimes: EnemyRuntime[] = createGrayboxEnemyRuntimes()
+  private readonly enemyRuntimes: EnemyRuntime[] = createConnectedLevelEnemyRuntimes()
   private collisionResolver: CharacterCollisionResolver | null = null
   private readonly enemyCollisionResolvers = new Map<string, CharacterCollisionResolver>()
   private contactQuery: CombatContactQuery | null = null
@@ -234,6 +240,7 @@ export class GameRuntime {
         itemId: loot.itemId,
         position: loot.position,
         spawnedFromEnemyId: loot.spawnedFromEnemyId,
+        spawnedFromEnemyIds: loot.spawnedFromEnemyIds,
       },
       world: {
         openedShortcutIds: this.worldRuntime.snapshot().openedShortcutIds,
@@ -248,13 +255,14 @@ export class GameRuntime {
   applySave(save: SaveFileV2 = createDefaultSaveV2()): void {
     this.resetPlayerActionState()
     this.playerState = createPlayerMotorState(
-      GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
+      CONNECTED_LEVEL_CHECKPOINT_DEFINITION.respawnPosition,
     )
     this.playerHealthRuntime.updatePosition(this.playerState.position)
     this.checkpointRuntime.restore(
       save.checkpointActivated,
-      save.activeCheckpointId === GRAYBOX_CHECKPOINT_DEFINITION.id
-        ? GRAYBOX_CHECKPOINT_DEFINITION.id
+      save.activeCheckpointId === CONNECTED_LEVEL_CHECKPOINT_DEFINITION.id ||
+      save.activeCheckpointId === LEGACY_GRAYBOX_CHECKPOINT_ID
+        ? CONNECTED_LEVEL_CHECKPOINT_DEFINITION.id
         : null,
     )
     this.worldRuntime.restore(save.world)
@@ -285,6 +293,7 @@ export class GameRuntime {
           : null,
       position: save.lootPickup.position,
       spawnedFromEnemyId: save.lootPickup.spawnedFromEnemyId,
+      spawnedFromEnemyIds: save.lootPickup.spawnedFromEnemyIds,
     })
     this.resetGrayboxEncounterKeepingLootMemory()
   }
@@ -295,8 +304,8 @@ export class GameRuntime {
 
   private resetGrayboxEncounterKeepingLootMemory(): void {
     for (const enemy of this.enemyRuntimes) {
-      const role = meleeRoleByRuntimeId(enemy.id)
-      enemy.reset(role?.spawnPosition ?? enemy.snapshot().position)
+      const placement = connectedEnemyPlacementByRuntimeId(enemy.id)
+      enemy.reset(placement?.spawnPosition ?? enemy.snapshot().position)
       this.enemyContactRuntimeFor(enemy.id).reset()
     }
     this.echoRewardedEnemyIds.clear()
@@ -435,8 +444,8 @@ export class GameRuntime {
 
   resetGrayboxEncounter(): void {
     for (const enemy of this.enemyRuntimes) {
-      const role = meleeRoleByRuntimeId(enemy.id)
-      enemy.reset(role?.spawnPosition ?? enemy.snapshot().position)
+      const placement = connectedEnemyPlacementByRuntimeId(enemy.id)
+      enemy.reset(placement?.spawnPosition ?? enemy.snapshot().position)
       this.enemyContactRuntimeFor(enemy.id).reset()
     }
     this.echoRewardedEnemyIds.clear()
@@ -539,9 +548,35 @@ export class GameRuntime {
       this.playerState.position,
       this.playerHealthRuntime.snapshot().health.alive,
     )
-    if (result.accepted) this.flaskRuntime.refill()
-    if (result.accepted) this.markPersistentChange()
+    if (result.accepted) {
+      this.flaskRuntime.refill()
+      this.resetGrayboxEncounterKeepingLootMemory()
+      this.markPersistentChange()
+    }
     return result
+  }
+
+  requestWorldInteraction(request: PlayerWorldInteractionRequest):
+    | { readonly kind: 'checkpoint'; readonly result: CheckpointInteractionResult }
+    | { readonly kind: 'shortcut'; readonly result: ShortcutOpenResult }
+    | { readonly kind: 'none'; readonly accepted: false } {
+    void request
+    const checkpointResult = this.requestCheckpointInteraction({
+      type: 'player-checkpoint-interaction',
+    })
+    if (checkpointResult.accepted) return { kind: 'checkpoint', result: checkpointResult }
+    if (!this.playerHealthRuntime.snapshot().health.alive) {
+      return { kind: 'none', accepted: false }
+    }
+    const shortcutResult = this.worldRuntime.openShortcut(
+      'connection.shortcut-checkpoint-mixed',
+      this.playerState.position,
+    )
+    if (shortcutResult.accepted) {
+      if (shortcutResult.changed) this.markPersistentChange()
+      return { kind: 'shortcut', result: shortcutResult }
+    }
+    return { kind: 'none', accepted: false }
   }
 
   requestRespawn(request: PlayerRespawnRequest): PlayerRespawnResult {
@@ -559,7 +594,7 @@ export class GameRuntime {
     this.playerHealthRuntime.restoreToMaximum()
     this.resetPlayerActionState()
     this.flaskRuntime.refill()
-    this.resetGrayboxEncounter()
+    this.resetGrayboxEncounterKeepingLootMemory()
     this.markPersistentChange()
     return {
       accepted: true,
@@ -693,6 +728,7 @@ export class GameRuntime {
           }
         }
       }
+      this.updateFinalGateProgress()
     })
 
     return { ...this.snapshot(), frame, hitEvents, incomingHitEvents }
@@ -743,8 +779,11 @@ export class GameRuntime {
       enemies,
       enemyAttacks,
       encounter: createGrayboxEncounterSnapshot(
-        GRAYBOX_ENEMY_ROLES.map((role) => role.runtimeId),
+        M5_ENCOUNTERS.find((encounter) => encounter.id === 'encounter.m5.mixed')!.enemyIds,
         enemies,
+      ),
+      encounters: M5_ENCOUNTERS.map((encounter) =>
+        createEncounterSnapshot(encounter.id, encounter.enemyIds, enemies),
       ),
       incomingContact: {
         totalHitCount: [...this.enemyContactRuntimes.values()].reduce(
@@ -784,12 +823,7 @@ export class GameRuntime {
     for (const enemy of this.enemyRuntimes) {
       const snapshot = enemy.snapshot()
       if (snapshot.alive) continue
-      const itemId =
-        enemy.id === 'enemy.skirmisher.1'
-          ? SKIRMISHER_LOOT_ITEM_ID
-          : enemy.id === 'enemy.brute.1'
-            ? BRUTE_LOOT_ITEM_ID
-            : null
+      const itemId = connectedEnemyPlacementByRuntimeId(enemy.id)?.lootItemId ?? null
       if (itemId === null) continue
       this.lootInstanceCounter += 1
       if (
@@ -816,6 +850,18 @@ export class GameRuntime {
         this.markPersistentChange()
       }
     }
+  }
+
+  private updateFinalGateProgress(): void {
+    const enemies = this.enemyRuntimes.map((enemy) => enemy.snapshot())
+    const prerequisitesComplete = M5_ENCOUNTERS.every(
+      (encounter) => createEncounterSnapshot(encounter.id, encounter.enemyIds, enemies).phase === 'complete',
+    )
+    const result = this.worldRuntime.tryReachFinalGate(
+      this.playerState.position,
+      prerequisitesComplete,
+    )
+    if (result.accepted && result.changed) this.markPersistentChange()
   }
 
   private enemyContactRuntimeFor(enemyId: string): CombatContactRuntime {

@@ -1,46 +1,50 @@
 import type { Vector3Value } from '../character/playerMotor'
 
-export const GRAYBOX_CHECKPOINT_ID = 'checkpoint.graybox.entry' as const
+export const M5_CHECKPOINT_ID = 'checkpoint.m5.refuge' as const
+export const LEGACY_GRAYBOX_CHECKPOINT_ID = 'checkpoint.graybox.entry' as const
 export const CHECKPOINT_ACTIVATION_RANGE = 1.1
 
 export interface CheckpointDefinition {
-  readonly id: typeof GRAYBOX_CHECKPOINT_ID
+  readonly id: typeof M5_CHECKPOINT_ID
   readonly respawnPosition: Vector3Value
   readonly activationRange: number
 }
 
-export const GRAYBOX_CHECKPOINT_DEFINITION: CheckpointDefinition = Object.freeze({
-  id: GRAYBOX_CHECKPOINT_ID,
-  respawnPosition: Object.freeze({ x: -3, y: 0.82, z: 3 }),
+export const CONNECTED_LEVEL_CHECKPOINT_DEFINITION: CheckpointDefinition = Object.freeze({
+  id: M5_CHECKPOINT_ID,
+  respawnPosition: Object.freeze({ x: -6, y: 0.82, z: 0 }),
   activationRange: CHECKPOINT_ACTIVATION_RANGE,
 })
 
+/** @deprecated M5 repurposed the single canonical checkpoint. */
+export const GRAYBOX_CHECKPOINT_DEFINITION = CONNECTED_LEVEL_CHECKPOINT_DEFINITION
+
 export interface CheckpointSnapshot {
-  readonly id: typeof GRAYBOX_CHECKPOINT_ID
+  readonly id: typeof M5_CHECKPOINT_ID
   readonly respawnPosition: Vector3Value
   readonly activationRange: number
   readonly activated: boolean
-  readonly currentCheckpointId: typeof GRAYBOX_CHECKPOINT_ID | null
+  readonly currentCheckpointId: typeof M5_CHECKPOINT_ID | null
 }
 
 export type CheckpointInteractionResult =
-  | { readonly accepted: true; readonly checkpointId: typeof GRAYBOX_CHECKPOINT_ID }
+  | { readonly accepted: true; readonly checkpointId: typeof M5_CHECKPOINT_ID }
   | {
       readonly accepted: false
-      readonly checkpointId: typeof GRAYBOX_CHECKPOINT_ID
+      readonly checkpointId: typeof M5_CHECKPOINT_ID
       readonly reason: 'actor-dead' | 'out-of-range'
     }
 
 export type PlayerRespawnResult =
-  | { readonly accepted: true; readonly checkpointId: typeof GRAYBOX_CHECKPOINT_ID }
+  | { readonly accepted: true; readonly checkpointId: typeof M5_CHECKPOINT_ID }
   | { readonly accepted: false; readonly reason: 'actor-alive' | 'no-active-checkpoint' }
 
 export class CheckpointRuntime {
   private activated = false
-  private currentCheckpointId: typeof GRAYBOX_CHECKPOINT_ID | null = null
+  private currentCheckpointId: typeof M5_CHECKPOINT_ID | null = null
 
   constructor(
-    readonly definition: CheckpointDefinition = GRAYBOX_CHECKPOINT_DEFINITION,
+    readonly definition: CheckpointDefinition = CONNECTED_LEVEL_CHECKPOINT_DEFINITION,
   ) {}
 
   interact(playerPosition: Vector3Value, playerAlive: boolean): CheckpointInteractionResult {
@@ -71,7 +75,7 @@ export class CheckpointRuntime {
     }
   }
 
-  restore(activated: boolean, currentCheckpointId: typeof GRAYBOX_CHECKPOINT_ID | null): void {
+  restore(activated: boolean, currentCheckpointId: typeof M5_CHECKPOINT_ID | null): void {
     this.activated = activated
     this.currentCheckpointId =
       activated && currentCheckpointId === this.definition.id ? this.definition.id : null

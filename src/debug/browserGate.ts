@@ -3,6 +3,7 @@ import { PLAYER_FLASK_USE_REQUEST } from '../input/playerFlaskIntent'
 import {
   PLAYER_CHECKPOINT_INTERACTION_REQUEST,
   PLAYER_RESPAWN_REQUEST,
+  PLAYER_WORLD_INTERACTION_REQUEST,
 } from '../input/playerRecoveryIntent'
 
 declare global {
@@ -12,6 +13,7 @@ declare global {
       applyDamage: (damage: number) => void
       useFlask: () => void
       interactCheckpoint: () => void
+      interactWorld: () => unknown
       respawn: () => void
       defeatEnemy: (enemyId: string) => void
       setPlayerPosition: (position: { x: number; y: number; z: number }) => void
@@ -33,6 +35,7 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     interactCheckpoint: () => {
       runtime.requestCheckpointInteraction(PLAYER_CHECKPOINT_INTERACTION_REQUEST)
     },
+    interactWorld: () => runtime.requestWorldInteraction(PLAYER_WORLD_INTERACTION_REQUEST),
     respawn: () => {
       runtime.requestRespawn(PLAYER_RESPAWN_REQUEST)
     },

@@ -170,13 +170,18 @@ export function meleeRoleByDefinitionId(definitionId: string): EnemyMeleeRoleSpe
   return SPECS_BY_DEFINITION_ID.get(definitionId) ?? null
 }
 
-export function createEnemyRuntimeFromRole(role: EnemyMeleeRoleSpec): EnemyRuntime {
+export function createEnemyRuntimeFromRole(
+  role: EnemyMeleeRoleSpec,
+  runtimeId: string = role.runtimeId,
+  spawnPosition: Vector3Value = role.spawnPosition,
+  initialFacing: PlayerFacingDirection = role.initialFacing,
+): EnemyRuntime {
   return new EnemyRuntime(
     role.definition,
-    role.runtimeId,
-    role.spawnPosition,
+    runtimeId,
+    spawnPosition,
     [role.attack],
-    role.initialFacing,
+    initialFacing,
   )
 }
 

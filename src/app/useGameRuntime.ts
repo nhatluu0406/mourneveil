@@ -138,11 +138,11 @@ export function useGameRuntime(): GameRuntimeIntegration {
       }
       const attackRequest = combatInput?.consumeAttackRequest() ?? null
       const dodgeRequest = combatInput?.consumeDodgeRequest() ?? null
-      const checkpointRequest =
-        combatInput?.consumeCheckpointInteractionRequest() ?? null
+      const worldInteractionRequest =
+        combatInput?.consumeWorldInteractionRequest() ?? null
       const flaskRequest = combatInput?.consumeFlaskUseRequest() ?? null
-      if (checkpointRequest !== null) {
-        runtime.requestCheckpointInteraction(checkpointRequest)
+      if (worldInteractionRequest !== null) {
+        runtime.requestWorldInteraction(worldInteractionRequest)
       }
       runtime.setGuardIntent(combatInput?.guardHeld() ?? false)
       if (attackRequest !== null) {

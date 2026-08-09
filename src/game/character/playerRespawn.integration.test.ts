@@ -43,7 +43,7 @@ describe('player checkpoint and respawn integration', () => {
     })
     expect(runtime.requestCheckpointInteraction(INTERACT)).toEqual({
       accepted: true,
-      checkpointId: 'checkpoint.graybox.entry',
+      checkpointId: 'checkpoint.m5.refuge',
     })
 
     runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 1, forward: 0 })
@@ -58,7 +58,7 @@ describe('player checkpoint and respawn integration', () => {
 
     expect(runtime.requestRespawn(RESPAWN)).toEqual({
       accepted: true,
-      checkpointId: 'checkpoint.graybox.entry',
+      checkpointId: 'checkpoint.m5.refuge',
     })
     expect(runtime.snapshot()).toMatchObject({
       player: {
@@ -74,6 +74,8 @@ describe('player checkpoint and respawn integration', () => {
     expect(runtime.snapshot().enemies.map((enemy) => enemy.health.current)).toEqual([
       SKIRMISHER_ROLE.definition.maximumHealth,
       BRUTE_ROLE.definition.maximumHealth,
+      SKIRMISHER_ROLE.definition.maximumHealth,
+      SKIRMISHER_ROLE.definition.maximumHealth,
     ])
     expect(runtime.snapshot().incomingContact).toMatchObject({
       totalHitCount: 0,

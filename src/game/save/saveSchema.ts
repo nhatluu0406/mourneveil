@@ -20,6 +20,10 @@ export interface SaveLootPickupV1 {
   readonly spawnedFromEnemyId: string | null
 }
 
+export interface SaveLootPickupV2 extends SaveLootPickupV1 {
+  readonly spawnedFromEnemyIds: readonly string[]
+}
+
 export interface SaveFileV1 {
   readonly version: typeof SAVE_VERSION_V1
   readonly activeCheckpointId: string | null
@@ -52,7 +56,7 @@ export interface SaveFileV2 {
     readonly weaponItemId: ItemId | null
     readonly charmItemId: ItemId | null
   }
-  readonly lootPickup: SaveLootPickupV1
+  readonly lootPickup: SaveLootPickupV2
   readonly world: SaveWorldV2
 }
 
@@ -87,6 +91,10 @@ export function createDefaultSaveV2(): SaveFileV2 {
   return {
     ...v1,
     version: SAVE_VERSION_V2,
+    lootPickup: {
+      ...v1.lootPickup,
+      spawnedFromEnemyIds: [],
+    },
     world: {
       openedShortcutIds: [],
       finalGateReached: false,

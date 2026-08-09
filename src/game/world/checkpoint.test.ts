@@ -5,7 +5,7 @@ describe('graybox checkpoint', () => {
   it('activates only for a living player inside authored range and owns current reference', () => {
     const checkpoint = new CheckpointRuntime()
     expect(checkpoint.snapshot()).toMatchObject({
-      id: 'checkpoint.graybox.entry',
+      id: 'checkpoint.m5.refuge',
       activated: false,
       currentCheckpointId: null,
     })
@@ -17,10 +17,10 @@ describe('graybox checkpoint', () => {
     ).toMatchObject({ accepted: false, reason: 'actor-dead' })
     expect(
       checkpoint.interact(GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition, true),
-    ).toEqual({ accepted: true, checkpointId: 'checkpoint.graybox.entry' })
+    ).toEqual({ accepted: true, checkpointId: 'checkpoint.m5.refuge' })
     expect(checkpoint.snapshot()).toMatchObject({
       activated: true,
-      currentCheckpointId: 'checkpoint.graybox.entry',
+      currentCheckpointId: 'checkpoint.m5.refuge',
     })
   })
 })

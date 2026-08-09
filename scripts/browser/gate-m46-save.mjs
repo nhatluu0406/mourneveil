@@ -47,7 +47,10 @@ async function main() {
 
   // Clear any prior save
   await page.goto(BASE, { waitUntil: 'networkidle' })
-  await page.evaluate(() => localStorage.removeItem('mourneveil.save.v1'))
+  await page.evaluate(() => {
+    localStorage.removeItem('mourneveil.save.v1')
+    localStorage.removeItem('mourneveil.save.v2')
+  })
   await page.reload({ waitUntil: 'networkidle' })
   await page.waitForTimeout(1500)
 
@@ -86,7 +89,7 @@ async function main() {
   await page.waitForTimeout(1800)
   s = await snap(page)
 
-  if (s.checkpoint.activated && s.checkpoint.currentCheckpointId === 'checkpoint.graybox.entry') {
+  if (s.checkpoint.activated && s.checkpoint.currentCheckpointId === 'checkpoint.m5.refuge') {
     ok('checkpoint restored')
   } else fail(`checkpoint ${JSON.stringify(s.checkpoint)}`)
   if (s.echoes === before.echoes) ok(`echoes restored (${s.echoes})`)

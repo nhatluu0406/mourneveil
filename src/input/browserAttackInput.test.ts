@@ -96,21 +96,21 @@ describe('BrowserAttackInput', () => {
     expect(input.consumeDodgeRequest()).toEqual({ type: 'player-dodge' })
   })
 
-  it('maps E, F, and R to semantic flask, checkpoint, and respawn edges', () => {
+  it('maps E, F, and R to semantic flask, world-interaction, and respawn edges', () => {
     const { input, windowTarget } = createInput()
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyE' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
     expect(input.consumeFlaskUseRequest()).toEqual({ type: 'player-flask-use' })
-    expect(input.consumeCheckpointInteractionRequest()).toEqual({
-      type: 'player-checkpoint-interaction',
+    expect(input.consumeWorldInteractionRequest()).toEqual({
+      type: 'player-world-interaction',
     })
     expect(input.consumeRespawnRequest()).toEqual({ type: 'player-respawn' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyE' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
     expect(input.consumeFlaskUseRequest()).toBeNull()
-    expect(input.consumeCheckpointInteractionRequest()).toBeNull()
+    expect(input.consumeWorldInteractionRequest()).toBeNull()
     expect(input.consumeRespawnRequest()).toBeNull()
   })
 

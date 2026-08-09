@@ -8,6 +8,7 @@ export interface LootPickupSnapshot {
   readonly instanceId: string | null
   readonly itemId: ItemId | null
   readonly position: Vector3Value | null
+  readonly spawnedFromEnemyIds: readonly string[]
 }
 
 export type LootPickupResult =
@@ -26,7 +27,8 @@ export class LootPickupRuntime {
   private instanceId: string | null = null
   private itemId: ItemId | null = null
   private position: Vector3Value | null = null
-  private spawnedFromEnemyId: string | null = null
+  private activeSpawnedFromEnemyId: string | null = null
+  private readonly spawnedFromEnemyIds = new Set<string>()
 
   spawnFromEnemy(
     enemyId: string,
@@ -34,7 +36,7 @@ export class LootPickupRuntime {
     position: Vector3Value,
     instanceId: string,
   ): boolean {
-    if (this.spawnedFromEnemyId === enemyId) return false
+    if (this.spawnedFromEnemyIds.has(enemyId)) return false
     if (getItemDefinition(itemId) === null) {
       throw new Error(`Cannot spawn unknown loot item: ${itemId}`)
     }
@@ -43,7 +45,8 @@ export class LootPickupRuntime {
     this.instanceId = instanceId
     this.itemId = itemId
     this.position = { ...position }
-    this.spawnedFromEnemyId = enemyId
+    this.activeSpawnedFromEnemyId = enemyId
+    this.spawnedFromEnemyIds.add(enemyId)
     return true
   }
 
@@ -61,6 +64,7 @@ export class LootPickupRuntime {
     this.itemId = null
     this.instanceId = null
     this.position = null
+    this.activeSpawnedFromEnemyId = null
     return { accepted: true, itemId, instanceId }
   }
 
@@ -74,7 +78,7 @@ export class LootPickupRuntime {
 
   resetLifecycle(): void {
     this.clearActivePickup()
-    this.spawnedFromEnemyId = null
+    this.spawnedFromEnemyIds.clear()
   }
 
   restore(snapshot: {
@@ -83,12 +87,20 @@ export class LootPickupRuntime {
     readonly itemId: ItemId | null
     readonly position: Vector3Value | null
     readonly spawnedFromEnemyId: string | null
+    readonly spawnedFromEnemyIds?: readonly string[]
   }): void {
     this.active = snapshot.active
     this.instanceId = snapshot.instanceId
     this.itemId = snapshot.itemId
     this.position = snapshot.position === null ? null : { ...snapshot.position }
-    this.spawnedFromEnemyId = snapshot.spawnedFromEnemyId
+    this.activeSpawnedFromEnemyId = snapshot.spawnedFromEnemyId
+    this.spawnedFromEnemyIds.clear()
+    for (const enemyId of snapshot.spawnedFromEnemyIds ?? []) {
+      this.spawnedFromEnemyIds.add(enemyId)
+    }
+    if (snapshot.spawnedFromEnemyId !== null) {
+      this.spawnedFromEnemyIds.add(snapshot.spawnedFromEnemyId)
+    }
   }
 
   snapshot(): LootPickupSnapshot & { readonly spawnedFromEnemyId: string | null } {
@@ -97,7 +109,8 @@ export class LootPickupRuntime {
       instanceId: this.instanceId,
       itemId: this.itemId,
       position: this.position === null ? null : { ...this.position },
-      spawnedFromEnemyId: this.spawnedFromEnemyId,
+      spawnedFromEnemyId: this.activeSpawnedFromEnemyId,
+      spawnedFromEnemyIds: [...this.spawnedFromEnemyIds].sort(),
     }
   }
 }

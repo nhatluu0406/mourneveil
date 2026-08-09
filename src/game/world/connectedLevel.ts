@@ -109,7 +109,15 @@ export const MOURNEVEIL_CONNECTED_LEVEL: ConnectedLevelDefinition = Object.freez
       { interactionRange: 1.25, unlockFromZoneId: 'zone.mixed-combat' },
     ),
     defineConnection('connection.mixed-final-approach', 'open', 'zone.mixed-combat', 'zone.final-approach', 4, -4),
-    defineConnection('connection.gate-final-arena', 'gated', 'zone.final-approach', 'zone.final-arena', 10, -4),
+    defineConnection(
+      'connection.gate-final-arena',
+      'gated',
+      'zone.final-approach',
+      'zone.final-arena',
+      10,
+      -4,
+      { interactionRange: 1.5 },
+    ),
   ]),
 })
 

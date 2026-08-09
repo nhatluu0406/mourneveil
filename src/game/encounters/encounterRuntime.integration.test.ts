@@ -19,6 +19,8 @@ describe('player runtime graybox encounter projection', () => {
     expect(runtime.snapshot().enemies.map((enemy) => enemy.health.current)).toEqual([
       SKIRMISHER_ROLE.definition.maximumHealth,
       BRUTE_ROLE.definition.maximumHealth,
+      SKIRMISHER_ROLE.definition.maximumHealth,
+      SKIRMISHER_ROLE.definition.maximumHealth,
     ])
   })
 

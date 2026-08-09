@@ -9,7 +9,7 @@ import {
 } from '@react-three/rapier'
 import { useEffect, useRef } from 'react'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
-import { meleeRoleByRuntimeId } from '../game/enemies/enemyRoles'
+import { meleeRoleByDefinitionId } from '../game/enemies/enemyRoles'
 import { EnemyVisual } from '../render/EnemyVisual'
 import {
   CHARACTER_COLLISION_OFFSET,
@@ -28,10 +28,10 @@ export function EnemyPhysicsBody({
   const bodyColliderRef = useRef<RapierCollider>(null)
   const hurtboxColliderRef = useRef<RapierCollider>(null)
   const { world } = useRapier()
-  const role = meleeRoleByRuntimeId(enemyId)
   const enemy =
     runtime.snapshot().enemies.find((entry) => entry.id === enemyId) ??
     runtime.snapshot().enemy
+  const role = meleeRoleByDefinitionId(enemy.definitionId)
   useCombatHurtboxRegistration(enemy.hurtbox.id, hurtboxColliderRef)
 
   useEffect(() => {

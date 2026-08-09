@@ -21,6 +21,10 @@ export type ShortcutOpenResult =
   | { readonly accepted: true; readonly shortcutId: MourneveilConnectionId; readonly changed: boolean }
   | { readonly accepted: false; readonly shortcutId: MourneveilConnectionId; readonly reason: 'unknown-shortcut' | 'wrong-side' | 'out-of-range' }
 
+export type FinalGateReachResult =
+  | { readonly accepted: true; readonly changed: boolean }
+  | { readonly accepted: false; readonly reason: 'prerequisites-incomplete' | 'out-of-range' }
+
 export class ConnectedWorldRuntime {
   private currentZoneId: MourneveilZoneId | null
   private readonly openedShortcutIds = new Set<MourneveilConnectionId>()
@@ -64,13 +68,18 @@ export class ConnectedWorldRuntime {
     if (connection === undefined) return false
     if (connection.kind === 'open') return true
     if (connection.kind === 'shortcut') return this.openedShortcutIds.has(connectionId)
-    return false
+    return this.finalGateReached
   }
 
-  markFinalGateReached(): boolean {
+  tryReachFinalGate(playerPosition: Vector3Value, prerequisitesComplete: boolean): FinalGateReachResult {
+    if (!prerequisitesComplete) return { accepted: false, reason: 'prerequisites-incomplete' }
+    const gate = this.definition.connections.find((connection) => connection.kind === 'gated')
+    if (gate === undefined || horizontalDistance(playerPosition, gate.worldPosition) > (gate.interactionRange ?? 0)) {
+      return { accepted: false, reason: 'out-of-range' }
+    }
     const changed = !this.finalGateReached
     this.finalGateReached = true
-    return changed
+    return { accepted: true, changed }
   }
 
   restore(flags: { readonly openedShortcutIds: readonly string[]; readonly finalGateReached: boolean }): void {

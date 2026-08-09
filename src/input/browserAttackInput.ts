@@ -5,10 +5,10 @@ import {
 import type { PlayerAimDirection } from './playerAimIntent'
 import { PLAYER_DODGE_REQUEST, type PlayerDodgeRequest } from './playerDefenseIntent'
 import {
-  PLAYER_CHECKPOINT_INTERACTION_REQUEST,
   PLAYER_RESPAWN_REQUEST,
-  type PlayerCheckpointInteractionRequest,
+  PLAYER_WORLD_INTERACTION_REQUEST,
   type PlayerRespawnRequest,
+  type PlayerWorldInteractionRequest,
 } from './playerRecoveryIntent'
 import { PLAYER_FLASK_USE_REQUEST, type PlayerFlaskUseRequest } from './playerFlaskIntent'
 
@@ -47,7 +47,7 @@ export class BrowserAttackInput {
   private flaskKeyHeld = false
   private pendingAttack: PlayerAttackRequest | null = null
   private pendingDodge: PlayerDodgeRequest | null = null
-  private pendingCheckpointInteraction: PlayerCheckpointInteractionRequest | null = null
+  private pendingCheckpointInteraction: PlayerWorldInteractionRequest | null = null
   private pendingRespawn: PlayerRespawnRequest | null = null
   private pendingFlaskUse: PlayerFlaskUseRequest | null = null
   private connected = false
@@ -111,7 +111,7 @@ export class BrowserAttackInput {
     return request
   }
 
-  consumeCheckpointInteractionRequest(): PlayerCheckpointInteractionRequest | null {
+  consumeWorldInteractionRequest(): PlayerWorldInteractionRequest | null {
     const request = this.pendingCheckpointInteraction
     this.pendingCheckpointInteraction = null
     return request
@@ -225,7 +225,7 @@ export class BrowserAttackInput {
     } else if (event.code === CHECKPOINT_INTERACTION_CODE && !this.checkpointKeyHeld) {
       event.preventDefault()
       this.checkpointKeyHeld = true
-      this.pendingCheckpointInteraction = PLAYER_CHECKPOINT_INTERACTION_REQUEST
+      this.pendingCheckpointInteraction = PLAYER_WORLD_INTERACTION_REQUEST
     } else if (event.code === RESPAWN_CODE && !this.respawnKeyHeld) {
       event.preventDefault()
       this.respawnKeyHeld = true
