@@ -64,7 +64,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - verifier: `node scripts/browser/gate0-m41-m43.mjs` against `http://127.0.0.1:4173/` → VERDICT PASS
   - evidence: PASS — 54 checks; combat damage/death×3/respawn/flask KeyE accept+reject+KeyF refill/UI isolation/no console errors; gate hook `window.__MOURNEVEIL_GATE__`
 
-- [ ] 4. M4.4 — Currency and death recovery (Echoes)
+- [x] 4. M4.4 — Currency and death recovery (Echoes)
   - depends: 0
   - risk: HIGH
   - isolation: sequential
@@ -72,9 +72,9 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - outcome: defeat rewards Echoes once; death drops carried Echoes into one recovery; living player recovers once; second death replaces/loses prior recovery; respawn/checkpoint do not auto-restore drops
   - non-goals: multi-currency, XP, economy framework, merchants
   - verifier: focused Echo reward/drop/recovery tests; `npm run lint`; `npm run typecheck`; HUMAN-VERIFY browser kill→earn→die→recover and second-death loss
-  - evidence: pending
+  - evidence: PASS — skirmisher 25 / brute 60 once per lifecycle; death drop + proximity recover; zero-carried death clears prior; browser gate-m44-echoes PASS; commit `feat(progression): add Echo recovery loop`
 
-- [ ] 5. M4.5 — Loot and basic equipment
+- [x] 5. M4.5 — Loot and basic equipment
   - depends: 4
   - risk: HIGH
   - isolation: sequential
@@ -82,9 +82,9 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - outcome: authored items, ownership inventory, weapon+charm slots, resolved attack damage and max-health modifiers, deterministic loot spawn/pickup once
   - non-goals: random loot, rarity, crafting, inventory grids, generalized stat framework
   - verifier: focused item/inventory/equipment/modifier tests; UI click isolation; browser equip/unequip proof
-  - evidence: pending
+  - evidence: PASS — oathblade +8/+12 dmg, vitality +20 max HP; skirmisher/brute authored loot; inventory UI equip isolation; gate-m45-loot PASS; commit `feat(items): add loot inventory and equipment proof`
 
-- [ ] 6. M4.6 — Versioned local save and M4 verification
+- [x] 6. M4.6 — Versioned local save and M4 verification
   - depends: 5
   - risk: HIGH
   - isolation: sequential
@@ -92,7 +92,7 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
   - outcome: SaveFileV1 persists stable facts only; malformed/unknown versions fall back safely; browser reload restores checkpoint/currency/recovery/inventory/equipment/flask policy; full M4 loop verified
   - non-goals: cloud save, fake historical migrations, transient combat serialization, M5
   - verifier: focused save tests; `npm run lint|typecheck|test|build|verify`; `git diff --check`; LeanLoop doctor/sync; HUMAN-VERIFY reload + end-to-end matrix
-  - evidence: pending
+  - evidence: PASS — SaveFileV1 localStorage; recovery persisted; encounter resets on load; gate-m46-save + gate-m4-e2e PASS; 172 tests; verify green
 
 ## Parallel groups
 
@@ -116,4 +116,4 @@ Task slug: `m4-core-rpg-loop` (`python3 scripts/leanloop/task.py start m4-core-r
 
 ## Next milestone pointer
 
-- After Gate 0 passes: M4.4 → M4.5 → M4.6. Do not start M5.
+- M4 complete pending Product Owner acceptance. Do not start M5 until authorized.

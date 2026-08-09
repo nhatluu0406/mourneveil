@@ -8,13 +8,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (97L)
+- PLAN.md (119L)
 - README.md (33L)
 - SETUP.md (152L)
 - STACK.md (69L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (38L)
+- package.json (39L)
 - tsconfig.app.json (24L)
 - ... +3 more
 - **.agents/** (0 files)
@@ -161,7 +161,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (47L)
-    - current-state.md (29L)
+    - current-state.md (30L)
     - definition-of-done.md (52L)
     - workflow.md (70L)
   - **docs/product/** (2 files)
@@ -170,6 +170,12 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - **prompts/** (1 files)
   - 000-bootstrap-foundation.md (224L)
 - **scripts/** (0 files)
+  - **scripts/browser/** (5 files)
+    - gate-m4-e2e.mjs (135L)
+    - gate-m44-echoes.mjs (130L)
+    - gate-m45-loot.mjs (113L)
+    - gate-m46-save.mjs (120L)
+    - gate0-m41-m43.mjs (443L)
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -185,21 +191,22 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (83L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../render/Scene
+    - App.tsx (135L) -- symbols: App; imports: ../debug/FoundationPanel, ../game/core/foundationDiagnostic, ../input/playerRecoveryIntent
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
-    - styles.css (118L)
-    - useFoundationRuntime.ts (172L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../input/browserAttackInput
+    - styles.css (177L)
+    - useFoundationRuntime.ts (197L) -- symbols: useFoundationRuntime; imports: ../game/character/playerRuntime, ../game/core/foundationDiagnostic, ../game/save/gameSaveService
   - **src/debug/** (1 files)
-    - FoundationPanel.tsx (294L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
+    - FoundationPanel.tsx (333L) -- symbols: FoundationPanel; imports: ../game/core/foundationDiagnostic, ../render/followCamera
   - **src/game/** (0 files)
-    - **src/game/character/** (12 files)
+    - **src/game/character/** (16 files)
       - enemyIncomingCombat.integration.test.ts (112L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./playerMotor
       - playerCombatHealth.test.ts (41L) -- imports: ./playerHealth
       - playerCombatHealth.ts (9L) -- imports: ./playerHealth
+      - playerCurrency.test.ts (32L) -- imports: ./playerCurrency
+      - playerCurrency.ts (58L) -- symbols: ECHOES_CURRENCY_ID, EchoesSnapshot, EchoesCurrencyRuntime
+      - playerEchoes.integration.test.ts (127L) -- imports: ../core/fixedStepClock, ../enemies/enemyRoles, ./playerMotor
       - playerFlask.integration.test.ts (112L) -- imports: ../../input/playerFlaskIntent, ../../input/playerRecoveryIntent, ../core/fixedStepClock
       - playerFlask.test.ts (25L) -- imports: ../combat/combatHealth, ./playerFlask
-      - playerFlask.ts (104L) -- symbols: PLAYER_FLASK_ACTION_ID, PLAYER_FLASK_RESOURCE_ID, PlayerFlaskDefinition, PLAYER_FLASK_DEFINITION, PlayerFlaskSnapshot; imports: ../combat/combatAction, ../combat/combatActionRuntime, ../combat/combatHealth
-      - playerHealth.ts (66L) -- symbols: PLAYER_ID, PLAYER_MAXIMUM_HEALTH, PLAYER_HURTBOX_ID, PLAYER_HURTBOX_RADIUS, PlayerHealthSnapshot; imports: ../combat/combatHealth, ../combat/combatTarget, ./playerMotor
-      - playerMotor.test.ts (103L) -- imports: ../../input/playerM
+      - playerFlask.ts (111L)
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

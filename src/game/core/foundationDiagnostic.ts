@@ -20,7 +20,7 @@ import type { EquipmentSnapshot } from '../items/playerEquipment'
 import type { LootPickupSnapshot } from '../items/lootPickup'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M4.5' as const
+export const MILESTONE = 'M4.6' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {

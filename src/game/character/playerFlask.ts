@@ -87,6 +87,13 @@ export class PlayerFlaskRuntime {
     this.currentCharges = PLAYER_FLASK_DEFINITION.maximumCharges
   }
 
+  setCharges(charges: number): void {
+    if (!Number.isInteger(charges) || charges < 0) {
+      throw new RangeError('Flask charges must be a non-negative integer')
+    }
+    this.currentCharges = Math.min(charges, PLAYER_FLASK_DEFINITION.maximumCharges)
+  }
+
   cancelCommittedUse(): void {
     this.pendingExecutionId = null
     this.appliedExecutionId = null

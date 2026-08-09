@@ -88,6 +88,7 @@ import {
   type EchoesSnapshot,
 } from './playerCurrency'
 import type { EquipSlot, ItemId } from '../items/itemDefinition'
+import { getItemDefinition } from '../items/itemDefinition'
 import {
   PlayerInventoryRuntime,
   type InventorySnapshot,
@@ -102,6 +103,10 @@ import {
   LootPickupRuntime,
   type LootPickupSnapshot,
 } from '../items/lootPickup'
+import {
+  createDefaultSaveV1,
+  type SaveFileV1,
+} from '../save/saveSchema'
 import {
   createPlayerMotorState,
   stopPlayerMotor,
@@ -185,6 +190,104 @@ export class PlayerRuntime {
   private contactQuery: CombatContactQuery | null = null
   /** Frozen aim for the committed attack execution; null while combat is idle. */
   private attackExecutionFacing: PlayerFacingDirection | null = null
+  private persistHandler: (() => void) | null = null
+
+  setPersistHandler(handler: (() => void) | null): void {
+    this.persistHandler = handler
+  }
+
+  captureSave(): SaveFileV1 {
+    const checkpoint = this.checkpointRuntime.snapshot()
+    const flask = this.flaskRuntime.snapshot()
+    const echoes = this.echoesRuntime.snapshot()
+    const recovery = this.echoRecoveryRuntime.snapshot()
+    const equipment = this.equipmentRuntime.snapshot()
+    const loot = this.lootPickupRuntime.snapshot()
+    return {
+      version: 1,
+      activeCheckpointId: checkpoint.currentCheckpointId,
+      checkpointActivated: checkpoint.activated,
+      flaskCharges: flask.currentCharges,
+      echoesCarried: echoes.carried,
+      echoRecovery: {
+        active: recovery.active,
+        amount: recovery.amount,
+        position: recovery.position,
+      },
+      inventory: this.inventoryRuntime.snapshot().entries,
+      equipment: {
+        weaponItemId: equipment.weaponItemId,
+        charmItemId: equipment.charmItemId,
+      },
+      lootPickup: {
+        active: loot.active,
+        instanceId: loot.instanceId,
+        itemId: loot.itemId,
+        position: loot.position,
+        spawnedFromEnemyId: loot.spawnedFromEnemyId,
+      },
+    }
+  }
+
+  /**
+   * Restores persistent facts only. Encounter enemies reset; transient combat/input cleared.
+   */
+  applySave(save: SaveFileV1 = createDefaultSaveV1()): void {
+    this.resetPlayerActionState()
+    this.playerState = createPlayerMotorState(
+      GRAYBOX_CHECKPOINT_DEFINITION.respawnPosition,
+    )
+    this.playerHealthRuntime.updatePosition(this.playerState.position)
+    this.checkpointRuntime.restore(
+      save.checkpointActivated,
+      save.activeCheckpointId === GRAYBOX_CHECKPOINT_DEFINITION.id
+        ? GRAYBOX_CHECKPOINT_DEFINITION.id
+        : null,
+    )
+    this.flaskRuntime.setCharges(save.flaskCharges)
+    this.echoesRuntime.setCarried(save.echoesCarried)
+    this.echoRecoveryRuntime.restore(save.echoRecovery)
+    const owned = save.inventory.filter((entry) => getItemDefinition(entry.itemId) !== null)
+    this.inventoryRuntime.replaceAll(owned)
+    const weapon =
+      save.equipment.weaponItemId !== null &&
+      this.inventoryRuntime.has(save.equipment.weaponItemId)
+        ? save.equipment.weaponItemId
+        : null
+    const charm =
+      save.equipment.charmItemId !== null &&
+      this.inventoryRuntime.has(save.equipment.charmItemId)
+        ? save.equipment.charmItemId
+        : null
+    this.equipmentRuntime.restore(weapon, charm)
+    this.syncEquipmentDerivedStats()
+    this.playerHealthRuntime.restoreToMaximum()
+    this.lootPickupRuntime.restore({
+      active: save.lootPickup.active && save.lootPickup.itemId !== null,
+      instanceId: save.lootPickup.instanceId,
+      itemId:
+        save.lootPickup.itemId !== null && getItemDefinition(save.lootPickup.itemId) !== null
+          ? save.lootPickup.itemId
+          : null,
+      position: save.lootPickup.position,
+      spawnedFromEnemyId: save.lootPickup.spawnedFromEnemyId,
+    })
+    this.resetGrayboxEncounterKeepingLootMemory()
+  }
+
+  private markPersistentChange(): void {
+    this.persistHandler?.()
+  }
+
+  private resetGrayboxEncounterKeepingLootMemory(): void {
+    for (const enemy of this.enemyRuntimes) {
+      const role = meleeRoleByRuntimeId(enemy.id)
+      enemy.reset(role?.spawnPosition ?? enemy.snapshot().position)
+      this.enemyContactRuntimeFor(enemy.id).reset()
+    }
+    this.echoRewardedEnemyIds.clear()
+    // Keep loot spawn memory / active pickup from save; do not resetLifecycle.
+  }
 
   requestCombatAction(
     request: CombatActionRequest,
@@ -363,13 +466,19 @@ export class PlayerRuntime {
 
   equipItem(itemId: ItemId): EquipResult {
     const result = this.equipmentRuntime.equip(itemId, this.inventoryRuntime)
-    if (result.accepted) this.syncEquipmentDerivedStats()
+    if (result.accepted) {
+      this.syncEquipmentDerivedStats()
+      this.markPersistentChange()
+    }
     return result
   }
 
   unequipSlot(slot: EquipSlot): UnequipResult {
     const result = this.equipmentRuntime.unequip(slot)
-    if (result.accepted) this.syncEquipmentDerivedStats()
+    if (result.accepted) {
+      this.syncEquipmentDerivedStats()
+      this.markPersistentChange()
+    }
     return result
   }
 
@@ -416,6 +525,7 @@ export class PlayerRuntime {
       this.playerHealthRuntime.snapshot().health.alive,
     )
     if (result.accepted) this.flaskRuntime.refill()
+    if (result.accepted) this.markPersistentChange()
     return result
   }
 
@@ -435,6 +545,7 @@ export class PlayerRuntime {
     this.resetPlayerActionState()
     this.flaskRuntime.refill()
     this.resetGrayboxEncounter()
+    this.markPersistentChange()
     return {
       accepted: true,
       checkpointId: this.checkpointRuntime.definition.id,
@@ -459,6 +570,7 @@ export class PlayerRuntime {
       if (flaskHealAmount !== null) {
         const restoration = this.playerHealthRuntime.restore(flaskHealAmount)
         this.flaskRuntime.recordRestoration(restoration.restoredHealth)
+        this.markPersistentChange()
       }
       if (playerAlive && this.collisionResolver !== null) {
         const defense = this.defenseRuntime.snapshot(combat)
@@ -492,9 +604,15 @@ export class PlayerRuntime {
           this.playerState.position,
           true,
         )
-        if (pickup.accepted) this.echoesRuntime.add(pickup.amount)
+        if (pickup.accepted) {
+          this.echoesRuntime.add(pickup.amount)
+          this.markPersistentChange()
+        }
         const loot = this.lootPickupRuntime.tryPickup(this.playerState.position, true)
-        if (loot.accepted) this.inventoryRuntime.add(loot.itemId)
+        if (loot.accepted) {
+          this.inventoryRuntime.add(loot.itemId)
+          this.markPersistentChange()
+        }
       }
       for (const enemyRuntime of this.enemyRuntimes) {
         advanceMeleeEnemy(
@@ -656,12 +774,16 @@ export class PlayerRuntime {
             : null
       if (itemId === null) continue
       this.lootInstanceCounter += 1
-      this.lootPickupRuntime.spawnFromEnemy(
-        enemy.id,
-        itemId,
-        snapshot.position,
-        `loot.${enemy.id}.${this.lootInstanceCounter}`,
-      )
+      if (
+        this.lootPickupRuntime.spawnFromEnemy(
+          enemy.id,
+          itemId,
+          snapshot.position,
+          `loot.${enemy.id}.${this.lootInstanceCounter}`,
+        )
+      ) {
+        this.markPersistentChange()
+      }
     }
   }
 
@@ -671,7 +793,10 @@ export class PlayerRuntime {
       if (snapshot.alive || this.echoRewardedEnemyIds.has(enemy.id)) continue
       this.echoRewardedEnemyIds.add(enemy.id)
       const reward = enemy.definition.echoReward
-      if (reward > 0) this.echoesRuntime.add(reward)
+      if (reward > 0) {
+        this.echoesRuntime.add(reward)
+        this.markPersistentChange()
+      }
     }
   }
 
@@ -688,6 +813,7 @@ export class PlayerRuntime {
     this.echoRecoveryRuntime.dropAt(this.playerState.position, dropped)
     this.resetPlayerActionState()
     this.playerState = stopPlayerMotor(this.playerState)
+    this.markPersistentChange()
   }
 
   private resetPlayerActionState(): void {

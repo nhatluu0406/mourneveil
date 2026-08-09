@@ -1,59 +1,57 @@
 # HANDOFF
 <!-- Durable end-of-session state for one task. -->
 
-Updated: 2026-08-09 by Codex
+Updated: 2026-08-09 by Cursor
 Task: m4-core-rpg-loop
 
 ## Status
 
-M4.1–M4.3 complete and verified. M4.4 was not started.
+M4.1–M4.6 complete and verified in this session. M5 not started. Product Owner acceptance pending.
 
-## M4.1 result
+## M4.1–M4.3
 
-- The former M3 proof is now canonical `PlayerHealthRuntime`; no parallel health system.
-- Health zero enters explicit dead state, resets player combat/defense/outgoing contact, stops motor velocity/intent, and rejects movement/new attack/dodge/guard.
-- Enemy committed actions continue to a safe idle state after player death; simulation and render remain live.
-- Focused gate: 58 tests, lint, typecheck, and diff check passed.
+- Canonical health/death, checkpoint F + respawn R, flask E — implementation from prior session.
+- Gate 0 browser replay PASS (`scripts/browser/gate0-m41-m43.mjs`).
 
-## M4.2 result
+## M4.4 — Echoes
 
-- `checkpoint.graybox.entry` owns stable ID, authored respawn position/range, activation, and current checkpoint reference.
-- F emits semantic checkpoint interaction; R emits semantic dead-only respawn. Raw keys stay in browser input.
-- Respawn restores transform/full health, clears action/defense/contact state, and resets both authored encounter enemies and incoming-contact dedup.
-- Focused gate: 34 tests, lint, typecheck, and diff check passed.
-- Runtime: local Vite returned HTTP 200; prescribed browser discovery returned no available backend, so repeated manual death/respawn remains unverified.
+- Currency: `currency.echoes`; skirmisher +25, brute +60; once per enemy lifecycle; encounter reset clears reward flags.
+- Death drops carried into one `world.echo-recovery`; amount 0 clears prior; second death replaces; respawn/checkpoint never auto-return.
+- Proximity pickup range 1.05. Browser: `gate-m44-echoes.mjs` PASS.
+- Commit: `044c6bc feat(progression): add Echo recovery loop`
 
-## M4.3 result
+## M4.5 — Loot / inventory / equipment
 
-- Centralized flask: 3 maximum charges, 40 healing, E semantic request.
-- Use is a 12-step startup, 1-step authoritative heal/charge-consume phase, and 18-step recovery; movement is committed through the shared action runtime.
-- Dead, full-health, empty, guard, or another committed action rejects use.
-- Checkpoint activation/re-interaction and checkpoint respawn refill all charges; respawn is treated as rest.
-- Focused gate: 47 tests, lint, typecheck, and diff check passed.
+- Items: oathblade, practice-edge, vitality, ember-seal, ash-token, echo-shard.
+- Slots: weapon + charm. Modifiers: oathblade +8 light/+12 heavy; vitality +20 max HP (clamp on unequip).
+- Loot: skirmisher → oathblade; brute → vitality; once per encounter lifecycle.
+- Compact `InventoryEquipmentPanel`; UI clicks isolated from combat.
+- Browser: `gate-m45-loot.mjs` PASS.
+- Commit: `b973142 feat(items): add loot inventory and equipment proof`
+
+## M4.6 — Save
+
+- Schema: `SaveFileV1` (`version: 1`) via `localStorage` key `mourneveil.save.v1`.
+- Persists: checkpoint, flask charges, Echoes, active recovery, inventory, equipment, loot spawn/active pickup.
+- Does not persist: combat/defense phases, contacts, camera, held input, enemy combat execution.
+- Load policy: restore persistent facts; reset encounter enemies; clear transient combat; idle/alive.
+- Migration entry accepts only V1; malformed/unknown → safe default.
+- Autosave on checkpoint/respawn/currency/recovery/loot/equip/flask charge changes.
+- Browser reload: `gate-m46-save.mjs` PASS; e2e: `gate-m4-e2e.mjs` PASS.
 
 ## Final verification
 
-- Full suite: 37 files, 159 tests passed.
-- `npm run lint`, `npm run typecheck`, `npm run build`, `npm run verify`, `git diff --check`, LeanLoop doctor strict, and LeanLoop sync check passed.
-- Non-blocking existing Vite main-chunk size advisory remains.
+- 42 files / 172 tests PASS
+- `npm run verify` PASS (chunk size advisory non-blocking)
+- `git diff --check`, doctor --strict, sync --check PASS
 
-## Encounter reset policy
+## Remaining non-blocking debt
 
-- Respawn resets both mixed-encounter enemies to authored spawns/health/idle state and clears their outgoing contact dedup.
-- Player action, defense, movement intent/velocity, outgoing contact, and browser held/pending input are cleared.
-- The independent training target is preserved.
-
-## Browser evidence
-
-- Local Vite endpoint returned HTTP 200 during M4.2.
-- In-app browser discovery returned an empty backend list, so fight/death/respawn and E-heal runtime interactions remain manually unverified.
-
-## Locked scope
-
-- Execute M4.1 → M4.2 → M4.3 sequentially with internal verification gates.
-- Stop before the next step on a failed gate or HIGH-risk authority conflict.
-- Do not start M4.4, create a branch, push, or add controller work.
+- Playwright is a devDependency for browser gates (not product runtime).
+- Vite main-chunk >500 kB advisory.
+- Controller deferred.
+- Product Owner interactive acceptance still required.
 
 ## Next action
 
-M4.4 — Loot pickup proof. Do not start it without a new Product Owner batch.
+Product Owner runtime acceptance of M4. Do not start M5 without a new batch authorization.

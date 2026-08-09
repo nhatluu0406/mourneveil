@@ -70,6 +70,12 @@ export class CheckpointRuntime {
       currentCheckpointId: this.currentCheckpointId,
     }
   }
+
+  restore(activated: boolean, currentCheckpointId: typeof GRAYBOX_CHECKPOINT_ID | null): void {
+    this.activated = activated
+    this.currentCheckpointId =
+      activated && currentCheckpointId === this.definition.id ? this.definition.id : null
+  }
 }
 
 function horizontalDistance(left: Vector3Value, right: Vector3Value): number {

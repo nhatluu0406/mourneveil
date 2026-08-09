@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PlayerRuntime } from '../game/character/playerRuntime'
 import type { FoundationRuntimeDiagnostic } from '../game/core/foundationDiagnostic'
+import {
+  GameSaveService,
+  LocalStorageSaveStorage,
+} from '../game/save/gameSaveService'
 import { BrowserAttackInput } from '../input/browserAttackInput'
 import type { AimDirectionResolver, CombatInputSnapshot } from '../input/browserAttackInput'
 import { BrowserGamepadInput } from '../input/browserGamepadInput'
@@ -17,7 +21,28 @@ interface FoundationRuntimeIntegration {
 }
 
 export function useFoundationRuntime(): FoundationRuntimeIntegration {
-  const runtime = useMemo(() => new PlayerRuntime(), [])
+  const saveService = useMemo(
+    () =>
+      new GameSaveService(
+        typeof localStorage === 'undefined'
+          ? {
+              readRaw: () => null,
+              writeRaw: () => undefined,
+              clear: () => undefined,
+            }
+          : new LocalStorageSaveStorage(localStorage),
+      ),
+    [],
+  )
+  const runtime = useMemo(() => {
+    const next = new PlayerRuntime()
+    const loaded = saveService.load()
+    if (loaded.ok) next.applySave(loaded.save)
+    next.setPersistHandler(() => {
+      saveService.save(next.captureSave())
+    })
+    return next
+  }, [saveService])
   const combatInputRef = useRef<BrowserAttackInput | null>(null)
   const keyboardInputRef = useRef<BrowserMovementInput | null>(null)
   const pendingGameplayInputRef = useRef<{
