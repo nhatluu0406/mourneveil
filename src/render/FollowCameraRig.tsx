@@ -42,12 +42,23 @@ export function FollowCameraRig({
     )
     poseRef.current = next
 
-    const lastHit = snapshot.contact.lastHit
-    if (lastHit !== null) {
-      const hitKey = `${lastHit.executionId}:${lastHit.targetId}:${lastHit.simulationStep}`
+    const lastOutgoing = snapshot.contact.lastHit
+    if (lastOutgoing !== null) {
+      const hitKey = `out:${lastOutgoing.executionId}:${lastOutgoing.targetId}:${lastOutgoing.simulationStep}`
       if (hitKey !== lastHitKeyRef.current) {
         lastHitKeyRef.current = hitKey
         impulseRemainingRef.current = HIT_IMPULSE_SECONDS
+      }
+    }
+    const lastIncoming = snapshot.incomingContact.lastHit
+    if (
+      lastIncoming !== null &&
+      (lastIncoming.outcome === 'damaged' || lastIncoming.outcome === 'guarded')
+    ) {
+      const hitKey = `in:${lastIncoming.executionId}:${lastIncoming.simulationStep}:${lastIncoming.outcome}`
+      if (hitKey !== lastHitKeyRef.current) {
+        lastHitKeyRef.current = hitKey
+        impulseRemainingRef.current = HIT_IMPULSE_SECONDS * (lastIncoming.outcome === 'damaged' ? 1.35 : 0.8)
       }
     }
 

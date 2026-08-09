@@ -13,9 +13,9 @@ describe('player attack presentation projection', () => {
   it('projects phases without controlling their progression', () => {
     const runtime = new CombatActionRuntime([PLAYER_LIGHT_ATTACK.action])
     expect(computePlayerAttackPresentationPose(runtime.snapshot())).toEqual({
-      weaponVisible: false,
+      weaponVisible: true,
       weaponYawRadians: 0,
-      weaponForwardOffset: -0.72,
+      weaponForwardOffset: -0.62,
       color: '#c4a574',
     })
 

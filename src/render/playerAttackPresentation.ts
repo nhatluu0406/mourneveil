@@ -14,9 +14,9 @@ export interface PlayerAttackPresentationPose {
 }
 
 const IDLE_POSE: PlayerAttackPresentationPose = Object.freeze({
-  weaponVisible: false,
+  weaponVisible: true,
   weaponYawRadians: 0,
-  weaponForwardOffset: -0.72,
+  weaponForwardOffset: -0.62,
   color: '#c4a574',
 })
 
@@ -43,31 +43,31 @@ export function computePlayerAttackPresentationPose(
   const isHeavy = attack.kind === 'heavy'
   // Keep the sweep mostly along execution facing so the readable attack axis
   // matches the authoritative contact sphere (avoid large lateral misreads).
-  const maximumYaw = isHeavy ? 0.42 : 0.28
+  const maximumYaw = isHeavy ? 0.72 : 0.38
   const baseForward = -0.72
-  const lunge = isHeavy ? 0.22 : 0.14
+  const lunge = isHeavy ? 0.32 : 0.18
 
   switch (combat.phase) {
     case 'startup':
       return {
         weaponVisible: true,
-        weaponYawRadians: -maximumYaw * (isHeavy ? progress * 0.85 : progress),
-        weaponForwardOffset: baseForward + (isHeavy ? -0.06 * progress : 0),
-        color: isHeavy ? '#8f7a5c' : '#d6c7a4',
+        weaponYawRadians: -maximumYaw * (isHeavy ? progress * 0.95 : progress * 0.75),
+        weaponForwardOffset: baseForward + (isHeavy ? 0.14 * progress : -0.04 * progress),
+        color: isHeavy ? '#a88858' : '#d6c7a4',
       }
     case 'active':
       return {
         weaponVisible: true,
-        weaponYawRadians: -maximumYaw + maximumYaw * 2 * progress,
+        weaponYawRadians: -maximumYaw + maximumYaw * 2.15 * progress,
         weaponForwardOffset: baseForward - lunge * Math.sin(progress * Math.PI),
-        color: isHeavy ? '#f0b45a' : '#f4d06f',
+        color: isHeavy ? '#ffb454' : '#f4d06f',
       }
     case 'recovery':
       return {
         weaponVisible: true,
-        weaponYawRadians: maximumYaw * (1 - progress),
-        weaponForwardOffset: baseForward,
-        color: isHeavy ? '#7d848c' : '#9da4ad',
+        weaponYawRadians: maximumYaw * (1 - progress) * (isHeavy ? 0.85 : 0.55),
+        weaponForwardOffset: baseForward + (isHeavy ? 0.08 * (1 - progress) : 0),
+        color: isHeavy ? '#6f767e' : '#9da4ad',
       }
   }
 }
