@@ -50,7 +50,7 @@ Classification: **M3.3.1 PASS · M3.4 PASS · M3.5 PASS · M3.6 NEXT**
 ## Commits this batch
 - `6d709aa` fix(enemy): prevent runtime state stall
 - `106d063` feat(enemy): add graybox enemy roles
-- (pending) feat(encounter): add mixed enemy combat proof
+- `a09cce5` feat(encounter): add mixed enemy combat proof
 
 ## Next
 M3.6 — M3 verification / PO acceptance. Do not start M3.6 in this session without a new authorized batch.
