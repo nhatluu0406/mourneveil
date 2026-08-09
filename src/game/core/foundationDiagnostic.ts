@@ -12,7 +12,7 @@ import type { EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import type { EnemyAttackSpatialSnapshot } from '../enemies/meleeEnemy'
 import type { SimulationTimeSnapshot } from './fixedStepClock'
 
-export const MILESTONE = 'M3.3.1' as const
+export const MILESTONE = 'M3.4' as const
 export const WORKING_TITLE = 'Mourneveil' as const
 
 export interface FoundationRuntimeDiagnostic {
@@ -30,6 +30,8 @@ export interface FoundationRuntimeDiagnostic {
   readonly enemy: EnemyRuntimeSnapshot
   readonly enemyAttack: EnemyAttackSpatialSnapshot
   readonly enemyDistanceToPlayer: number
+  readonly enemies: readonly EnemyRuntimeSnapshot[]
+  readonly enemyAttacks: readonly EnemyAttackSpatialSnapshot[]
   readonly incomingContact: CombatContactSnapshot
 }
 

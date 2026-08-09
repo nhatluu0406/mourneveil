@@ -1,54 +1,23 @@
 import type { CharacterCollisionResolver, PlayerFacingDirection, Vector3Value } from '../character/playerMotor'
 import { PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED } from '../character/playerMotor'
-import { defineCombatAction } from '../combat/combatAction'
 import type { ActiveCombatContactShape } from '../combat/combatContact'
-import { defineEnemy } from './enemyDefinition'
 import { EnemyRuntime, type EnemyRuntimeSnapshot } from './enemyRuntime'
+import {
+  createEnemyRuntimeFromRole,
+  meleeRoleByActionId,
+  meleeRoleByDefinitionId,
+  SKIRMISHER_ROLE,
+  type EnemyMeleeRoleSpec,
+} from './enemyRoles'
 
-export const MELEE_ENEMY_ID = 'enemy.melee.1' as const
-export const MELEE_ENEMY_ATTACK_ID = 'enemy.melee.attack' as const
-export const MELEE_ENEMY_SPAWN_POSITION = Object.freeze({ x: 2.5, y: 0.82, z: 3 })
-
-export const MELEE_ENEMY_ATTACK = defineCombatAction({
-  id: MELEE_ENEMY_ATTACK_ID,
-  startupSteps: 30,
-  activeSteps: 6,
-  recoverySteps: 30,
-  resourceCost: null,
-  cancellationPolicy: 'never',
-  interruptibilityPolicy: 'never',
-  contactWindowId: 'enemy.melee.attack.contact',
-  cooldownSteps: 0,
-})
-
-export const MELEE_ENEMY_ATTACK_DAMAGE = 15
-export const MELEE_ENEMY_CONTACT_SHAPE = Object.freeze({
-  id: 'enemy.melee.attack.sphere',
-  kind: 'sphere' as const,
-  actionId: MELEE_ENEMY_ATTACK_ID,
-  windowId: MELEE_ENEMY_ATTACK.contactWindowId!,
-  forwardOffset: 0.78,
-  radius: 0.52,
-})
-
-export const MELEE_ENEMY_DEFINITION = defineEnemy({
-  id: 'enemy.melee.graybox',
-  role: 'melee',
-  tags: ['grounded', 'melee'],
-  body: { radius: 0.35, halfHeight: 0.45 },
-  hurtbox: {
-    id: 'hurtbox',
-    kind: 'sphere',
-    offset: { x: 0, y: 0, z: 0 },
-    radius: 0.46,
-  },
-  maximumHealth: 100,
-  movementSpeed: 2.1,
-  perceptionRange: 4.5,
-  stoppingRange: 1.28,
-  attackRange: 1.48,
-  attackActionIds: [MELEE_ENEMY_ATTACK_ID],
-})
+/** @deprecated Prefer SKIRMISHER_ROLE; retained as the converted M3 melee baseline. */
+export const MELEE_ENEMY_ID = SKIRMISHER_ROLE.runtimeId
+export const MELEE_ENEMY_ATTACK_ID = SKIRMISHER_ROLE.attack.id
+export const MELEE_ENEMY_SPAWN_POSITION = SKIRMISHER_ROLE.spawnPosition
+export const MELEE_ENEMY_ATTACK = SKIRMISHER_ROLE.attack
+export const MELEE_ENEMY_ATTACK_DAMAGE = SKIRMISHER_ROLE.damage
+export const MELEE_ENEMY_CONTACT_SHAPE = SKIRMISHER_ROLE.contact
+export const MELEE_ENEMY_DEFINITION = SKIRMISHER_ROLE.definition
 
 export interface EnemyAttackSpatialSnapshot {
   readonly executionFacing: PlayerFacingDirection | null
@@ -57,13 +26,7 @@ export interface EnemyAttackSpatialSnapshot {
 }
 
 export function createMeleeEnemyRuntime(): EnemyRuntime {
-  return new EnemyRuntime(
-    MELEE_ENEMY_DEFINITION,
-    MELEE_ENEMY_ID,
-    MELEE_ENEMY_SPAWN_POSITION,
-    [MELEE_ENEMY_ATTACK],
-    { x: -1, z: 0 },
-  )
+  return createEnemyRuntimeFromRole(SKIRMISHER_ROLE)
 }
 
 export function advanceMeleeEnemy(
@@ -76,6 +39,7 @@ export function advanceMeleeEnemy(
   let enemy = runtime.snapshot()
   if (!enemy.alive) return
 
+  const attackId = runtime.definition.attackActionIds[0]
   const targetAlive = options.targetAlive ?? true
   if (!targetAlive) {
     // Keep committed action clocks advancing so recovery cannot freeze, then
@@ -108,7 +72,7 @@ export function advanceMeleeEnemy(
     } else {
       runtime.holdSpacing(direction.facing)
       if (direction.distance <= runtime.definition.stoppingRange) {
-        runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing ?? enemy.facing)
+        runtime.startAction(attackId, direction.facing ?? enemy.facing)
       }
       return
     }
@@ -116,17 +80,15 @@ export function advanceMeleeEnemy(
   if (enemy.state !== 'pursue') return
 
   if (direction.distance <= runtime.definition.stoppingRange) {
-    runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing ?? enemy.facing)
+    runtime.startAction(attackId, direction.facing ?? enemy.facing)
     return
   }
   if (resolveCollision === null || direction.facing === null) {
-    // Without a valid pursuit step, still allow committed melee when already
-    // inside the resume/attack band so pursue cannot soft-lock.
     if (direction.distance <= runtime.definition.attackRange) {
       runtime.transition('spacing')
       runtime.holdSpacing(direction.facing ?? enemy.facing)
       if (direction.distance <= runtime.definition.stoppingRange) {
-        runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing ?? enemy.facing)
+        runtime.startAction(attackId, direction.facing ?? enemy.facing)
       }
     }
     return
@@ -155,20 +117,15 @@ export function advanceMeleeEnemy(
     resolveCollision,
   )
   const movedHorizontal = Math.hypot(collision.translation.x, collision.translation.z)
-  if (
-    desiredTranslation.x !== 0 ||
-    desiredTranslation.z !== 0
-  ) {
+  if (desiredTranslation.x !== 0 || desiredTranslation.z !== 0) {
     if (
       movedHorizontal < maximumTravel * 0.05 &&
       direction.distance <= runtime.definition.attackRange
     ) {
-      // Collision soft-lock: enter spacing so the enemy can re-evaluate attack
-      // instead of remaining forever in pursue with a zero step.
       runtime.transition('spacing')
       runtime.holdSpacing(direction.facing)
       if (direction.distance <= runtime.definition.stoppingRange) {
-        runtime.startAction(MELEE_ENEMY_ATTACK_ID, direction.facing)
+        runtime.startAction(attackId, direction.facing)
       }
       return
     }
@@ -191,7 +148,11 @@ export function advanceMeleeEnemy(
 export function createEnemyAttackSpatialSnapshot(
   enemy: EnemyRuntimeSnapshot,
 ): EnemyAttackSpatialSnapshot {
-  const actionMatches = enemy.action.actionId === MELEE_ENEMY_ATTACK_ID
+  const role = resolveRoleForEnemy(enemy)
+  if (role === null) {
+    return { executionFacing: null, contactEnabled: false, activeContactShape: null }
+  }
+  const actionMatches = enemy.action.actionId === role.attack.id
   const executionFacing = actionMatches && enemy.attackExecutionFacing !== null
     ? { ...enemy.attackExecutionFacing }
     : null
@@ -199,26 +160,41 @@ export function createEnemyAttackSpatialSnapshot(
     actionMatches &&
     enemy.alive &&
     enemy.action.contact.enabled &&
-    enemy.action.contact.windowId === MELEE_ENEMY_CONTACT_SHAPE.windowId
+    enemy.action.contact.windowId === role.contact.windowId
   return {
     executionFacing,
     contactEnabled,
     activeContactShape:
       contactEnabled && executionFacing !== null
         ? {
-            id: MELEE_ENEMY_CONTACT_SHAPE.id,
+            id: role.contact.id,
             kind: 'sphere',
-            actionId: MELEE_ENEMY_ATTACK_ID,
-            windowId: MELEE_ENEMY_CONTACT_SHAPE.windowId,
+            actionId: role.attack.id,
+            windowId: role.contact.windowId,
             center: {
-              x: enemy.position.x + executionFacing.x * MELEE_ENEMY_CONTACT_SHAPE.forwardOffset,
+              x: enemy.position.x + executionFacing.x * role.contact.forwardOffset,
               y: enemy.position.y,
-              z: enemy.position.z + executionFacing.z * MELEE_ENEMY_CONTACT_SHAPE.forwardOffset,
+              z: enemy.position.z + executionFacing.z * role.contact.forwardOffset,
             },
-            radius: MELEE_ENEMY_CONTACT_SHAPE.radius,
+            radius: role.contact.radius,
           }
         : null,
   }
+}
+
+export function enemyAttackDamage(enemy: EnemyRuntimeSnapshot): number {
+  return resolveRoleForEnemy(enemy)?.damage ?? 0
+}
+
+export function horizontalDistance(a: Vector3Value, b: Vector3Value): number {
+  return Math.hypot(a.x - b.x, a.z - b.z)
+}
+
+function resolveRoleForEnemy(enemy: EnemyRuntimeSnapshot): EnemyMeleeRoleSpec | null {
+  return (
+    meleeRoleByActionId(enemy.action.actionId) ??
+    meleeRoleByDefinitionId(enemy.definitionId)
+  )
 }
 
 function resolvePursuitCollision(
@@ -257,12 +233,12 @@ function resolvePursuitCollision(
     const forwardProgress =
       collision.translation.x * pursuitFacing.x +
       collision.translation.z * pursuitFacing.z
-    const horizontalDistance = Math.hypot(
+    const steeredHorizontalDistance = Math.hypot(
       collision.translation.x,
       collision.translation.z,
     )
     return {
-      score: horizontalDistance + Math.max(0, forwardProgress),
+      score: steeredHorizontalDistance + Math.max(0, forwardProgress),
       translation: steeredTranslation,
     }
   })
@@ -281,15 +257,6 @@ function stableSteeringSign(runtimeId: string): 1 | -1 {
   return (hash & 1) === 0 ? 1 : -1
 }
 
-function normalizeHorizontal(value: PlayerFacingDirection): PlayerFacingDirection {
-  const magnitude = Math.hypot(value.x, value.z)
-  return { x: value.x / magnitude, z: value.z / magnitude }
-}
-
-export function horizontalDistance(from: Vector3Value, to: Vector3Value): number {
-  return Math.hypot(to.x - from.x, to.z - from.z)
-}
-
 function directionAndDistance(
   from: Vector3Value,
   to: Vector3Value,
@@ -302,4 +269,9 @@ function directionAndDistance(
     facing:
       distance === 0 ? null : { x: deltaX / distance, z: deltaZ / distance },
   }
+}
+
+function normalizeHorizontal(value: PlayerFacingDirection): PlayerFacingDirection {
+  const magnitude = Math.hypot(value.x, value.z)
+  return { x: value.x / magnitude, z: value.z / magnitude }
 }

@@ -13,7 +13,7 @@ const NEUTRAL = { horizontal: 0, forward: 0 } as const
 function createApproachingRuntime(): PlayerRuntime {
   const runtime = new PlayerRuntime()
   runtime.attachCollisionResolver(FLAT_GROUND)
-  runtime.attachEnemyCollisionResolver(FLAT_GROUND)
+  runtime.attachEnemyCollisionResolver(runtime.snapshot().enemy.id, FLAT_GROUND)
   runtime.attachCombatContactQuery(({ hurtboxes }) =>
     hurtboxes
       .filter((hurtbox) => hurtbox.ownerId === 'player')
@@ -43,17 +43,18 @@ describe('player runtime enemy incoming-melee integration', () => {
   it('applies one normal incoming hit through player combat health', () => {
     const runtime = createApproachingRuntime()
     expect(advanceUntilIncoming(runtime)).toMatchObject({
-      attackerId: 'enemy.melee.1',
+      attackerId: 'enemy.skirmisher.1',
       targetId: 'player',
       outcome: 'damaged',
-      appliedDamage: 15,
+      appliedDamage: 10,
     })
-    expect(runtime.snapshot().playerCombat.health.current).toBe(85)
+    expect(runtime.snapshot().playerCombat.health.current).toBe(90)
   })
 
   it('uses authoritative dodge active phase to prevent the same contact', () => {
     const runtime = createApproachingRuntime()
-    while (runtime.snapshot().enemy.action.phaseElapsedSteps < 28) {
+    const startupSteps = runtime.snapshot().enemy.action.phaseDurationSteps
+    while (runtime.snapshot().enemy.action.phaseElapsedSteps < Math.max(0, startupSteps - 2)) {
       runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
     }
     expect(
@@ -83,9 +84,15 @@ describe('player runtime enemy incoming-melee integration', () => {
 
   it('continues enemy action clocks after player defeat instead of freezing mid-attack', () => {
     const runtime = createApproachingRuntime()
-    while (runtime.snapshot().playerCombat.health.alive) {
+    let defeated = false
+    for (let step = 0; step < 2400; step += 1) {
       runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
+      if (!runtime.snapshot().playerCombat.health.alive) {
+        defeated = true
+        break
+      }
     }
+    expect(defeated).toBe(true)
     expect(runtime.snapshot().playerCombat.defeated).toBe(true)
     const frozen = runtime.snapshot().enemy
     expect(['attack', 'recovery', 'spacing', 'pursue', 'idle']).toContain(frozen.state)

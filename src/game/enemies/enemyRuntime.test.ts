@@ -17,7 +17,7 @@ const ATTACK = defineCombatAction({
 
 const DEFINITION = defineEnemy({
   id: 'enemy.test.melee',
-  role: 'melee',
+  role: 'skirmisher',
   tags: ['grounded', 'melee'],
   body: { radius: 0.35, halfHeight: 0.45 },
   hurtbox: { id: 'hurtbox', kind: 'sphere', offset: { x: 0, y: 0, z: 0 }, radius: 0.45 },

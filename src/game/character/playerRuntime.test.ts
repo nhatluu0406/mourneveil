@@ -52,7 +52,7 @@ describe('PlayerRuntime', () => {
     for (let step = 0; step < startup; step += 1) {
       runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
     }
-    expect(runtime.snapshot().enemy.health.current).toBe(100 - damage)
+    expect(runtime.snapshot().enemy.health.current).toBe(70 - damage)
   })
 
   it('resolves active contact after movement in the fixed simulation step', () => {

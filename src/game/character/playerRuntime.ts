@@ -45,13 +45,15 @@ import {
 import {
   advanceMeleeEnemy,
   createEnemyAttackSpatialSnapshot,
-  createMeleeEnemyRuntime,
+  enemyAttackDamage,
   horizontalDistance,
-  MELEE_ENEMY_ATTACK_DAMAGE,
-  MELEE_ENEMY_SPAWN_POSITION,
   type EnemyAttackSpatialSnapshot,
 } from '../enemies/meleeEnemy'
-import type { EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
+import {
+  createGrayboxEnemyRuntimes,
+  meleeRoleByRuntimeId,
+} from '../enemies/enemyRoles'
+import type { EnemyRuntime, EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import {
   PlayerCombatHealthRuntime,
   type PlayerCombatSnapshot,
@@ -74,9 +76,12 @@ export interface PlayerRuntimeSnapshot {
   readonly trainingTarget: TrainingTargetSnapshot
   readonly defense: PlayerDefenseSnapshot
   readonly playerCombat: PlayerCombatSnapshot
+  /** Primary diagnostic enemy (skirmisher). Prefer `enemies` for multi-role fixtures. */
   readonly enemy: EnemyRuntimeSnapshot
   readonly enemyAttack: EnemyAttackSpatialSnapshot
   readonly enemyDistanceToPlayer: number
+  readonly enemies: readonly EnemyRuntimeSnapshot[]
+  readonly enemyAttacks: readonly EnemyAttackSpatialSnapshot[]
   readonly incomingContact: CombatContactSnapshot
 }
 
@@ -96,15 +101,15 @@ export class PlayerRuntime {
   )
   private readonly defenseRuntime = new PlayerDefenseRuntime()
   private readonly contactRuntime = new CombatContactRuntime()
-  private readonly enemyContactRuntime = new CombatContactRuntime()
+  private readonly enemyContactRuntimes = new Map<string, CombatContactRuntime>()
   private readonly trainingTargetRuntime = new TrainingTargetRuntime()
   private playerState = createPlayerMotorState()
   private readonly playerCombatRuntime = new PlayerCombatHealthRuntime(
     this.playerState.position,
   )
-  private readonly enemyRuntime = createMeleeEnemyRuntime()
+  private readonly enemyRuntimes: EnemyRuntime[] = createGrayboxEnemyRuntimes()
   private collisionResolver: CharacterCollisionResolver | null = null
-  private enemyCollisionResolver: CharacterCollisionResolver | null = null
+  private readonly enemyCollisionResolvers = new Map<string, CharacterCollisionResolver>()
   private contactQuery: CombatContactQuery | null = null
   /** Frozen aim for the committed attack execution; null while combat is idle. */
   private attackExecutionFacing: PlayerFacingDirection | null = null
@@ -202,11 +207,20 @@ export class PlayerRuntime {
     }
   }
 
-  attachEnemyCollisionResolver(resolver: CharacterCollisionResolver): () => void {
-    this.enemyCollisionResolver = resolver
+  attachEnemyCollisionResolver(
+    enemyId: string,
+    resolver: CharacterCollisionResolver,
+  ): () => void {
+    this.enemyCollisionResolvers.set(enemyId, resolver)
     return () => {
-      if (this.enemyCollisionResolver === resolver) this.enemyCollisionResolver = null
+      if (this.enemyCollisionResolvers.get(enemyId) === resolver) {
+        this.enemyCollisionResolvers.delete(enemyId)
+      }
     }
+  }
+
+  enemyIds(): readonly string[] {
+    return this.enemyRuntimes.map((enemy) => enemy.id)
   }
 
   attachCombatContactQuery(query: CombatContactQuery): () => void {
@@ -225,8 +239,11 @@ export class PlayerRuntime {
 
   resetMeleeFixture(): void {
     this.playerCombatRuntime.reset()
-    this.enemyRuntime.reset(MELEE_ENEMY_SPAWN_POSITION)
-    this.enemyContactRuntime.reset()
+    for (const enemy of this.enemyRuntimes) {
+      const role = meleeRoleByRuntimeId(enemy.id)
+      enemy.reset(role?.spawnPosition ?? enemy.snapshot().position)
+      this.enemyContactRuntimeFor(enemy.id).reset()
+    }
   }
 
   advanceFrame(
@@ -270,60 +287,64 @@ export class PlayerRuntime {
         }
       }
       this.playerCombatRuntime.updatePosition(this.playerState.position)
-      advanceMeleeEnemy(
-        this.enemyRuntime,
-        this.playerState.position,
-        fixedStepSeconds,
-        this.enemyCollisionResolver,
-        { targetAlive: playerAlive },
-      )
+      for (const enemyRuntime of this.enemyRuntimes) {
+        advanceMeleeEnemy(
+          enemyRuntime,
+          this.playerState.position,
+          fixedStepSeconds,
+          this.enemyCollisionResolvers.get(enemyRuntime.id) ?? null,
+          { targetAlive: playerAlive },
+        )
+      }
       if (this.contactQuery !== null) {
-        const combat = this.combatRuntime.snapshot()
+        const combatSnapshot = this.combatRuntime.snapshot()
         const attack = createPlayerAttackSpatialSnapshot(
-          combat,
+          combatSnapshot,
           this.playerState.position,
           this.attackExecutionFacing,
         )
         hitEvents.push(
           ...this.contactRuntime.resolvePlayerContact({
-            combat,
+            combat: combatSnapshot,
             attack,
             simulationStep: nextStepCount,
-            targets: [this.trainingTargetRuntime, this.enemyRuntime],
+            targets: [this.trainingTargetRuntime, ...this.enemyRuntimes],
             query: this.contactQuery,
           }),
         )
-        const enemy = this.enemyRuntime.snapshot()
-        const enemyAttack = createEnemyAttackSpatialSnapshot(enemy)
         if (playerAlive) {
-          incomingHitEvents.push(
-            ...this.enemyContactRuntime.resolveContact({
-              attackerId: enemy.id,
-              combat: enemy.action,
-              contactShape: enemyAttack.activeContactShape,
-              simulationStep: nextStepCount,
-              targets: [this.playerCombatRuntime],
-              query: this.contactQuery,
-              damage: MELEE_ENEMY_ATTACK_DAMAGE,
-              resolveDamage: (target, damage) => {
-                const outcome = resolveIncomingMeleeDefense(
-                  this.defenseRuntime.snapshot(combat),
-                  this.playerState.facing,
-                  enemyAttack.executionFacing ?? enemy.facing,
-                )
-                if (outcome === 'damaged') {
-                  return { outcome, result: target.applyDamage(damage) }
-                }
-                const health = target.snapshot().health
-                const result: CombatDamageResult = {
-                  applied: false,
-                  appliedDamage: 0,
-                  health,
-                }
-                return { outcome, result }
-              },
-            }),
-          )
+          for (const enemyRuntime of this.enemyRuntimes) {
+            const enemy = enemyRuntime.snapshot()
+            const enemyAttack = createEnemyAttackSpatialSnapshot(enemy)
+            incomingHitEvents.push(
+              ...this.enemyContactRuntimeFor(enemy.id).resolveContact({
+                attackerId: enemy.id,
+                combat: enemy.action,
+                contactShape: enemyAttack.activeContactShape,
+                simulationStep: nextStepCount,
+                targets: [this.playerCombatRuntime],
+                query: this.contactQuery,
+                damage: enemyAttackDamage(enemy),
+                resolveDamage: (target, damage) => {
+                  const outcome = resolveIncomingMeleeDefense(
+                    this.defenseRuntime.snapshot(combatSnapshot),
+                    this.playerState.facing,
+                    enemyAttack.executionFacing ?? enemy.facing,
+                  )
+                  if (outcome === 'damaged') {
+                    return { outcome, result: target.applyDamage(damage) }
+                  }
+                  const health = target.snapshot().health
+                  const result: CombatDamageResult = {
+                    applied: false,
+                    appliedDamage: 0,
+                    health,
+                  }
+                  return { outcome, result }
+                },
+              }),
+            )
+          }
         }
       }
     })
@@ -337,7 +358,22 @@ export class PlayerRuntime {
       this.attackExecutionFacing = null
     }
     this.playerCombatRuntime.updatePosition(this.playerState.position)
-    const enemy = this.enemyRuntime.snapshot()
+    const enemies = this.enemyRuntimes.map((enemy) => enemy.snapshot())
+    const enemyAttacks = enemies.map((enemy) => createEnemyAttackSpatialSnapshot(enemy))
+    const enemy = enemies[0]
+    const enemyAttack = enemyAttacks[0]
+    const lastIncoming = [...this.enemyContactRuntimes.values()]
+      .map((runtime) => runtime.snapshot())
+      .reduce<CombatContactSnapshot>(
+        (latest, snapshot) => {
+          if (snapshot.lastHit === null) return latest
+          if (latest.lastHit === null) return snapshot
+          return snapshot.lastHit.simulationStep >= latest.lastHit.simulationStep
+            ? snapshot
+            : latest
+        },
+        { totalHitCount: 0, lastHit: null },
+      )
     return {
       simulation: this.clock.snapshot(),
       player: this.playerState,
@@ -352,12 +388,28 @@ export class PlayerRuntime {
       defense: this.defenseRuntime.snapshot(combat),
       playerCombat: this.playerCombatRuntime.snapshot(),
       enemy,
-      enemyAttack: createEnemyAttackSpatialSnapshot(enemy),
+      enemyAttack,
       enemyDistanceToPlayer: horizontalDistance(
         enemy.position,
         this.playerState.position,
       ),
-      incomingContact: this.enemyContactRuntime.snapshot(),
+      enemies,
+      enemyAttacks,
+      incomingContact: {
+        totalHitCount: [...this.enemyContactRuntimes.values()].reduce(
+          (sum, runtime) => sum + runtime.snapshot().totalHitCount,
+          0,
+        ),
+        lastHit: lastIncoming.lastHit,
+      },
     }
+  }
+
+  private enemyContactRuntimeFor(enemyId: string): CombatContactRuntime {
+    const existing = this.enemyContactRuntimes.get(enemyId)
+    if (existing !== undefined) return existing
+    const created = new CombatContactRuntime()
+    this.enemyContactRuntimes.set(enemyId, created)
+    return created
   }
 }

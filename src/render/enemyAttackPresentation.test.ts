@@ -15,10 +15,10 @@ const FLAT_GROUND = (_position: unknown, translation: { x: number; y: number; z:
 
 describe('enemy attack presentation projection', () => {
   it.each([
-    [{ x: 1.27, y: 0.82, z: 3 }, { x: -1, z: 0 }],
-    [{ x: 3.73, y: 0.82, z: 3 }, { x: 1, z: 0 }],
-    [{ x: 2.5, y: 0.82, z: 1.77 }, { x: 0, z: -1 }],
-    [{ x: 2.5, y: 0.82, z: 4.23 }, { x: 0, z: 1 }],
+    [{ x: 1.5, y: 0.82, z: 3 }, { x: -1, z: 0 }],
+    [{ x: 3.5, y: 0.82, z: 3 }, { x: 1, z: 0 }],
+    [{ x: 2.5, y: 0.82, z: 2.0 }, { x: 0, z: -1 }],
+    [{ x: 2.5, y: 0.82, z: 4.0 }, { x: 0, z: 1 }],
   ])('aligns local -Z telegraph with execution facing for %o', (playerPosition, expected) => {
     const enemy = createMeleeEnemyRuntime()
     advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
@@ -34,7 +34,7 @@ describe('enemy attack presentation projection', () => {
   })
 
   it('keeps telegraph and contact on one execution-facing projection', () => {
-    const playerAtStart = { x: 1.27, y: 0.82, z: 3 }
+    const playerAtStart = { x: 1.5, y: 0.82, z: 3 }
     const enemy = createMeleeEnemyRuntime()
     advanceMeleeEnemy(enemy, playerAtStart, STEP, FLAT_GROUND)
     const startup = enemy.snapshot()
@@ -45,7 +45,7 @@ describe('enemy attack presentation projection', () => {
     )
 
     for (let step = 0; step < MELEE_ENEMY_ATTACK.startupSteps; step += 1) {
-      advanceMeleeEnemy(enemy, { x: 3.72, y: 0.82, z: 3 }, STEP, FLAT_GROUND)
+      advanceMeleeEnemy(enemy, { x: 3.5, y: 0.82, z: 3 }, STEP, FLAT_GROUND)
     }
     const active = enemy.snapshot()
     const activeAttack = createEnemyAttackSpatialSnapshot(active)

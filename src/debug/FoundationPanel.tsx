@@ -212,6 +212,17 @@ export function FoundationPanel({
           </dd>
         </div>
         <div>
+          <dt>Enemies</dt>
+          <dd>
+            {diagnostic.runtime.enemies
+              .map(
+                (enemy) =>
+                  `${enemy.id.replace('enemy.', '')}:${enemy.state}:${enemy.health.current}`,
+              )
+              .join(' · ')}
+          </dd>
+        </div>
+        <div>
           <dt>Enemy distance/facing</dt>
           <dd>
             {diagnostic.runtime.enemyDistanceToPlayer.toFixed(2)} · live (

@@ -15,6 +15,7 @@ import {
 } from './meleeEnemy'
 
 const STEP = 1 / 60
+const CLOSE_PLAYER = { x: 1.5, y: 0.82, z: 3 } as const
 const FLAT_GROUND: CharacterCollisionResolver = (_position, translation) => ({
   translation: { ...translation, y: 0 },
   grounded: true,
@@ -38,10 +39,13 @@ function defense(overrides: Partial<PlayerDefenseSnapshot> = {}): PlayerDefenseS
 }
 
 function advanceToActive(
-  playerPosition = { x: 1.3, y: 0.82, z: 3 },
+  playerPosition: { x: number; y: number; z: number } = CLOSE_PLAYER,
 ) {
   const enemy = createMeleeEnemyRuntime()
-  advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
+  for (let step = 0; step < 180 && enemy.snapshot().action.phase !== 'startup'; step += 1) {
+    advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
+  }
+  expect(enemy.snapshot().action.phase).toBe('startup')
   for (let step = 0; step < MELEE_ENEMY_ATTACK.startupSteps; step += 1) {
     advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
   }
@@ -99,12 +103,12 @@ describe('first melee enemy behavior', () => {
     )
     expect(pursuing.facing).toEqual({ x: -1, z: 0 })
 
-    advanceMeleeEnemy(enemy, { x: 1.3, y: 0.82, z: 3 }, STEP, FLAT_GROUND)
+    advanceMeleeEnemy(enemy, CLOSE_PLAYER, STEP, FLAT_GROUND)
     expect(enemy.snapshot()).toMatchObject({ state: 'attack', action: { phase: 'startup' } })
   })
 
   it('owns telegraph, active, recovery, and repeat timing in fixed steps', () => {
-    const playerPosition = { x: 1.3, y: 0.82, z: 3 }
+    const playerPosition = CLOSE_PLAYER
     const enemy = advanceToActive(playerPosition)
     expect(createEnemyAttackSpatialSnapshot(enemy.snapshot()).contactEnabled).toBe(true)
 
@@ -126,14 +130,14 @@ describe('first melee enemy behavior', () => {
   it('halts behavior and outgoing contact after defeat', () => {
     const enemy = advanceToActive()
     enemy.applyDamage(enemy.definition.maximumHealth)
-    advanceMeleeEnemy(enemy, { x: 1.3, y: 0.82, z: 3 }, STEP, FLAT_GROUND)
+    advanceMeleeEnemy(enemy, CLOSE_PLAYER, STEP, FLAT_GROUND)
     expect(enemy.snapshot()).toMatchObject({ state: 'defeated', action: { phase: 'idle' } })
     expect(createEnemyAttackSpatialSnapshot(enemy.snapshot()).activeContactShape).toBeNull()
   })
 
   it('snapshots accepted facing and does not rotate when the player moves behind', () => {
-    const front = { x: 1.27, y: 0.82, z: 3 }
-    const behind = { x: 3.73, y: 0.82, z: 3 }
+    const front = { x: 1.5, y: 0.82, z: 3 }
+    const behind = { x: 3.5, y: 0.82, z: 3 }
     const enemy = createMeleeEnemyRuntime()
     advanceMeleeEnemy(enemy, front, STEP, FLAT_GROUND)
     const accepted = enemy.snapshot()
@@ -153,8 +157,8 @@ describe('first melee enemy behavior', () => {
   })
 
   it('snapshots a new player direction for a later execution', () => {
-    const firstPosition = { x: 1.27, y: 0.82, z: 3 }
-    const secondPosition = { x: 3.73, y: 0.82, z: 3 }
+    const firstPosition = { x: 1.5, y: 0.82, z: 3 }
+    const secondPosition = { x: 3.5, y: 0.82, z: 3 }
     const enemy = createMeleeEnemyRuntime()
     advanceMeleeEnemy(enemy, firstPosition, STEP, FLAT_GROUND)
     expect(enemy.snapshot().attackExecutionFacing).toEqual({ x: -1, z: 0 })
@@ -178,7 +182,7 @@ describe('first melee enemy behavior', () => {
 
   it('holds authored spacing hysteresis without pursue/attack threshold flapping', () => {
     const enemy = createMeleeEnemyRuntime()
-    const close = { x: 1.27, y: 0.82, z: 3 }
+    const close = { x: 1.5, y: 0.82, z: 3 }
     advanceMeleeEnemy(enemy, close, STEP, FLAT_GROUND)
     for (
       let step = 0;
@@ -245,12 +249,12 @@ describe('enemy outgoing contact and player defense', () => {
     for (let step = 0; step < MELEE_ENEMY_ATTACK.startupSteps; step += 1) {
       wrongFacing.advanceAction()
     }
-    const player = new PlayerCombatHealthRuntime({ x: 1.3, y: 0.82, z: 3 })
+    const player = new PlayerCombatHealthRuntime(CLOSE_PLAYER)
     expect(resolveIncoming(wrongFacing, player, defense())).toEqual([])
   })
 
   it('damages once per execution and permits a new execution to hit again', () => {
-    const playerPosition = { x: 1.3, y: 0.82, z: 3 }
+    const playerPosition = CLOSE_PLAYER
     const enemy = advanceToActive(playerPosition)
     const player = new PlayerCombatHealthRuntime(playerPosition)
     const contacts = new CombatContactRuntime()
@@ -269,7 +273,7 @@ describe('enemy outgoing contact and player defense', () => {
     }
     expect(resolve()).toHaveLength(1)
     expect(resolve()).toEqual([])
-    expect(player.snapshot().health.current).toBe(85)
+    expect(player.snapshot().health.current).toBe(90)
 
     for (
       let step = 0;
@@ -281,18 +285,18 @@ describe('enemy outgoing contact and player defense', () => {
       advanceMeleeEnemy(enemy, playerPosition, STEP, FLAT_GROUND)
     }
     expect(resolve()).toHaveLength(1)
-    expect(player.snapshot().health.current).toBe(70)
+    expect(player.snapshot().health.current).toBe(80)
   })
 
   it('applies normal damage, dodge invulnerability, and directional guard policy', () => {
-    const playerPosition = { x: 1.3, y: 0.82, z: 3 }
+    const playerPosition = CLOSE_PLAYER
 
     const normal = new PlayerCombatHealthRuntime(playerPosition)
     expect(resolveIncoming(advanceToActive(playerPosition), normal, defense())[0]).toMatchObject({
       outcome: 'damaged',
       appliedDamage: MELEE_ENEMY_ATTACK_DAMAGE,
     })
-    expect(normal.snapshot().health.current).toBe(85)
+    expect(normal.snapshot().health.current).toBe(90)
 
     const dodging = new PlayerCombatHealthRuntime(playerPosition)
     expect(
@@ -314,7 +318,7 @@ describe('enemy outgoing contact and player defense', () => {
     ).toMatchObject({ outcome: 'guarded', appliedDamage: 0 })
     expect(guarding.snapshot().health.current).toBe(100)
 
-    const rearPosition = { x: 3.7, y: 0.82, z: 3 }
+    const rearPosition = { x: 3.5, y: 0.82, z: 3 }
     const rear = new PlayerCombatHealthRuntime(rearPosition)
     const rearEnemy = advanceToActive(rearPosition)
     expect(resolveIncoming(rearEnemy, rear, defense({ guarding: true }))[0]).toMatchObject({
@@ -348,7 +352,7 @@ describe('enemy outgoing contact and player defense', () => {
     advanceMeleeEnemy(enemy, farPlayer, STEP, FLAT_GROUND)
     expect(enemy.snapshot().state).toBe('pursue')
 
-    const nearPlayer = { x: 1.2, y: 0.82, z: 3 }
+    const nearPlayer = { x: 1.35, y: 0.82, z: 3 }
     const blocked: CharacterCollisionResolver = () => ({
       translation: { x: 0, y: 0, z: 0 },
       grounded: true,
@@ -360,7 +364,7 @@ describe('enemy outgoing contact and player defense', () => {
   })
 
   it('completes multiple attack cycles without trapping in a non-terminal dead-end', () => {
-    const playerPosition = { x: 1.3, y: 0.82, z: 3 }
+    const playerPosition = CLOSE_PLAYER
     const enemy = createMeleeEnemyRuntime()
     let attackStarts = 0
     let previousPhase: string | null = null
