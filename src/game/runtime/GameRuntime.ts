@@ -22,6 +22,7 @@ import {
   type CombatContactQuery,
   type CombatContactSnapshot,
   type CombatHitEvent,
+  type CombatOcclusionQuery,
 } from '../combat/combatContact'
 import type { CombatDamageResult } from '../combat/combatHealth'
 import {
@@ -67,6 +68,17 @@ import {
   connectedEnemyPlacementByRuntimeId,
   createConnectedLevelEnemyRuntimes,
 } from '../encounters/connectedLevelEncounters'
+import {
+  EncounterActivationRuntime,
+  type EncounterActivationSnapshot,
+} from '../encounters/encounterActivation'
+import {
+  advanceNavigationState,
+  createEnemyNavigationState,
+  currentNavigationWaypoint,
+  planConnectedNavigationRoute,
+  type EnemyNavigationState,
+} from '../world/connectedNavigation'
 import type { EnemyRuntime, EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import {
   CheckpointRuntime,
@@ -160,6 +172,7 @@ export interface GameRuntimeSnapshot {
   readonly equipment: EquipmentSnapshot
   readonly lootPickup: LootPickupSnapshot
   readonly world: ConnectedWorldSnapshot
+  readonly encounterActivation: EncounterActivationSnapshot
   readonly resolvedAttackDamage: {
     readonly light: number
     readonly heavy: number
@@ -193,6 +206,7 @@ export class GameRuntime {
   private readonly equipmentRuntime = new PlayerEquipmentRuntime()
   private readonly lootPickupRuntime = new LootPickupRuntime()
   private readonly worldRuntime = new ConnectedWorldRuntime()
+  private readonly encounterActivationRuntime = new EncounterActivationRuntime()
   private readonly echoRewardedEnemyIds = new Set<string>()
   private lootInstanceCounter = 0
   private playerState = createPlayerMotorState(
@@ -202,9 +216,11 @@ export class GameRuntime {
     this.playerState.position,
   )
   private readonly enemyRuntimes: EnemyRuntime[] = createConnectedLevelEnemyRuntimes()
+  private readonly enemyNavigationStates = new Map<string, EnemyNavigationState>()
   private collisionResolver: CharacterCollisionResolver | null = null
   private readonly enemyCollisionResolvers = new Map<string, CharacterCollisionResolver>()
   private contactQuery: CombatContactQuery | null = null
+  private occlusionQuery: CombatOcclusionQuery | null = null
   /** Frozen aim for the committed attack execution; null while combat is idle. */
   private attackExecutionFacing: PlayerFacingDirection | null = null
   private persistHandler: (() => void) | null = null
@@ -315,7 +331,9 @@ export class GameRuntime {
       const placement = connectedEnemyPlacementByRuntimeId(enemy.id)
       enemy.reset(placement?.spawnPosition ?? enemy.snapshot().position)
       this.enemyContactRuntimeFor(enemy.id).reset()
+      this.enemyNavigationStates.delete(enemy.id)
     }
+    this.encounterActivationRuntime.reset()
     this.echoRewardedEnemyIds.clear()
     // Keep loot spawn memory / active pickup from save; do not resetLifecycle.
   }
@@ -441,6 +459,16 @@ export class GameRuntime {
     }
   }
 
+  attachCombatOcclusionQuery(query: CombatOcclusionQuery): () => void {
+    this.occlusionQuery = query
+
+    return () => {
+      if (this.occlusionQuery === query) {
+        this.occlusionQuery = null
+      }
+    }
+  }
+
   resetTrainingTarget(): void {
     this.trainingTargetRuntime.reset()
   }
@@ -455,7 +483,9 @@ export class GameRuntime {
       const placement = connectedEnemyPlacementByRuntimeId(enemy.id)
       enemy.reset(placement?.spawnPosition ?? enemy.snapshot().position)
       this.enemyContactRuntimeFor(enemy.id).reset()
+      this.enemyNavigationStates.delete(enemy.id)
     }
+    this.encounterActivationRuntime.reset()
     this.echoRewardedEnemyIds.clear()
     this.lootPickupRuntime.resetLifecycle()
   }
@@ -658,6 +688,7 @@ export class GameRuntime {
       }
       this.playerHealthRuntime.updatePosition(this.playerState.position)
       this.worldRuntime.updatePlayerPosition(this.playerState.position)
+      this.encounterActivationRuntime.update(this.playerState.position)
       if (playerAlive) {
         const pickup = this.echoRecoveryRuntime.tryPickup(
           this.playerState.position,
@@ -674,12 +705,56 @@ export class GameRuntime {
         }
       }
       for (const enemyRuntime of this.enemyRuntimes) {
+        const simulationEnabled = this.encounterActivationRuntime.isEnemySimulationEnabled(
+          enemyRuntime.id,
+          this.playerState.position,
+        )
+        if (!simulationEnabled) {
+          advanceMeleeEnemy(
+            enemyRuntime,
+            this.playerState.position,
+            fixedStepSeconds,
+            null,
+            { targetAlive: false },
+          )
+          this.enemyNavigationStates.delete(enemyRuntime.id)
+          continue
+        }
+
+        let navigation = this.enemyNavigationStates.get(enemyRuntime.id) ?? null
+        const enemySnapshot = enemyRuntime.snapshot()
+        const distanceToPlayer = horizontalDistance(
+          enemySnapshot.position,
+          this.playerState.position,
+        )
+        if (
+          navigation !== null &&
+          distanceToPlayer <= enemyRuntime.definition.attackRange * 1.35
+        ) {
+          this.enemyNavigationStates.delete(enemyRuntime.id)
+          navigation = null
+        }
+        if (navigation !== null) {
+          navigation = advanceNavigationState(navigation, enemySnapshot.position)
+          if (navigation === null) {
+            this.enemyNavigationStates.delete(enemyRuntime.id)
+          } else {
+            this.enemyNavigationStates.set(enemyRuntime.id, navigation)
+          }
+        }
+        const navigationTarget = currentNavigationWaypoint(navigation)
         advanceMeleeEnemy(
           enemyRuntime,
           this.playerState.position,
           fixedStepSeconds,
           this.enemyCollisionResolvers.get(enemyRuntime.id) ?? null,
-          { targetAlive: playerAlive },
+          {
+            targetAlive: playerAlive,
+            navigationTarget,
+            onDirectPursuitBlocked: () => {
+              this.ensureEnemyNavigationRoute(enemyRuntime.id)
+            },
+          },
         )
       }
       if (this.contactQuery !== null) {
@@ -697,12 +772,22 @@ export class GameRuntime {
             targets: [this.trainingTargetRuntime, ...this.enemyRuntimes],
             query: this.contactQuery,
             damageOverride: this.resolvedDamageForAction(combatSnapshot.actionId),
+            attackOrigin: this.playerState.position,
+            occlusionQuery: this.occlusionQuery ?? undefined,
           }),
         )
         this.grantEchoRewardsForDefeatedEnemies()
         this.spawnLootForDefeatedEnemies()
         if (playerAlive) {
           for (const enemyRuntime of this.enemyRuntimes) {
+            if (
+              !this.encounterActivationRuntime.isEnemySimulationEnabled(
+                enemyRuntime.id,
+                this.playerState.position,
+              )
+            ) {
+              continue
+            }
             const enemy = enemyRuntime.snapshot()
             const enemyAttack = createEnemyAttackSpatialSnapshot(enemy)
             incomingHitEvents.push(
@@ -714,6 +799,8 @@ export class GameRuntime {
                 targets: [this.playerHealthRuntime],
                 query: this.contactQuery,
                 damage: enemyAttackDamage(enemy),
+                attackOrigin: enemy.position,
+                occlusionQuery: this.occlusionQuery ?? undefined,
                 resolveDamage: (target, damage) => {
                   const outcome = resolveIncomingMeleeDefense(
                     this.defenseRuntime.snapshot(combatSnapshot),
@@ -808,8 +895,33 @@ export class GameRuntime {
       equipment: this.equipmentRuntime.snapshot(),
       lootPickup: this.lootPickupRuntime.snapshot(),
       world: this.worldRuntime.snapshot(),
+      encounterActivation: this.encounterActivationRuntime.snapshot(),
       resolvedAttackDamage: this.resolvedAttackDamage(),
     }
+  }
+
+  private ensureEnemyNavigationRoute(enemyId: string): void {
+    const existing = this.enemyNavigationStates.get(enemyId)
+    if (existing !== undefined) {
+      const nextIndex = existing.routeIndex + 1
+      if (nextIndex < existing.routeNodeIds.length) {
+        this.enemyNavigationStates.set(enemyId, {
+          routeNodeIds: existing.routeNodeIds,
+          routeIndex: nextIndex,
+        })
+        return
+      }
+      this.enemyNavigationStates.delete(enemyId)
+    }
+    const enemy = this.enemyRuntimes.find((entry) => entry.id === enemyId)
+    if (enemy === undefined) return
+    const route = planConnectedNavigationRoute(
+      enemy.snapshot().position,
+      this.playerState.position,
+      (connectionId) => this.worldRuntime.isConnectionOpen(connectionId),
+    )
+    if (route === null) return
+    this.enemyNavigationStates.set(enemyId, createEnemyNavigationState(route))
   }
 
   private resolvedDamageForAction(actionId: string | null): number | undefined {

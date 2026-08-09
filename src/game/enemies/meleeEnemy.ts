@@ -34,7 +34,13 @@ export function advanceMeleeEnemy(
   playerPosition: Vector3Value,
   fixedStepSeconds: number,
   resolveCollision: CharacterCollisionResolver | null,
-  options: { readonly targetAlive?: boolean } = {},
+  options: {
+    readonly targetAlive?: boolean
+    /** When set, pursue this authored route waypoint instead of the player. */
+    readonly navigationTarget?: Vector3Value | null
+    /** Called when direct pursuit toward the player is locally blocked. */
+    readonly onDirectPursuitBlocked?: () => void
+  } = {},
 ): void {
   let enemy = runtime.snapshot()
   if (!enemy.alive) return
@@ -54,9 +60,16 @@ export function advanceMeleeEnemy(
     return
   }
 
-  const direction = directionAndDistance(enemy.position, playerPosition)
+  const playerDirection = directionAndDistance(enemy.position, playerPosition)
+  const navigationTarget = options.navigationTarget ?? null
+  const pursuitTarget =
+    navigationTarget !== null && enemy.state === 'pursue'
+      ? navigationTarget
+      : playerPosition
+  const direction = directionAndDistance(enemy.position, pursuitTarget)
+
   if (enemy.state === 'idle') {
-    if (direction.distance > runtime.definition.perceptionRange) return
+    if (playerDirection.distance > runtime.definition.perceptionRange) return
     runtime.transition('pursue', 'player')
     enemy = runtime.snapshot()
   }
@@ -66,29 +79,32 @@ export function advanceMeleeEnemy(
     return
   }
   if (enemy.state === 'spacing') {
-    if (direction.distance > runtime.definition.attackRange) {
+    if (playerDirection.distance > runtime.definition.attackRange) {
       runtime.transition('pursue')
       enemy = runtime.snapshot()
     } else {
-      runtime.holdSpacing(direction.facing)
-      if (direction.distance <= runtime.definition.stoppingRange) {
-        runtime.startAction(attackId, direction.facing ?? enemy.facing)
+      runtime.holdSpacing(playerDirection.facing)
+      if (playerDirection.distance <= runtime.definition.stoppingRange) {
+        runtime.startAction(attackId, playerDirection.facing ?? enemy.facing)
       }
       return
     }
   }
   if (enemy.state !== 'pursue') return
 
-  if (direction.distance <= runtime.definition.stoppingRange) {
-    runtime.startAction(attackId, direction.facing ?? enemy.facing)
+  if (
+    navigationTarget === null &&
+    playerDirection.distance <= runtime.definition.stoppingRange
+  ) {
+    runtime.startAction(attackId, playerDirection.facing ?? enemy.facing)
     return
   }
   if (resolveCollision === null || direction.facing === null) {
-    if (direction.distance <= runtime.definition.attackRange) {
+    if (playerDirection.distance <= runtime.definition.attackRange) {
       runtime.transition('spacing')
-      runtime.holdSpacing(direction.facing ?? enemy.facing)
-      if (direction.distance <= runtime.definition.stoppingRange) {
-        runtime.startAction(attackId, direction.facing ?? enemy.facing)
+      runtime.holdSpacing(playerDirection.facing ?? enemy.facing)
+      if (playerDirection.distance <= runtime.definition.stoppingRange) {
+        runtime.startAction(attackId, playerDirection.facing ?? enemy.facing)
       }
     }
     return
@@ -100,10 +116,11 @@ export function advanceMeleeEnemy(
     -PLAYER_MAX_FALL_SPEED,
   )
   const maximumTravel = horizontalSpeed * fixedStepSeconds
-  const horizontalTravel = Math.min(
-    maximumTravel,
-    direction.distance - runtime.definition.stoppingRange,
-  )
+  const remaining =
+    navigationTarget === null
+      ? Math.max(0, direction.distance - runtime.definition.stoppingRange)
+      : direction.distance
+  const horizontalTravel = Math.min(maximumTravel, remaining)
   const desiredTranslation = {
     x: direction.facing.x * horizontalTravel,
     y: verticalVelocity * fixedStepSeconds,
@@ -118,16 +135,19 @@ export function advanceMeleeEnemy(
   )
   const movedHorizontal = Math.hypot(collision.translation.x, collision.translation.z)
   if (desiredTranslation.x !== 0 || desiredTranslation.z !== 0) {
-    if (
-      movedHorizontal < maximumTravel * 0.05 &&
-      direction.distance <= runtime.definition.attackRange
-    ) {
-      runtime.transition('spacing')
-      runtime.holdSpacing(direction.facing)
-      if (direction.distance <= runtime.definition.stoppingRange) {
-        runtime.startAction(attackId, direction.facing)
+    if (movedHorizontal < maximumTravel * 0.05) {
+      if (
+        navigationTarget === null &&
+        playerDirection.distance <= runtime.definition.attackRange
+      ) {
+        runtime.transition('spacing')
+        runtime.holdSpacing(playerDirection.facing)
+        if (playerDirection.distance <= runtime.definition.stoppingRange) {
+          runtime.startAction(attackId, playerDirection.facing ?? enemy.facing)
+        }
+        return
       }
-      return
+      options.onDirectPursuitBlocked?.()
     }
   }
   runtime.setMotion(
@@ -141,7 +161,9 @@ export function advanceMeleeEnemy(
       y: collision.grounded ? 0 : collision.translation.y / fixedStepSeconds,
       z: collision.translation.z / fixedStepSeconds,
     },
-    direction.facing,
+    navigationTarget === null
+      ? (playerDirection.facing ?? direction.facing)
+      : direction.facing,
   )
 }
 

@@ -20,7 +20,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
 - Boss, elite/new/ranged enemy role, waves, procedural generation, streaming, navmesh/A*, minimap
 - Quests, dialogue, merchants, leveling, crafting, inventory expansion
 - Production art/audio/VFX, controller, deployment
-- M5.4-M5.6 implementation in this session
+- M6 or any milestone beyond M5
 
 ## Steps
 
@@ -56,26 +56,46 @@ Replace the combat-test arena with one small connected graybox level that suppor
   - verifier: focused level/world/physics/save integration tests; M1-M4 regressions; mandatory browser playthrough when controllable; `npm run lint`; `npm run typecheck`; `npm run test`; `npm run build`; `npm run verify`; `git diff --check`; LeanLoop doctor/sync
   - evidence: PASS — new sessions spawn at arrival; collision-backed 34×19 graybox provides arrival choke, three encounter spaces, refuge, long route, shortcut, final approach, and gated arena; safe Echo fallback clamps legacy/debug positions; 23 focused integration tests and real Rapier route/gate/perimeter proof green; full 48-file/190-test suite, lint, typecheck, build, and verify green; browser playthrough unavailable because no controllable browser instance/executable exists
 
+- [x] 3.1. M5.3.1 — Connected-level combat and navigation correctness
+  - depends: 3 PASS
+  - risk: HIGH
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: melee solid-world occlusion, encounter activation policy, authored route-node navigation, combat contact diagnostics (dev), Rapier regression tests, browser correctness gates
+  - outcome: no through-wall melee; no unexplained far damage; no permanent obstacle deadlock on intended M5 routes; keyboard+mouse primary
+  - non-goals: navmesh/A*, new enemy roles, readability polish, controller, M5.4+
+  - verifier: focused Rapier occlusion + navigation + activation tests; browser through-wall/far-damage/nav gate; lint; typecheck; `git diff --check`
+  - evidence: PASS — through-wall root cause was overlap-only melee contact with no solid occlusion; far-damage root cause was all encounters active from session start so `enemy.skirmisher.introduction` chased to the refuge and hit at ~1.05m; authored zone activation + egress leash stop cross-level chase; authored route anchors replace permanent local-steer wall deadlocks; Rapier occlusion/nav/activation tests green; `scripts/browser/gate-m531-correctness.mjs` VERDICT PASS
+
 - [ ] 4. M5.4 — Level readability and environmental composition
-  - depends: 3
+  - depends: 3.1 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
   - isolation: sequential
-  - outcome: improve graybox landmarks, sightlines, route legibility, and environmental composition without changing authority
+  - owns/allows: graybox landmarks/tints, checkpoint/shortcut/gate readability, compact collapsible dev panel, inventory overflow/name presentation, training-target removal from normal M5 play, centralized milestone diagnostic
+  - outcome: connected level reads as a level; UI does not obscure play; no obsolete combat-test artifacts in normal play
+  - non-goals: production assets, combat authority changes
+  - verifier: browser readability gate; lint; typecheck; focused UI/visual unit checks where present; `git diff --check`
 
 - [ ] 5. M5.5 — Encounter and traversal tuning
-  - depends: 4
+  - depends: 4 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
   - isolation: sequential
-  - outcome: tune encounter pressure, spacing, pursuit compatibility, and traversal pacing
+  - owns/allows: placement/activation/stand-off tuning, recovery route practicality, deterministic loot placement, navigation soak
+  - outcome: deliberate combat/traversal rhythm with skirmisher+brute only
+  - non-goals: waves, new roles, item system expansion
+  - verifier: focused encounter/placement tests; browser soak; lint; typecheck; `git diff --check`
 
 - [ ] 6. M5.6 — Full M5 playthrough and verification
-  - depends: 5
+  - depends: 5 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
   - isolation: sequential
-  - outcome: production-build playthrough and M5 acceptance evidence
+  - owns/allows: full fresh-run browser playthrough evidence, death/save regressions, verification docs/state, browser regression gates
+  - outcome: M5 READY FOR PRODUCT OWNER ACCEPTANCE (no tag/push in this task)
+  - non-goals: M6, Git tag `v0.5.0-connected-level`
+  - verifier: `npm run lint`; `npm run typecheck`; `npm run test`; `npm run build`; `npm run verify`; `git diff --check`; LeanLoop doctor/sync; full browser playthrough gate
 
 ## Parallel groups
 
@@ -87,6 +107,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
 - 2026-08-10 | Save world progression through SaveFileV2 with explicit V1 migration | V1 shape is immutable; opened shortcut is a new stable fact
 - 2026-08-10 | Checkpoint rest/death respawn recreate all connected-level enemies, preserve opened shortcuts and loot-once memory, and never grant Echoes during reset | Keeps traversal progress and rewards deterministic across recovery cycles
 - 2026-08-10 | Shape the graybox around direct pursuit and local steering: open encounter rooms, sparse blockers, and no route that requires navmesh | Respects the accepted M3 navigation boundary
+- 2026-08-10 | Melee hits require overlap AND solid-world occlusion clear; M5 encounters activate on zone entry with egress leash; blocked pursuit uses authored connection/detour anchors | Product Owner M5.3.1 blockers B1–B3
 
 ## Escalation
 

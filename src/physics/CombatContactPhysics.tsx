@@ -2,6 +2,7 @@ import { useRapier } from '@react-three/rapier'
 import { useEffect, useMemo, type ReactNode } from 'react'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { createRapierCombatContactQuery } from './combatContactQuery'
+import { createRapierCombatOcclusionQuery } from './combatOcclusionQuery'
 import {
   CombatHurtboxRegistryContext,
   RapierCombatHurtboxRegistry,
@@ -17,13 +18,18 @@ export function CombatContactPhysics({
   const { world, rapier } = useRapier()
   const registry = useMemo(() => new RapierCombatHurtboxRegistry(), [])
 
-  useEffect(
-    () =>
-      runtime.attachCombatContactQuery(
-        createRapierCombatContactQuery(world, rapier, () => registry.registrations()),
-      ),
-    [rapier, registry, runtime, world],
-  )
+  useEffect(() => {
+    const detachContact = runtime.attachCombatContactQuery(
+      createRapierCombatContactQuery(world, rapier, () => registry.registrations()),
+    )
+    const detachOcclusion = runtime.attachCombatOcclusionQuery(
+      createRapierCombatOcclusionQuery(world, rapier),
+    )
+    return () => {
+      detachContact()
+      detachOcclusion()
+    }
+  }, [rapier, registry, runtime, world])
 
   return (
     <CombatHurtboxRegistryContext.Provider value={registry}>

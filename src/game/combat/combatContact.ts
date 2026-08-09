@@ -36,6 +36,17 @@ export type CombatContactQuery = (
   request: CombatContactQueryRequest,
 ) => readonly CombatContactCandidate[]
 
+export type CombatOcclusionResult = 'clear' | 'blocked'
+
+export interface CombatOcclusionQueryRequest {
+  readonly origin: Vector3Value
+  readonly target: Vector3Value
+}
+
+export type CombatOcclusionQuery = (
+  request: CombatOcclusionQueryRequest,
+) => CombatOcclusionResult
+
 export interface CombatHitEvent {
   readonly type: 'combat-hit'
   readonly attackerId: CombatTargetId
@@ -63,6 +74,8 @@ export interface ResolvePlayerContactRequest {
   readonly query: CombatContactQuery
   /** When set, overrides authored attack definition damage (equipment modifiers). */
   readonly damageOverride?: number
+  readonly attackOrigin?: Vector3Value
+  readonly occlusionQuery?: CombatOcclusionQuery
 }
 
 export interface CombatDamageResolution {
@@ -84,6 +97,10 @@ export interface ResolveCombatContactRequest {
   readonly query: CombatContactQuery
   readonly damage: number
   readonly resolveDamage?: CombatDamageResolver
+  /** Authoritative attacker origin for solid-world occlusion (not render). */
+  readonly attackOrigin?: Vector3Value
+  /** When provided, overlap candidates require a clear solid-world path. */
+  readonly occlusionQuery?: CombatOcclusionQuery
 }
 
 const EMPTY_CONTACT_SNAPSHOT: CombatContactSnapshot = Object.freeze({
@@ -109,6 +126,8 @@ export class CombatContactRuntime {
       targets: request.targets,
       query: request.query,
       damage: request.damageOverride ?? action.damage,
+      attackOrigin: request.attackOrigin,
+      occlusionQuery: request.occlusionQuery,
     })
   }
 
@@ -150,6 +169,19 @@ export class CombatContactRuntime {
         target.snapshot().hurtbox.id !== candidate.hurtboxId
       ) {
         continue
+      }
+
+      const hurtbox = target.snapshot().hurtbox
+      if (request.occlusionQuery !== undefined) {
+        const origin = request.attackOrigin ?? shape.center
+        if (
+          request.occlusionQuery({
+            origin,
+            target: hurtbox.center,
+          }) === 'blocked'
+        ) {
+          continue
+        }
       }
 
       const resolution = request.resolveDamage?.(target, request.damage) ?? {
