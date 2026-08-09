@@ -5,6 +5,7 @@ interface FoundationPanelProps {
   diagnostic: FoundationDiagnostic
   camera: CameraDiagnostic | null
   onResetTrainingTarget: () => void
+  onResetMeleeFixture: () => void
 }
 
 function readinessLabel(ready: boolean): string {
@@ -15,6 +16,7 @@ export function FoundationPanel({
   diagnostic,
   camera,
   onResetTrainingTarget,
+  onResetMeleeFixture,
 }: FoundationPanelProps) {
   return (
     <aside className="foundation-panel" aria-label="Foundation diagnostic">
@@ -191,9 +193,52 @@ export function FoundationPanel({
           <dt>Target hit count</dt>
           <dd>{diagnostic.runtime.trainingTarget.hitCount}</dd>
         </div>
+        <div>
+          <dt>Player health</dt>
+          <dd>
+            {diagnostic.runtime.playerCombat.health.current}/
+            {diagnostic.runtime.playerCombat.health.maximum} ·{' '}
+            {diagnostic.runtime.playerCombat.health.alive ? 'alive' : 'defeated'}
+          </dd>
+        </div>
+        <div>
+          <dt>Enemy</dt>
+          <dd>
+            {diagnostic.runtime.enemy.id} · {diagnostic.runtime.enemy.state} ·{' '}
+            {diagnostic.runtime.enemy.health.current}/
+            {diagnostic.runtime.enemy.health.maximum}
+          </dd>
+        </div>
+        <div>
+          <dt>Enemy distance/facing</dt>
+          <dd>
+            {diagnostic.runtime.enemyDistanceToPlayer.toFixed(2)} · (
+            {diagnostic.runtime.enemy.facing.x.toFixed(2)},{' '}
+            {diagnostic.runtime.enemy.facing.z.toFixed(2)})
+          </dd>
+        </div>
+        <div>
+          <dt>Enemy action</dt>
+          <dd>
+            {diagnostic.runtime.enemy.action.actionId ?? 'none'} ·{' '}
+            {diagnostic.runtime.enemy.action.phase} · contact{' '}
+            {diagnostic.runtime.enemyAttack.contactEnabled ? 'enabled' : 'disabled'}
+          </dd>
+        </div>
+        <div>
+          <dt>Last incoming</dt>
+          <dd>
+            {diagnostic.runtime.incomingContact.lastHit
+              ? `${diagnostic.runtime.incomingContact.lastHit.outcome} · ${diagnostic.runtime.incomingContact.lastHit.appliedDamage} damage`
+              : 'none'}
+          </dd>
+        </div>
       </dl>
       <button type="button" onClick={onResetTrainingTarget}>
         Reset training target
+      </button>
+      <button type="button" onClick={onResetMeleeFixture}>
+        Reset melee fixture
       </button>
     </aside>
   )

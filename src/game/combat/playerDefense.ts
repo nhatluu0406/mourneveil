@@ -7,6 +7,12 @@ import type { CombatActionSnapshot, CombatActionStartResult } from './combatActi
 export const PLAYER_DODGE_ACTION_ID = 'player.dodge' as const
 export const PLAYER_DODGE_SPEED = 8
 export const PLAYER_GUARD_MOVEMENT_SCALE = 0.35
+export const PLAYER_GUARD_CONE_ANGLE_DEGREES = 120
+const PLAYER_GUARD_CONE_MINIMUM_DOT = Math.cos(
+  (PLAYER_GUARD_CONE_ANGLE_DEGREES * Math.PI) / 360,
+)
+
+export type IncomingMeleeDefenseOutcome = 'damaged' | 'dodged' | 'guarded'
 
 export const PLAYER_DODGE_ACTION: CombatActionDefinition = defineCombatAction({
   id: PLAYER_DODGE_ACTION_ID,
@@ -97,4 +103,23 @@ export class PlayerDefenseRuntime {
       invulnerable: activeDodge !== null && combat.phase === 'active',
     }
   }
+}
+
+export function resolveIncomingMeleeDefense(
+  defense: PlayerDefenseSnapshot,
+  playerFacing: PlayerFacingDirection,
+  playerPosition: { readonly x: number; readonly z: number },
+  attackerPosition: { readonly x: number; readonly z: number },
+): IncomingMeleeDefenseOutcome {
+  if (defense.invulnerable) return 'dodged'
+  if (!defense.guarding) return 'damaged'
+
+  const deltaX = attackerPosition.x - playerPosition.x
+  const deltaZ = attackerPosition.z - playerPosition.z
+  const distance = Math.hypot(deltaX, deltaZ)
+  if (distance === 0) return 'damaged'
+  const incomingX = deltaX / distance
+  const incomingZ = deltaZ / distance
+  const dot = playerFacing.x * incomingX + playerFacing.z * incomingZ
+  return dot >= PLAYER_GUARD_CONE_MINIMUM_DOT ? 'guarded' : 'damaged'
 }

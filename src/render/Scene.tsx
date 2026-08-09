@@ -5,6 +5,8 @@ import { FIXED_STEP_SECONDS } from '../game/core/fixedStepClock'
 import { GRAYBOX_CENTER_BLOCKER_SIZE } from '../physics/grayboxCollision'
 import { PlayerPhysicsBody } from '../physics/PlayerPhysicsBody'
 import { TrainingTargetPhysicsBody } from '../physics/TrainingTargetPhysicsBody'
+import { CombatContactPhysics } from '../physics/CombatContactPhysics'
+import { EnemyPhysicsBody } from '../physics/EnemyPhysicsBody'
 import { FollowCameraRig } from './FollowCameraRig'
 import type { CameraDiagnostic } from './followCamera'
 
@@ -87,8 +89,11 @@ function FoundationWorld({ onPhysicsReady, runtime }: SceneProps) {
       <BoundaryWall position={[5.75, 0.75, 0]} size={[0.5, 1.5, 12]} />
       <BoundaryWall position={[0, 0.75, -5.75]} size={[11, 1.5, 0.5]} />
       <BoundaryWall position={[0, 0.75, 5.75]} size={[11, 1.5, 0.5]} />
-      <PlayerPhysicsBody runtime={runtime} />
-      <TrainingTargetPhysicsBody runtime={runtime} />
+      <CombatContactPhysics runtime={runtime}>
+        <PlayerPhysicsBody runtime={runtime} />
+        <TrainingTargetPhysicsBody runtime={runtime} />
+        <EnemyPhysicsBody runtime={runtime} />
+      </CombatContactPhysics>
     </Physics>
   )
 }

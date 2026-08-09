@@ -37,14 +37,34 @@ function advancePattern(
 }
 
 describe('PlayerRuntime', () => {
+  it.each([
+    ['light', 20],
+    ['heavy', 35],
+  ] as const)('applies authoritative player %s damage to the enemy hurtbox', (attack, damage) => {
+    const runtime = new PlayerRuntime()
+    runtime.attachCombatContactQuery(({ hurtboxes }) =>
+      hurtboxes
+        .filter((hurtbox) => hurtbox.ownerId === runtime.snapshot().enemy.id)
+        .map((hurtbox) => ({ hurtboxId: hurtbox.id, targetId: hurtbox.ownerId })),
+    )
+    runtime.requestPlayerAttack(attackRequest(attack))
+    const startup = attack === 'light' ? 8 : 18
+    for (let step = 0; step < startup; step += 1) {
+      runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
+    }
+    expect(runtime.snapshot().enemy.health.current).toBe(100 - damage)
+  })
+
   it('resolves active contact after movement in the fixed simulation step', () => {
     const runtime = new PlayerRuntime()
     runtime.attachCollisionResolver(resolveOnFlatGround)
     runtime.attachCombatContactQuery(({ hurtboxes }) =>
-      hurtboxes.map((hurtbox) => ({
-        hurtboxId: hurtbox.id,
-        targetId: hurtbox.ownerId,
-      })),
+      hurtboxes
+        .filter((hurtbox) => hurtbox.ownerId === 'training-target.graybox')
+        .map((hurtbox) => ({
+          hurtboxId: hurtbox.id,
+          targetId: hurtbox.ownerId,
+        })),
     )
     runtime.requestPlayerAttack(attackRequest('light'))
 

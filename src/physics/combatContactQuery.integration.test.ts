@@ -5,7 +5,13 @@ import {
   PLAYER_LIGHT_ATTACK,
   transformPlayerAttackContactShape,
 } from '../game/combat/playerAttackActions'
-import type { SphereHurtbox } from '../game/combat/trainingTarget'
+import type { SphereHurtbox } from '../game/combat/combatTarget'
+import { PlayerCombatHealthRuntime } from '../game/character/playerCombatHealth'
+import {
+  MELEE_ENEMY_ATTACK,
+  createEnemyAttackSpatialSnapshot,
+  createMeleeEnemyRuntime,
+} from '../game/enemies/meleeEnemy'
 import { createRapierCombatContactQuery } from './combatContactQuery'
 
 beforeAll(async () => {
@@ -81,6 +87,46 @@ describe('Rapier combat contact query', () => {
 
     expect(query({ contactShape: away, hurtboxes: [HURTBOX] })).toEqual([])
     expect(query({ contactShape: toward, hurtboxes: [HURTBOX] })).toHaveLength(1)
+    world.free()
+  })
+
+  it('queries the player hurtbox from enemy execution-facing contact', () => {
+    const player = new PlayerCombatHealthRuntime({ x: 1.3, y: 0.82, z: 3 })
+    const hurtbox = player.snapshot().hurtbox
+    const world = new RAPIER.World({ x: 0, y: 0, z: 0 })
+    const collider = world.createCollider(
+      RAPIER.ColliderDesc.ball(hurtbox.radius)
+        .setTranslation(hurtbox.center.x, hurtbox.center.y, hurtbox.center.z)
+        .setSensor(true),
+    )
+    world.step()
+    const query = createRapierCombatContactQuery(world, RAPIER, [
+      { hurtboxId: hurtbox.id, collider },
+    ])
+
+    const toward = createMeleeEnemyRuntime()
+    toward.transition('pursue', 'player')
+    toward.startAction(MELEE_ENEMY_ATTACK.id, { x: -1, z: 0 })
+    const away = createMeleeEnemyRuntime()
+    away.transition('pursue', 'player')
+    away.startAction(MELEE_ENEMY_ATTACK.id, { x: 1, z: 0 })
+    for (let step = 0; step < MELEE_ENEMY_ATTACK.startupSteps; step += 1) {
+      toward.advanceAction()
+      away.advanceAction()
+    }
+
+    expect(
+      query({
+        contactShape: createEnemyAttackSpatialSnapshot(toward.snapshot()).activeContactShape!,
+        hurtboxes: [hurtbox],
+      }),
+    ).toHaveLength(1)
+    expect(
+      query({
+        contactShape: createEnemyAttackSpatialSnapshot(away.snapshot()).activeContactShape!,
+        hurtboxes: [hurtbox],
+      }),
+    ).toEqual([])
     world.free()
   })
 })

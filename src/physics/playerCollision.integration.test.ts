@@ -14,12 +14,88 @@ import {
   PLAYER_CAPSULE_RADIUS,
   configurePlayerCharacterController,
 } from './playerCollisionConfig'
+import {
+  MELEE_ENEMY_DEFINITION,
+  advanceMeleeEnemy,
+  createMeleeEnemyRuntime,
+} from '../game/enemies/meleeEnemy'
+import { configureCharacterController } from './playerCollisionConfig'
 
 beforeAll(async () => {
   await RAPIER.init()
 })
 
 describe('graybox player collision', () => {
+  it('keeps authoritative enemy pursuit outside a solid blocker', () => {
+    const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
+    world.timestep = FIXED_STEP_SECONDS
+    world.createCollider(
+      RAPIER.ColliderDesc.cuboid(6, 0.25, 6).setTranslation(0, -0.25, 0),
+    )
+    const wallCenterX = 1.5
+    const wallHalfWidth = 0.25
+    world.createCollider(
+      RAPIER.ColliderDesc.cuboid(wallHalfWidth, 0.75, 2).setTranslation(
+        wallCenterX,
+        0.75,
+        3,
+      ),
+    )
+    const enemy = createMeleeEnemyRuntime()
+    const initial = enemy.snapshot().position
+    const body = world.createRigidBody(
+      RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(
+        initial.x,
+        initial.y,
+        initial.z,
+      ),
+    )
+    const collider = world.createCollider(
+      RAPIER.ColliderDesc.capsule(
+        MELEE_ENEMY_DEFINITION.body.halfHeight,
+        MELEE_ENEMY_DEFINITION.body.radius,
+      ),
+      body,
+    )
+    const controller = world.createCharacterController(CHARACTER_COLLISION_OFFSET)
+    configureCharacterController(controller)
+    const resolveCollision: CharacterCollisionResolver = (position, desired) => {
+      body.setTranslation(position, false)
+      controller.computeColliderMovement(collider, desired)
+      const translation = controller.computedMovement()
+      body.setTranslation(
+        {
+          x: position.x + translation.x,
+          y: position.y + translation.y,
+          z: position.z + translation.z,
+        },
+        false,
+      )
+      return {
+        translation: { x: translation.x, y: translation.y, z: translation.z },
+        grounded: controller.computedGrounded(),
+      }
+    }
+
+    for (let step = 0; step < 180; step += 1) {
+      advanceMeleeEnemy(
+        enemy,
+        { x: 0, y: 0.82, z: 3 },
+        FIXED_STEP_SECONDS,
+        resolveCollision,
+      )
+      world.step()
+    }
+
+    const wallRightFace = wallCenterX + wallHalfWidth
+    expect(enemy.snapshot().state).toBe('pursue')
+    expect(
+      enemy.snapshot().position.x - MELEE_ENEMY_DEFINITION.body.radius - wallRightFace,
+    ).toBeGreaterThanOrEqual(CHARACTER_COLLISION_OFFSET - 0.001)
+    world.removeCharacterController(controller)
+    world.free()
+  })
+
   it('uses Rapier-corrected movement without penetrating the center blocker', () => {
     const world = new RAPIER.World({ x: 0, y: -9.81, z: 0 })
     world.timestep = FIXED_STEP_SECONDS

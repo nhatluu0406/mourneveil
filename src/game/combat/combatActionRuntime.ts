@@ -16,6 +16,7 @@ export type CombatActionStartFailureReason =
   | 'cooldown-active'
   | 'resource-unavailable'
   | 'guard-active'
+  | 'actor-defeated'
 
 export type CombatActionStartResult =
   | {

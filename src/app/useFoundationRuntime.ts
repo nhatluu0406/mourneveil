@@ -105,13 +105,7 @@ export function useFoundationRuntime(): FoundationRuntimeIntegration {
       if (framesSinceDiagnostic >= 6) {
         framesSinceDiagnostic = 0
         setDiagnostic({
-          simulation: snapshot.simulation,
-          player: snapshot.player,
-          combat: snapshot.combat,
-          attack: snapshot.attack,
-          contact: snapshot.contact,
-          trainingTarget: snapshot.trainingTarget,
-          defense: snapshot.defense,
+          ...snapshot,
           movementIntent: composed.intent,
           activeInputSource: composed.source,
           combatInput: combatInput?.snapshot() ?? neutralCombatInputSnapshot(),

@@ -4,7 +4,7 @@ import type {
   CombatContactCandidate,
   CombatContactQuery,
 } from '../game/combat/combatContact'
-import type { CombatHurtboxId } from '../game/combat/trainingTarget'
+import type { CombatHurtboxId } from '../game/combat/combatTarget'
 
 export interface RapierHurtboxRegistration {
   readonly hurtboxId: CombatHurtboxId
@@ -14,16 +14,19 @@ export interface RapierHurtboxRegistration {
 export function createRapierCombatContactQuery(
   world: World,
   rapier: typeof Rapier,
-  registrations: readonly RapierHurtboxRegistration[],
+  registrations:
+    | readonly RapierHurtboxRegistration[]
+    | (() => readonly RapierHurtboxRegistration[]),
 ): CombatContactQuery {
-  const hurtboxIdByCollider = new Map(
-    registrations.map(
+  return ({ contactShape, hurtboxes }) => {
+    const currentRegistrations =
+      typeof registrations === 'function' ? registrations() : registrations
+    const hurtboxIdByCollider = new Map(
+      currentRegistrations.map(
       (registration) =>
         [registration.collider.handle, registration.hurtboxId] as const,
-    ),
-  )
-
-  return ({ contactShape, hurtboxes }) => {
+      ),
+    )
     const requestedHurtboxes = new Map(
       hurtboxes.map((hurtbox) => [hurtbox.id, hurtbox.ownerId] as const),
     )

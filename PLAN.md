@@ -7,7 +7,8 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
 ## Non-goals
 - Boss framework
 - Loot / inventory expansion
-- Player health system unless explicitly resolved by PLAN decision before the step that needs it
+- Player health beyond the narrow deterministic M3 incoming-melee proof contract
+- Healing, regeneration, flask, armor, resistances, status effects, full death/respawn, production health HUD, or a generalized RPG-stat framework
 - Stamina
 - Complex navmesh / general pathfinding unless demonstrated necessary for graybox pursuit
 - Procedural spawning / waves framework
@@ -16,8 +17,10 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
 - Multiplayer / backend
 - Do not reopen M2 combat authority unless a regression blocks M3
 
-## Unresolved scope decision (must resolve before the first step that needs it)
-- **Player incoming-damage / health proof:** M3 enemy attacks may require proving contact against the player. Do **not** silently implement player health. Before M3.2 (or whichever step first needs inbound player damage), append an explicit PLAN decision authorizing either (a) a narrow player-damage/health proof contract analogous to M2.3 training-target health, or (b) an alternate proof that avoids player health. Until then, enemy attack work must stop at telegraph/contact-contract design without applying player damage.
+## Resolved M3 player-health scope
+- Allowed only for M3 enemy incoming-melee proof: deterministic player combat health with maximum/current values, alive/defeated state, clamped `applyDamage`, and development-only reset/diagnostic.
+- Prohibited: healing, regeneration, flask, armor, resistances, status effects, full player death/respawn, production health HUD, and a generalized RPG-stat framework.
+- Player zero health may freeze the development fixture; it does not authorize checkpoint or respawn behavior.
 
 ## Steps
 <!-- risk: LOW|MEDIUM|HIGH ; isolation: inline|sequential|worktree -->
@@ -33,7 +36,7 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - verifier: `npm ci && npm run verify && git diff --check && python3 scripts/leanloop/doctor.py --strict && python3 scripts/leanloop/sync.py --check`
   - evidence: CI failed on Install dependencies with EUSAGE missing `@emnapi/core@1.11.3` / `@emnapi/runtime@1.11.3`; lockfile regenerated with npm 10 package-lock-only so peers are recorded
 
-- [ ] 1. M3.1 — Enemy runtime and state authority
+- [x] 1. M3.1 — Enemy runtime and state authority
   - depends: 0
   - risk: HIGH
   - preferred agent: Codex
@@ -43,18 +46,20 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
   - non-goals: AI pursuit, attacks, navmesh, presentation, player health, multiple roles
   - verifier: focused enemy-runtime tests plus `npm run verify && git diff --check`
   - completion evidence: deterministic state transitions and hurtbox/health contract tests green; PLAN/HANDOFF updated
+  - evidence: immutable enemy definitions and stable instance identity; shared combat health/hurtbox authority; explicit transition/action ownership; focused enemy + combat tests 47/47; full verify 103/103 and build green
 
-- [ ] 2. M3.2 — First melee enemy behavior
+- [x] 2. M3.2 — First melee enemy behavior
   - depends: 1
   - risk: HIGH
   - preferred agent: Codex
   - isolation: sequential
   - owns/allows: perception, pursue, telegraph, committed attack, recovery, player-directed contact contract, simple defeat, one deterministic melee enemy
   - outcome: one melee enemy exercises the M3.1 runtime through a complete attack/defeat loop
-  - gate: resolve the player incoming-damage/health PLAN decision before applying damage to the player
-  - non-goals: role variants, navmesh framework, ranged enemies, production animation
+  - gate: M3.1 internal gate must pass before implementation begins
+  - non-goals: role variants, navmesh framework, ranged enemies, production animation, and player health beyond the resolved narrow M3 proof contract
   - verifier: focused melee-behavior tests plus M2 combat regressions and `npm run verify && git diff --check`
   - completion evidence: deterministic pursue/telegraph/attack/recovery/defeat proven; runtime proof recorded
+  - evidence: one grounded melee instance detects by distance, pursues through the Rapier character-controller boundary, snapshots attack facing, resolves one contact per execution, respects authoritative dodge and a 120° forward guard cone, takes existing light/heavy damage, and halts at defeat; focused M3/M2 tests 71/71, M1 regressions 13/13, full suite 118/118, build green; browser backend unavailable, local endpoint HTTP 200 only
 
 - [ ] 3. M3.3 — Enemy movement/navigation and spacing
   - depends: 2
@@ -108,6 +113,7 @@ Task slug: `m3-enemy-framework` (`python3 scripts/leanloop/task.py start m3-enem
 - 2026-08-09 | M2 Combat Proof Product Owner accepted; initialize M3 Enemy Framework graph | PO authorized M3.0 after M2 acceptance
 - 2026-08-09 | CI `npm ci` failure was lockfile incompleteness for `@emnapi/core@1.11.3` and `@emnapi/runtime@1.11.3` peer installs; regenerate lock with npm 10 | Matches GitHub Actions Node 22 / npm 10 clean-install contract without bypassing npm ci
 - 2026-08-09 | Player incoming-damage/health for enemy attacks remains an explicit unresolved PLAN gate | Prevents repeating the M2 training-target-health scope conflict
+- 2026-08-09 | Authorize minimal deterministic player combat health only for M3 enemy incoming-melee proof | Product Owner explicitly allowed max/current health, alive/defeated, clamped damage, and development reset/diagnostic while prohibiting broader health/RPG systems
 
 ## Escalation
 - Same error 3 times: stop, write a stuck report under the active task `reports/`, and escalate

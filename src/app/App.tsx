@@ -75,6 +75,7 @@ export function App() {
         diagnostic={diagnostic}
         camera={cameraDiagnostic}
         onResetTrainingTarget={() => runtime.resetTrainingTarget()}
+        onResetMeleeFixture={() => runtime.resetMeleeFixture()}
       />
     </main>
   )

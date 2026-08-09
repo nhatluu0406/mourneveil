@@ -1,4 +1,5 @@
 import {
+  BallCollider,
   CapsuleCollider,
   RigidBody,
   useRapier,
@@ -14,6 +15,7 @@ import {
   PLAYER_CAPSULE_RADIUS,
   configurePlayerCharacterController,
 } from './playerCollisionConfig'
+import { useCombatHurtboxRegistration } from './combatHurtboxRegistry'
 
 interface PlayerPhysicsBodyProps {
   runtime: PlayerRuntime
@@ -22,8 +24,11 @@ interface PlayerPhysicsBodyProps {
 export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
   const rigidBodyRef = useRef<RapierRigidBody>(null)
   const colliderRef = useRef<RapierCollider>(null)
+  const hurtboxColliderRef = useRef<RapierCollider>(null)
   const { world } = useRapier()
   const initialPosition = runtime.snapshot().player.position
+  const playerHurtbox = runtime.snapshot().playerCombat.hurtbox
+  useCombatHurtboxRegistration(playerHurtbox.id, hurtboxColliderRef)
 
   useEffect(() => {
     const rigidBody = rigidBodyRef.current
@@ -77,6 +82,11 @@ export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
       <CapsuleCollider
         ref={colliderRef}
         args={[PLAYER_CAPSULE_HALF_HEIGHT, PLAYER_CAPSULE_RADIUS]}
+      />
+      <BallCollider
+        ref={hurtboxColliderRef}
+        args={[playerHurtbox.radius]}
+        sensor
       />
       <PlayerVisual runtime={runtime} />
     </RigidBody>

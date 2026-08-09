@@ -1,15 +1,14 @@
 import type { Vector3Value } from '../character/playerMotor'
+import {
+  applyCombatDamage,
+  assertPositiveFinite,
+  createCombatHealth,
+  type CombatDamageResult,
+  type CombatHealthState,
+} from './combatHealth'
+import type { CombatTargetId, SphereHurtbox } from './combatTarget'
 
-export type CombatTargetId = string
-export type CombatHurtboxId = string
-
-export interface SphereHurtbox {
-  readonly id: CombatHurtboxId
-  readonly ownerId: CombatTargetId
-  readonly kind: 'sphere'
-  readonly center: Vector3Value
-  readonly radius: number
-}
+export type { CombatHurtboxId, CombatTargetId, SphereHurtbox } from './combatTarget'
 
 export interface TrainingTargetDefinition {
   readonly id: CombatTargetId
@@ -18,17 +17,8 @@ export interface TrainingTargetDefinition {
   readonly maximumHealth: number
 }
 
-export interface TrainingTargetHealthState {
-  readonly maximum: number
-  readonly current: number
-  readonly alive: boolean
-}
-
-export interface TrainingTargetDamageResult {
-  readonly applied: boolean
-  readonly appliedDamage: number
-  readonly health: TrainingTargetHealthState
-}
+export type TrainingTargetHealthState = CombatHealthState
+export type TrainingTargetDamageResult = CombatDamageResult
 
 export interface TrainingTargetSnapshot extends TrainingTargetDefinition {
   readonly health: TrainingTargetHealthState
@@ -56,22 +46,7 @@ export function applyTrainingTargetDamage(
   health: TrainingTargetHealthState,
   damage: number,
 ): TrainingTargetDamageResult {
-  assertPositiveFinite(damage, 'Damage')
-  if (!health.alive) {
-    return { applied: false, appliedDamage: 0, health }
-  }
-
-  const current = Math.max(0, health.current - damage)
-  const nextHealth = Object.freeze({
-    maximum: health.maximum,
-    current,
-    alive: current > 0,
-  })
-  return {
-    applied: true,
-    appliedDamage: health.current - current,
-    health: nextHealth,
-  }
+  return applyCombatDamage(health, damage)
 }
 
 export class TrainingTargetRuntime {
@@ -83,7 +58,7 @@ export class TrainingTargetRuntime {
     private readonly definition: TrainingTargetDefinition =
       TRAINING_TARGET_DEFINITION,
   ) {
-    this.health = createFullHealth(definition.maximumHealth)
+    this.health = createCombatHealth(definition.maximumHealth)
   }
 
   applyDamage(damage: number): TrainingTargetDamageResult {
@@ -97,7 +72,7 @@ export class TrainingTargetRuntime {
   }
 
   reset(): void {
-    this.health = createFullHealth(this.definition.maximumHealth)
+    this.health = createCombatHealth(this.definition.maximumHealth)
     this.hitCount = 0
     this.hitRevision += 1
   }
@@ -139,18 +114,8 @@ export function defineTrainingTarget(
   })
 }
 
-function createFullHealth(maximum: number): TrainingTargetHealthState {
-  return Object.freeze({ maximum, current: maximum, alive: true })
-}
-
 function assertFiniteVector(value: Vector3Value, label: string): void {
   if (![value.x, value.y, value.z].every(Number.isFinite)) {
     throw new RangeError(`${label} must contain only finite values`)
-  }
-}
-
-function assertPositiveFinite(value: number, label: string): void {
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new RangeError(`${label} must be a finite positive number`)
   }
 }

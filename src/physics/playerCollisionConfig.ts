@@ -12,7 +12,7 @@ interface PlayerCharacterController {
   setMinSlopeSlideAngle(angle: number): void
 }
 
-export function configurePlayerCharacterController(
+export function configureCharacterController(
   controller: PlayerCharacterController,
 ): void {
   controller.setSlideEnabled(true)
@@ -20,3 +20,5 @@ export function configurePlayerCharacterController(
   controller.setMaxSlopeClimbAngle(CHARACTER_MAX_WALKABLE_SLOPE_RADIANS)
   controller.setMinSlopeSlideAngle(CHARACTER_MAX_WALKABLE_SLOPE_RADIANS)
 }
+
+export const configurePlayerCharacterController = configureCharacterController

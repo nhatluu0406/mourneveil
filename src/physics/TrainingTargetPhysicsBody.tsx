@@ -1,13 +1,12 @@
 import {
   BallCollider,
   RigidBody,
-  useRapier,
   type RapierCollider,
 } from '@react-three/rapier'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import type { PlayerRuntime } from '../game/character/playerRuntime'
 import { TrainingTargetVisual } from '../render/TrainingTargetVisual'
-import { createRapierCombatContactQuery } from './combatContactQuery'
+import { useCombatHurtboxRegistration } from './combatHurtboxRegistry'
 
 export function TrainingTargetPhysicsBody({
   runtime,
@@ -15,21 +14,8 @@ export function TrainingTargetPhysicsBody({
   runtime: PlayerRuntime
 }) {
   const colliderRef = useRef<RapierCollider>(null)
-  const { world, rapier } = useRapier()
   const target = runtime.snapshot().trainingTarget
-
-  useEffect(() => {
-    const collider = colliderRef.current
-    if (collider === null) {
-      return
-    }
-
-    return runtime.attachCombatContactQuery(
-      createRapierCombatContactQuery(world, rapier, [
-        { hurtboxId: target.hurtbox.id, collider },
-      ]),
-    )
-  }, [rapier, runtime, target.hurtbox.id, world])
+  useCombatHurtboxRegistration(target.hurtbox.id, colliderRef)
 
   return (
     <RigidBody
