@@ -6,7 +6,7 @@ Mourneveil is a local-first browser-based 3D action RPG vertical slice focused o
 
 **M5 Connected Level** is Product Owner accepted and tagged `v0.5.0-connected-level`.
 
-**M6 Presentation** is active (`m6-presentation`). M6.1–M6.6 exist in HEAD; Product Owner visual-quality correction **M6.7–M6.10** is in progress. M7 has not started.
+**M6 Presentation** is complete through M6.10 on `main` and **awaiting Product Owner acceptance** (`m6-presentation`). M7 has not started.
 
 ## Requirements
 
