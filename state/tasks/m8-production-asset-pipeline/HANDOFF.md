@@ -5,7 +5,7 @@ Task: m8-production-asset-pipeline
 
 ## Status
 
-**ACTIVE — macro-batch 1, baseline gate passed.** M8 remains open; M9 not started.
+**ACTIVE — macro-batch 1, baseline and asset-contract gates passed.** M8 remains open; M9 not started.
 
 ## Repository truth
 
@@ -23,4 +23,13 @@ Task: m8-production-asset-pipeline
 
 ## Next
 
-Establish the narrow asset contract/validator, then load the checkpoint shrine through it. Do not expand into character assets, broad environment art, M9, controller, or remote delivery.
+## Asset contract
+
+- Manifest: `assets/production-assets.json`; editable glTF sources under `assets/source`, committed imports under `public/assets`, stable typed `/assets/...` runtime references under `src/content/assets`.
+- First format contract: embedded-buffer glTF 2.0, meters, Y-up, ground-centered pivot, explicit transform, embedded PBR materials.
+- `npm run assets:import` validates then copies; `npm run assets:verify` rejects missing/malformed/drifted assets and missing provenance/license. Build runs verification first.
+- Collision is always an authored world proxy. Runtime never reads editable source paths. No Git LFS for the small text asset.
+
+## Next
+
+Load the checkpoint shrine through the canonical reference and complete the full gate. Do not expand into character assets, broad environment art, M9, controller, or remote delivery.

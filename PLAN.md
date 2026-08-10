@@ -18,12 +18,13 @@ Task slug: `m8-production-asset-pipeline` (`python3 scripts/leanloop/task.py sta
   - owns/allows: checkpoint authored data/runtime projection, focused tests, canonical milestone docs, deprecated Claude-local example
   - verifier: `npm run lint && npm run typecheck && npm run test -- src/game/world/checkpoint.test.ts src/game/character/playerRespawn.integration.test.ts src/physics/connectedLevelAuthoring.test.ts`
   - evidence: PASS; lint/typecheck plus 17 focused checkpoint, respawn, authoring, HUD, and navigation tests.
-- [ ] 1. Establish the minimum production asset contract and validation boundary
+- [x] 1. Establish the minimum production asset contract and validation boundary
   - depends: 0
   - risk: HIGH
   - isolation: sequential
   - owns/allows: asset architecture doc, source/runtime asset paths, focused validation/import tooling and tests, package scripts
   - verifier: `npm run assets:verify && npm run lint && npm run typecheck`
+  - evidence: PASS; asset import/verify, 4 focused contract tests, lint, typecheck, and diff check.
 - [ ] 2. Replace the checkpoint placeholder through the canonical asset path
   - depends: 1
   - risk: MEDIUM

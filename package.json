@@ -9,12 +9,14 @@
     "npm": "10.9.2"
   },
   "scripts": {
+    "assets:import": "node scripts/assets/import-production-assets.mjs",
+    "assets:verify": "node scripts/assets/verify-production-assets.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc -b && vite build",
+    "build": "npm run assets:verify && tsc -b && vite build",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {

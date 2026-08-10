@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "world.checkpoint.refuge-shrine",
+      "format": "gltf2",
+      "sourcePath": "assets/source/world/checkpoint/refuge-shrine.gltf",
+      "runtimePath": "public/assets/world/checkpoint/refuge-shrine.gltf",
+      "runtimeUrl": "/assets/world/checkpoint/refuge-shrine.gltf",
+      "scale": [1, 1, 1],
+      "rotationRadians": [0, 0, 0],
+      "units": "meters",
+      "upAxis": "Y",
+      "pivot": "ground-center",
+      "materials": "embedded-pbr",
+      "colliderPolicy": "authored-world-proxy",
+      "provenance": "Original Mourneveil project asset authored for this repository; contains no third-party content.",
+      "license": "Project-owned; no separate third-party license. Redistribution remains controlled by the repository owner."
+    }
+  ]
+}

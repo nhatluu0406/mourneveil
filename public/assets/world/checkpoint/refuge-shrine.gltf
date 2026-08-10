@@ -1,0 +1,35 @@
+{
+  "asset": { "version": "2.0", "generator": "Mourneveil M8 authored static shrine" },
+  "scene": 0,
+  "scenes": [{ "name": "RefugeShrine", "nodes": [0, 1, 2, 3, 4, 5, 6, 7] }],
+  "nodes": [
+    { "name": "StoneBase", "mesh": 0, "translation": [0, 0.12, 0], "scale": [0.8, 0.24, 0.8] },
+    { "name": "StoneStep", "mesh": 0, "translation": [0, 0.34, 0], "scale": [0.62, 0.2, 0.62] },
+    { "name": "OathPillar", "mesh": 0, "translation": [0, 1.35, 0], "scale": [0.3, 1.85, 0.3] },
+    { "name": "LeftArm", "mesh": 0, "translation": [-0.35, 2.1, 0], "rotation": [0, 0, -0.28], "scale": [0.5, 0.18, 0.28] },
+    { "name": "RightArm", "mesh": 0, "translation": [0.35, 2.1, 0], "rotation": [0, 0, 0.28], "scale": [0.5, 0.18, 0.28] },
+    { "name": "LeftBinding", "mesh": 1, "translation": [-0.2, 2.46, 0], "rotation": [0, 0, -0.18], "scale": [0.16, 0.52, 0.2] },
+    { "name": "RightBinding", "mesh": 1, "translation": [0.2, 2.46, 0], "rotation": [0, 0, 0.18], "scale": [0.16, 0.52, 0.2] },
+    { "name": "Crown", "mesh": 1, "translation": [0, 2.78, 0], "rotation": [0, 0, 0.785398], "scale": [0.3, 0.3, 0.3] }
+  ],
+  "meshes": [
+    { "name": "HewnStone", "primitives": [{ "attributes": { "POSITION": 0, "NORMAL": 1 }, "indices": 2, "material": 0 }] },
+    { "name": "OathMetal", "primitives": [{ "attributes": { "POSITION": 0, "NORMAL": 1 }, "indices": 2, "material": 1 }] }
+  ],
+  "materials": [
+    { "name": "RefugeStone", "pbrMetallicRoughness": { "baseColorFactor": [0.22, 0.29, 0.27, 1], "metallicFactor": 0.02, "roughnessFactor": 0.9 } },
+    { "name": "OathBinding", "pbrMetallicRoughness": { "baseColorFactor": [0.42, 0.64, 0.56, 1], "metallicFactor": 0.55, "roughnessFactor": 0.32 }, "emissiveFactor": [0.05, 0.16, 0.12] }
+  ],
+  "buffers": [{ "byteLength": 648, "uri": "data:application/octet-stream;base64,AAAAvwAAAL8AAAC/AAAAvwAAAL8AAAA/AAAAvwAAAD8AAAA/AAAAvwAAAD8AAAC/AAAAPwAAAL8AAAA/AAAAPwAAAL8AAAC/AAAAPwAAAD8AAAC/AAAAPwAAAD8AAAA/AAAAvwAAAL8AAAA/AAAAvwAAAL8AAAC/AAAAPwAAAL8AAAC/AAAAPwAAAL8AAAA/AAAAvwAAAD8AAAC/AAAAvwAAAD8AAAA/AAAAPwAAAD8AAAA/AAAAPwAAAD8AAAC/AAAAPwAAAL8AAAC/AAAAvwAAAL8AAAC/AAAAvwAAAD8AAAC/AAAAPwAAAD8AAAC/AAAAvwAAAL8AAAA/AAAAPwAAAL8AAAA/AAAAPwAAAD8AAAA/AAAAvwAAAD8AAAA/AACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAABAAIAAAACAAMABAAFAAYABAAGAAcACAAJAAoACAAKAAsADAANAA4ADAAOAA8AEAARABIAEAASABMAFAAVABYAFAAWABcA" }],
+  "bufferViews": [
+    { "buffer": 0, "byteOffset": 0, "byteLength": 288, "target": 34962 },
+    { "buffer": 0, "byteOffset": 288, "byteLength": 288, "target": 34962 },
+    { "buffer": 0, "byteOffset": 576, "byteLength": 72, "target": 34963 }
+  ],
+  "accessors": [
+    { "bufferView": 0, "componentType": 5126, "count": 24, "type": "VEC3", "min": [-0.5, -0.5, -0.5], "max": [0.5, 0.5, 0.5] },
+    { "bufferView": 1, "componentType": 5126, "count": 24, "type": "VEC3" },
+    { "bufferView": 2, "componentType": 5123, "count": 36, "type": "SCALAR" }
+  ],
+  "extras": { "units": "meters", "upAxis": "Y", "pivot": "ground-center", "colliderPolicy": "authored-world-proxy" }
+}
