@@ -291,10 +291,11 @@ Establish presentation-only animation contracts and usable procedural motion for
   - verifier: focused player animation tests; browser state gate when controllable; lint; typecheck; `git diff --check`
   - evidence: PASS automated — shared player projection drives restrained idle, speed-based locomotion, light/heavy phase commitment, guard, dodge, flask, cosmetic hit reaction, and defeated override through a pure procedural pose resolver; 24 focused tests plus lint/typecheck/diff green; no controllable browser instance available
 
-- [ ] M7.3 — Enemy animation state foundation
+- [x] M7.3 — Enemy animation state foundation
   - depends: M7.2 PASS; risk: MEDIUM; agent: Codex; isolation: sequential
   - outcome: shared enemy animation projection with authored skirmisher/brute tuning and frozen execution-facing
   - verifier: focused enemy animation/facing tests; browser combat cycles when controllable; lint; typecheck; `git diff --check`
+  - evidence: PASS automated — both roles use the shared projection/pose backend with role-authored cadence, commitment, recovery, and recoil tuning; execution-facing remains frozen through recovery and later attacks may reorient; 33 enemy animation/facing/runtime tests plus lint/typecheck/diff green; browser unavailable
 
 - [ ] M7.4 — Animation integration and deterministic verification
   - depends: M7.3 PASS; risk: MEDIUM; agent: Codex; isolation: sequential

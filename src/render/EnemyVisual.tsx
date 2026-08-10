@@ -1,10 +1,15 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
-import type { Group, Mesh, MeshStandardMaterial } from 'three'
+import { MathUtils, type Group, type Mesh, type MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { meleeRoleByDefinitionId } from '../game/enemies/enemyRoles'
-import { createEnemyAttackPresentationSnapshot } from './enemyAttackPresentation'
+import {
+  createEnemyAttackPresentationSnapshot,
+  localNegativeZFacingYaw,
+} from './enemyAttackPresentation'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
+import { projectEnemyAnimation } from './animation/enemyAnimationProjection'
+import { resolveEnemyProceduralPose } from './animation/enemyProceduralPose'
 
 const STATE_MIX = {
   idle: 0,
@@ -27,8 +32,9 @@ export function EnemyVisual({
   const materialRef = useRef<MeshStandardMaterial>(null)
   const telegraphRef = useRef<Mesh>(null)
   const contactRef = useRef<Mesh>(null)
+  const weaponRef = useRef<Mesh>(null)
 
-  useFrame(() => {
+  useFrame((_state, deltaSeconds) => {
     const runtimeSnapshot = runtime.snapshot()
     const enemyIndex = runtimeSnapshot.enemies.findIndex((entry) => entry.id === enemyId)
     if (enemyIndex < 0) return
@@ -37,36 +43,61 @@ export function EnemyVisual({
     if (role === null) return
     const enemyAttack = runtimeSnapshot.enemyAttacks[enemyIndex]
     const attackPresentation = createEnemyAttackPresentationSnapshot(enemy, enemyAttack)
+    const animation = projectEnemyAnimation(
+      enemy,
+      runtimeSnapshot.simulation.stepCount,
+      runtimeSnapshot.contact,
+    )
+    const proceduralPose = resolveEnemyProceduralPose(
+      animation,
+      role.presentation.animation,
+      runtimeSnapshot.simulation.stepCount,
+    )
     const facing = facingRef.current
     const body = bodyRef.current
     const material = materialRef.current
     const telegraph = telegraphRef.current
     const contact = contactRef.current
+    const weapon = weaponRef.current
     if (
       facing === null ||
       body === null ||
       material === null ||
       telegraph === null ||
-      contact === null
+      contact === null ||
+      weapon === null
     )
       return
 
-    facing.rotation.y = attackPresentation.yawRadians
+    facing.rotation.y = localNegativeZFacingYaw(animation.facing)
     const isBrute = role.role === 'brute'
-    body.scale.set(
-      isBrute ? 1.15 : 0.88,
-      enemy.alive ? (isBrute ? 1.05 : 0.98) : 0.2,
-      isBrute ? 1.12 : 0.9,
+    const damping = Math.max(1, 1 / Math.max(animation.transition.blendSeconds, 0.001))
+    body.scale.x = MathUtils.damp(body.scale.x, isBrute ? 1.15 : 0.88, damping, deltaSeconds)
+    body.scale.y = MathUtils.damp(
+      body.scale.y,
+      (isBrute ? 1.05 : 0.98) * proceduralPose.bodyScaleY,
+      damping,
+      deltaSeconds,
     )
-    body.rotation.z = enemy.alive ? 0 : Math.PI / 2
-    body.position.y = enemy.alive ? 0 : -0.42
+    body.scale.z = MathUtils.damp(body.scale.z, isBrute ? 1.12 : 0.9, damping, deltaSeconds)
+    body.rotation.x = MathUtils.damp(body.rotation.x, proceduralPose.bodyPitch, damping, deltaSeconds)
+    body.rotation.z = MathUtils.damp(body.rotation.z, proceduralPose.bodyRoll, damping, deltaSeconds)
+    body.position.y = MathUtils.damp(body.position.y, proceduralPose.bodyOffsetY, damping, deltaSeconds)
+    weapon.rotation.x = MathUtils.damp(
+      weapon.rotation.x,
+      (isBrute ? 0 : 0.55) + proceduralPose.weaponPitch,
+      damping,
+      deltaSeconds,
+    )
+    weapon.rotation.y = MathUtils.damp(
+      weapon.rotation.y,
+      (isBrute ? 0 : 0.1) + proceduralPose.weaponYaw,
+      damping,
+      deltaSeconds,
+    )
     material.color.set(isBrute ? MOURNEVEIL_PALETTE.brute.body : MOURNEVEIL_PALETTE.skirmisher.body)
     material.color.offsetHSL(0, -0.05, -STATE_MIX[enemy.state] * 0.28)
-    const damagedFlash =
-      enemy.alive &&
-      runtimeSnapshot.contact.lastHit !== null &&
-      runtimeSnapshot.contact.lastHit.targetId === enemy.id &&
-      runtimeSnapshot.simulation.stepCount - runtimeSnapshot.contact.lastHit.simulationStep < 10
+    const damagedFlash = animation.mode !== 'defeated' && animation.hitReactionToken !== null
     material.emissive.set(damagedFlash ? MOURNEVEIL_PALETTE.damage : '#000000')
     material.emissiveIntensity = damagedFlash ? 0.55 : 0
     telegraph.visible = attackPresentation.telegraphVisible
@@ -105,7 +136,7 @@ export function EnemyVisual({
               <boxGeometry args={[0.34, 0.28, 0.34]} />
               <meshStandardMaterial color="#5a3830" roughness={0.88} />
             </mesh>
-            <mesh castShadow position={[0.42, 0.05, -0.55]}>
+            <mesh ref={weaponRef} castShadow position={[0.42, 0.05, -0.55]}>
               <boxGeometry args={[0.18, 0.85, 0.18]} />
               <meshStandardMaterial
                 color={MOURNEVEIL_PALETTE.brute.weapon}
@@ -132,7 +163,7 @@ export function EnemyVisual({
               <boxGeometry args={[0.08, 0.4, 0.08]} />
               <meshStandardMaterial color="#4a6a58" roughness={0.8} />
             </mesh>
-            <mesh castShadow position={[0.2, 0.05, -0.42]} rotation={[0.55, 0.1, 0]}>
+            <mesh ref={weaponRef} castShadow position={[0.2, 0.05, -0.42]} rotation={[0.55, 0.1, 0]}>
               <boxGeometry args={[0.05, 0.08, 0.62]} />
               <meshStandardMaterial
                 color={MOURNEVEIL_PALETTE.skirmisher.blade}

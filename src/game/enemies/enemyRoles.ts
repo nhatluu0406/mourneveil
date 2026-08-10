@@ -18,6 +18,16 @@ export interface EnemyPresentationDefinition {
   readonly telegraphColor: string
   readonly contactColor: string
   readonly bodyScale: number
+  readonly animation: EnemyAnimationPresentationDefinition
+}
+
+export interface EnemyAnimationPresentationDefinition {
+  readonly idleAmplitude: number
+  readonly locomotionCadence: number
+  readonly attackAnticipation: number
+  readonly attackSwing: number
+  readonly recoveryWeight: number
+  readonly hitRecoil: number
 }
 
 export interface EnemyMeleeRoleSpec {
@@ -95,6 +105,14 @@ export const SKIRMISHER_ROLE: EnemyMeleeRoleSpec = Object.freeze({
     telegraphColor: '#7dffb0',
     contactColor: '#ff6b5c',
     bodyScale: 0.92,
+    animation: Object.freeze({
+      idleAmplitude: 0.018,
+      locomotionCadence: 0.19,
+      attackAnticipation: 0.28,
+      attackSwing: 0.48,
+      recoveryWeight: 0.18,
+      hitRecoil: 0.2,
+    }),
   }),
 })
 
@@ -137,6 +155,14 @@ export const BRUTE_ROLE: EnemyMeleeRoleSpec = Object.freeze({
     telegraphColor: '#ff9d4d',
     contactColor: '#ff574d',
     bodyScale: 1.18,
+    animation: Object.freeze({
+      idleAmplitude: 0.009,
+      locomotionCadence: 0.105,
+      attackAnticipation: 0.5,
+      attackSwing: 0.72,
+      recoveryWeight: 0.32,
+      hitRecoil: 0.12,
+    }),
   }),
 })
 
