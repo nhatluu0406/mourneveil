@@ -278,11 +278,12 @@ Establish presentation-only animation contracts and usable procedural motion for
   - verifier: canonical-doc consistency search; `git diff --check`
   - evidence: PASS — canonical roadmap now defines Foundation Slice through Release Quality, separates version maturity from milestones, closes accepted/tagged M6, and removes stale current M7 hardening/release wording
 
-- [ ] M7.1 — Animation presentation architecture
+- [x] M7.1 — Animation presentation architecture
   - depends: M7.0 PASS; risk: HIGH; agent: Codex; isolation: sequential
   - outcome: typed immutable projection from authoritative snapshots; deterministic phase progress; backend-neutral transition contract
   - non-goals: gameplay timers/transitions, root motion, GLTF pipeline
   - verifier: focused animation architecture tests; lint; typecheck; `git diff --check`
+  - evidence: PASS — immutable backend-neutral presentation state projects explicit precedence, authoritative facing/velocity, committed action phase, and deterministic normalized progress; 8 focused tests plus lint/typecheck/diff green; no gameplay authority changes
 
 - [ ] M7.2 — Player animation state foundation
   - depends: M7.1 PASS; risk: MEDIUM; agent: Codex; isolation: sequential
