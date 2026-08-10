@@ -17,23 +17,33 @@ export function resolveEnemyProceduralPose(
 ): EnemyProceduralPose {
   const progress = state.action?.normalizedPhaseProgress ?? 0
   const phase = state.action?.phase ?? 'idle'
+  const aggressiveLean = tuning.locomotionCadence > 0.14 ? 0.12 : 0.04
 
   switch (state.mode) {
     case 'defeated':
-      return pose({ bodyOffsetY: -0.42, bodyRoll: Math.PI / 2, bodyScaleY: 0.2 })
+      return pose({
+        bodyOffsetY: -0.36,
+        bodyRoll: Math.PI / 2.2,
+        bodyScaleY: 0.26,
+        bodyPitch: 0.12,
+        weaponPitch: 0.4,
+      })
     case 'hit-reaction':
       return pose({
         bodyPitch: -tuning.hitRecoil,
-        bodyRoll: tuning.hitRecoil * 0.45,
-        weaponPitch: tuning.hitRecoil * 0.6,
+        bodyRoll: tuning.hitRecoil * 0.4,
+        bodyOffsetY: -0.02,
+        weaponPitch: tuning.hitRecoil * 0.55,
       })
     case 'locomotion': {
       const cycle = simulationStep * tuning.locomotionCadence
+      const stride = Math.sin(cycle)
       return pose({
-        bodyOffsetY: Math.abs(Math.sin(cycle)) * tuning.idleAmplitude * 1.35,
-        bodyPitch: 0.08 + Math.sin(cycle) * 0.035,
-        bodyRoll: Math.sin(cycle * 0.5) * 0.035,
-        weaponPitch: Math.sin(cycle) * 0.12,
+        // Planted cadence — avoid abs(sin) toy bounce.
+        bodyOffsetY: Math.abs(stride) * tuning.idleAmplitude * 0.55,
+        bodyPitch: aggressiveLean + stride * 0.03,
+        bodyRoll: stride * (tuning.locomotionCadence > 0.14 ? 0.045 : 0.02),
+        weaponPitch: stride * (tuning.locomotionCadence > 0.14 ? 0.16 : 0.08),
       })
     }
     case 'enemy-attack': {
@@ -41,22 +51,31 @@ export function resolveEnemyProceduralPose(
       const strike = phase === 'active' ? Math.sin(progress * Math.PI) : 0
       const recovery = phase === 'recovery' ? 1 - progress : 0
       return pose({
-        bodyOffsetY: -0.035 * (anticipation + strike),
-        bodyPitch: -tuning.attackAnticipation * anticipation +
-          tuning.attackSwing * strike + tuning.recoveryWeight * recovery,
-        bodyRoll: -tuning.attackAnticipation * 0.25 * anticipation +
-          tuning.attackSwing * 0.28 * strike,
-        weaponPitch: -tuning.attackAnticipation * anticipation +
-          tuning.attackSwing * strike,
-        weaponYaw: -tuning.attackSwing * 0.35 * anticipation +
-          tuning.attackSwing * 0.7 * strike,
+        bodyOffsetY: -0.04 * anticipation - 0.05 * strike,
+        bodyPitch:
+          -tuning.attackAnticipation * anticipation +
+          tuning.attackSwing * strike +
+          tuning.recoveryWeight * recovery,
+        bodyRoll:
+          -tuning.attackAnticipation * 0.3 * anticipation +
+          tuning.attackSwing * 0.32 * strike,
+        weaponPitch:
+          -tuning.attackAnticipation * anticipation +
+          tuning.attackSwing * strike +
+          tuning.recoveryWeight * 0.35 * recovery,
+        weaponYaw:
+          -tuning.attackSwing * 0.4 * anticipation +
+          tuning.attackSwing * 0.75 * strike,
       })
     }
     case 'idle':
       return pose({
-        bodyOffsetY: Math.sin(simulationStep * tuning.locomotionCadence * 0.35) *
-          tuning.idleAmplitude,
-        bodyPitch: Math.sin(simulationStep * 0.035) * tuning.idleAmplitude,
+        bodyOffsetY:
+          Math.sin(simulationStep * tuning.locomotionCadence * 0.22) *
+          tuning.idleAmplitude *
+          0.65,
+        bodyPitch: aggressiveLean * 0.35 + Math.sin(simulationStep * 0.025) * tuning.idleAmplitude,
+        weaponPitch: Math.sin(simulationStep * 0.02) * tuning.idleAmplitude * 0.8,
       })
     case 'guard':
     case 'dodge':

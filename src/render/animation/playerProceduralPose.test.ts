@@ -56,8 +56,8 @@ describe('player procedural pose', () => {
   it('makes defeat a stable override pose', () => {
     expect(resolvePlayerProceduralPose(state('defeated'), 1)).toMatchObject({
       defeated: true,
-      bodyScaleY: 0.2,
-      bodyRoll: Math.PI / 2,
+      bodyScaleY: 0.28,
+      bodyRoll: Math.PI / 2.35,
     })
   })
 })

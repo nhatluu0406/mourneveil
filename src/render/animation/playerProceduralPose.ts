@@ -22,44 +22,57 @@ export function resolvePlayerProceduralPose(
 ): PlayerProceduralPose {
   const progress = state.action?.normalizedPhaseProgress ?? 0
   const phase = state.action?.phase ?? 'idle'
-  const breath = Math.sin(simulationStep * 0.045)
-  const locomotionCycle = simulationStep * (0.11 + Math.min(state.locomotionSpeed, 5) * 0.025)
+  // Slow restrained breath — no toy bounce / scale pulse.
+  const breath = Math.sin(simulationStep * 0.028)
+  const speed = Math.min(state.locomotionSpeed, PLAYER_MOVE_SPEED_REF)
+  const locomotionCycle = simulationStep * (0.09 + speed * 0.022)
 
   switch (state.mode) {
     case 'defeated':
       return pose({
-        bodyOffsetY: -0.38,
-        bodyScaleY: 0.2,
-        bodyRoll: Math.PI / 2,
-        torsoPitch: 0.25,
+        bodyOffsetY: -0.32,
+        bodyOffsetX: 0.06,
+        bodyScaleY: 0.28,
+        bodyScaleZ: 0.92,
+        bodyRoll: Math.PI / 2.35,
+        torsoPitch: 0.18,
+        leftArmPitch: 0.35,
+        rightArmPitch: -0.2,
+        weaponPitch: 0.55,
         defeated: true,
       })
     case 'dodge':
       return pose({
-        bodyOffsetX: 0.14,
-        bodyOffsetY: -0.04,
-        bodyScaleX: 0.94,
-        bodyScaleY: 0.9,
-        bodyScaleZ: 1.06,
-        torsoPitch: 0.34,
-        limbSwing: 0.45,
+        bodyOffsetX: 0.18,
+        bodyOffsetY: -0.06,
+        bodyScaleX: 0.92,
+        bodyScaleY: 0.88,
+        bodyScaleZ: 1.1,
+        torsoPitch: 0.42,
+        bodyRoll: -0.08,
+        limbSwing: 0.55,
+        leftArmPitch: 0.35,
+        rightArmPitch: -0.55,
+        weaponPitch: 0.2,
       })
     case 'guard':
       return pose({
-        bodyOffsetY: breath * 0.006,
-        torsoPitch: -0.12,
-        leftArmPitch: -0.8,
-        rightArmPitch: -0.55,
-        weaponPitch: -0.35,
+        bodyOffsetY: breath * 0.003,
+        bodyScaleZ: 1.02,
+        torsoPitch: -0.16,
+        bodyRoll: 0.04,
+        leftArmPitch: -0.95,
+        rightArmPitch: -0.72,
+        weaponPitch: -0.48,
       })
     case 'heal': {
-      const lift = phase === 'startup' ? progress : phase === 'active' ? 1 : 1 - progress
+      const lift = phase === 'startup' ? progress : phase === 'active' ? 1 : 1 - progress * 0.85
       return pose({
-        bodyOffsetY: breath * 0.004,
-        torsoPitch: -0.08 * lift,
-        leftArmPitch: -1.25 * lift,
-        rightArmPitch: -1.05 * lift,
-        weaponPitch: 0.7 * lift,
+        bodyOffsetY: breath * 0.002 - 0.01 * lift,
+        torsoPitch: -0.12 * lift,
+        leftArmPitch: -1.15 * lift,
+        rightArmPitch: -0.35 * lift,
+        weaponPitch: 0.55 * lift,
       })
     }
     case 'light-attack':
@@ -69,49 +82,62 @@ export function resolvePlayerProceduralPose(
       const strike = phase === 'active' ? Math.sin(progress * Math.PI) : 0
       const recovery = phase === 'recovery' ? 1 - progress : 0
       return pose({
-        bodyOffsetY: -0.025 * (anticipation + strike),
-        torsoPitch: (heavy ? -0.35 : -0.2) * anticipation +
-          (heavy ? 0.42 : 0.26) * strike + 0.12 * recovery,
-        bodyRoll: (heavy ? -0.18 : -0.1) * anticipation +
-          (heavy ? 0.22 : 0.14) * strike,
-        leftArmPitch: -0.35 * anticipation + 0.45 * strike,
-        rightArmPitch: (heavy ? -1.05 : -0.72) * anticipation +
-          (heavy ? 1.2 : 0.92) * strike,
-        weaponPitch: (heavy ? -0.42 : -0.24) * anticipation +
-          (heavy ? 0.35 : 0.2) * strike,
+        bodyOffsetY: -0.02 * anticipation - (heavy ? 0.04 : 0.015) * strike,
+        torsoPitch:
+          (heavy ? -0.48 : -0.18) * anticipation +
+          (heavy ? 0.55 : 0.28) * strike +
+          (heavy ? 0.2 : 0.08) * recovery,
+        bodyRoll:
+          (heavy ? -0.22 : -0.08) * anticipation + (heavy ? 0.28 : 0.12) * strike,
+        leftArmPitch: -0.28 * anticipation + 0.5 * strike,
+        rightArmPitch:
+          (heavy ? -1.25 : -0.68) * anticipation + (heavy ? 1.35 : 0.98) * strike,
+        weaponPitch:
+          (heavy ? -0.55 : -0.2) * anticipation +
+          (heavy ? 0.48 : 0.32) * strike +
+          0.1 * recovery,
+        limbSwing: 0.12 * strike,
       })
     }
     case 'hit-reaction':
       return pose({
-        bodyOffsetX: -0.06,
-        bodyRoll: -0.12,
-        torsoPitch: -0.24,
-        leftArmPitch: 0.3,
-        rightArmPitch: 0.38,
+        bodyOffsetX: -0.05,
+        bodyOffsetY: -0.015,
+        bodyRoll: -0.1,
+        torsoPitch: -0.2,
+        leftArmPitch: 0.22,
+        rightArmPitch: 0.28,
+        weaponPitch: 0.12,
       })
     case 'locomotion': {
-      const stride = Math.sin(locomotionCycle) * Math.min(0.72, 0.16 + state.locomotionSpeed * 0.1)
+      const stride =
+        Math.sin(locomotionCycle) * Math.min(0.78, 0.2 + speed * 0.11)
+      // Grounded vertical settle — avoid marching bounce.
+      const settle = Math.abs(Math.sin(locomotionCycle)) * 0.008
       return pose({
-        bodyOffsetY: Math.abs(Math.sin(locomotionCycle)) * 0.018,
-        torsoPitch: 0.09,
+        bodyOffsetY: settle,
+        torsoPitch: 0.07 + speed * 0.008,
         limbSwing: stride,
-        leftArmPitch: -stride * 0.65,
-        rightArmPitch: stride * 0.65,
+        leftArmPitch: -stride * 0.72,
+        rightArmPitch: stride * 0.72,
+        weaponPitch: stride * 0.08,
       })
     }
     case 'idle':
       return pose({
-        bodyOffsetY: breath * 0.008,
-        bodyScaleY: 1 + breath * 0.006,
-        torsoPitch: breath * 0.012,
-        leftArmPitch: -0.05 + breath * 0.015,
-        rightArmPitch: 0.04 - breath * 0.012,
-        weaponPitch: 0.05 + breath * 0.01,
+        bodyOffsetY: breath * 0.004,
+        torsoPitch: breath * 0.008,
+        bodyRoll: breath * 0.004,
+        leftArmPitch: -0.06 + breath * 0.01,
+        rightArmPitch: 0.05 - breath * 0.008,
+        weaponPitch: 0.04 + breath * 0.012,
       })
     case 'enemy-attack':
       return pose({})
   }
 }
+
+const PLAYER_MOVE_SPEED_REF = 4
 
 function pose(overrides: Partial<PlayerProceduralPose>): PlayerProceduralPose {
   return {
