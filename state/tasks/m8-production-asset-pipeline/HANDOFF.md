@@ -5,7 +5,7 @@ Task: m8-production-asset-pipeline
 
 ## Status
 
-**ACTIVE — macro-batch 1 implementation complete; final gate pending.** M8 remains open; M9 not started.
+**ACTIVE — macro-batch 1 complete.** M8 remains open; M9 not started.
 
 ## Repository truth
 
@@ -40,4 +40,20 @@ Task: m8-production-asset-pipeline
 
 ## Next
 
-Run the full repository/LeanLoop gate, refresh REPOMAP, and record browser limitation. Do not expand into character assets, broad environment art, M9, controller, or remote delivery.
+## Verification
+
+- Focused baseline: 17 checkpoint/respawn/authoring/HUD/navigation tests.
+- Focused asset/integration: asset import/verify; validator/reference/presentation/save/respawn/M7 animation regressions passed.
+- Full: `npm run verify` PASS — 65 files / 266 tests, lint, typecheck, asset-validated Vite production build.
+- `git diff --check`, LeanLoop doctor strict, and sync check PASS; REPOMAP refreshed.
+- In-app browser discovery returned no browser backend. Fresh-start, interaction, death/respawn, visible GLTF load, and console observations were therefore not manually claimed. Automated placement/physics and asset-boundary evidence is green.
+
+## Unresolved risks
+
+- Product Owner visual acceptance of shrine scale/material/readability and spawn clearance remains required in a controllable browser.
+- The first contract intentionally supports one embedded-buffer text glTF. Binary GLB, external textures, compression, skinned assets, and asset budgets remain future M8 decisions.
+- Existing Vite chunk-size warning remains non-blocking and predates this slice.
+
+## Recommended next M8 macro-batch
+
+Add one production-character static/skinned import proof only after choosing owned/licensed source assets and defining texture/binary size policy. Preserve the M7 animation-presentation contract; do not begin broad retargeting or M9.

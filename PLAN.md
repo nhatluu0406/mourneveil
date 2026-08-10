@@ -32,12 +32,13 @@ Task slug: `m8-production-asset-pipeline` (`python3 scripts/leanloop/task.py sta
   - owns/allows: checkpoint source/runtime asset, checkpoint renderer, focused render/asset tests, provenance record
   - verifier: `npm run assets:verify && npm run test -- src/render/CheckpointVisual.test.tsx src/game/world/checkpoint.test.ts`
   - evidence: PASS; canonical GLTF load projection, actionable missing-asset test, 8 focused tests, lint/typecheck/build.
-- [ ] 3. Complete M8 macro-batch verification and durable state
+- [x] 3. Complete M8 macro-batch verification and durable state
   - depends: 2
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: browser/runtime gate where available, PLAN/HANDOFF/CHECKPOINT/current-state/REPOMAP, focused fixes only
   - verifier: `npm run verify && git diff --check && python3 scripts/leanloop/doctor.py --strict && python3 scripts/leanloop/sync.py --check`
+  - evidence: PASS; 65 files/266 tests, lint, typecheck, asset-validated production build, diff check, doctor, sync. Browser backend unavailable and recorded.
 
 ## Parallel groups
 

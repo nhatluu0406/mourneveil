@@ -1,6 +1,7 @@
 import RAPIER from '@dimforge/rapier3d-compat'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { Vector3Value } from '../game/character/playerMotor'
+import { CONNECTED_LEVEL_CHECKPOINT_DEFINITION } from '../game/world/checkpoint'
 import { activeConnectedLevelColliders } from './connectedLevelCollision'
 import {
   CHARACTER_COLLISION_OFFSET,
@@ -19,7 +20,7 @@ describe('connected graybox Rapier collision', () => {
     const route = [
       { x: -10, y: 0.82, z: 6 },
       { x: -9, y: 0.82, z: 2 },
-      { x: -6, y: 0.82, z: 0 },
+      CONNECTED_LEVEL_CHECKPOINT_DEFINITION.interactionPosition,
       { x: -6, y: 0.82, z: -5.8 },
       { x: -2.2, y: 0.82, z: -5.8 },
       { x: 2, y: 0.82, z: -4 },
