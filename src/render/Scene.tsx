@@ -10,7 +10,10 @@ import type { CameraDiagnostic } from './followCamera'
 import { CheckpointVisual } from './CheckpointVisual'
 import { EchoRecoveryVisual } from './EchoRecoveryVisual'
 import { LootPickupVisual } from './LootPickupVisual'
-import { ConnectedLevelVisual } from './ConnectedLevelVisual'
+import {
+  CameraOcclusionFader,
+  ConnectedLevelVisual,
+} from './ConnectedLevelVisual'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 
 interface SceneProps {
@@ -34,6 +37,7 @@ function GameWorld({ onPhysicsReady, runtime }: SceneProps) {
     <Physics gravity={[0, -9.81, 0]} timeStep={FIXED_STEP_SECONDS}>
       <PhysicsReadySignal onReady={onPhysicsReady} />
       <ConnectedLevelVisual runtime={runtime} />
+      <CameraOcclusionFader runtime={runtime} />
       <CheckpointVisual runtime={runtime} />
       <EchoRecoveryVisual runtime={runtime} />
       <LootPickupVisual runtime={runtime} />
