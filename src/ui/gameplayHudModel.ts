@@ -25,7 +25,7 @@ export function resolveGameplayInteractionPrompt(
 
   const player = snapshot.player.position
   if (
-    horizontalDistance(player, CONNECTED_LEVEL_CHECKPOINT_DEFINITION.respawnPosition) <=
+    horizontalDistance(player, CONNECTED_LEVEL_CHECKPOINT_DEFINITION.interactionPosition) <=
     CONNECTED_LEVEL_CHECKPOINT_DEFINITION.activationRange
   ) {
     return 'F — Rest'

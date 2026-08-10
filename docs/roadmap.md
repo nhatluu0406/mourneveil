@@ -12,8 +12,8 @@ This is a directional product roadmap, not an immutable feature contract. Milest
 
 | Milestone | Focus |
 | --- | --- |
-| **M7** | Animation & Character Feel — **PO acceptance pending** |
-| **M8** | Production Asset Pipeline |
+| **M7** | Animation & Character Feel — **PRODUCT OWNER ACCEPTED** (`v0.7.0-animation-foundation`) |
+| **M8** | Production Asset Pipeline — **ACTIVE** |
 | **M9** | Combat Depth |
 | **M10** | Ranged / Magic |
 | **M11** | Boss Vertical Slice |
@@ -49,7 +49,7 @@ Versions describe product maturity; milestones describe development work. One ve
 
 - `v0.5` — connected RPG loop
 - `v0.6` — presentation foundation
-- `v0.7` — animated combat / production-slice progression (`v0.7.0-animation-foundation` intended after M7 acceptance)
+- `v0.7` — animated combat / production-slice progression (`v0.7.0-animation-foundation`)
 - `v0.8` — vertical-slice alpha
 - `v0.9` — content beta
 - `v1.0` — first production release

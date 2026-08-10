@@ -1,9 +1,9 @@
 # Current State
 
 - Updated: 2026-08-11
-- Accepted release: **`v0.6.0-presentation-foundation`** (M6)
-- Active task: `m7-animation-character-feel`
-- Status: **M7 READY FOR PRODUCT OWNER ACCEPTANCE** (M7.0–M7.6 complete; not self-accepted). M8 not started.
+- Accepted release: **`v0.7.0-animation-foundation`** (M7)
+- Active task: `m8-production-asset-pipeline`
+- Status: **M8 ACTIVE** — production asset pipeline macro-batch 1.
 
 ## What exists
 
@@ -14,10 +14,9 @@
 
 ## Highest-value limitations
 
-- Procedural characters/environments only (production assets → M8)
+- Procedural characters/environments remain except for M8 production-asset vertical slices
 - Two melee roles; authored navigation; controller deferred
 
 ## Next executable work
 
-1. Product Owner accepts M7 (then tag `v0.7.0-animation-foundation` if authorized)
-2. Initialize **M8 Production Asset Pipeline** (new task + replace `PLAN.md`)
+Execute the active M8 steps in `PLAN.md`; do not start M9.

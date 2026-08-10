@@ -1,4 +1,5 @@
 import type { Vector3Value } from '../character/playerMotor'
+import { CONNECTED_LEVEL_CHECKPOINT_DEFINITION } from './checkpoint'
 import {
   MOURNEVEIL_CONNECTED_LEVEL,
   type ConnectedLevelDefinition,
@@ -33,11 +34,15 @@ const ZONE_CENTER_NODES: readonly ConnectedNavigationNode[] =
     Object.freeze({
       id: `nav.zone.${zone.id}`,
       zoneId: zone.id,
-      position: Object.freeze({
-        x: (zone.bounds.minimumX + zone.bounds.maximumX) / 2,
-        y: 0.82,
-        z: (zone.bounds.minimumZ + zone.bounds.maximumZ) / 2,
-      }),
+      position: Object.freeze(
+        zone.id === 'zone.checkpoint'
+          ? { ...CONNECTED_LEVEL_CHECKPOINT_DEFINITION.interactionPosition }
+          : {
+              x: (zone.bounds.minimumX + zone.bounds.maximumX) / 2,
+              y: 0.82,
+              z: (zone.bounds.minimumZ + zone.bounds.maximumZ) / 2,
+            },
+      ),
       connectionId: null,
     }),
   )

@@ -52,10 +52,21 @@ def main() -> int:
             print(f"  {name}")
         return 1
 
-    add = git(root, "add", "--", *allowed)
-    if add.returncode:
-        print(add.stderr.strip() or "FAIL: git add failed")
-        return add.returncode
+    existing = [path for path in allowed if (root / path).exists()]
+    deleted = [
+        path for path in allowed
+        if not (root / path).exists() and path not in already
+    ]
+    for paths, mode in ((existing, None), (deleted, "--update")):
+        if not paths:
+            continue
+        add_args = ["add"]
+        if mode is not None:
+            add_args.append(mode)
+        add = git(root, *add_args, "--", *paths)
+        if add.returncode:
+            print(add.stderr.strip() or "FAIL: git add failed")
+            return add.returncode
     staged = [x for x in git(root, "diff", "--cached", "--name-only").stdout.splitlines() if x]
     unexpected = sorted(set(staged) - set(allowed))
     if unexpected:

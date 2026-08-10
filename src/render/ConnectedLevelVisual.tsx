@@ -20,6 +20,7 @@ const COLORS = {
   floor: MOURNEVEIL_PALETTE.environment.floor,
   wall: MOURNEVEIL_PALETTE.environment.wall,
   blocker: MOURNEVEIL_PALETTE.environment.blocker,
+  checkpoint: MOURNEVEIL_PALETTE.checkpoint.stone,
   'shortcut-gate': MOURNEVEIL_PALETTE.shortcut.closed,
   'final-gate': MOURNEVEIL_PALETTE.finalGate.sealed,
 } as const
@@ -58,25 +59,27 @@ function SolidVisual({
   return (
     <RigidBody type="fixed" colliders={false} position={collider.position}>
       <CuboidCollider args={halfExtents} />
-      <mesh castShadow={!isFloor} receiveShadow userData={{ solidId: collider.id }}>
-        <boxGeometry args={collider.size} />
-        <meshStandardMaterial
-          ref={materialRef}
-          color={color}
-          roughness={isGate ? 0.55 : 0.9}
-          metalness={isGate ? 0.18 : 0.02}
-          emissive={
-            collider.kind === 'final-gate'
-              ? MOURNEVEIL_PALETTE.finalGate.emissive
-              : collider.kind === 'shortcut-gate'
-                ? MOURNEVEIL_PALETTE.shortcut.emissive
-                : '#000000'
-          }
-          transparent
-          opacity={1}
-          depthWrite
-        />
-      </mesh>
+      {collider.kind === 'checkpoint' ? null : (
+        <mesh castShadow={!isFloor} receiveShadow userData={{ solidId: collider.id }}>
+          <boxGeometry args={collider.size} />
+          <meshStandardMaterial
+            ref={materialRef}
+            color={color}
+            roughness={isGate ? 0.55 : 0.9}
+            metalness={isGate ? 0.18 : 0.02}
+            emissive={
+              collider.kind === 'final-gate'
+                ? MOURNEVEIL_PALETTE.finalGate.emissive
+                : collider.kind === 'shortcut-gate'
+                  ? MOURNEVEIL_PALETTE.shortcut.emissive
+                  : '#000000'
+            }
+            transparent
+            opacity={1}
+            depthWrite
+          />
+        </mesh>
+      )}
     </RigidBody>
   )
 }

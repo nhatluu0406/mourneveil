@@ -5,9 +5,7 @@ Task: m7-animation-character-feel
 
 ## Status
 
-**READY FOR PRODUCT OWNER ACCEPTANCE.** M7.0–M7.6 complete on `main`. Agent does **not** self-accept. M8 not started.
-
-Intended acceptance tag (create only after PO acceptance + push + clean tree): `v0.7.0-animation-foundation`.
+**CLOSED — PRODUCT OWNER ACCEPTED.** M7.0–M7.6 complete on `main`; local tag `v0.7.0-animation-foundation` resolves to the accepted closure commit `c93f083`.
 
 ## Summary
 
@@ -59,4 +57,4 @@ Intended acceptance tag (create only after PO acceptance + push + clean tree): `
 
 ## Next milestone
 
-After Product Owner acceptance: **M8 — Production Asset Pipeline** (`m8-production-asset-pipeline`). Do not create that task or rewrite PLAN for M8 until acceptance.
+**M8 — Production Asset Pipeline** (`m8-production-asset-pipeline`) is authorized next.

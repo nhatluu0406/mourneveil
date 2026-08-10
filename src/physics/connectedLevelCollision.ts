@@ -1,7 +1,10 @@
+import { CONNECTED_LEVEL_CHECKPOINT_DEFINITION } from '../game/world/checkpoint'
+
 export type ConnectedLevelColliderKind =
   | 'floor'
   | 'wall'
   | 'blocker'
+  | 'checkpoint'
   | 'shortcut-gate'
   | 'final-gate'
 
@@ -54,6 +57,17 @@ export const CONNECTED_LEVEL_COLLIDERS: readonly ConnectedLevelBoxCollider[] = O
   box('blocker.mixed.west', 'blocker', [0, 0.75, -5.8], [1, 1.5, 1]),
   box('blocker.mixed.east', 'blocker', [2.7, 0.75, -2], [1, 1.5, 1]),
   box('blocker.approach', 'blocker', [7.2, 0.75, -6.1], [0.9, 1.5, 0.9]),
+
+  box(
+    'checkpoint.refuge.proxy',
+    'checkpoint',
+    [
+      CONNECTED_LEVEL_CHECKPOINT_DEFINITION.visualPosition.x,
+      CONNECTED_LEVEL_CHECKPOINT_DEFINITION.collisionSize[1] / 2,
+      CONNECTED_LEVEL_CHECKPOINT_DEFINITION.visualPosition.z,
+    ],
+    CONNECTED_LEVEL_CHECKPOINT_DEFINITION.collisionSize,
+  ),
 
   ...CONNECTED_LEVEL_LANDMARKS,
 ])

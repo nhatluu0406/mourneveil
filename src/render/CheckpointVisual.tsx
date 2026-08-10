@@ -35,7 +35,7 @@ export function CheckpointVisual({ runtime }: { readonly runtime: GameRuntime })
   })
 
   return (
-    <group position={[checkpoint.respawnPosition.x, 0, checkpoint.respawnPosition.z]}>
+    <group position={[checkpoint.visualPosition.x, checkpoint.visualPosition.y, checkpoint.visualPosition.z]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <ringGeometry args={[0.85, 1.35, 32]} />
         <meshStandardMaterial ref={ringRef} roughness={0.55} />
