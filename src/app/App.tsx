@@ -16,6 +16,8 @@ export function App() {
   const [physicsReady, setPhysicsReady] = useState(false)
   const [cameraDiagnostic, setCameraDiagnostic] =
     useState<CameraDiagnostic | null>(null)
+  const [devDetailsVisible, setDevDetailsVisible] = useState(false)
+  const [inventoryOpen, setInventoryOpen] = useState(false)
   const {
     runtime,
     snapshot: runtimeSnapshot,
@@ -39,6 +41,32 @@ export function App() {
     if (!import.meta.env.DEV) return
     return installDevelopmentBrowserGate(runtime)
   }, [runtime])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return
+      const target = event.target
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+      if (event.code === 'KeyI') {
+        event.preventDefault()
+        setInventoryOpen((value) => !value)
+        return
+      }
+      if (import.meta.env.DEV && event.code === 'F3') {
+        event.preventDefault()
+        setDevDetailsVisible((value) => !value)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   return (
     <main className="app-shell">
@@ -80,16 +108,25 @@ export function App() {
         </Canvas>
       </RenderErrorBoundary>
       <GameplayHud snapshot={runtimeSnapshot} />
+      <InventoryEquipmentPanel
+        snapshot={runtimeSnapshot}
+        runtime={runtime}
+        open={inventoryOpen}
+        onClose={() => setInventoryOpen(false)}
+      />
       {import.meta.env.DEV ? (
         <DevelopmentPanel
           diagnostic={diagnostic}
           camera={cameraDiagnostic}
+          visible={devDetailsVisible}
           onResetTrainingTarget={() => runtime.resetTrainingTarget()}
           onRestorePlayerForDevelopment={() => runtime.restorePlayerForDevelopment()}
           onResetMeleeFixture={() => runtime.resetMeleeFixture()}
         />
       ) : null}
-      <InventoryEquipmentPanel snapshot={runtimeSnapshot} runtime={runtime} />
+      {import.meta.env.DEV && !devDetailsVisible ? (
+        <p className="dev-hint">F3 — Development Details</p>
+      ) : null}
     </main>
   )
 }
