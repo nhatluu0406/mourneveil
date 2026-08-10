@@ -113,6 +113,7 @@ Replace the combat-test arena with one small connected graybox level that suppor
 
 # PLAN: M6 Presentation and Playable Identity
 <!-- Presentation milestone. Do not change combat/world authority. -->
+Task slug: `m6-presentation` (`python3 scripts/leanloop/task.py start m6-presentation`)
 
 ## Goal
 
@@ -125,6 +126,7 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
 - Centralized dark-fantasy palette, lighting, environment composition
 - Combat/interaction presentation polish driven by authoritative events
 - Full browser playthrough + M5 correctness regressions + production boundary
+- PO visual-quality correction: state separation, occlusion/solidity truth, game-grade UI, raised actor/environment quality
 
 ## Non-goals
 
@@ -192,7 +194,43 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: bounded visual/UI cleanup; production boundary; soak
   - outcome: production build lacks DEV mutations/Details; HUD present; soak clean
   - verifier: `npm run verify`; production preview; doctor/sync; `git diff --check`
-  - evidence: PASS — production preview boundary PASS (no gate/Details; HUD+inventory present); doctor/sync OK
+  - evidence: PASS automated — PO later rejected visual quality; correction continues as M6.7–M6.10
+
+- [ ] 7. M6.7 — Repository state separation + occlusion/collision truth
+  - depends: 6 PASS + PO visual rejection
+  - risk: MEDIUM–HIGH (stop if true HIGH-risk collision redesign)
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: m6-presentation task state; decorative-solidity contract; presentation-only camera occlusion fade
+  - outcome: M5/M6 HANDOFFs separated; no fake solid visuals; actors readable behind foreground walls; no physics weaken
+  - verifier: focused occlusion tests; browser occlusion gate; lint; typecheck; `git diff --check`
+
+- [ ] 8. M6.8 — Game-grade HUD and UI redesign
+  - depends: 7 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: HUD composition, typography/frame tokens, inventory overlay, F3 DEV details, I loadout
+  - outcome: play without web-app chrome; game UI language
+  - verifier: browser UI gate; lint; typecheck; `git diff --check`
+
+- [ ] 9. M6.9 — Dark-fantasy actor/environment quality pass
+  - depends: 8 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: procedural actor silhouettes, environment breakup, lighting, combat presentation
+  - outcome: no longer reads as toy/student prototype
+  - verifier: browser quality gate; lint; typecheck; `git diff --check`
+
+- [ ] 10. M6.10 — Full presentation and correctness acceptance
+  - depends: 9 PASS
+  - risk: MEDIUM
+  - preferred agent: Cursor
+  - isolation: sequential
+  - owns/allows: screenshot-quality review; M5 regressions; production boundary; soak
+  - outcome: ready for Product Owner acceptance (agent does not self-accept)
+  - verifier: `npm run verify`; all M5/M6 gates; doctor/sync; `git diff --check`
 
 ## Parallel groups
 
@@ -207,6 +245,8 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
 - 2026-08-10 | Melee hits require overlap AND solid-world occlusion clear; M5 encounters activate on zone entry with egress leash; blocked pursuit uses authored connection/detour anchors | Product Owner M5.3.1 blockers B1–B3
 - 2026-08-10 | No environmental hazard/trap system; regional HP loss must attribute to authored enemy melee or be treated as a bug | M5.6.2 Product Owner audit
 - 2026-08-10 | M5 tagged `v0.5.0-connected-level`; authorized M5.6.2 then M6 presentation macro-batch on `main` | Explicit Product Owner authorization
+- 2026-08-11 | M6.1–M6.6 not PO-accepted; correction batch M6.7–M6.10 on task `m6-presentation`; Vesperfall is principle benchmark only | Explicit Product Owner correction
+- 2026-08-11 | Decorative non-solid geometry must not visually read as gameplay-blocking walls/pillars; camera occlusion fade is presentation-only | M6.7 solidity/occlusion contract
 
 ## Escalation
 
