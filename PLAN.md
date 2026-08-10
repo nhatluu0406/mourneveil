@@ -234,7 +234,7 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: screenshot-quality review; M5 regressions; production boundary; soak
   - outcome: ready for Product Owner acceptance (agent does not self-accept)
   - verifier: `npm run verify`; all M5/M6 gates; doctor/sync; `git diff --check`
-  - evidence: PASS automated — `gate-m610-quality`; `gate-m531`/`m561`/`m562`/`m66`/`m67`/`m68`; verify 229 tests; doctor/sync OK; **PO acceptance pending**
+  - evidence: PASS automated — `gate-m610-quality`; `gate-m531`/`m561`/`m562`/`m66`/`m67`/`m68`; verify 229 tests; doctor/sync OK; Product Owner accepted M6 on 2026-08-11
 
 ## Parallel groups
 
@@ -255,4 +255,66 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
 ## Escalation
 
 - Any failed internal gate or HIGH-risk authority conflict stops the batch before the next step.
+- Same error three times: write a stuck report under the active task and stop.
+
+# PLAN: M7 Animation & Character Feel
+Task slug: `m7-animation-character-feel` (`python3 scripts/leanloop/task.py start m7-animation-character-feel`)
+
+## Goal
+
+Establish presentation-only animation contracts and usable procedural motion for the accepted vertical slice while preserving fixed-step gameplay, contact, movement, and facing authority.
+
+## Non-goals
+
+- Production models, animation packs, GLTF registry, root-motion gameplay, boss, ranged combat, controller, deployment
+- M7B visual tuning or M8 production-asset implementation
+- Broad M1–M6 runtime refactors
+
+## Steps
+
+- [x] M7.0 — Long-term product roadmap and version train
+  - risk: MEDIUM; agent: Codex; isolation: sequential
+  - outcome: long-running release trains and milestone-independent version model; M6 accepted/closed; M7 active
+  - verifier: canonical-doc consistency search; `git diff --check`
+  - evidence: PASS — canonical roadmap now defines Foundation Slice through Release Quality, separates version maturity from milestones, closes accepted/tagged M6, and removes stale current M7 hardening/release wording
+
+- [ ] M7.1 — Animation presentation architecture
+  - depends: M7.0 PASS; risk: HIGH; agent: Codex; isolation: sequential
+  - outcome: typed immutable projection from authoritative snapshots; deterministic phase progress; backend-neutral transition contract
+  - non-goals: gameplay timers/transitions, root motion, GLTF pipeline
+  - verifier: focused animation architecture tests; lint; typecheck; `git diff --check`
+
+- [ ] M7.2 — Player animation state foundation
+  - depends: M7.1 PASS; risk: MEDIUM; agent: Codex; isolation: sequential
+  - outcome: procedural idle/locomotion/light/heavy/guard/dodge/heal/hit/defeated poses driven by presentation state
+  - verifier: focused player animation tests; browser state gate when controllable; lint; typecheck; `git diff --check`
+
+- [ ] M7.3 — Enemy animation state foundation
+  - depends: M7.2 PASS; risk: MEDIUM; agent: Codex; isolation: sequential
+  - outcome: shared enemy animation projection with authored skirmisher/brute tuning and frozen execution-facing
+  - verifier: focused enemy animation/facing tests; browser combat cycles when controllable; lint; typecheck; `git diff --check`
+
+- [ ] M7.4 — Animation integration and deterministic verification
+  - depends: M7.3 PASS; risk: MEDIUM; agent: Codex; isolation: sequential
+  - outcome: explicit precedence/transitions, clean respawn/save projection, connected-level regression evidence, M8-compatible renderer boundary
+  - verifier: focused integration tests; full repository verification; browser playthrough when controllable; doctor/sync; `git diff --check`
+
+- [ ] M7.5 — Animation feel and visual motion tuning
+  - depends: M7.4 PASS; risk: MEDIUM; agent: Cursor; isolation: sequential
+  - outcome: bounded procedural feel, camera-feedback, and screenshot/browser refinement
+  - non-goals: gameplay authority changes, production assets
+
+- [ ] M7.6 — M7 animation/content acceptance
+  - depends: M7.5 PASS; risk: MEDIUM; agent: Cursor; isolation: sequential
+  - outcome: final browser QA and Product Owner-ready M7 evidence
+  - non-goals: M8 implementation
+
+## Decisions
+
+- 2026-08-11 | M6 accepted as Presentation Foundation and existing `v0.6.0-presentation-foundation` tag preserved; M7 activated as Animation & Character Feel | Explicit Product Owner authorization
+- 2026-08-11 | Product versions describe maturity and may span multiple milestones; roadmap ranges are directional | Long-running ARPG product model
+
+## Escalation
+
+- Stop before a later step if animation requires gameplay authority, root motion, broad runtime redesign, or unresolved M5/M6 regression.
 - Same error three times: write a stuck report under the active task and stop.

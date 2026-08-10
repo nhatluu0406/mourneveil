@@ -3,7 +3,7 @@
 
 ## Identity
 - Product: Mourneveil — local-first browser 3D action RPG vertical slice (working title)
-- Priority: reliable local vertical slice; no deployment until local hardening is accepted
+- Priority: evolve a reliable local vertical slice through the long-running pre-1.0 roadmap; deployment remains deferred until release-quality milestones
 - Language of record: English (code, identifiers, commits, docs)
 
 ## Runtime & tooling

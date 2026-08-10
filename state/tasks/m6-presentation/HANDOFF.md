@@ -5,7 +5,7 @@ Task: m6-presentation
 
 ## Status
 
-**READY FOR PRODUCT OWNER ACCEPTANCE.** M6.7–M6.10 correction batch complete on `main`. Agent does **not** self-accept. M7 not started.
+**CLOSED — PRODUCT OWNER ACCEPTED.** M6.7–M6.10 correction batch completed on `main`; the Product Owner accepted M6 as Presentation Foundation on 2026-08-11. Tagged `v0.6.0-presentation-foundation` before M7 began.
 
 ## M6.7 findings
 
@@ -45,4 +45,4 @@ Boss/new roles/ranged/leveling/quests/minimap/controller/deployment/production p
 
 ## Next action
 
-Product Owner visual-quality review. Do not start M7 until accepted.
+Historical task closed. M7 state lives separately under `state/tasks/m7-animation-character-feel/`.

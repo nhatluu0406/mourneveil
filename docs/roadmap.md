@@ -1,54 +1,56 @@
 # Roadmap
 
-This is directional milestone scope, not an execution plan. Current work and evidence live in `PLAN.md` and active task state.
+This is a directional product roadmap, not an immutable feature contract. Milestone ranges may move as play evidence changes. Current work and evidence live in `PLAN.md` and the active LeanLoop task.
 
-## M0 — Project Foundation — COMPLETE
+## Foundation Slice — M0–M6 — PRODUCT OWNER ACCEPTED
 
-- Repository governance and local Vite/React/TypeScript scaffold
-- React Three Fiber, Three.js, Rapier, tests, and minimal CI
-- Strict TypeScript and local runtime proof
+- Project foundation, movement, combat, enemies, and the core RPG loop
+- One connected graybox level with checkpoint, shortcut, recovery, loot, and save
+- Presentation foundation for a coherent procedural dark-fantasy slice
+- Release train position: `v0.5` connected RPG loop, `v0.6` presentation foundation
 
-## M1 — Graybox Movement — PRODUCT OWNER ACCEPTED
+## Vertical Slice Alpha — approximately M7–M12
 
-- Fixed-step simulation, semantic movement intent, collision, grounding, and high-oblique camera
-- Keyboard/mouse primary input and gamepad movement adapter
-- Focus/input lifecycle handling and deterministic diagnostics
-- Physical controller acceptance remains deferred to later input hardening
+- Animation and character feel
+- Production character/environment asset pipeline
+- Combat depth and ranged/magic breadth
+- First boss vertical slice
+- Vertical-slice alpha acceptance
+- Directional version targets: `v0.7` animated combat and production-slice progression; `v0.8` vertical-slice alpha
 
-## M2 — Combat Proof — PRODUCT OWNER ACCEPTED
+## Playable Alpha — approximately M13–M20
 
-- Light/heavy attacks, dodge, guard, explicit action timing, contact authority, and damage
-- Canvas-local combat input, execution-facing snapshot, and deterministic combat fixtures
+- Deeper itemization, stats, progression, and player build identity
+- Larger enemy roster and encounter systems
+- Expanded connected world
+- NPC interaction and environmental lore
+- Playable-alpha acceptance
 
-## M3 — Enemy Framework — PRODUCT OWNER ACCEPTED
+## Content Beta — approximately M21–M28
 
-- Two proven melee roles: skirmisher and brute
-- Perception, pursuit, local collision-aware steering, spacing, telegraphs, attacks, health, and defeat
-- Mixed encounter lifecycle and deterministic browser/long-run verification
-- Navmesh/pathfinding and a third normal role remain deferred
+- Additional regions, bosses, weapons, and movesets
+- Production audio, music, and VFX
+- Advanced UI/UX, accessibility, and controller support
+- Full-content verification and directional `v0.9` content beta
 
-## M4 — Core RPG Loop — PRODUCT OWNER ACCEPTED / CLOSED
+## Release Quality — M29+
 
-- Canonical player health/death, checkpoint/respawn, and limited healing flask
-- Echoes reward, death drop, and recovery
-- Deterministic loot, inventory, weapon/charm equipment, and canonical derived modifiers
-- Versioned local save of stable gameplay facts
+- Performance and save-migration soak
+- Compatibility, packaging, deployment, and release pipeline
+- Accessibility and reliability hardening
+- Release candidates and `v1.0` first production release
 
-## M5 — Connected Level — NEXT / NOT STARTED
+## Version train
 
-- One connected area with mixed encounters
-- One meaningful shortcut
-- Elite and boss progression
-- Completion reward
+Versions describe product maturity; milestones describe development work. One version may contain several milestones.
 
-## M6 — Presentation
+- `v0.5` — connected RPG loop
+- `v0.6` — presentation foundation
+- `v0.7` — animated combat / production-slice progression
+- `v0.8` — vertical-slice alpha
+- `v0.9` — content beta
+- `v1.0` — first production release
 
-- Art direction, character/enemy assets, production HUD, VFX, audio, asset ledger, and accessibility basics
+## Current milestone
 
-## M7 — Local Hardening
-
-- Repeated playthroughs, save/restart, controller/reconnect, focus loss, aspect ratios, performance, fresh-clone reproduction, and production-build acceptance
-
-## Deployment gate
-
-Deployment planning begins only after local hardening and vertical-slice stability are accepted.
+M7 is **Animation & Character Feel**. It establishes presentation-only animation contracts and procedural motion before the production asset pipeline. It is neither release hardening nor the final milestone.
