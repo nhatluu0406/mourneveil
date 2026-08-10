@@ -7,10 +7,6 @@ import {
   PLAYER_CAPSULE_RADIUS,
 } from '../physics/playerCollisionConfig'
 import {
-  PLAYER_FACING_MARKER_POSITION,
-  PLAYER_FACING_MARKER_SIZE,
-} from './playerVisualConfig'
-import {
   computePlayerAttackPresentationPose,
   resolveAttackPresentationFacing,
 } from './playerAttackPresentation'
@@ -26,7 +22,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const contactShapeRef = useRef<Mesh>(null)
   const guardMarkerRef = useRef<Mesh>(null)
   const torsoMaterialRef = useRef<MeshStandardMaterial>(null)
-  const headMaterialRef = useRef<MeshStandardMaterial>(null)
+  const cloakMaterialRef = useRef<MeshStandardMaterial>(null)
 
   useFrame(() => {
     const snapshot = runtime.snapshot()
@@ -38,7 +34,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     const contactShape = contactShapeRef.current
     const guardMarker = guardMarkerRef.current
     const torsoMaterial = torsoMaterialRef.current
-    const headMaterial = headMaterialRef.current
+    const cloakMaterial = cloakMaterialRef.current
     if (
       facingGroup === null ||
       bodyGroup === null ||
@@ -48,7 +44,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       contactShape === null ||
       guardMarker === null ||
       torsoMaterial === null ||
-      headMaterial === null
+      cloakMaterial === null
     ) {
       return
     }
@@ -58,16 +54,16 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     facingGroup.rotation.y = localNegativeZFacingYaw(facing)
     const pose = computePlayerAttackPresentationPose(snapshot.combat)
     weapon.visible = pose.weaponVisible
-    weapon.position.set(0.22, 0.12, pose.weaponForwardOffset)
+    weapon.position.set(0.28, 0.05, pose.weaponForwardOffset)
     weaponSweep.rotation.y = pose.weaponYawRadians
     weaponMaterial.color.set(pose.color)
 
     const alive = snapshot.playerHealth.health.alive
     const dodging = snapshot.defense.dodgeMovementActive
-    bodyGroup.scale.set(dodging ? 0.92 : 1, alive ? (dodging ? 0.92 : 1) : 0.22, dodging ? 1.08 : 1)
+    bodyGroup.scale.set(dodging ? 0.94 : 1, alive ? (dodging ? 0.9 : 1) : 0.2, dodging ? 1.06 : 1)
     bodyGroup.rotation.z = alive ? 0 : Math.PI / 2
-    bodyGroup.position.y = alive ? 0 : -0.35
-    bodyGroup.position.x = dodging ? 0.12 : 0
+    bodyGroup.position.y = alive ? 0 : -0.38
+    bodyGroup.position.x = dodging ? 0.14 : 0
 
     const lastHit = snapshot.incomingContact.lastHit
     const flash =
@@ -75,9 +71,9 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       lastHit !== null &&
       lastHit.outcome === 'damaged' &&
       snapshot.simulation.stepCount - lastHit.simulationStep < 12
-    for (const material of [torsoMaterial, headMaterial]) {
+    for (const material of [torsoMaterial, cloakMaterial]) {
       material.emissive.set(flash ? MOURNEVEIL_PALETTE.damage : '#000000')
-      material.emissiveIntensity = flash ? 0.55 : 0
+      material.emissiveIntensity = flash ? 0.45 : 0
     }
 
     const activeShape = snapshot.attack.activeContactShape
@@ -91,91 +87,98 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   return (
     <group ref={facingGroupRef}>
       <group ref={bodyGroupRef}>
-        {/* Invisible reference capsule size stays gameplay-owned; silhouette is decorative. */}
         <mesh visible={false}>
           <capsuleGeometry
             args={[PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HALF_HEIGHT * 2, 4, 8]}
           />
         </mesh>
-        <mesh castShadow position={[0, -0.05, 0]}>
-          <capsuleGeometry args={[0.22, 0.55, 6, 12]} />
+        {/* Lower stance / greaves */}
+        <mesh castShadow position={[-0.11, -0.42, 0.02]}>
+          <boxGeometry args={[0.16, 0.42, 0.18]} />
+          <meshStandardMaterial color="#4a433a" roughness={0.92} />
+        </mesh>
+        <mesh castShadow position={[0.11, -0.42, 0.02]}>
+          <boxGeometry args={[0.16, 0.42, 0.18]} />
+          <meshStandardMaterial color="#4a433a" roughness={0.92} />
+        </mesh>
+        {/* Torso / tabard */}
+        <mesh castShadow position={[0, 0.02, 0]}>
+          <boxGeometry args={[0.42, 0.55, 0.28]} />
           <meshStandardMaterial
             ref={torsoMaterialRef}
-            color={MOURNEVEIL_PALETTE.player.cloth}
-            roughness={0.62}
-            metalness={0.05}
+            color="#6d5a45"
+            roughness={0.88}
+            metalness={0.04}
           />
         </mesh>
-        <mesh castShadow position={[0, 0.52, 0]}>
-          <sphereGeometry args={[0.2, 12, 10]} />
-          <meshStandardMaterial
-            ref={headMaterialRef}
-            color={MOURNEVEIL_PALETTE.player.skin}
-            roughness={0.55}
-          />
+        <mesh castShadow position={[0, 0.08, 0.02]}>
+          <boxGeometry args={[0.34, 0.42, 0.18]} />
+          <meshStandardMaterial color="#3f8f9a" roughness={0.72} metalness={0.08} />
         </mesh>
+        {/* Shoulders */}
         <mesh castShadow position={[-0.28, 0.28, 0]}>
-          <capsuleGeometry args={[0.07, 0.32, 4, 8]} />
-          <meshStandardMaterial color={MOURNEVEIL_PALETTE.player.cloth} roughness={0.65} />
+          <boxGeometry args={[0.2, 0.16, 0.24]} />
+          <meshStandardMaterial color="#5a4c3d" roughness={0.86} />
         </mesh>
         <mesh castShadow position={[0.28, 0.28, 0]}>
-          <capsuleGeometry args={[0.07, 0.32, 4, 8]} />
-          <meshStandardMaterial color={MOURNEVEIL_PALETTE.player.cloth} roughness={0.65} />
+          <boxGeometry args={[0.2, 0.16, 0.24]} />
+          <meshStandardMaterial color="#5a4c3d" roughness={0.86} />
         </mesh>
-        <mesh castShadow position={[0, 0.18, 0.02]}>
-          <boxGeometry args={[0.42, 0.28, 0.28]} />
+        {/* Arms */}
+        <mesh castShadow position={[-0.34, 0.02, 0]} rotation={[0.15, 0, 0.2]}>
+          <boxGeometry args={[0.1, 0.38, 0.1]} />
+          <meshStandardMaterial color="#5c5044" roughness={0.9} />
+        </mesh>
+        <mesh castShadow position={[0.34, 0.02, 0]} rotation={[0.15, 0, -0.2]}>
+          <boxGeometry args={[0.1, 0.38, 0.1]} />
+          <meshStandardMaterial color="#5c5044" roughness={0.9} />
+        </mesh>
+        {/* Hooded / faceted head */}
+        <mesh castShadow position={[0, 0.48, 0.02]}>
+          <boxGeometry args={[0.26, 0.24, 0.24]} />
+          <meshStandardMaterial color="#c2a07a" roughness={0.78} />
+        </mesh>
+        <mesh castShadow position={[0, 0.58, -0.02]}>
+          <boxGeometry args={[0.3, 0.14, 0.28]} />
           <meshStandardMaterial
-            color={MOURNEVEIL_PALETTE.player.accent}
-            roughness={0.5}
-            metalness={0.12}
+            ref={cloakMaterialRef}
+            color="#3d4f52"
+            roughness={0.9}
           />
         </mesh>
-        <mesh
-          castShadow
-          position={[
-            PLAYER_FACING_MARKER_POSITION.x,
-            PLAYER_FACING_MARKER_POSITION.y,
-            PLAYER_FACING_MARKER_POSITION.z,
-          ]}
-        >
-          <boxGeometry
-            args={[
-              PLAYER_FACING_MARKER_SIZE.x,
-              PLAYER_FACING_MARKER_SIZE.y,
-              PLAYER_FACING_MARKER_SIZE.z,
-            ]}
-          />
-          <meshStandardMaterial
-            color={MOURNEVEIL_PALETTE.player.accent}
-            roughness={0.5}
-            metalness={0.12}
-          />
+        {/* Cloak mass */}
+        <mesh castShadow position={[0, -0.05, -0.18]} rotation={[0.25, 0, 0]}>
+          <boxGeometry args={[0.48, 0.7, 0.08]} />
+          <meshStandardMaterial color="#2f3a3c" roughness={0.94} />
+        </mesh>
+        {/* Facing wedge */}
+        <mesh castShadow position={[0, 0.15, -0.34]}>
+          <boxGeometry args={[0.14, 0.08, 0.22]} />
+          <meshStandardMaterial color={MOURNEVEIL_PALETTE.player.accent} roughness={0.55} metalness={0.15} />
         </mesh>
       </group>
       <group ref={weaponSweepRef}>
-        <mesh ref={weaponRef} castShadow position={[0.22, 0.12, -0.72]}>
-          <boxGeometry args={[0.07, 0.07, 0.95]} />
+        <mesh ref={weaponRef} castShadow position={[0.28, 0.05, -0.7]}>
+          <boxGeometry args={[0.05, 0.05, 0.95]} />
           <meshStandardMaterial
             ref={weaponMaterialRef}
-            color={MOURNEVEIL_PALETTE.player.metal}
-            roughness={0.38}
-            metalness={0.35}
+            color="#b8a888"
+            roughness={0.35}
+            metalness={0.55}
           />
+        </mesh>
+        <mesh position={[0.28, 0.05, -0.28]} castShadow>
+          <boxGeometry args={[0.14, 0.04, 0.08]} />
+          <meshStandardMaterial color="#6a5a48" roughness={0.7} metalness={0.25} />
         </mesh>
       </group>
       <mesh ref={contactShapeRef} position={[0, 0, -0.82]} visible={false}>
-        <sphereGeometry args={[1, 16, 10]} />
-        <meshBasicMaterial
-          color="#f4d06f"
-          transparent
-          opacity={0.22}
-          wireframe
-          depthWrite={false}
-        />
+        <sphereGeometry args={[1, 12, 8]} />
+        <meshBasicMaterial color="#f4d06f" transparent opacity={0.18} wireframe depthWrite={false} />
       </mesh>
-      <mesh ref={guardMarkerRef} position={[0, 0.3, -0.42]} visible={false}>
-        <boxGeometry args={[0.55, 0.62, 0.08]} />
-        <meshBasicMaterial color="#8fc4da" transparent opacity={0.55} />
+      <mesh ref={guardMarkerRef} position={[0, 0.22, -0.36]} visible={false}>
+        <boxGeometry args={[0.5, 0.55, 0.06]} />
+        <meshBasicMaterial color="#8fc4da" transparent opacity={0.5} />
       </mesh>
     </group>
   )

@@ -131,19 +131,24 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
       {MOURNEVEIL_CONNECTED_LEVEL.zones.map((zone) => {
         const width = zone.bounds.maximumX - zone.bounds.minimumX
         const depth = zone.bounds.maximumZ - zone.bounds.minimumZ
+        const cx = (zone.bounds.minimumX + zone.bounds.maximumX) / 2
+        const cz = (zone.bounds.minimumZ + zone.bounds.maximumZ) / 2
         return (
-          <mesh
-            key={zone.id}
-            receiveShadow
-            position={[
-              (zone.bounds.minimumX + zone.bounds.maximumX) / 2,
-              0.012,
-              (zone.bounds.minimumZ + zone.bounds.maximumZ) / 2,
-            ]}
-          >
-            <boxGeometry args={[width, 0.02, depth]} />
-            <meshStandardMaterial color={zone.presentation.floorColor} roughness={0.96} />
-          </mesh>
+          <group key={zone.id}>
+            <mesh receiveShadow position={[cx, 0.012, cz]}>
+              <boxGeometry args={[width, 0.02, depth]} />
+              <meshStandardMaterial color={zone.presentation.floorColor} roughness={0.96} />
+            </mesh>
+            {/* Large stone division lines — authored floor treatment, not a debug grid. */}
+            <mesh receiveShadow position={[cx, 0.02, cz]}>
+              <boxGeometry args={[width * 0.98, 0.01, 0.04]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={1} />
+            </mesh>
+            <mesh receiveShadow position={[cx, 0.02, cz]}>
+              <boxGeometry args={[0.04, 0.01, depth * 0.98]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={1} />
+            </mesh>
+          </group>
         )
       })}
 
