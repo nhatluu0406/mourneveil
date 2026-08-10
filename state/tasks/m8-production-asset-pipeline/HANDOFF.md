@@ -5,7 +5,7 @@ Task: m8-production-asset-pipeline
 
 ## Status
 
-**ACTIVE — macro-batch 1, baseline and asset-contract gates passed.** M8 remains open; M9 not started.
+**ACTIVE — macro-batch 1 implementation complete; final gate pending.** M8 remains open; M9 not started.
 
 ## Repository truth
 
@@ -32,4 +32,12 @@ Task: m8-production-asset-pipeline
 
 ## Next
 
-Load the checkpoint shrine through the canonical reference and complete the full gate. Do not expand into character assets, broad environment art, M9, controller, or remote delivery.
+## First vertical slice
+
+- `world.checkpoint.refuge-shrine` is original project-authored static glTF with committed source/runtime copies and manifest provenance.
+- `CheckpointVisual` loads it through Drei `useGLTF` at the authored visual anchor. The remaining ring/light are checkpoint-state feedback, not shrine geometry or gameplay authority.
+- World-authored proxy collision remains separate. Focused tests prove render uses the visual anchor, save/respawn uses a clear authored position, and missing assets report stable ID/path at validation.
+
+## Next
+
+Run the full repository/LeanLoop gate, refresh REPOMAP, and record browser limitation. Do not expand into character assets, broad environment art, M9, controller, or remote delivery.

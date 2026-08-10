@@ -25,12 +25,13 @@ Task slug: `m8-production-asset-pipeline` (`python3 scripts/leanloop/task.py sta
   - owns/allows: asset architecture doc, source/runtime asset paths, focused validation/import tooling and tests, package scripts
   - verifier: `npm run assets:verify && npm run lint && npm run typecheck`
   - evidence: PASS; asset import/verify, 4 focused contract tests, lint, typecheck, and diff check.
-- [ ] 2. Replace the checkpoint placeholder through the canonical asset path
+- [x] 2. Replace the checkpoint placeholder through the canonical asset path
   - depends: 1
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: checkpoint source/runtime asset, checkpoint renderer, focused render/asset tests, provenance record
   - verifier: `npm run assets:verify && npm run test -- src/render/CheckpointVisual.test.tsx src/game/world/checkpoint.test.ts`
+  - evidence: PASS; canonical GLTF load projection, actionable missing-asset test, 8 focused tests, lint/typecheck/build.
 - [ ] 3. Complete M8 macro-batch verification and durable state
   - depends: 2
   - risk: MEDIUM

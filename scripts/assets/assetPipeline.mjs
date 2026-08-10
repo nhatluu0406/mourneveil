@@ -43,6 +43,18 @@ export function validateGltfDocument(document, label) {
   if (!Array.isArray(document.meshes) || document.meshes.length === 0) {
     throw new Error(`[assets] ${label}: no render meshes`)
   }
+  if (
+    !Array.isArray(document.nodes) ||
+    document.nodes.some(
+      (node) =>
+        (node.rotation !== undefined &&
+          (node.rotation.length !== 4 || node.rotation.some((value) => !Number.isFinite(value)))) ||
+        (node.scale !== undefined &&
+          (node.scale.length !== 3 || node.scale.some((value) => !Number.isFinite(value)))),
+    )
+  ) {
+    throw new Error(`[assets] ${label}: invalid node transform`)
+  }
   if (!Array.isArray(document.buffers) || document.buffers.some((buffer) => !buffer.uri?.startsWith('data:'))) {
     throw new Error(`[assets] ${label}: first slice requires embedded deterministic buffers`)
   }

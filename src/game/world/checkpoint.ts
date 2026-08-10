@@ -20,7 +20,7 @@ export const CONNECTED_LEVEL_CHECKPOINT_DEFINITION: CheckpointDefinition = Objec
   id: M5_CHECKPOINT_ID,
   visualPosition: Object.freeze({ x: -5.5, y: 0, z: 0 }),
   interactionPosition: Object.freeze({ x: -6.4, y: 0.82, z: 0 }),
-  respawnPosition: Object.freeze({ x: -7, y: 0.82, z: 0 }),
+  respawnPosition: Object.freeze({ x: -6.8, y: 0.82, z: 0 }),
   collisionSize: Object.freeze([0.8, 2.8, 0.8] as const),
   activationRange: CHECKPOINT_ACTIVATION_RANGE,
 })

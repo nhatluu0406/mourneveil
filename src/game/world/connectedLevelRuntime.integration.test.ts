@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { GameRuntime } from '../runtime/GameRuntime'
 import { createDefaultSaveV2 } from '../save/saveSchema'
+import { horizontalFootprintOverlapsSolid } from '../../physics/connectedLevelCollision'
+import { PLAYER_CAPSULE_RADIUS } from '../../physics/playerCollisionConfig'
+import { CONNECTED_LEVEL_CHECKPOINT_DEFINITION } from './checkpoint'
 import { MOURNEVEIL_CONNECTED_LEVEL } from './connectedLevel'
 
 describe('complete connected-level runtime initialization', () => {
@@ -25,8 +28,12 @@ describe('complete connected-level runtime initialization', () => {
       activeCheckpointId: 'checkpoint.m5.refuge',
     })
     expect(rested.snapshot()).toMatchObject({
-      player: { position: { x: -6, y: 0.82, z: 0 } },
+      player: { position: CONNECTED_LEVEL_CHECKPOINT_DEFINITION.respawnPosition },
       world: { currentZoneId: 'zone.checkpoint' },
     })
+    const position = rested.snapshot().player.position
+    expect(
+      horizontalFootprintOverlapsSolid(position.x, position.z, PLAYER_CAPSULE_RADIUS),
+    ).toBeNull()
   })
 })

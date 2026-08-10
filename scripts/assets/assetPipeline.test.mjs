@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { validateGltfDocument, validateProductionAssetManifest } from './assetPipeline.mjs'
+import { readAndValidateGltf, validateGltfDocument, validateProductionAssetManifest } from './assetPipeline.mjs'
 
 const validAsset = {
   id: 'world.checkpoint.refuge-shrine', format: 'gltf2',
@@ -23,5 +23,14 @@ describe('production asset validation', () => {
   it('rejects malformed glTF at the validation boundary', () => {
     expect(() => validateGltfDocument({ asset: { version: '1.0' } }, validAsset.id)).toThrow('glTF 2.0')
     expect(() => validateGltfDocument({ asset: { version: '2.0' }, scene: 0, scenes: [{}], meshes: [] }, validAsset.id)).toThrow('no render meshes')
+    expect(() => validateGltfDocument({ asset: { version: '2.0' }, scene: 0, scenes: [{}], meshes: [{}], nodes: [{ rotation: [0, 1, 0] }], buffers: [] }, validAsset.id)).toThrow('invalid node transform')
+  })
+
+  it('reports a missing development asset with its stable id and path', async () => {
+    await expect(
+      readAndValidateGltf(process.cwd(), 'assets/source/missing.gltf', validAsset.id),
+    ).rejects.toThrow(
+      '[assets] world.checkpoint.refuge-shrine: missing asset file assets/source/missing.gltf',
+    )
   })
 })
