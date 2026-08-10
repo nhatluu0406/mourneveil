@@ -15,14 +15,14 @@ Before every task, resolve truth in this order:
 
 1. Current Git HEAD, branch, status, and working tree
 2. `STACK.md` — operational project law
-3. `PLAN.md` — current execution graph
+3. `PLAN.md` — **live execution graph for the currently active milestone/task only**
 4. Active LeanLoop task state (`python3 scripts/leanloop/task.py path`) — HANDOFF / CHECKPOINT
 5. Accepted ADRs under `docs/architecture/decisions/`
-6. Product scope under `docs/product/`
+6. Product scope under `docs/product/` / directional `docs/roadmap.md`
 7. `docs/development/current-state.md` — concise milestone summary only
-8. Old reports or conversational context
+8. Historical task HANDOFFs, Git history, and release tags
 
-Do not duplicate detailed operational or plan state across these files. Do not rely on a branch name, commit hash, dependency version, or file layout copied from an old prompt without checking the repository.
+Do not duplicate detailed operational or plan state across these files. Do not retain closed-milestone execution graphs inside `PLAN.md`. Do not rely on a branch name, commit hash, dependency version, or file layout copied from an old prompt without checking the repository.
 
 ## Operating model
 
@@ -136,8 +136,10 @@ Gameplay or visual changes also require a local runtime check with a determinist
 ## Canonical documentation
 
 - Put stable operational law in `STACK.md`.
-- Put the active execution graph and step evidence in `PLAN.md` and the active task HANDOFF.
+- Put the **active** execution graph in `PLAN.md` (current milestone/task only). Closed plans are not archived inside `PLAN.md`; durable history lives in task HANDOFFs, roadmap, Git history, and tags.
+- Put step evidence and milestone contracts in the active (or closed) task HANDOFF under `state/tasks/`.
 - Keep `docs/development/current-state.md` as a short milestone summary: status, known limitations, and the next PLAN step pointer — not a second STACK/PLAN.
+- Keep `docs/roadmap.md` as directional long-term trains — not task-level evidence.
 
 Update that summary when milestone status, limitations, or the next recommended task change. Do not rewrite product scope or an accepted ADR merely to make an implementation look compliant. Escalate the mismatch.
 
@@ -175,12 +177,12 @@ Be precise. “Implemented” means the behavior exists in the current working t
 **Spend tokens on decisions, not repetition.** Treat chat context as disposable; crystallize decisions and task state to disk.
 
 ## Start every task
-1. Read `STACK.md` / `PLAN.md` when present, plus active task state (`python3 scripts/leanloop/task.py path`). Create missing planning files from templates before non-trivial work.
+1. Read `STACK.md` / `PLAN.md` when present, plus active task state (`python3 scripts/leanloop/task.py path`). Create missing planning files from templates before non-trivial work. `PLAN.md` holds only the active milestone/task graph.
 2. Use `state/REPOMAP.md` before exploratory reads; grep first, then ranged reads.
 3. Run `python3 scripts/leanloop/git_guard.py` before editing. If the main tree is dirty, isolate the task in a Git worktree rather than touching existing changes.
 
 ## Hard rules
-- Non-trivial code requires PLAN.md with per-step machine verifiers and explicit non-goals.
+- Non-trivial code requires PLAN.md with per-step machine verifiers and explicit non-goals. Closed milestone plans are not retained in PLAN.md.
 - STACK.md is project law; contracts are the source of truth for boundaries; DB changes use migrations.
 - Parallel implementation is allowed only across isolated Git worktrees/branches. Never let workers share a working tree or Git index.
 - Use risk-adaptive model routing: cheap execution for deterministic low-risk work; strongest available reasoning for security, concurrency, data loss, migrations, architecture-sensitive refactors, or ambiguous failures.

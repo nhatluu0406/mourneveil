@@ -4,11 +4,10 @@ Mourneveil is a local-first browser-based 3D action RPG vertical slice focused o
 
 ## Status
 
-**M5 Connected Level** is Product Owner accepted and tagged `v0.5.0-connected-level`.
-
-**M6 Presentation Foundation** is Product Owner accepted and tagged `v0.6.0-presentation-foundation`.
-
-**M7 Animation & Character Feel** is complete through M7.6 on `main` and **awaiting Product Owner acceptance** (`m7-animation-character-feel`). M8 has not started.
+- Latest Product Owner–accepted tag: **`v0.6.0-presentation-foundation`** (M6 Presentation Foundation)
+- Active milestone: **M7 Animation & Character Feel** — implementation complete; **awaiting Product Owner acceptance** (`m7-animation-character-feel`)
+- After M7 acceptance: **M8 Production Asset Pipeline** (not started)
+- Intended M7 tag (only after PO acceptance): `v0.7.0-animation-foundation`
 
 ## Requirements
 
@@ -25,14 +24,17 @@ npx --yes npm@10.9.2 run verify
 npx --yes npm@10.9.2 run dev
 ```
 
-Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). The Vite server is pinned to that host and port. No environment variables or external services are required.
+Open [http://127.0.0.1:4173/](http://127.0.0.1:4173/). Host and port are pinned. No environment variables or external services are required.
 
 ## Verification
 
-- `npm run lint`
-- `npm run typecheck`
-- `npm run test`
-- `npm run build`
-- `npm run verify` — runs the complete local repository gate
+- `npm run lint` · `npm run typecheck` · `npm run test` · `npm run build`
+- `npm run verify` — full local repository gate
 
-Canonical project law and active state live in `AGENTS.md`, `STACK.md`, `PLAN.md`, and the active task under `state/tasks/`. `docs/development/current-state.md` is the concise milestone summary.
+## Canonical documents
+
+- `AGENTS.md` / `STACK.md` — project law and source-of-truth order
+- `PLAN.md` — **active milestone execution graph only**
+- `state/tasks/<slug>/` — active and historical LeanLoop task HANDOFFs
+- `docs/roadmap.md` — directional long-term release trains
+- `docs/development/current-state.md` — short milestone snapshot

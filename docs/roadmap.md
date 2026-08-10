@@ -1,22 +1,25 @@
 # Roadmap
 
-This is a directional product roadmap, not an immutable feature contract. Milestone ranges may move as play evidence changes. Current work and evidence live in `PLAN.md` and the active LeanLoop task.
+This is a directional product roadmap, not an immutable feature contract. Milestone ranges may move as play evidence changes. Active execution lives only in `PLAN.md` and the active LeanLoop task HANDOFF.
 
 ## Foundation Slice — M0–M6 — PRODUCT OWNER ACCEPTED
 
-- Project foundation, movement, combat, enemies, and the core RPG loop
-- One connected graybox level with checkpoint, shortcut, recovery, loot, and save
-- Presentation foundation for a coherent procedural dark-fantasy slice
-- Release train position: `v0.5` connected RPG loop, `v0.6` presentation foundation
+- M0–M4: foundation, movement, combat proof, enemy framework, core RPG loop
+- M5: connected graybox level (`v0.5.0-connected-level`)
+- M6: presentation foundation (`v0.6.0-presentation-foundation`)
 
 ## Vertical Slice Alpha — approximately M7–M12
 
-- Animation and character feel
-- Production character/environment asset pipeline
-- Combat depth and ranged/magic breadth
-- First boss vertical slice
-- Vertical-slice alpha acceptance
-- Directional version targets: `v0.7` animated combat and production-slice progression; `v0.8` vertical-slice alpha
+| Milestone | Focus |
+| --- | --- |
+| **M7** | Animation & Character Feel — **PO acceptance pending** |
+| **M8** | Production Asset Pipeline |
+| **M9** | Combat Depth |
+| **M10** | Ranged / Magic |
+| **M11** | Boss Vertical Slice |
+| **M12** | Vertical Slice Alpha acceptance |
+
+Directional version targets: `v0.7` animated combat / production-slice progression; `v0.8` vertical-slice alpha.
 
 ## Playable Alpha — approximately M13–M20
 
@@ -46,11 +49,9 @@ Versions describe product maturity; milestones describe development work. One ve
 
 - `v0.5` — connected RPG loop
 - `v0.6` — presentation foundation
-- `v0.7` — animated combat / production-slice progression
+- `v0.7` — animated combat / production-slice progression (`v0.7.0-animation-foundation` intended after M7 acceptance)
 - `v0.8` — vertical-slice alpha
 - `v0.9` — content beta
 - `v1.0` — first production release
 
-## Current milestone
-
-M7 is **Animation & Character Feel**. It establishes presentation-only animation contracts and procedural motion before the production asset pipeline. It is neither release hardening nor the final milestone.
+Distant milestone numbers are directional, not immutable project law.

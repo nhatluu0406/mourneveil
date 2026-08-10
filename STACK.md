@@ -55,7 +55,9 @@
 - Alias: follow existing `tsconfig` paths; no deep `../../..` when an alias exists
 
 ## Source of truth
-1. Git HEAD + working tree → 2. this file → 3. `PLAN.md` → 4. active LeanLoop task HANDOFF/CHECKPOINT → 5. ADRs → 6. product docs → 7. `docs/development/current-state.md` (milestone summary only) → 8. old reports/chat
+1. Git HEAD + working tree → 2. this file → 3. `PLAN.md` (active milestone/task execution graph **only**) → 4. active LeanLoop task HANDOFF/CHECKPOINT → 5. ADRs → 6. product docs / directional roadmap → 7. `docs/development/current-state.md` (milestone summary only) → 8. historical HANDOFFs / Git history / tags
+
+`PLAN.md` must not accumulate closed-milestone graphs. Durable history lives in `state/tasks/*/HANDOFF.md`, `docs/roadmap.md`, Git history, and release tags.
 
 ## Agent routing
 - **Codex**: strategic use for high-risk gameplay/simulation/save architecture and difficult cross-module integration

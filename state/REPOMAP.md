@@ -5,18 +5,18 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 
 ## Tree & entry points
 - .gitignore (52L)
-- AGENTS.md (197L)
+- AGENTS.md (199L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (324L)
-- README.md (38L)
+- PLAN.md (31L)
+- README.md (40L)
 - SETUP.md (44L)
-- STACK.md (76L)
+- STACK.md (78L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (44L)
-- tmp-m76-checkpoint.png (703L)
-- ... +11 more
+- tsconfig.app.json (24L)
+- ... +3 more
 - **.agents/** (0 files)
   - **.agents/skills/** (0 files)
     - **.agents/skills/codebase-map/** (1 files)
@@ -154,7 +154,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - STACK.md (31L)
       - WIKI-INSTRUCTIONS.md (17L)
 - **docs/** (1 files)
-  - roadmap.md (56L)
+  - roadmap.md (57L)
   - **docs/architecture/** (2 files)
     - animation-presentation.md (14L)
     - overview.md (79L)
@@ -209,6 +209,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - developmentDiagnostic.ts (29L) -- symbols: DEVELOPMENT_MILESTONE, DEVELOPMENT_MILESTONE_STEP, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
   - **src/game/** (0 files)
     - **src/game/character/** (13 files)
-      - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStep
+      - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock, .
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

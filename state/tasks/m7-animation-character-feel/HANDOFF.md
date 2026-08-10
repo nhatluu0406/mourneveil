@@ -7,36 +7,56 @@ Task: m7-animation-character-feel
 
 **READY FOR PRODUCT OWNER ACCEPTANCE.** M7.0–M7.6 complete on `main`. Agent does **not** self-accept. M8 not started.
 
-## Locked authority (unchanged)
+Intended acceptance tag (create only after PO acceptance + push + clean tree): `v0.7.0-animation-foundation`.
 
-- Gameplay fixed-step state drives typed presentation intent.
+## Summary
+
+### M7.0 — Roadmap
+
+- Long-term release trains documented; product versions describe maturity and may span milestones.
+- M6 closed as Presentation Foundation (`v0.6.0-presentation-foundation`); M7 activated.
+
+### M7.1 — Animation presentation architecture
+
+- Typed immutable `AnimationPresentationState` projected from authoritative snapshots.
+- Deterministic phase progress; backend-neutral transition contract.
+- Explicit precedence: defeated > committed action > hit reaction > guard > locomotion > idle.
+
+### Root-motion / authority policy
+
+- Gameplay transforms remain authoritative.
+- Procedural (and future GLTF) animation is in-place presentation only.
 - Animation never advances combat, movement, invulnerability, contact, damage, or recovery.
-- Gameplay transforms remain authoritative; procedural and future GLTF animation are in-place presentation backends.
-- Enemy presentation facing consumes the same accepted `attackExecutionFacing` snapshot as contact authority.
 
-## M7.4.1 collision
+### M7.2 / M7.3 — Player and enemy animation
 
-- Root cause: Rapier character controller queried a stale broadphase while R3F auto-stepped kinematic bodies → soft capsule overlap into authored solids (clearance often 0.1–0.24 vs radius 0.35).
-- Fix: `Physics paused`; explicit `CuboidCollider` half-extents matching authored size; `world.step()` before `computeColliderMovement`; final-divider endpoint overlaps; wall continuity validator (southern detour gap allowed).
-- Gate: `scripts/browser/gate-m741-collision.mjs` PASS (clearance ≈ 0.370).
+- Player: idle, locomotion, light/heavy, guard, dodge, flask, hit reaction, defeated.
+- Enemies: shared projection/pose backend; skirmisher vs brute authored cadence; frozen `attackExecutionFacing` through recovery.
 
-## M7.5 / M7.6 animation
+### M7.4 — Integration
 
-- Tuned player idle/locomotion/attacks/guard/dodge/heal/death; skirmisher vs brute cadence.
-- Gate: `scripts/browser/gate-m76-animation.mjs` PASS; wall clearance retained after animation work.
+- Respawn/save-load derive fresh idle presentation; animation state is never serialized.
+- M8 may replace procedural renderers with in-place GLTF/AnimationMixer backends on the same presentation state.
 
-## Verification
+### M7.4.1 — Collision hardening
 
-- 258 tests PASS (isolated vitest after Windows pool exhaustion)
-- lint / typecheck / build / doctor / sync PASS
-- M5.6.1 + M6.7 collision regressions PASS
+- Root cause: Rapier CC queried a stale broadphase while R3F auto-stepped kinematics → soft wall overlap.
+- Fix: `Physics paused`; explicit `CuboidCollider` half-extents; `world.step()` before CC; wall continuity validator.
+- Gate: `scripts/browser/gate-m741-collision.mjs` PASS.
+
+### M7.5 / M7.6 — Feel tuning and browser acceptance
+
+- Tuned player/enemy procedural motion for grounded weight and role identity.
+- Gate: `scripts/browser/gate-m76-animation.mjs` PASS; wall clearance retained.
+- Automated: 258 tests; lint/typecheck/build/doctor/sync green.
 
 ## Known limitations
 
-- Procedural low-poly only (no production GLTF packs)
+- Procedural low-poly only (no production GLTF packs) — addressed by **M8 Production Asset Pipeline**
 - Cosmetic weapon/limb clipping through walls possible at camera distance
 - Keyboard + mouse primary; controller deferred
+- Authored navigation only; two melee roles
 
-## Next action
+## Next milestone
 
-Product Owner acceptance of M7. Do not start M8 until accepted.
+After Product Owner acceptance: **M8 — Production Asset Pipeline** (`m8-production-asset-pipeline`). Do not create that task or rewrite PLAN for M8 until acceptance.

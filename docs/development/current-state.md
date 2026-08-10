@@ -1,22 +1,23 @@
 # Current State
 
 - Updated: 2026-08-11
-- Milestone: **M7 Animation & Character Feel — Product Owner acceptance pending**
-- Active LeanLoop task: `m7-animation-character-feel`
-- Status: M6 Presentation Foundation accepted/tagged. M7.0–M7.6 complete on `main`. **Not** PO-accepted. M8 not started.
+- Accepted release: **`v0.6.0-presentation-foundation`** (M6)
+- Active task: `m7-animation-character-feel`
+- Status: **M7 READY FOR PRODUCT OWNER ACCEPTANCE** (M7.0–M7.6 complete; not self-accepted). M8 not started.
 
 ## What exists
 
-- Connected-level gameplay authority from M5
-- Presentation Foundation through M6
-- Backend-neutral animation presentation + tuned procedural player/enemy motion
-- Hardened connected-level wall collision (paused Physics + explicit cuboids + CC pipeline step)
+- Connected-level RPG loop (zones, checkpoint, shortcut, encounters, save V2)
+- Presentation foundation (HUD, occlusion fade, procedural dark-fantasy look)
+- Animation presentation architecture + tuned procedural player/enemy motion
+- Hardened connected-level wall collision (paused Physics + explicit cuboids)
 
-## Known limitations
+## Highest-value limitations
 
-- Authored navigation only; two melee roles; controller deferred
-- Procedural low-poly only
+- Procedural characters/environments only (production assets → M8)
+- Two melee roles; authored navigation; controller deferred
 
 ## Next executable work
 
-Product Owner acceptance of M7. Do not start M8 until accepted.
+1. Product Owner accepts M7 (then tag `v0.7.0-animation-foundation` if authorized)
+2. Initialize **M8 Production Asset Pipeline** (new task + replace `PLAN.md`)
