@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber'
-import { RigidBody } from '@react-three/rapier'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useEffect, useRef } from 'react'
 import type { MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
@@ -48,8 +48,16 @@ function SolidVisual({
     })
   }, [collider.id, isFloor])
 
+  // Explicit cuboid half-extents — do not use mesh auto-colliders (scale/AABB drift).
+  const halfExtents: [number, number, number] = [
+    collider.size[0] / 2,
+    collider.size[1] / 2,
+    collider.size[2] / 2,
+  ]
+
   return (
-    <RigidBody type="fixed" colliders="cuboid" position={collider.position}>
+    <RigidBody type="fixed" colliders={false} position={collider.position}>
+      <CuboidCollider args={halfExtents} />
       <mesh castShadow={!isFloor} receiveShadow userData={{ solidId: collider.id }}>
         <boxGeometry args={collider.size} />
         <meshStandardMaterial

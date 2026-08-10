@@ -46,6 +46,9 @@ export function PlayerPhysicsBody({ runtime }: PlayerPhysicsBodyProps) {
     const detachResolver = runtime.attachCollisionResolver(
       (position, desiredTranslation) => {
         rigidBody.setTranslation(position, false)
+        // Physics is paused in Scene; step once so character queries see current
+        // kinematic + fixed collider poses (Rapier broadphase). Avoids soft wall penetration.
+        world.step()
         controller.computeColliderMovement(collider, desiredTranslation)
         const translation = controller.computedMovement()
         const nextPosition = {

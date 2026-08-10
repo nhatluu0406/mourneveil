@@ -34,7 +34,7 @@ function PhysicsReadySignal({ onReady }: { onReady: () => void }) {
 
 function GameWorld({ onPhysicsReady, runtime }: SceneProps) {
   return (
-    <Physics gravity={[0, -9.81, 0]} timeStep={FIXED_STEP_SECONDS}>
+    <Physics gravity={[0, -9.81, 0]} timeStep={FIXED_STEP_SECONDS} paused>
       <PhysicsReadySignal onReady={onPhysicsReady} />
       <ConnectedLevelVisual runtime={runtime} />
       <CameraOcclusionFader runtime={runtime} />

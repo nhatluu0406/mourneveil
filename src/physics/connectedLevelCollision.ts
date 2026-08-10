@@ -37,16 +37,17 @@ export const CONNECTED_LEVEL_COLLIDERS: readonly ConnectedLevelBoxCollider[] = O
   // Arrival choke: the route crosses at the northern opening.
   box('wall.arrival-choke', 'wall', [-11, 0.75, -2], [0.5, 1.5, 13]),
 
-  // Checkpoint-to-court divider: southern detour plus one locked shortcut gap.
+  // Checkpoint-to-court divider: intentional southern detour gap (~1.5m) plus locked shortcut.
+  // South ends at z=-6.5; middle begins at z=-5.0 — that gap is the authored southern route.
   box('wall.shortcut-divider.south', 'wall', [-3, 0.75, -7.5], [0.5, 1.5, 2]),
   box('wall.shortcut-divider.middle', 'wall', [-3, 0.75, -3.6], [0.5, 1.5, 2.8]),
   box('wall.shortcut-divider.north', 'wall', [-3, 0.75, 4.55], [0.5, 1.5, 9.9]),
   box('gate.shortcut', 'shortcut-gate', [-3, 0.75, -1.3], [0.5, 1.5, 1.8]),
 
-  // Final arena partition retains a boss-gate silhouette without a boss.
-  box('wall.final-divider.south', 'wall', [10, 0.75, -7.05], [0.5, 1.5, 2.9]),
-  box('wall.final-divider.north', 'wall', [10, 0.75, 3.45], [0.5, 1.5, 12.1]),
-  box('gate.final', 'final-gate', [10, 0.75, -4], [0.5, 1.5, 2.6]),
+  // Final arena partition: segments intentionally overlap endpoints (no micro-gaps).
+  box('wall.final-divider.south', 'wall', [10, 0.75, -7.25], [0.5, 1.5, 3.5]),
+  box('wall.final-divider.north', 'wall', [10, 0.75, 3.35], [0.5, 1.5, 12.3]),
+  box('gate.final', 'final-gate', [10, 0.75, -4], [0.5, 1.5, 2.9]),
 
   // Sparse navigation-safe blockers in the combat spaces.
   box('blocker.first-combat', 'blocker', [-8.25, 0.75, 4.25], [1.1, 1.5, 1.1]),
@@ -95,6 +96,123 @@ export function horizontalFootprintOverlapsSolid(
     }
   }
   return null
+}
+
+export interface WallSegmentContinuityIssue {
+  readonly along: 'x' | 'z'
+  readonly axisValue: number
+  readonly gapStart: number
+  readonly gapEnd: number
+  readonly gapLength: number
+  readonly leftId: string
+  readonly rightId: string
+}
+
+/**
+ * Detect unintended gaps between collinear wall/gate segments that share a centerline.
+ * Intentional openings must be listed in `allowedGaps` (same along/axisValue + overlapping range).
+ */
+export function findUnintendedWallSegmentGaps(
+  colliders: readonly ConnectedLevelBoxCollider[],
+  allowedGaps: readonly {
+    readonly along: 'x' | 'z'
+    readonly axisValue: number
+    readonly gapStart: number
+    readonly gapEnd: number
+  }[] = [],
+  {
+    axisTolerance = 0.05,
+    maxUnintendedGap = 0.15,
+  }: { readonly axisTolerance?: number; readonly maxUnintendedGap?: number } = {},
+): readonly WallSegmentContinuityIssue[] {
+  const segments = colliders.filter(
+    (entry) => entry.kind === 'wall' || entry.kind === 'shortcut-gate' || entry.kind === 'final-gate',
+  )
+  const issues: WallSegmentContinuityIssue[] = []
+
+  for (const along of ['x', 'z'] as const) {
+    const axisIndex = along === 'x' ? 0 : 2
+    const runIndex = along === 'x' ? 2 : 0
+    const groups = new Map<number, Array<{ id: string; start: number; end: number }>>()
+
+    for (const segment of segments) {
+      const thickness = segment.size[axisIndex]
+      // Only treat thin barrier slabs (walls spanning the other axis).
+      if (thickness > 1.2) continue
+      const axisValue = segment.position[axisIndex]
+      const halfRun = segment.size[runIndex] / 2
+      const start = segment.position[runIndex] - halfRun
+      const end = segment.position[runIndex] + halfRun
+      let groupKey: number | null = null
+      for (const key of groups.keys()) {
+        if (Math.abs(key - axisValue) <= axisTolerance) {
+          groupKey = key
+          break
+        }
+      }
+      if (groupKey === null) {
+        groupKey = axisValue
+        groups.set(groupKey, [])
+      }
+      groups.get(groupKey)!.push({ id: segment.id, start, end })
+    }
+
+    for (const [axisValue, group] of groups) {
+      const ordered = [...group].sort((a, b) => a.start - b.start || a.end - b.end)
+      for (let index = 0; index < ordered.length - 1; index += 1) {
+        const left = ordered[index]!
+        const right = ordered[index + 1]!
+        const gapStart = left.end
+        const gapEnd = right.start
+        const gapLength = gapEnd - gapStart
+        if (gapLength <= maxUnintendedGap) continue
+        const allowed = allowedGaps.some(
+          (gap) =>
+            gap.along === along &&
+            Math.abs(gap.axisValue - axisValue) <= axisTolerance &&
+            gap.gapStart <= gapStart + 0.05 &&
+            gap.gapEnd >= gapEnd - 0.05,
+        )
+        if (allowed) continue
+        issues.push({
+          along,
+          axisValue,
+          gapStart,
+          gapEnd,
+          gapLength,
+          leftId: left.id,
+          rightId: right.id,
+        })
+      }
+    }
+  }
+
+  return issues
+}
+
+/** Authored southern detour through the checkpoint divider (not a collider hole bug). */
+export const CONNECTED_LEVEL_ALLOWED_WALL_GAPS = Object.freeze([
+  Object.freeze({
+    along: 'x' as const,
+    axisValue: -3,
+    gapStart: -6.5,
+    gapEnd: -5,
+  }),
+])
+
+export function assertConnectedLevelWallContinuity(
+  colliders: readonly ConnectedLevelBoxCollider[] = CONNECTED_LEVEL_COLLIDERS,
+): void {
+  const issues = findUnintendedWallSegmentGaps(colliders, CONNECTED_LEVEL_ALLOWED_WALL_GAPS)
+  if (issues.length > 0) {
+    const detail = issues
+      .map(
+        (issue) =>
+          `${issue.leftId}→${issue.rightId} along ${issue.along}=${issue.axisValue} gap=${issue.gapLength.toFixed(3)}`,
+      )
+      .join('; ')
+    throw new Error(`Connected-level wall continuity failed: ${detail}`)
+  }
 }
 
 function box(

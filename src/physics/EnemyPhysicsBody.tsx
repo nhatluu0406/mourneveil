@@ -44,6 +44,7 @@ export function EnemyPhysicsBody({
       enemyId,
       (position, desiredTranslation) => {
         body.setTranslation(position, false)
+        world.step()
         controller.computeColliderMovement(collider, desiredTranslation)
         const translation = controller.computedMovement()
         body.setTranslation(
