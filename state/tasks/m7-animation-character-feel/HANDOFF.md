@@ -1,36 +1,42 @@
 # HANDOFF
 
-Updated: 2026-08-11 by Codex
+Updated: 2026-08-11 by Cursor
 Task: m7-animation-character-feel
 
 ## Status
 
-**M7A COMPLETE — READY FOR CURSOR M7B.** M7.0–M7.4 PASS. M6 remains closed; M8 not started.
+**READY FOR PRODUCT OWNER ACCEPTANCE.** M7.0–M7.6 complete on `main`. Agent does **not** self-accept. M8 not started.
 
-## Locked authority
+## Locked authority (unchanged)
 
 - Gameplay fixed-step state drives typed presentation intent.
 - Animation never advances combat, movement, invulnerability, contact, damage, or recovery.
 - Gameplay transforms remain authoritative; procedural and future GLTF animation are in-place presentation backends.
-- Player procedural pose is derived from the shared state and simulation step; render damping blends only local parts.
-- Skirmisher and brute share the enemy projection/pose backend; immutable role presentation data supplies distinct cadence and commitment.
 - Enemy presentation facing consumes the same accepted `attackExecutionFacing` snapshot as contact authority.
 
-## Runtime verification
+## M7.4.1 collision
 
-- In-app browser discovery returned no available browser instances; M7.2 browser observation is unverified.
-- M7.4 browser playthrough is likewise unverified. No substitute browser backend was used.
-- Automated gate: 60 focused integration/regression tests; full 61-file/250-test suite; lint, typecheck, build, verify, diff, doctor, and sync PASS.
-- The first duplicated verify run exhausted the Windows Vitest worker pool after a separate 250-test PASS; isolated `npm run verify` then passed all gates.
+- Root cause: Rapier character controller queried a stale broadphase while R3F auto-stepped kinematic bodies → soft capsule overlap into authored solids (clearance often 0.1–0.24 vs radius 0.35).
+- Fix: `Physics paused`; explicit `CuboidCollider` half-extents matching authored size; `world.step()` before `computeColliderMovement`; final-divider endpoint overlaps; wall continuity validator (southern detour gap allowed).
+- Gate: `scripts/browser/gate-m741-collision.mjs` PASS (clearance ≈ 0.370).
 
-## Integration policy
+## M7.5 / M7.6 animation
 
-- Precedence is defeated > committed action > hit reaction > guard > locomotion > idle.
-- Render damping changes local procedural parts only; collision, aim rays, world transforms, and contact shapes are unchanged.
-- Respawn and save/load derive fresh idle presentation from reset authoritative state; animation state is never serialized.
-- M8 may replace procedural renderers with in-place GLTF/AnimationMixer backends consuming the same `AnimationPresentationState`.
-- Keyboard and mouse remain primary; controller is deferred.
+- Tuned player idle/locomotion/attacks/guard/dodge/heal/death; skirmisher vs brute cadence.
+- Gate: `scripts/browser/gate-m76-animation.mjs` PASS; wall clearance retained after animation work.
+
+## Verification
+
+- 258 tests PASS (isolated vitest after Windows pool exhaustion)
+- lint / typecheck / build / doctor / sync PASS
+- M5.6.1 + M6.7 collision regressions PASS
+
+## Known limitations
+
+- Procedural low-poly only (no production GLTF packs)
+- Cosmetic weapon/limb clipping through walls possible at camera distance
+- Keyboard + mouse primary; controller deferred
 
 ## Next action
 
-Cursor executes M7.5 motion/camera/browser refinement, then M7.6 acceptance. Do not start M8.
+Product Owner acceptance of M7. Do not start M8 until accepted.

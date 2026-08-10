@@ -8,15 +8,15 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (323L)
+- PLAN.md (324L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (76L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (44L)
-- tsconfig.app.json (24L)
-- ... +3 more
+- tmp-m76-checkpoint.png (703L)
+- ... +11 more
 - **.agents/** (0 files)
   - **.agents/skills/** (0 files)
     - **.agents/skills/codebase-map/** (1 files)
@@ -162,14 +162,14 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (21L)
+    - current-state.md (23L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
     - vertical-slice.md (41L)
     - vision.md (79L)
 - **scripts/** (0 files)
-  - **scripts/browser/** (19 files)
+  - **scripts/browser/** (21 files)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
@@ -182,7 +182,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m561-correctness.mjs (279L)
     - gate-m562-regional-hp.mjs (113L)
     - gate-m61-presentation.mjs (130L)
-    - ... +7 more
+    - ... +9 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -209,6 +209,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - developmentDiagnostic.ts (29L) -- symbols: DEVELOPMENT_MILESTONE, DEVELOPMENT_MILESTONE_STEP, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
   - **src/game/** (0 files)
     - **src/game/character/** (13 files)
-      - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock,
+      - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStep
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

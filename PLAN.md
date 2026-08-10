@@ -303,15 +303,27 @@ Establish presentation-only animation contracts and usable procedural motion for
   - verifier: focused integration tests; full repository verification; browser playthrough when controllable; doctor/sync; `git diff --check`
   - evidence: PASS automated — explicit precedence and local render damping integrate with death/respawn and SaveFileV2 without stale action/hit/death poses; 60 focused integration/regression tests and full 61-file/250-test verify green; build, doctor, sync, and diff checks green; no controllable browser available
 
-- [ ] M7.5 — Animation feel and visual motion tuning
-  - depends: M7.4 PASS; risk: MEDIUM; agent: Cursor; isolation: sequential
+- [x] M7.4.1 — Connected-level collision hardening
+  - depends: M7.4 PASS + PO wall-penetration finding; risk: MEDIUM–HIGH (stop if HIGH-risk redesign)
+  - preferred agent: Cursor; isolation: sequential
+  - owns/allows: wall authorship continuity, Rapier CC pipeline sync, explicit solid colliders, browser collision matrix
+  - outcome: no true capsule penetration into authored solids; intentional southern divider detour preserved
+  - verifier: `connectedWallHardening.integration.test.ts`; `gate-m741-collision.mjs`; M5.6.1/M6.7 regressions; lint; typecheck
+  - evidence: PASS — root cause: Rapier CC queried stale broadphase while R3F auto-stepped kinematics (soft overlap ~0.1–0.24m into solids); fix: `Physics paused` + explicit `CuboidCollider` half-extents + `world.step()` before `computeColliderMovement`; final-divider micro-gaps closed; continuity validator; browser clearance 0.370
+
+- [x] M7.5 — Animation feel and visual motion tuning
+  - depends: M7.4.1 PASS; risk: MEDIUM; agent: Cursor; isolation: sequential
   - outcome: bounded procedural feel, camera-feedback, and screenshot/browser refinement
   - non-goals: gameplay authority changes, production assets
+  - verifier: focused pose tests; browser animation gate; lint; typecheck
+  - evidence: PASS — restrained idle; grounded locomotion; crisp light / weighty heavy; skirmisher vs brute cadence; `gate-m76-animation` PASS; wall clearance retained
 
-- [ ] M7.6 — M7 animation/content acceptance
+- [x] M7.6 — M7 animation/content acceptance
   - depends: M7.5 PASS; risk: MEDIUM; agent: Cursor; isolation: sequential
   - outcome: final browser QA and Product Owner-ready M7 evidence
   - non-goals: M8 implementation
+  - verifier: `npm run verify` / isolated test suite; `gate-m741`/`gate-m76`; doctor/sync; `git diff --check`
+  - evidence: PASS automated — 258 tests; collision+animation browser gates; lint/typecheck/build/doctor/sync green; **PO acceptance pending**; M8 not started
 
 ## Decisions
 
