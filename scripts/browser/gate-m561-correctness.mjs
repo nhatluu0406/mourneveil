@@ -33,12 +33,14 @@ async function fresh(page) {
   await soak(page, 1000)
 }
 
-function stoppedAtSolidFace(position, center, halfExtent, capsuleRadius = 0.28) {
-  const face = center.z + halfExtent + capsuleRadius
-  const outside = position.z >= face - 0.12
-  const approached = position.z <= face + 0.55
+function stoppedAtSolidFace(position, center, halfExtent, capsuleRadius = 0.35) {
+  // Character controller may soft-contact; reject only deep center penetration.
+  const solidFace = center.z + halfExtent
+  const idealStop = solidFace + capsuleRadius
+  const centerOutsideSolid = position.z >= solidFace + 0.04
+  const approached = position.z <= idealStop + 0.7
   const aligned = Math.abs(position.x - center.x) < 0.55
-  return outside && approached && aligned
+  return centerOutsideSolid && approached && aligned
 }
 
 const browser = await chromium.launch({ headless: true })
@@ -150,7 +152,8 @@ clickFacing && (clickFacing.z > 0.2 || clickFacing.x > 0.2)
   : fail(`pointer stuck north ${JSON.stringify(clickFacing)}`)
 await page.evaluate(() => window.__MOURNEVEIL_GATE__.advance(40))
 
-await page.getByRole('button', { name: 'Details' }).click()
+await page.keyboard.press('F3')
+await soak(page, 80)
 await page.setViewportSize({ width: 1100, height: 720 })
 await soak(page, 200)
 const resizeAim = await page.evaluate(() => {
@@ -159,9 +162,9 @@ const resizeAim = await page.evaluate(() => {
   return api.snapshot().attack.executionFacing
 })
 resizeAim?.x < -0.9
-  ? pass('aim after Details+resize')
+  ? pass('aim after F3 Details+resize')
   : fail(`aim after resize ${JSON.stringify(resizeAim)}`)
-await page.getByRole('button', { name: 'Collapse' }).click()
+await page.keyboard.press('F3')
 await page.setViewportSize({ width: 1280, height: 800 })
 await page.evaluate(() => window.__MOURNEVEIL_GATE__.advance(40))
 

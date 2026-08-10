@@ -29,12 +29,7 @@ page.on('pageerror', (error) => errors.push(String(error)))
 await page.goto(BASE, { waitUntil: 'networkidle' })
 await fresh(page)
 
-// Collapse Details if present
-const details = page.getByRole('button', { name: /Details|Collapse/i })
-if (await details.count()) {
-  const label = await details.first().textContent()
-  if (label?.includes('Collapse')) await details.first().click()
-}
+// Development Details stay hidden unless F3 — leave them off for presentation checks.
 
 const meshCounts = await page.evaluate(() => {
   // Approximation via runtime presence; Playwright cannot read Three scene easily.

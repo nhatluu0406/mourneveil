@@ -40,12 +40,7 @@ page.on('pageerror', (error) => errors.push(String(error)))
 await page.goto(BASE, { waitUntil: 'networkidle' })
 await fresh(page)
 
-// Full presentation playthrough with Details collapsed
-const details = page.getByRole('button', { name: /Details|Collapse/i })
-if (await details.count()) {
-  const label = await details.first().textContent()
-  if (label?.includes('Collapse')) await details.first().click()
-}
+// Full presentation playthrough with Development Details hidden (default).
 
 await gate(page, 'restorePlayer')
 let state = await snapshot(page)

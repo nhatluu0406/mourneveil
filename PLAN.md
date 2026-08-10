@@ -196,7 +196,7 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - verifier: `npm run verify`; production preview; doctor/sync; `git diff --check`
   - evidence: PASS automated — PO later rejected visual quality; correction continues as M6.7–M6.10
 
-- [ ] 7. M6.7 — Repository state separation + occlusion/collision truth
+- [x] 7. M6.7 — Repository state separation + occlusion/collision truth
   - depends: 6 PASS + PO visual rejection
   - risk: MEDIUM–HIGH (stop if true HIGH-risk collision redesign)
   - preferred agent: Cursor
@@ -204,8 +204,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: m6-presentation task state; decorative-solidity contract; presentation-only camera occlusion fade
   - outcome: M5/M6 HANDOFFs separated; no fake solid visuals; actors readable behind foreground walls; no physics weaken
   - verifier: focused occlusion tests; browser occlusion gate; lint; typecheck; `git diff --check`
+  - evidence: PASS — task `m6-presentation`; decorative lintels/rubble only; `CameraOcclusionFader`; `gate-m67-occlusion` PASS; no HIGH-risk collision redesign
 
-- [ ] 8. M6.8 — Game-grade HUD and UI redesign
+- [x] 8. M6.8 — Game-grade HUD and UI redesign
   - depends: 7 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -213,8 +214,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: HUD composition, typography/frame tokens, inventory overlay, F3 DEV details, I loadout
   - outcome: play without web-app chrome; game UI language
   - verifier: browser UI gate; lint; typecheck; `git diff --check`
+  - evidence: PASS — F3 DEV details; I Armory; bottom-left status + command strip; `uiTheme`; `gate-m68-ui` PASS
 
-- [ ] 9. M6.9 — Dark-fantasy actor/environment quality pass
+- [x] 9. M6.9 — Dark-fantasy actor/environment quality pass
   - depends: 8 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -222,8 +224,9 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: procedural actor silhouettes, environment breakup, lighting, combat presentation
   - outcome: no longer reads as toy/student prototype
   - verifier: browser quality gate; lint; typecheck; `git diff --check`
+  - evidence: PASS — hooded player; lean skirmisher; armored brute; shrine checkpoint; tile seams; localized lights
 
-- [ ] 10. M6.10 — Full presentation and correctness acceptance
+- [x] 10. M6.10 — Full presentation and correctness acceptance
   - depends: 9 PASS
   - risk: MEDIUM
   - preferred agent: Cursor
@@ -231,6 +234,7 @@ Move Mourneveil from technical graybox toward a coherent dark-fantasy playable v
   - owns/allows: screenshot-quality review; M5 regressions; production boundary; soak
   - outcome: ready for Product Owner acceptance (agent does not self-accept)
   - verifier: `npm run verify`; all M5/M6 gates; doctor/sync; `git diff --check`
+  - evidence: PASS automated — `gate-m610-quality`; `gate-m531`/`m561`/`m562`/`m66`/`m67`/`m68`; verify 229 tests; doctor/sync OK; **PO acceptance pending**
 
 ## Parallel groups
 

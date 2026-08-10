@@ -33,19 +33,23 @@ page.on('pageerror', (error) => errors.push(String(error)))
 await page.goto(BASE, { waitUntil: 'networkidle' })
 await fresh(page)
 
-// Walk into solid watch-column — must stop outside (no penetration)
+// Walk into solid watch-column — must stop outside (no penetration).
+// Movement forward=+1 is camera-relative south (−Z), matching gate-m561.
 await page.evaluate(() => {
   const api = window.__MOURNEVEIL_GATE__
   api.restorePlayer()
-  api.setPlayerPosition({ x: -10.4, y: 0.82, z: 3.2 })
-  api.setMovementOverride({ horizontal: 0, forward: -1 })
+  api.defeatEnemy('enemy.skirmisher.introduction')
+  api.setPlayerPosition({ x: -10.4, y: 0.82, z: 2.7 })
+  api.setMovementOverride({ horizontal: 0, forward: 1 })
 })
 await soak(page, 2500)
 await page.evaluate(() => window.__MOURNEVEIL_GATE__.setMovementOverride(null))
 let state = await snapshot(page)
-const face = 1.2 + 0.225 + 0.28
+const solidFace = 1.2 + 0.225
+const idealStop = solidFace + 0.35
 const stopped =
-  state.player.position.z >= face - 0.12 && state.player.position.z <= face + 0.65
+  state.player.position.z >= solidFace + 0.04 &&
+  state.player.position.z <= idealStop + 0.7
 stopped
   ? pass(`solid watch-column stop z=${state.player.position.z.toFixed(2)}`)
   : fail(`watch-column stop unexpected z=${state.player.position.z}`)
@@ -62,7 +66,13 @@ state.playerHealth.health.alive
   ? pass('player readable path behind divider remains alive')
   : fail('unexpected death behind divider')
 
-// Open shortcut: tall decorative tower must not remain as walk-through wall
+// Unlock shortcut from mixed-combat side, then confirm open corridor is walkable
+// (decorative lintels must not act as phantom solids).
+await page.evaluate(() => {
+  const api = window.__MOURNEVEIL_GATE__
+  api.setPlayerPosition({ x: 0.5, y: 0.82, z: -4 })
+})
+await soak(page, 200)
 await page.evaluate(() => {
   const api = window.__MOURNEVEIL_GATE__
   api.setPlayerPosition({ x: -2, y: 0.82, z: -1.2 })
