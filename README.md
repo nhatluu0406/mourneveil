@@ -8,7 +8,7 @@ Mourneveil is a local-first browser-based 3D action RPG vertical slice focused o
 
 **M6 Presentation Foundation** is Product Owner accepted and tagged `v0.6.0-presentation-foundation`.
 
-**M7 Animation & Character Feel** is active on `main` (`m7-animation-character-feel`).
+**M7 Animation & Character Feel** is complete through M7.6 on `main` and **awaiting Product Owner acceptance** (`m7-animation-character-feel`). M8 has not started.
 
 ## Requirements
 
