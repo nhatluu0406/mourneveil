@@ -285,10 +285,11 @@ Establish presentation-only animation contracts and usable procedural motion for
   - verifier: focused animation architecture tests; lint; typecheck; `git diff --check`
   - evidence: PASS — immutable backend-neutral presentation state projects explicit precedence, authoritative facing/velocity, committed action phase, and deterministic normalized progress; 8 focused tests plus lint/typecheck/diff green; no gameplay authority changes
 
-- [ ] M7.2 — Player animation state foundation
+- [x] M7.2 — Player animation state foundation
   - depends: M7.1 PASS; risk: MEDIUM; agent: Codex; isolation: sequential
   - outcome: procedural idle/locomotion/light/heavy/guard/dodge/heal/hit/defeated poses driven by presentation state
   - verifier: focused player animation tests; browser state gate when controllable; lint; typecheck; `git diff --check`
+  - evidence: PASS automated — shared player projection drives restrained idle, speed-based locomotion, light/heavy phase commitment, guard, dodge, flask, cosmetic hit reaction, and defeated override through a pure procedural pose resolver; 24 focused tests plus lint/typecheck/diff green; no controllable browser instance available
 
 - [ ] M7.3 — Enemy animation state foundation
   - depends: M7.2 PASS; risk: MEDIUM; agent: Codex; isolation: sequential

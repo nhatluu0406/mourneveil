@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
-import type { Group, Mesh, MeshStandardMaterial } from 'three'
+import { MathUtils, type Group, type Mesh, type MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import {
   PLAYER_CAPSULE_HALF_HEIGHT,
@@ -12,6 +12,8 @@ import {
 } from './playerAttackPresentation'
 import { localNegativeZFacingYaw } from './enemyAttackPresentation'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
+import { projectPlayerAnimation } from './animation/playerAnimationProjection'
+import { resolvePlayerProceduralPose } from './animation/playerProceduralPose'
 
 export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const facingGroupRef = useRef<Group>(null)
@@ -23,9 +25,19 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const guardMarkerRef = useRef<Mesh>(null)
   const torsoMaterialRef = useRef<MeshStandardMaterial>(null)
   const cloakMaterialRef = useRef<MeshStandardMaterial>(null)
+  const torsoRef = useRef<Mesh>(null)
+  const leftLegRef = useRef<Mesh>(null)
+  const rightLegRef = useRef<Mesh>(null)
+  const leftArmRef = useRef<Mesh>(null)
+  const rightArmRef = useRef<Mesh>(null)
 
-  useFrame(() => {
+  useFrame((_state, deltaSeconds) => {
     const snapshot = runtime.snapshot()
+    const animation = projectPlayerAnimation(snapshot)
+    const proceduralPose = resolvePlayerProceduralPose(
+      animation,
+      snapshot.simulation.stepCount,
+    )
     const facingGroup = facingGroupRef.current
     const bodyGroup = bodyGroupRef.current
     const weaponSweep = weaponSweepRef.current
@@ -35,6 +47,11 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     const guardMarker = guardMarkerRef.current
     const torsoMaterial = torsoMaterialRef.current
     const cloakMaterial = cloakMaterialRef.current
+    const torso = torsoRef.current
+    const leftLeg = leftLegRef.current
+    const rightLeg = rightLegRef.current
+    const leftArm = leftArmRef.current
+    const rightArm = rightArmRef.current
     if (
       facingGroup === null ||
       bodyGroup === null ||
@@ -44,13 +61,20 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       contactShape === null ||
       guardMarker === null ||
       torsoMaterial === null ||
-      cloakMaterial === null
+      cloakMaterial === null ||
+      torso === null ||
+      leftLeg === null ||
+      rightLeg === null ||
+      leftArm === null ||
+      rightArm === null
     ) {
       return
     }
-    guardMarker.visible = snapshot.defense.guarding
+    guardMarker.visible = animation.mode === 'guard'
 
-    const facing = resolveAttackPresentationFacing(snapshot.attack, snapshot.player)
+    const facing = resolveAttackPresentationFacing(snapshot.attack, {
+      facing: animation.facing,
+    })
     facingGroup.rotation.y = localNegativeZFacingYaw(facing)
     const pose = computePlayerAttackPresentationPose(snapshot.combat)
     weapon.visible = pose.weaponVisible
@@ -58,19 +82,21 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     weaponSweep.rotation.y = pose.weaponYawRadians
     weaponMaterial.color.set(pose.color)
 
-    const alive = snapshot.playerHealth.health.alive
-    const dodging = snapshot.defense.dodgeMovementActive
-    bodyGroup.scale.set(dodging ? 0.94 : 1, alive ? (dodging ? 0.9 : 1) : 0.2, dodging ? 1.06 : 1)
-    bodyGroup.rotation.z = alive ? 0 : Math.PI / 2
-    bodyGroup.position.y = alive ? 0 : -0.38
-    bodyGroup.position.x = dodging ? 0.14 : 0
+    const damping = Math.max(1, 1 / Math.max(animation.transition.blendSeconds, 0.001))
+    bodyGroup.scale.x = MathUtils.damp(bodyGroup.scale.x, proceduralPose.bodyScaleX, damping, deltaSeconds)
+    bodyGroup.scale.y = MathUtils.damp(bodyGroup.scale.y, proceduralPose.bodyScaleY, damping, deltaSeconds)
+    bodyGroup.scale.z = MathUtils.damp(bodyGroup.scale.z, proceduralPose.bodyScaleZ, damping, deltaSeconds)
+    bodyGroup.rotation.z = MathUtils.damp(bodyGroup.rotation.z, proceduralPose.bodyRoll, damping, deltaSeconds)
+    bodyGroup.position.y = MathUtils.damp(bodyGroup.position.y, proceduralPose.bodyOffsetY, damping, deltaSeconds)
+    bodyGroup.position.x = MathUtils.damp(bodyGroup.position.x, proceduralPose.bodyOffsetX, damping, deltaSeconds)
+    torso.rotation.x = MathUtils.damp(torso.rotation.x, proceduralPose.torsoPitch, damping, deltaSeconds)
+    leftLeg.rotation.x = MathUtils.damp(leftLeg.rotation.x, proceduralPose.limbSwing, damping, deltaSeconds)
+    rightLeg.rotation.x = MathUtils.damp(rightLeg.rotation.x, -proceduralPose.limbSwing, damping, deltaSeconds)
+    leftArm.rotation.x = MathUtils.damp(leftArm.rotation.x, 0.15 + proceduralPose.leftArmPitch, damping, deltaSeconds)
+    rightArm.rotation.x = MathUtils.damp(rightArm.rotation.x, 0.15 + proceduralPose.rightArmPitch, damping, deltaSeconds)
+    weaponSweep.rotation.x = MathUtils.damp(weaponSweep.rotation.x, proceduralPose.weaponPitch, damping, deltaSeconds)
 
-    const lastHit = snapshot.incomingContact.lastHit
-    const flash =
-      alive &&
-      lastHit !== null &&
-      lastHit.outcome === 'damaged' &&
-      snapshot.simulation.stepCount - lastHit.simulationStep < 12
+    const flash = animation.mode !== 'defeated' && animation.hitReactionToken !== null
     for (const material of [torsoMaterial, cloakMaterial]) {
       material.emissive.set(flash ? MOURNEVEIL_PALETTE.damage : '#000000')
       material.emissiveIntensity = flash ? 0.45 : 0
@@ -93,16 +119,16 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
           />
         </mesh>
         {/* Lower stance / greaves */}
-        <mesh castShadow position={[-0.11, -0.42, 0.02]}>
+        <mesh ref={leftLegRef} castShadow position={[-0.11, -0.42, 0.02]}>
           <boxGeometry args={[0.16, 0.42, 0.18]} />
           <meshStandardMaterial color="#4a433a" roughness={0.92} />
         </mesh>
-        <mesh castShadow position={[0.11, -0.42, 0.02]}>
+        <mesh ref={rightLegRef} castShadow position={[0.11, -0.42, 0.02]}>
           <boxGeometry args={[0.16, 0.42, 0.18]} />
           <meshStandardMaterial color="#4a433a" roughness={0.92} />
         </mesh>
         {/* Torso / tabard */}
-        <mesh castShadow position={[0, 0.02, 0]}>
+        <mesh ref={torsoRef} castShadow position={[0, 0.02, 0]}>
           <boxGeometry args={[0.42, 0.55, 0.28]} />
           <meshStandardMaterial
             ref={torsoMaterialRef}
@@ -125,11 +151,11 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
           <meshStandardMaterial color="#5a4c3d" roughness={0.86} />
         </mesh>
         {/* Arms */}
-        <mesh castShadow position={[-0.34, 0.02, 0]} rotation={[0.15, 0, 0.2]}>
+        <mesh ref={leftArmRef} castShadow position={[-0.34, 0.02, 0]} rotation={[0.15, 0, 0.2]}>
           <boxGeometry args={[0.1, 0.38, 0.1]} />
           <meshStandardMaterial color="#5c5044" roughness={0.9} />
         </mesh>
-        <mesh castShadow position={[0.34, 0.02, 0]} rotation={[0.15, 0, -0.2]}>
+        <mesh ref={rightArmRef} castShadow position={[0.34, 0.02, 0]} rotation={[0.15, 0, -0.2]}>
           <boxGeometry args={[0.1, 0.38, 0.1]} />
           <meshStandardMaterial color="#5c5044" roughness={0.9} />
         </mesh>
