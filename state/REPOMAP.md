@@ -8,15 +8,15 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - AGENTS.md (197L)
 - CLAUDE.local.md.example (12L)
 - CLAUDE.md (38L)
-- PLAN.md (254L)
-- README.md (36L)
+- PLAN.md (323L)
+- README.md (38L)
 - SETUP.md (44L)
-- STACK.md (75L)
+- STACK.md (76L)
 - eslint.config.js (28L)
 - index.html (13L)
 - package.json (44L)
-- tmp-m610-arrival.png (482L)
-- ... +13 more
+- tsconfig.app.json (24L)
+- ... +3 more
 - **.agents/** (0 files)
   - **.agents/skills/** (0 files)
     - **.agents/skills/codebase-map/** (1 files)
@@ -154,8 +154,9 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - STACK.md (31L)
       - WIKI-INSTRUCTIONS.md (17L)
 - **docs/** (1 files)
-  - roadmap.md (54L)
-  - **docs/architecture/** (1 files)
+  - roadmap.md (56L)
+  - **docs/architecture/** (2 files)
+    - animation-presentation.md (14L)
     - overview.md (79L)
     - **docs/architecture/decisions/** (1 files)
       - 0001-web-stack.md (46L)
@@ -208,6 +209,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - developmentDiagnostic.ts (29L) -- symbols: DEVELOPMENT_MILESTONE, DEVELOPMENT_MILESTONE_STEP, WORKING_TITLE, DevelopmentDiagnostic, createDevelopmentDiagnostic; imports: ../app/useGameRuntime
   - **src/game/** (0 files)
     - **src/game/character/** (13 files)
-      - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock, ../combat/combatContact, ./player
+      - enemyIncomingCombat.integration.test.ts (113L) -- imports: ../core/fixedStepClock,
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

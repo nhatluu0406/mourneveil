@@ -297,10 +297,11 @@ Establish presentation-only animation contracts and usable procedural motion for
   - verifier: focused enemy animation/facing tests; browser combat cycles when controllable; lint; typecheck; `git diff --check`
   - evidence: PASS automated — both roles use the shared projection/pose backend with role-authored cadence, commitment, recovery, and recoil tuning; execution-facing remains frozen through recovery and later attacks may reorient; 33 enemy animation/facing/runtime tests plus lint/typecheck/diff green; browser unavailable
 
-- [ ] M7.4 — Animation integration and deterministic verification
+- [x] M7.4 — Animation integration and deterministic verification
   - depends: M7.3 PASS; risk: MEDIUM; agent: Codex; isolation: sequential
   - outcome: explicit precedence/transitions, clean respawn/save projection, connected-level regression evidence, M8-compatible renderer boundary
   - verifier: focused integration tests; full repository verification; browser playthrough when controllable; doctor/sync; `git diff --check`
+  - evidence: PASS automated — explicit precedence and local render damping integrate with death/respawn and SaveFileV2 without stale action/hit/death poses; 60 focused integration/regression tests and full 61-file/250-test verify green; build, doctor, sync, and diff checks green; no controllable browser available
 
 - [ ] M7.5 — Animation feel and visual motion tuning
   - depends: M7.4 PASS; risk: MEDIUM; agent: Cursor; isolation: sequential
