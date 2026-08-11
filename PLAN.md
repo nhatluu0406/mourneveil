@@ -1,64 +1,54 @@
-# PLAN: M9 Combat Depth — Hit Reaction / Interrupt
+# PLAN: M9 Combat Depth — Telegraph + Punish Window Readability
 <!-- Live M9 graph only. -->
 
-Input: Product Owner M9 macro-batch 2 | Stack: `STACK.md` | Task: `m9-combat-depth`
+Input: Product Owner M9 macro-batch 3 | Stack: `STACK.md` | Task: `m9-combat-depth`
 
 ## Goal
 
-Add one deterministic enemy hit-reaction/interrupt slice: existing player heavy attacks can interrupt eligible enemies into a short simulation-owned stun, without posture meters or combat redesign.
+Make enemy attack startup / active / recovery visually readable and create a perceivable punish window after committed attacks, without changing damage or contact authority.
 
 ## Non-goals
 
-- Stamina/posture/poise, knockback/ragdoll, parry, combo trees, new light/heavy architecture, new enemies/weapons/art, M10, closing/tagging M9.
+- New VFX architecture, art/rigs, perfect guard/parry, posture, knockback, M10, closing/tagging M9, global damage/HP/guard/dodge rebalance.
 
 ## Steps
 
-- [x] 0. Recon + lock interrupt contract
+- [x] 0. Audit current telegraph + lock timing/presentation contract
   - depends: —
-  - risk: MEDIUM
-  - isolation: sequential
-  - owns/allows: PLAN locked contract; read-only combat/enemy/animation audit in HANDOFF
-  - verifier: PLAN documents trigger (existing heavy), skirmisher/brute rules, phases, anti-stunlock, duration
-  - evidence: PASS; existing light/heavy attacks reused; no new attack architecture.
-- [x] 1. Authoritative enemy hit-reaction runtime
-  - depends: 0
-  - risk: HIGH
-  - isolation: sequential
-  - owns/allows: `enemyRuntime`, `enemyHitReaction`, `meleeEnemy` AI gating, `GameRuntime` post-hit application, focused tests
-  - verifier: focused hit-reaction tests A–K (incl. guard regressions)
-  - evidence: PASS; unit + integration suites green; guard/contact regressions green.
-- [x] 2. Presentation projection only
-  - depends: 1
   - risk: LOW
   - isolation: sequential
-  - owns/allows: M7 enemy animation projection reuse; no new VFX architecture
-  - verifier: hit-reaction mode driven by simulation state; M7 animation regressions green
-  - evidence: PASS; `projectEnemyAnimation` prefers sim `hitReaction` token.
-- [x] 3. Deterministic M9 runtime gate
+  - owns/allows: PLAN locked timings; HANDOFF audit notes
+  - verifier: PLAN records before/after step counts and presentation channels
+- [x] 1. Tune authored attack timings + phase presentation
+  - depends: 0
+  - risk: MEDIUM
+  - isolation: sequential
+  - owns/allows: `enemyRoles` attack steps, attack presentation projection, procedural pose/visual accents, focused tests
+  - verifier: focused timing/presentation/hit-reaction/guard tests PASS
+- [x] 2. Deterministic readability + startup-interrupt gate
+  - depends: 1
+  - risk: MEDIUM
+  - isolation: sequential
+  - owns/allows: one owned Playwright gate + package script; screenshots under ignored tmp/
+  - verifier: `npm run gate:m9-telegraph-readability` PASS; cleanup/port reuse
+- [x] 3. Verify and hand off
   - depends: 1, 2
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: one owned Playwright gate via existing lifecycle; package script
-  - verifier: `npm run gate:m9-hit-reaction` PASS; owned cleanup/port reuse
-  - evidence: PASS; in-page sequenced probe; port 4195 reusable.
-- [x] 4. Verify and hand off
-  - depends: 1, 2, 3
-  - risk: MEDIUM
-  - isolation: sequential
   - owns/allows: PLAN/HANDOFF/current-state/REPOMAP; DEBT only if real deferred limitation
-  - verifier: full verify + lifecycle + doctor/sync/git guard
-  - evidence: PASS; 70 files/303 tests; assets/build; lifecycle; doctor/sync.
+  - verifier: lint/typecheck/test/build/verify + lifecycle + doctor/sync/git guard
 
 ## Locked contract
 
-- Trigger: existing player **heavy** attack contact (`interruptImpact: 1`); light remains `0` (damage only, presentation flash may remain).
-- Skirmisher threshold `1` → one heavy interrupts. Brute threshold `2` → two separate heavy executions required.
-- Interruptible: idle/pursue/spacing, attack startup, attack recovery. Non-interruptible: attack **active**, defeated, already in hitReaction, post-reaction immunity.
-- On interrupt: cancel enemy action, clear execution facing, zero velocity, enter `hitReaction` for 20 fixed steps; then resume pursue (keep target) or idle.
-- Anti-stunlock: no re-entry while reacting; same `executionId` cannot apply twice; 12-step post-reaction immunity; interrupt meter quiet-resets after 90 steps.
-- Damage authority unchanged; reaction is a consequence of already-deduped `damaged` hits. Transient / unsaved.
+- Simulation phases remain authoritative. Presentation derives from `action.phase` only.
+- Skirmisher attack steps: startup **20**, active **10**, recovery **24**.
+- Brute attack steps: startup **48**, active **12**, recovery **48**.
+- Startup: stronger wind-up pose + telegraph ring + brief emissive accent.
+- Active: committed swing pose; no interrupt (unchanged).
+- Recovery: readable open/recover pose + distinct recovery cue; no reattack until recovery completes; interruptible by heavy per MB2.
+- Punish window = recovery itself (not a new state). Light attack must be landable when in range.
 
 ## Escalation
 
-- Stop if interrupt requires redesigning CombatContact/guard ownership or a posture subsystem.
-- Same failure three times: stuck report and stop.
+- Stop if readability requires animation-driven contact or a new combat authority.
+- Same failure 3× → stuck report.

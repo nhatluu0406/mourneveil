@@ -5,55 +5,53 @@ Task: m9-combat-depth
 
 ## Status
 
-ACTIVE — M9 macro-batch 2 PASS. Enemy hit-reaction / heavy-hit interrupt is complete; M9 is not closed or tagged.
+ACTIVE — M9 macro-batch 3 PASS. Enemy telegraph + punish-window readability is complete; M9 is not closed or tagged.
 
 ## Prior
 
-- Macro-batch 1: guard impact / temporary guard break (HEAD baseline `13fbb25`).
+- Macro-batch 1: guard impact / temporary guard break.
+- Macro-batch 2: heavy-hit reaction interrupt (`a6ac421`).
 - M8 remains accepted at `v0.8.0-production-asset-pipeline` → `244aab1`.
-- M7 tag `v0.7.0-animation-foundation` → `c93f083`.
 
-## Recon
+## Timing contract (authoritative)
 
-- Player already distinguished light vs heavy attacks; no new attack architecture added.
-- Enemy states previously had no simulation hit-reaction; animation only flashed from contact tokens.
-- Damage applied without interrupting chase/attack except on defeat.
-- Skirmisher/brute share `EnemyRuntime` + role-authored constants.
+| Role | startup | active | recovery |
+|------|---------|--------|----------|
+| Before | 18 / 5 / 18 | 42 / 8 / 36 |
+| After | skirmisher **20 / 10 / 24** | brute **48 / 12 / 48** |
 
-## Interrupt contract
-
-- Trigger: existing heavy attack `interruptImpact: 1`; light `0`.
-- Skirmisher threshold `1`; brute threshold `2`.
-- Interruptible: idle/pursue/spacing, attack startup, attack recovery.
-- Non-interruptible: attack active (committed), defeated, already reacting, post-reaction immunity.
-- Reaction: 20 fixed steps; cancel action; clear execution facing; zero velocity; resume pursue/idle.
-- Anti-stunlock: same `executionId` blocked; no re-entry while reacting; 12-step immunity; meter quiet-reset 90 steps.
-- Applied only after deduped `damaged` contact events in `GameRuntime`. Transient / unsaved.
+Simulation phases remain authoritative. Presentation derives from `action.phase` only. Punish window = recovery (no new state); recovery blocks reattack.
 
 ## Presentation
 
-- M7 `projectEnemyAnimation` prefers authoritative `hitReaction` state over brief contact flash.
-- No new VFX, no production GLB, no art replacement.
+- Stronger procedural wind-up / swing / open-recover poses (role animation tuning).
+- Phase projection: telegraph ring (startup), recovery ring (recovery), emissive accents, `phaseAccent`.
+- DEV contact sphere unchanged.
+
+## Interrupt / defense
+
+- MB2 interrupt rules unchanged; startup interrupt now deterministically proven in `gate:m9-telegraph-readability`.
+- Active non-interrupt remains unit-covered (player heavy startup 18 cannot connect inside skirmisher active 10).
+- Guard / guard-break / dodge / mistimed damage regressions PASS.
 
 ## Runtime evidence
 
-- `npm run gate:m9-hit-reaction` PASS (owned lifecycle, port 4195 reusable).
-- Observed in-page: skirmisher heavy → hitReaction/movement stop → recover; brute resists first heavy (meter=1) then reacts on second; post-reaction combat/nav legal; no page errors.
-- `npm run gate:m9-guard-depth` re-run PASS (guard regression).
+- `npm run gate:m9-telegraph-readability` PASS (port 4195 reusable; screenshots under `tmp-m9-telegraph-readability/`).
+- Observed: skirmisher/brute phase frames; punish light in recovery; startup+recovery heavy interrupts; brute meter→reaction; guard/dodge/mistimed defense; no page errors.
+- `gate:m9-hit-reaction` / `gate:m9-guard-depth` / `gate:lifecycle` PASS.
 
 ## Verification
 
-- Focused hit-reaction/guard/contact/enemy/animation/nav/respawn suites PASS.
-- `npm run lint` / `typecheck` / `test` (70 files / 303 tests) / `build` / `assets:verify` PASS.
-- `npm run gate:lifecycle` PASS.
+- Focused telegraph/presentation/hit-reaction/guard/animation suites PASS.
+- `npm run lint` / `typecheck` / `test` (71 files / 308 tests; Node heap flake possible under low memory) / `build` / `assets:verify` / `verify` PASS.
 - `git diff --check`, LeanLoop doctor `--strict`, sync `--check` PASS.
 
 ## Debt
 
-- No debt added or resolved. Intentional non-goals (posture, light stuns, knockback) remain roadmap scope, not deferred defects.
+- No debt added. Placeholder procedural art remains roadmap scope, not a new deferred defect.
 
 ## Next
 
-Recommended M9 macro-batch 3 for **Cursor**: small readability/tuning of interrupt windows (e.g. ensure startup interrupts are reliably observable in mixed encounters) or one narrow recovery-feel constant pass — no new authority.
+Recommended M9 macro-batch 4 for **Cursor**: player attack commitment/readability or contact/hit feedback tuning — contained presentation/timing, no new authority.
 
-Recommend **Codex** only if Product Owner wants a new authority boundary (true poise meter, shared stun abstraction across player guard-break, or knockback physics).
+Recommend **Codex** only if Product Owner wants a shared stun/poise authority or animation-driven contact (rejected for this batch).
