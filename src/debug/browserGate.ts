@@ -6,6 +6,7 @@ import {
   PLAYER_RESPAWN_REQUEST,
   PLAYER_WORLD_INTERACTION_REQUEST,
 } from '../input/playerRecoveryIntent'
+import { readRendererStats } from './rendererStats'
 
 declare global {
   interface Window {
@@ -32,6 +33,7 @@ declare global {
       setMovementOverride: (movement: PlayerMovementIntent | null) => void
       equipItem: (itemId: string) => unknown
       unequipSlot: (slot: 'weapon' | 'charm') => unknown
+      rendererStats: () => unknown
     }
   }
 }
@@ -84,6 +86,7 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     },
     equipItem: (itemId) => runtime.equipItem(itemId),
     unequipSlot: (slot) => runtime.unequipSlot(slot),
+    rendererStats: () => readRendererStats(),
   }
 
   return () => {

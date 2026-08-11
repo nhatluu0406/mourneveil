@@ -1,4 +1,3 @@
-import { mkdir } from 'node:fs/promises'
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
 
 const OUT = 'tmp-m8-shrine'
@@ -16,8 +15,8 @@ async function gate(page, method, ...args) {
   )
 }
 
-await mkdir(OUT, { recursive: true })
 await runOwnedBrowserGate({
+  artifactDir: OUT,
   run: async (page, { baseUrl }) => {
     const errors = []
     const assetFailures = []

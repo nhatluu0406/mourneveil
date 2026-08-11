@@ -41,7 +41,7 @@ Desktop.ini
 *.temp
 *.bak
 vite.config.*.timestamp-*
-tmp-m*/
+tmp-m*
 
 # LEANLOOP:IGNORE:START
 state/CURRENT_TASK

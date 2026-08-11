@@ -1,4 +1,3 @@
-import { mkdir } from 'node:fs/promises'
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
 
 const OUT = 'tmp-m9-hit-reaction'
@@ -34,9 +33,9 @@ async function runProbe(page, probe) {
   return page.evaluate(probe)
 }
 
-await mkdir(OUT, { recursive: true })
 let cleanupReport = null
 await runOwnedBrowserGate({
+  artifactDir: OUT,
   port: PORT,
   afterCleanup: (report) => {
     cleanupReport = report
@@ -251,7 +250,13 @@ if (
 ) {
   fail(`owned cleanup failed: ${JSON.stringify(cleanupReport)}`)
 } else {
-  pass(`owned browser/server cleanup complete; port ${PORT} reusable`)
+  if (cleanupReport.artifactCleanup?.kept) {
+  pass(`owned artifacts kept (KEEP_ARTIFACTS); port ${PORT} reusable`)
+} else if (cleanupReport.artifactCleanup?.kept === false) {
+  pass(`owned artifacts removed; port ${PORT} reusable`)
+} else {
+  fail(`artifact cleanup missing: ${JSON.stringify(cleanupReport.artifactCleanup)}`)
+}
 }
 
 if (failures.length > 0) {

@@ -15,6 +15,8 @@ import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { projectPlayerAnimation } from './animation/playerAnimationProjection'
 import { resolvePlayerProceduralPose } from './animation/playerProceduralPose'
 import { resolvePlayerOutgoingHitConfirm } from './playerCombatFeedback'
+import { combatContactCueLayout } from './combatContactCueLayout'
+import { CombatContactVolumeCue } from './CombatContactVolumeCue'
 
 const PLAYER_PLACEHOLDER_BLADE_LENGTH = 0.56
 const PLAYER_PLACEHOLDER_WEAPON_X = 0.28
@@ -25,7 +27,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const weaponSweepRef = useRef<Group>(null)
   const weaponRef = useRef<Mesh>(null)
   const weaponMaterialRef = useRef<MeshStandardMaterial>(null)
-  const contactShapeRef = useRef<Mesh>(null)
+  const contactShapeRef = useRef<Group>(null)
   const guardMarkerRef = useRef<Mesh>(null)
   const guardMaterialRef = useRef<MeshStandardMaterial>(null)
   const torsoMaterialRef = useRef<MeshStandardMaterial>(null)
@@ -149,8 +151,12 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     const activeShape = snapshot.attack.activeContactShape
     contactShape.visible = import.meta.env.DEV && activeShape !== null
     if (activeShape !== null) {
-      contactShape.position.set(0, 0, -activeShape.forwardOffset)
-      contactShape.scale.setScalar(activeShape.radius)
+      const cue = combatContactCueLayout(
+        activeShape.forwardOffset,
+        activeShape.radius,
+      )
+      contactShape.position.set(0, cue.localY, -cue.forwardOffset)
+      contactShape.scale.setScalar(cue.radius)
     }
   })
 
@@ -242,10 +248,11 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
           <meshStandardMaterial color="#6a5a48" roughness={0.7} metalness={0.25} />
         </mesh>
       </group>
-      <mesh ref={contactShapeRef} position={[0, 0, -0.82]} visible={false}>
-        <sphereGeometry args={[1, 12, 8]} />
-        <meshBasicMaterial color="#f4d06f" transparent opacity={0.18} wireframe depthWrite={false} />
-      </mesh>
+      <CombatContactVolumeCue
+        groupRef={contactShapeRef}
+        color="#f4d06f"
+        opacity={0.32}
+      />
       <mesh ref={guardMarkerRef} position={[0, 0.22, -0.36]} visible={false}>
         <boxGeometry args={[0.5, 0.55, 0.06]} />
         <meshStandardMaterial ref={guardMaterialRef} color="#8fc4da" transparent opacity={0.5} />

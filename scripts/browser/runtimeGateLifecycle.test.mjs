@@ -1,8 +1,12 @@
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
+import { access, constants, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   canBindPort,
+  prepareOwnedArtifactDir,
+  shouldKeepGateArtifacts,
   signalOwnedPosixProcessGroup,
   stopOwnedProcessTree,
   waitForHttp,
@@ -63,5 +67,33 @@ describe('owned runtime gate lifecycle', () => {
         throw denied
       }),
     ).toThrow(denied)
+  })
+
+  it('prepares and removes owned tmp-m artifact dirs by default', async () => {
+    const owned = await prepareOwnedArtifactDir('tmp-m-lifecycle-test', {
+      env: { KEEP_ARTIFACTS: '0' },
+    })
+    await writeFile(path.join(owned.path, 'probe.txt'), 'ok', 'utf8')
+    expect(await access(owned.path, constants.F_OK).then(() => true)).toBe(true)
+    const cleanup = await owned.cleanup()
+    expect(cleanup).toEqual({ kept: false, path: owned.path })
+    await expect(access(owned.path, constants.F_OK)).rejects.toBeTruthy()
+  })
+
+  it('keeps owned artifacts when KEEP_ARTIFACTS is set', async () => {
+    expect(shouldKeepGateArtifacts({ KEEP_ARTIFACTS: '1' })).toBe(true)
+    const owned = await prepareOwnedArtifactDir('tmp-m-lifecycle-keep', {
+      env: { KEEP_ARTIFACTS: '1' },
+    })
+    const cleanup = await owned.cleanup()
+    expect(cleanup.kept).toBe(true)
+    await access(owned.path, constants.F_OK)
+    const { rm } = await import('node:fs/promises')
+    await rm(owned.path, { recursive: true, force: true })
+  })
+
+  it('rejects artifact paths outside a single cwd-owned tmp-m folder', async () => {
+    await expect(prepareOwnedArtifactDir('../tmp-m-escape')).rejects.toThrow(/cwd-owned/)
+    await expect(prepareOwnedArtifactDir('not-tmp')).rejects.toThrow(/tmp-m/)
   })
 })

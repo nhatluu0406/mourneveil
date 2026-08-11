@@ -11,6 +11,9 @@ import { InventoryEquipmentPanel } from '../ui/InventoryEquipmentPanel'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useGameRuntime } from './useGameRuntime'
 
+/** Cap retina DPR so a simple graybox scene does not allocate 2× drawing buffers by default. */
+const RENDERER_DPR: [number, number] = [1, 1.5]
+
 export function App() {
   const [rendererReady, setRendererReady] = useState(false)
   const [physicsReady, setPhysicsReady] = useState(false)
@@ -79,8 +82,7 @@ export function App() {
             near: 0.1,
             far: 120,
           }}
-          dpr={[1, 2]}
-          fallback={
+          dpr={RENDERER_DPR}          fallback={
             <div className="render-fallback" role="alert">
               <h2>3D renderer unavailable</h2>
               <p>This browser does not provide the WebGL support Mourneveil needs.</p>

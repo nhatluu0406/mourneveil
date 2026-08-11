@@ -15,6 +15,8 @@ import {
   requestedEnemyProofAsset,
   resolveEnemyPresentationBackend,
 } from './enemyPresentationBackend'
+import { combatContactCueLayout } from './combatContactCueLayout'
+import { CombatContactVolumeCue } from './CombatContactVolumeCue'
 
 const STATE_MIX = {
   idle: 0,
@@ -60,7 +62,7 @@ function ProceduralEnemyVisual({
   const telegraphMaterialRef = useRef<MeshBasicMaterial>(null)
   const recoveryRef = useRef<Mesh>(null)
   const recoveryMaterialRef = useRef<MeshBasicMaterial>(null)
-  const contactRef = useRef<Mesh>(null)
+  const contactRef = useRef<Group>(null)
   const weaponRef = useRef<Mesh>(null)
 
   useFrame((_state, deltaSeconds) => {
@@ -159,6 +161,11 @@ function ProceduralEnemyVisual({
     recovery.visible = attackPresentation.recoveryVisible
     recoveryMaterial.opacity = 0.22 + 0.4 * attackPresentation.phaseAccent
     contact.visible = import.meta.env.DEV && attackPresentation.contactVisible
+    if (attackPresentation.contactVisible) {
+      const cue = combatContactCueLayout(role.contact.forwardOffset, role.contact.radius)
+      contact.position.set(0, cue.localY, -cue.forwardOffset)
+      contact.scale.setScalar(cue.radius)
+    }
   })
 
   const enemy =
@@ -278,21 +285,11 @@ function ProceduralEnemyVisual({
           side={2}
         />
       </mesh>
-      <mesh
-        ref={contactRef}
-        position={[0, 0, -role.contact.forwardOffset]}
-        scale={role.contact.radius}
-        visible={false}
-      >
-        <sphereGeometry args={[1, 12, 8]} />
-        <meshBasicMaterial
-          color={isBrute ? MOURNEVEIL_PALETTE.brute.contact : MOURNEVEIL_PALETTE.skirmisher.contact}
-          transparent
-          opacity={0.22}
-          wireframe
-          depthWrite={false}
-        />
-      </mesh>
+      <CombatContactVolumeCue
+        groupRef={contactRef}
+        color={isBrute ? MOURNEVEIL_PALETTE.brute.contact : MOURNEVEIL_PALETTE.skirmisher.contact}
+        opacity={0.3}
+      />
     </group>
   )
 }

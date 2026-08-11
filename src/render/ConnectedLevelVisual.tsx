@@ -178,51 +178,51 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
       </mesh>
 
       {/* Arrival rubble near solid post — low silhouette. */}
-      <mesh position={[-12.6, 0.18, 7.5]} castShadow>
+      <mesh position={[-12.6, 0.18, 7.5]}>
         <boxGeometry args={[0.55, 0.28, 0.4]} />
         <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.wall} roughness={0.92} />
       </mesh>
-      <mesh position={[-12.35, 0.12, 7.85]} rotation={[0, 0.4, 0.15]} castShadow>
+      <mesh position={[-12.35, 0.12, 7.85]} rotation={[0, 0.4, 0.15]}>
         <boxGeometry args={[0.35, 0.18, 0.28]} />
         <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.94} />
       </mesh>
 
       {/* Outer watch rubble scrap (was fake wall). */}
-      <mesh position={[-9.2, 0.22, 4.6]} castShadow>
+      <mesh position={[-9.2, 0.22, 4.6]}>
         <boxGeometry args={[1.1, 0.28, 0.45]} />
         <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.93} />
       </mesh>
-      <mesh position={[-8.7, 0.16, 4.9]} rotation={[0.2, 0.3, 0]} castShadow>
+      <mesh position={[-8.7, 0.16, 4.9]} rotation={[0.2, 0.3, 0]}>
         <boxGeometry args={[0.45, 0.2, 0.3]} />
         <meshStandardMaterial color="#4a524c" roughness={0.94} />
       </mesh>
 
       {/* Mixed court floor borders — clearly ground dressing. */}
-      <mesh position={[1, 0.08, -1.4]} castShadow>
+      <mesh position={[1, 0.08, -1.4]}>
         <boxGeometry args={[3.2, 0.12, 0.28]} />
         <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={0.95} />
       </mesh>
-      <mesh position={[1, 0.08, -6.5]} castShadow>
+      <mesh position={[1, 0.08, -6.5]}>
         <boxGeometry args={[3.2, 0.12, 0.28]} />
         <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={0.95} />
       </mesh>
 
       {/* Ash walk rubble clusters. */}
-      <mesh position={[6.2, 0.2, -6.35]} castShadow>
+      <mesh position={[6.2, 0.2, -6.35]}>
         <boxGeometry args={[0.7, 0.32, 0.4]} />
         <meshStandardMaterial color="#4a3a38" roughness={0.93} />
       </mesh>
-      <mesh position={[8.9, 0.16, -1.55]} castShadow>
+      <mesh position={[8.9, 0.16, -1.55]}>
         <boxGeometry args={[0.55, 0.24, 0.35]} />
         <meshStandardMaterial color="#453532" roughness={0.93} />
       </mesh>
 
       {/* Arena approach debris — low, not pillars. */}
-      <mesh position={[12.4, 0.18, -6.5]} castShadow>
+      <mesh position={[12.4, 0.18, -6.5]}>
         <boxGeometry args={[0.5, 0.28, 0.45]} />
         <meshStandardMaterial color="#3a2c38" roughness={0.9} />
       </mesh>
-      <mesh position={[12.4, 0.18, -1.5]} castShadow>
+      <mesh position={[12.4, 0.18, -1.5]}>
         <boxGeometry args={[0.5, 0.28, 0.45]} />
         <meshStandardMaterial color="#3a2c38" roughness={0.9} />
       </mesh>

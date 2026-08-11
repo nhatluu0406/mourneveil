@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process'
+import { rm, mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 import { createServer } from 'node:net'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium } from 'playwright'
@@ -9,6 +11,49 @@ const DEFAULT_HOST = '127.0.0.1'
 const DEFAULT_PORT = 4173
 const START_TIMEOUT_MS = 30_000
 const STOP_TIMEOUT_MS = 3_000
+const OWNED_ARTIFACT_NAME = /^tmp-m[\w.-]+$/i
+
+export function shouldKeepGateArtifacts(env = process.env) {
+  return env.KEEP_ARTIFACTS === '1' || env.KEEP_ARTIFACTS === 'true'
+}
+
+/**
+ * Prepare a gate-owned evidence directory under cwd.
+ * Only `tmp-m*` basenames are allowed so cleanup cannot touch arbitrary paths.
+ */
+export async function prepareOwnedArtifactDir(
+  relativeDir,
+  { cwd = process.cwd(), env = process.env } = {},
+) {
+  if (typeof relativeDir !== 'string' || relativeDir.length === 0) {
+    throw new TypeError('prepareOwnedArtifactDir requires a relative directory')
+  }
+  const root = path.resolve(cwd)
+  const resolved = path.resolve(cwd, relativeDir)
+  const relative = path.relative(root, resolved)
+  if (
+    relative === '' ||
+    relative.startsWith('..') ||
+    path.isAbsolute(relative) ||
+    relative.split(/[/\\]/).length !== 1
+  ) {
+    throw new Error(`artifact dir must be a single cwd-owned folder: ${relativeDir}`)
+  }
+  if (!OWNED_ARTIFACT_NAME.test(path.basename(resolved))) {
+    throw new Error(`artifact dir basename must match tmp-m*: ${path.basename(resolved)}`)
+  }
+  await mkdir(resolved, { recursive: true })
+  return {
+    path: resolved,
+    async cleanup() {
+      if (shouldKeepGateArtifacts(env)) {
+        return { kept: true, path: resolved }
+      }
+      await rm(resolved, { recursive: true, force: true })
+      return { kept: false, path: resolved }
+    },
+  }
+}
 
 export async function runOwnedBrowserGate({
   run,
@@ -17,10 +62,15 @@ export async function runOwnedBrowserGate({
   port = DEFAULT_PORT,
   headless = true,
   viewport = { width: 1440, height: 900 },
+  artifactDir = null,
   afterCleanup,
 }) {
   if (typeof run !== 'function') throw new TypeError('runOwnedBrowserGate requires run(page)')
   const output = []
+  const artifacts =
+    artifactDir === null || artifactDir === undefined
+      ? null
+      : await prepareOwnedArtifactDir(artifactDir, { cwd })
   const server = spawnOwnedVite({ cwd, host, port, output })
   let browser = null
   let context = null
@@ -33,11 +83,16 @@ export async function runOwnedBrowserGate({
       await closeQuietly(context)
       await closeQuietly(browser)
       await stopOwnedProcessTree(server)
+      let artifactCleanup = null
+      if (artifacts !== null) {
+        artifactCleanup = await artifacts.cleanup()
+      }
       const report = {
         pageClosed: page === null || page.isClosed(),
         browserClosed: browser === null || !browser.isConnected(),
         serverExited: server.exitCode !== null || server.signalCode !== null,
         portReusable: await canBindPort(port, host),
+        artifactCleanup,
       }
       if (afterCleanup) await afterCleanup(report)
       return report
@@ -56,6 +111,7 @@ export async function runOwnedBrowserGate({
       browser,
       context,
       serverPid: server.pid,
+      artifactDir: artifacts?.path ?? null,
     })
   } finally {
     removeSignalHandlers()

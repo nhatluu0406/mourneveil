@@ -15,6 +15,7 @@ import {
   ConnectedLevelVisual,
 } from './ConnectedLevelVisual'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
+import { RendererStatsPublisher } from './RendererStatsPublisher'
 
 interface SceneProps {
   onPhysicsReady: () => void
@@ -100,6 +101,7 @@ export function Scene({
         color={MOURNEVEIL_PALETTE.finalGate.open}
       />
       <FollowCameraRig runtime={runtime} onDiagnostic={onCameraDiagnostic} />
+      {import.meta.env.DEV ? <RendererStatsPublisher /> : null}
       <GameWorld onPhysicsReady={onPhysicsReady} runtime={runtime} />
     </>
   )

@@ -19,6 +19,7 @@
     "gate:m9-hit-reaction": "node scripts/browser/gate-m9-hit-reaction.mjs",
     "gate:m9-telegraph-readability": "node scripts/browser/gate-m9-telegraph-readability.mjs",
     "gate:m9-player-combat": "node scripts/browser/gate-m9-player-combat.mjs",
+    "gate:m9-perf-baseline": "node scripts/browser/gate-m9-perf-baseline.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

@@ -16,6 +16,8 @@ import {
   syncEnemyGltfClipPlayback,
   type EnemyGltfClipPlaybackState,
 } from './animation/enemyGltfClipPlayback'
+import { combatContactCueLayout } from './combatContactCueLayout'
+import { CombatContactVolumeCue } from './CombatContactVolumeCue'
 
 function enableShadows(root: Object3D): void {
   root.traverse((node) => {
@@ -36,7 +38,7 @@ export function SkirmisherProductionVisual({
   const facingRef = useRef<Group>(null)
   const modelRef = useRef<Group>(null)
   const telegraphRef = useRef<Mesh>(null)
-  const contactRef = useRef<Mesh>(null)
+  const contactRef = useRef<Group>(null)
   const playbackRef = useRef<EnemyGltfClipPlaybackState>({ mode: null, action: null })
   const { scene, animations } = useGLTF(SKIRMISHER_PROOF_ASSET.runtimeUrl)
   const skinnedRoot = useMemo(() => {
@@ -50,8 +52,9 @@ export function SkirmisherProductionVisual({
   useEffect(() => {
     return () => {
       mixer.stopAllAction()
+      mixer.uncacheRoot(skinnedRoot)
     }
-  }, [mixer])
+  }, [mixer, skinnedRoot])
 
   useFrame((_state, deltaSeconds) => {
     const runtimeSnapshot = runtime.snapshot()
@@ -99,6 +102,11 @@ export function SkirmisherProductionVisual({
 
     telegraph.visible = attackPresentation.telegraphVisible
     contact.visible = import.meta.env.DEV && attackPresentation.contactVisible
+    if (attackPresentation.contactVisible) {
+      const cue = combatContactCueLayout(role.contact.forwardOffset, role.contact.radius)
+      contact.position.set(0, cue.localY, -cue.forwardOffset)
+      contact.scale.setScalar(cue.radius)
+    }
   })
 
   const enemy =
@@ -125,21 +133,11 @@ export function SkirmisherProductionVisual({
           side={2}
         />
       </mesh>
-      <mesh
-        ref={contactRef}
-        position={[0, 0, -role.contact.forwardOffset]}
-        scale={role.contact.radius}
-        visible={false}
-      >
-        <sphereGeometry args={[1, 12, 8]} />
-        <meshBasicMaterial
-          color={MOURNEVEIL_PALETTE.skirmisher.contact}
-          transparent
-          opacity={0.22}
-          wireframe
-          depthWrite={false}
-        />
-      </mesh>
+      <CombatContactVolumeCue
+        groupRef={contactRef}
+        color={MOURNEVEIL_PALETTE.skirmisher.contact}
+        opacity={0.3}
+      />
     </group>
   )
 }

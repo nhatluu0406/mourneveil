@@ -1,4 +1,3 @@
-import { mkdir } from 'node:fs/promises'
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
 
 const OUT = 'tmp-m8-stabilization'
@@ -87,9 +86,9 @@ async function poseNearWall(page, { name, position, facing, movement }) {
   pass(`${name} clear-space weapon restoration captured`)
 }
 
-await mkdir(OUT, { recursive: true })
 let cleanupReport = null
 await runOwnedBrowserGate({
+  artifactDir: OUT,
   afterCleanup: (report) => {
     cleanupReport = report
   },
@@ -226,6 +225,12 @@ await runOwnedBrowserGate({
 
 if (!cleanupReport?.browserClosed || !cleanupReport?.serverExited || !cleanupReport?.portReusable) {
   fail(`owned cleanup incomplete: ${JSON.stringify(cleanupReport)}`)
+} else if (cleanupReport.artifactCleanup?.kept) {
+  pass(`owned artifacts kept (KEEP_ARTIFACTS); port reusable`)
+} else if (cleanupReport.artifactCleanup?.kept === false) {
+  pass('owned artifacts removed; port reusable')
+} else {
+  fail(`artifact cleanup missing: ${JSON.stringify(cleanupReport.artifactCleanup)}`)
 }
 if (failures.length > 0) {
   throw new Error(`${failures.length} M8 stabilization gate failure(s)\n${failures.join('\n')}`)
