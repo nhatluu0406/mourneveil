@@ -6,6 +6,7 @@ import {
   PLAYER_CAPSULE_HALF_HEIGHT,
   PLAYER_CAPSULE_RADIUS,
 } from '../physics/playerCollisionConfig'
+import { activeConnectedLevelColliders } from '../physics/connectedLevelCollision'
 import {
   computePlayerAttackPresentationPose,
   resolveAttackPresentationFacing,
@@ -14,6 +15,11 @@ import { localNegativeZFacingYaw } from './enemyAttackPresentation'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { projectPlayerAnimation } from './animation/playerAnimationProjection'
 import { resolvePlayerProceduralPose } from './animation/playerProceduralPose'
+import {
+  computePlayerWeaponWallScale,
+  PLAYER_WEAPON_BLADE_LENGTH,
+  PLAYER_WEAPON_HILT_LOCAL,
+} from './playerWeaponWallConstraint'
 
 export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const facingGroupRef = useRef<Group>(null)
@@ -78,11 +84,29 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     facingGroup.rotation.y = localNegativeZFacingYaw(facing)
     const pose = computePlayerAttackPresentationPose(snapshot.combat)
     weapon.visible = pose.weaponVisible
-    weapon.position.set(0.28, 0.05, pose.weaponForwardOffset)
     weaponSweep.rotation.y = pose.weaponYawRadians
     weaponMaterial.color.set(pose.color)
 
     const damping = Math.max(1, 1 / Math.max(animation.transition.blendSeconds, 0.001))
+    const wallScale = computePlayerWeaponWallScale({
+      playerPosition: snapshot.player.position,
+      facing,
+      sweepYawRadians: pose.weaponYawRadians,
+      bladeCenterForwardOffset: pose.weaponForwardOffset,
+      solids: activeConnectedLevelColliders({
+        shortcutOpen: snapshot.world.openedShortcutIds.includes(
+          'connection.shortcut-checkpoint-mixed',
+        ),
+        finalGateOpen: snapshot.world.finalGateReached,
+      }),
+    })
+    weapon.scale.z = MathUtils.damp(weapon.scale.z, wallScale, 18, deltaSeconds)
+    weapon.position.set(
+      PLAYER_WEAPON_HILT_LOCAL.x,
+      0.05,
+      PLAYER_WEAPON_HILT_LOCAL.z +
+        (pose.weaponForwardOffset - PLAYER_WEAPON_HILT_LOCAL.z) * weapon.scale.z,
+    )
     bodyGroup.scale.x = MathUtils.damp(bodyGroup.scale.x, proceduralPose.bodyScaleX, damping, deltaSeconds)
     bodyGroup.scale.y = MathUtils.damp(bodyGroup.scale.y, proceduralPose.bodyScaleY, damping, deltaSeconds)
     bodyGroup.scale.z = MathUtils.damp(bodyGroup.scale.z, proceduralPose.bodyScaleZ, damping, deltaSeconds)
@@ -185,7 +209,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       </group>
       <group ref={weaponSweepRef}>
         <mesh ref={weaponRef} castShadow position={[0.28, 0.05, -0.7]}>
-          <boxGeometry args={[0.05, 0.05, 0.95]} />
+          <boxGeometry args={[0.05, 0.05, PLAYER_WEAPON_BLADE_LENGTH]} />
           <meshStandardMaterial
             ref={weaponMaterialRef}
             color="#b8a888"

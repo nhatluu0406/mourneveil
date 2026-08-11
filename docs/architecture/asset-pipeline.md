@@ -16,6 +16,14 @@ M8 establishes one intentionally small path:
 - Render assets are presentation only. World-authored simple Rapier proxies own collision and remain valid if the render asset changes.
 - Tests may construct malformed in-memory manifests/documents; production runtime paths must never point at test fixtures.
 
+## Presentation acceptance states
+
+- **Proof/test asset:** validates import, loading, skinning, clips, or semantic mapping; it may appear only in an explicit development fixture and is not presumed fit for gameplay.
+- **Candidate production asset:** may be evaluated in a playable branch/fixture but is not the accepted default presentation.
+- **Product Owner-accepted presentation:** the default playable renderer. Infrastructure progress must not replace it with a visually inferior proof.
+
+`enemy.skirmisher.proof` remains a project-owned animated GLB proof and development fixture. The default playable skirmisher uses the prior M7 procedural presentation after Product Owner rejection of the proof mesh as playable art.
+
 ## Initial budgets
 
 Derived from the current slice (refuge shrine ~3.4KB, skirmisher proof GLB ~13KB, preexisting JS bundle ~3.5MB):

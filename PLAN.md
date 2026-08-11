@@ -1,64 +1,63 @@
-# PLAN: M8 Production Asset Pipeline — Macro-batch 2
+# PLAN: M8 Production Asset Pipeline — Macro-batch 3 Stabilization
 <!-- Live task graph. Keep steps independently verifiable/committable. -->
 
-Input: Product Owner M8 macro-batch 2 | Stack: STACK.md | Contract: docs/architecture/asset-pipeline.md
+Input: Product Owner M8 macro-batch 3 | Stack: STACK.md | Contracts: `docs/architecture/animation-presentation.md`, `docs/architecture/asset-pipeline.md`
 Task slug: `m8-production-asset-pipeline` (`python3 scripts/leanloop/task.py start m8-production-asset-pipeline`)
 
 ## Non-goals
 
-- Player model replacement, generalized retargeting, Draco/Meshopt/KTX2/Basis, CDN, Git LFS, whole-level art, HUD/palette redesign, M9.
-- Closing/tagging M8; rewriting M7 history/tags; render-mesh-owned collision or combat authority.
+- New actor/prop assets, player replacement, third-party art, IK/retargeting, physics weapons, broad presentation redesign, generalized process supervision, M9.
+- Closing/tagging M8, pushing, changing combat/contact authority, or deleting the accepted GLB pipeline proof.
 
 ## Steps
 
-- [x] 0. Macro-batch 1 visual acceptance gate (shrine spawn/rest/respawn)
+- [x] 0. Establish truth, reproduce defects, and clean only proven stale Mourneveil processes
   - depends: —
-  - risk: MEDIUM
+  - risk: HIGH
   - isolation: sequential
-  - owns/allows: Playwright gate script under `scripts/browser/`, focused shrine/runtime fixes only if defects found
-  - verifier: `node scripts/browser/gate-m8-shrine-visual.mjs` with `npm run dev` (HUMAN-VERIFY screenshots + console); automated gate exit 0
-  - evidence: PASS; Playwright Chromium available. Spawn clearance 10.4m from shrine visual; Rest prompt/accept; respawn clearance 1.3m at authored anchor; no asset console/network failures. Screenshots under `tmp-m8-shrine/`. No shrine defects requiring code fix.
-- [x] 1. Extend production asset contract for GLB + explicit budgets
+  - owns/allows: read-only Git/history/process/browser audit; PLAN and active CHECKPOINT
+  - verifier: ancestry/tag/upstream evidence; scoped PID command-line + port evidence; deterministic runtime screenshots when browser control is available
+  - evidence: PASS; clean `main` at `ac0c385` equaled origin; M7 tag peeled to `c93f083`; verified Mourneveil Vite PID 52044 stopped and port 4173 released; ambiguous npm PID 61176 left untouched.
+- [x] 1. Constrain held-weapon presentation near authored solids
   - depends: 0
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `docs/architecture/asset-pipeline.md`, `assets/*`, `scripts/assets/*`, STACK asset bullet, focused pipeline tests
-  - verifier: `npm run assets:verify && npm run test -- scripts/assets/assetPipeline.test.mjs src/content/assets/productionAssetReference.test.ts`
-  - evidence: PASS; GLB+gltf2 formats, texture none-external/embedded-only, animationSemantics, 256KiB/1MiB budgets; 5 pipeline tests + references.
-- [x] 2. Author and import one skinned animated skirmisher proof GLB
+  - owns/allows: player render/presentation helpers and focused tests; read-only authored collider projection
+  - verifier: `npm run test -- src/render/playerWeaponWallConstraint.test.ts src/render/playerAttackPresentation.test.ts src/render/PlayerVisual.test.ts src/physics/playerCollision.integration.test.ts src/physics/combatOcclusion.integration.test.ts`
+  - evidence: PASS; render-only authored-solid blade constraint; 5 focused files / 16 tests; divider and border idle/locomotion/attack/clear screenshots show no tested penetration; player capsule/contact authority unchanged.
+- [x] 2. Restore accepted procedural skirmisher in gameplay while retaining isolated GLB proof
   - depends: 1
-  - risk: HIGH
+  - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: project-authored skirmisher GLB source/runtime, manifest/provenance, clip→semantic mapping module + tests
-  - verifier: `npm run assets:import && npm run assets:verify && npm run test -- src/content/assets src/render/animation`
-  - evidence: PASS; `enemy.skirmisher.proof` ~13KB GLB; Clip_Skirm_* mapped at asset boundary; import/verify green.
-- [x] 3. Integrate skirmisher GLB through M7 animation presentation (render-only)
+  - owns/allows: enemy render/backend selection, proof fixture/gate, asset docs/tests
+  - verifier: `npm run assets:verify && npm run test -- src/render/enemyPresentationRoles.test.ts src/render/animation/enemyGltfClipPlayback.test.ts src/render/animation/enemyAnimation.test.ts src/content/assets/productionAssetReference.test.ts`
+  - evidence: PASS; prior procedural renderer restored by default; proof GLB retained behind explicit development query; default gate made no proof-GLB request; isolated proof gate exercised startup/defeat.
+- [x] 3. Add owned browser/runtime lifecycle and success/failure cleanup proof
   - depends: 2
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `EnemyVisual` / enemy presentation path for skirmisher only, narrow visual fixes, focused render/gameplay tests
-  - verifier: `npm run test -- src/render/animation/enemyGltfClipPlayback.test.ts src/render/animation/enemyAnimation.test.ts src/game/enemies src/physics/enemyMovement.integration.test.ts`
-  - evidence: PASS; SkirmisherProductionVisual + mixer sync; brute remains procedural; 54 focused enemy/animation tests.
-- [x] 4. Full verification + durable M8 state
+  - owns/allows: `scripts/browser/` shared lifecycle + M8 gates, package scripts, focused lifecycle tests
+  - verifier: `npm run test -- scripts/browser/runtimeGateLifecycle.test.mjs && npm run gate:lifecycle && npm run gate:m8-stabilization`
+  - evidence: PASS; unit child-port cleanup; real Vite + Playwright success and intentional-failure cleanup; M8 gates own server/browser; ports 4173/4191/4192 reusable.
+- [x] 4. Full verification and durable M8 stabilization state
   - depends: 3
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: PLAN/HANDOFF/current-state/REPOMAP, browser enemy gate when available
-  - verifier: `npm run verify && git diff --check && python3 scripts/leanloop/doctor.py --strict && python3 scripts/leanloop/sync.py --check`
-  - evidence: PASS; lint/typecheck; 66 files/270 tests; asset-validated build; shrine+skirmisher Playwright gates PASS; doctor/sync PASS.
+  - owns/allows: PLAN/HANDOFF/current-state/REPOMAP/STACK only if durable law changes
+  - verifier: `npm run verify && git diff --check && python3 scripts/leanloop/doctor.py --strict && python3 scripts/leanloop/sync.py --check && python3 scripts/leanloop/git_guard.py`
+  - evidence: PASS; 68 files / 276 tests; lint/typecheck/build; focused 69 tests; assets import/verify; browser gates; diff/LeanLoop gates green.
 
 ## Parallel groups
 
-- none — single-writer sequential batch
+- none — Product Owner requires Codex-only single-writer sequential work
 
 ## Decisions
 
-- 2026-08-11 | Prefer one enemy (skirmisher) animated GLB over player replacement to prove skinned clips + M7 presentation with smaller blast radius.
-- 2026-08-11 | Prefer project-authored proof asset over fetching third-party content when no licensed animated asset exists locally.
-- 2026-08-11 | Prefer `.glb` as production runtime format; no compression stack without measured need.
-- 2026-08-11 | Initial budgets: 256 KiB default per asset / 1 MiB total runtime; proof entries use 64 KiB caps.
+- 2026-08-11 | Treat the PO-rejected skirmisher GLB as a retained technical proof, not default playable presentation.
+- 2026-08-11 | Presentation may read authored solid geometry to constrain visible weapon reach; combat contacts and timing remain unchanged.
+- 2026-08-11 | Active M8 browser gates own one direct Vite child plus their Playwright page/context/browser and clean them in one idempotent `finally` boundary.
 
 ## Escalation
 
-- Same error 3 times: persist a stuck report and stop for Product Owner review.
-- If no owned/licensed animated asset can be authored with available tooling, stop content selection and report the PO decision while finishing infrastructure that does not depend on it.
+- Same error 3 times: persist a stuck report under the active task and stop for Product Owner review.
+- If wall-aware presentation requires gameplay/contact changes or reliable Windows scoped teardown cannot be proven, stop M8 expansion and report the architecture blocker.

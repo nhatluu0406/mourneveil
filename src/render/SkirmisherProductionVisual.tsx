@@ -143,5 +143,3 @@ export function SkirmisherProductionVisual({
     </group>
   )
 }
-
-useGLTF.preload(SKIRMISHER_PROOF_ASSET.runtimeUrl)

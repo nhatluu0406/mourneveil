@@ -11,6 +11,10 @@
   "scripts": {
     "assets:import": "node scripts/assets/import-production-assets.mjs",
     "assets:verify": "node scripts/assets/verify-production-assets.mjs",
+    "gate:lifecycle": "node scripts/browser/verify-runtime-gate-lifecycle.mjs",
+    "gate:m8-stabilization": "node scripts/browser/gate-m8-stabilization.mjs",
+    "gate:m8-skirmisher-proof": "node scripts/browser/gate-m8-skirmisher-visual.mjs",
+    "gate:m8-shrine": "node scripts/browser/gate-m8-shrine-visual.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
