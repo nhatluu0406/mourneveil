@@ -13,7 +13,7 @@ This is a directional product roadmap, not an immutable feature contract. Milest
 | Milestone | Focus |
 | --- | --- |
 | **M7** | Animation & Character Feel — **PRODUCT OWNER ACCEPTED** (`v0.7.0-animation-foundation`) |
-| **M8** | Production Asset Pipeline — **ACTIVE** |
+| **M8** | Production Asset Pipeline — **READY FOR PRODUCT OWNER ACCEPTANCE** |
 | **M9** | Combat Depth |
 | **M10** | Ranged / Magic |
 | **M11** | Boss Vertical Slice |

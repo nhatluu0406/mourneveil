@@ -11,7 +11,7 @@
 - Three.js + React Three Fiber + Drei + `@react-three/rapier`
 - Tests: Vitest · Lint: ESLint · Package manager: **npm 10.9.2** (lockfile committed)
 - Node.js `>=22.12.0 <23` · no env vars / backend / cloud services for the slice
-- Browser/runtime gates that start Vite or Playwright own those exact process handles and close them through an idempotent `finally` boundary on pass, failure, timeout, or signal; Windows forced cleanup may target only the recorded owned PID tree, never arbitrary Node processes or port owners
+- Browser/runtime gates that start Vite or Playwright own those exact process handles and close them through an idempotent `finally` boundary on pass, failure, timeout, or signal; an already-absent owned POSIX process group (`ESRCH`) is successful teardown while other signal errors remain fatal; Windows forced cleanup may target only the recorded owned PID tree, never arbitrary Node processes or port owners
 - Stack ADR: `docs/architecture/decisions/0001-web-stack.md`
 
 ## Commands (agents use only these)

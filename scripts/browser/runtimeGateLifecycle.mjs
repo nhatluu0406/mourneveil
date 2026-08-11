@@ -85,19 +85,29 @@ export async function stopOwnedProcessTree(child, timeoutMs = STOP_TIMEOUT_MS) {
   if (!Number.isInteger(pid) || pid <= 0) throw new Error('owned child has no valid PID')
 
   if (process.platform === 'win32') {
-    child.kill('SIGTERM')
+    signalOwnedChild(child, 'SIGTERM')
   } else {
-    process.kill(-pid, 'SIGTERM')
+    signalOwnedPosixProcessGroup(pid, 'SIGTERM')
   }
   if (await waitForExit(child, timeoutMs)) return
 
   if (process.platform === 'win32') {
     await runTaskkill(pid)
   } else {
-    process.kill(-pid, 'SIGKILL')
+    signalOwnedPosixProcessGroup(pid, 'SIGKILL')
   }
   if (!(await waitForExit(child, timeoutMs))) {
     throw new Error(`owned process tree ${pid} did not terminate`)
+  }
+}
+
+export function signalOwnedPosixProcessGroup(pid, signal, killProcess = process.kill) {
+  try {
+    killProcess(-pid, signal)
+    return true
+  } catch (error) {
+    if (isMissingProcessError(error)) return false
+    throw error
   }
 }
 
@@ -157,6 +167,19 @@ function waitForExit(child, timeoutMs) {
     }
     child.once('exit', onExit)
   })
+}
+
+function signalOwnedChild(child, signal) {
+  try {
+    return child.kill(signal)
+  } catch (error) {
+    if (isMissingProcessError(error)) return false
+    throw error
+  }
+}
+
+function isMissingProcessError(error) {
+  return error !== null && typeof error === 'object' && error.code === 'ESRCH'
 }
 
 function runTaskkill(pid) {
