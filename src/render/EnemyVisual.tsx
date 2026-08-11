@@ -22,6 +22,7 @@ const STATE_MIX = {
   spacing: 0.2,
   attack: 0.4,
   recovery: 0.28,
+  hitReaction: 0.55,
   defeated: 0.7,
 } as const
 

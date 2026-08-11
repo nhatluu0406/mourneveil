@@ -4,6 +4,7 @@ import {
   type CombatActionSnapshot,
   type CombatActionStartResult,
 } from '../combat/combatActionRuntime'
+import type { CombatHitEvent } from '../combat/combatContact'
 import {
   applyCombatDamage,
   createCombatHealth,
@@ -13,9 +14,24 @@ import {
 import type { SphereHurtbox } from '../combat/combatTarget'
 import type { PlayerFacingDirection, Vector3Value } from '../character/playerMotor'
 import type { EnemyDefinition, EnemyDefinitionId } from './enemyDefinition'
+import {
+  ENEMY_HIT_REACTION_DURATION_STEPS,
+  ENEMY_HIT_REACTION_IMMUNITY_STEPS,
+  ENEMY_INTERRUPT_METER_QUIET_RESET_STEPS,
+  enemyInterruptThreshold,
+  enemyPhaseAllowsInterrupt,
+  interruptImpactForPlayerAction,
+} from './enemyHitReaction'
 
 export type EnemyRuntimeId = string
-export type EnemyState = 'idle' | 'pursue' | 'spacing' | 'attack' | 'recovery' | 'defeated'
+export type EnemyState =
+  | 'idle'
+  | 'pursue'
+  | 'spacing'
+  | 'attack'
+  | 'recovery'
+  | 'hitReaction'
+  | 'defeated'
 
 export interface EnemyRuntimeSnapshot {
   readonly id: EnemyRuntimeId
@@ -30,14 +46,18 @@ export interface EnemyRuntimeSnapshot {
   readonly targetId: string | null
   readonly action: CombatActionSnapshot
   readonly hurtbox: SphereHurtbox
+  readonly hitReactionRemainingSteps: number
+  readonly interruptMeter: number
+  readonly hitReactionImmunityRemainingSteps: number
 }
 
 const ALLOWED_TRANSITIONS: Readonly<Record<EnemyState, readonly EnemyState[]>> = {
-  idle: ['pursue', 'defeated'],
-  pursue: ['idle', 'spacing', 'attack', 'defeated'],
-  spacing: ['idle', 'pursue', 'attack', 'defeated'],
-  attack: ['recovery', 'defeated'],
-  recovery: ['spacing', 'defeated'],
+  idle: ['pursue', 'hitReaction', 'defeated'],
+  pursue: ['idle', 'spacing', 'attack', 'hitReaction', 'defeated'],
+  spacing: ['idle', 'pursue', 'attack', 'hitReaction', 'defeated'],
+  attack: ['recovery', 'hitReaction', 'defeated'],
+  recovery: ['spacing', 'hitReaction', 'defeated'],
+  hitReaction: ['pursue', 'idle', 'defeated'],
   defeated: [],
 }
 
@@ -50,6 +70,11 @@ export class EnemyRuntime {
   private state: EnemyState = 'idle'
   private health: CombatHealthState
   private targetId: string | null = null
+  private hitReactionRemainingSteps = 0
+  private interruptMeter = 0
+  private interruptMeterQuietSteps = 0
+  private hitReactionImmunityRemainingSteps = 0
+  private lastReactionExecutionId: number | null = null
 
   constructor(
     readonly definition: EnemyDefinition,
@@ -77,14 +102,24 @@ export class EnemyRuntime {
     if (!ALLOWED_TRANSITIONS[this.state].includes(next)) {
       throw new Error(`Forbidden enemy transition: ${this.state} -> ${next}`)
     }
-    if (next !== 'idle' && next !== 'defeated' && targetId === null) {
+    if (next === 'idle' || next === 'defeated') {
+      this.targetId = null
+    } else if (next === 'hitReaction') {
+      this.targetId = targetId ?? this.targetId
+    } else if (targetId === null) {
       throw new Error(`Enemy state ${next} requires a target`)
+    } else {
+      this.targetId = targetId
     }
     this.state = next
-    this.targetId = next === 'idle' || next === 'defeated' ? null : targetId
     if (next === 'defeated') {
       this.velocity = { x: 0, y: 0, z: 0 }
       this.attackExecutionFacing = null
+      this.hitReactionRemainingSteps = 0
+      this.interruptMeter = 0
+      this.interruptMeterQuietSteps = 0
+      this.hitReactionImmunityRemainingSteps = 0
+      this.lastReactionExecutionId = null
       this.actions.reset()
     }
   }
@@ -92,6 +127,9 @@ export class EnemyRuntime {
   startAction(actionId: CombatActionId, facing: PlayerFacingDirection): CombatActionStartResult {
     if (!this.health.alive) {
       return { accepted: false, actionId, reason: 'actor-defeated' }
+    }
+    if (this.state === 'hitReaction') {
+      return { accepted: false, actionId, reason: 'action-in-progress' }
     }
     if (this.state !== 'pursue' && this.state !== 'spacing') {
       return { accepted: false, actionId, reason: 'action-in-progress' }
@@ -109,12 +147,40 @@ export class EnemyRuntime {
 
   advanceAction(): void {
     if (!this.health.alive) return
+    if (this.state === 'hitReaction') return
     this.actions.advanceFixedStep()
     const phase = this.actions.snapshot().phase
     if (this.state === 'attack' && phase === 'recovery') this.transition('recovery')
     if (this.state === 'recovery' && phase === 'idle') {
       this.attackExecutionFacing = null
       this.transition('spacing')
+    }
+  }
+
+  /** Advances simulation-owned hit-reaction and quiet/immunity timers one fixed step. */
+  advanceHitReaction(): void {
+    if (!this.health.alive) return
+    if (this.hitReactionImmunityRemainingSteps > 0) {
+      this.hitReactionImmunityRemainingSteps -= 1
+    }
+    if (this.interruptMeter > 0) {
+      this.interruptMeterQuietSteps += 1
+      if (this.interruptMeterQuietSteps >= ENEMY_INTERRUPT_METER_QUIET_RESET_STEPS) {
+        this.interruptMeter = 0
+        this.interruptMeterQuietSteps = 0
+      }
+    }
+    if (this.state !== 'hitReaction') return
+    this.velocity = { x: 0, y: 0, z: 0 }
+    if (this.hitReactionRemainingSteps > 0) {
+      this.hitReactionRemainingSteps -= 1
+    }
+    if (this.hitReactionRemainingSteps > 0) return
+    this.hitReactionImmunityRemainingSteps = ENEMY_HIT_REACTION_IMMUNITY_STEPS
+    if (this.targetId !== null) {
+      this.transition('pursue', this.targetId)
+    } else {
+      this.transition('idle')
     }
   }
 
@@ -149,6 +215,38 @@ export class EnemyRuntime {
     return result
   }
 
+  /**
+   * Applies interrupt policy after an already-deduped damaged hit.
+   * Returns whether a new hit-reaction state began.
+   */
+  applyHitReactionFromDamagedHit(hit: Pick<CombatHitEvent, 'actionId' | 'executionId' | 'outcome'>): boolean {
+    if (hit.outcome !== 'damaged' || !this.health.alive || this.state === 'defeated') return false
+    if (this.state === 'hitReaction') return false
+    if (this.hitReactionImmunityRemainingSteps > 0) return false
+    if (this.lastReactionExecutionId === hit.executionId) return false
+
+    const impact = interruptImpactForPlayerAction(hit.actionId)
+    if (impact <= 0) return false
+
+    const actionPhase = this.actions.snapshot().phase
+    if (!enemyPhaseAllowsInterrupt(this.state, actionPhase)) return false
+
+    this.interruptMeter += impact
+    this.interruptMeterQuietSteps = 0
+    const threshold = enemyInterruptThreshold(this.definition.role)
+    if (this.interruptMeter < threshold) return false
+
+    this.interruptMeter = 0
+    this.interruptMeterQuietSteps = 0
+    this.lastReactionExecutionId = hit.executionId
+    this.attackExecutionFacing = null
+    this.velocity = { x: 0, y: 0, z: 0 }
+    this.actions.reset()
+    this.hitReactionRemainingSteps = ENEMY_HIT_REACTION_DURATION_STEPS
+    this.transition('hitReaction', this.targetId)
+    return true
+  }
+
   reset(position: Vector3Value = this.position): void {
     assertFiniteVector(position, 'Enemy reset position')
     this.position = { ...position }
@@ -156,6 +254,11 @@ export class EnemyRuntime {
     this.state = 'idle'
     this.targetId = null
     this.attackExecutionFacing = null
+    this.hitReactionRemainingSteps = 0
+    this.interruptMeter = 0
+    this.interruptMeterQuietSteps = 0
+    this.hitReactionImmunityRemainingSteps = 0
+    this.lastReactionExecutionId = null
     this.health = createCombatHealth(this.definition.maximumHealth)
     this.actions.reset()
   }
@@ -186,6 +289,9 @@ export class EnemyRuntime {
         },
         radius: this.definition.hurtbox.radius,
       },
+      hitReactionRemainingSteps: this.hitReactionRemainingSteps,
+      interruptMeter: this.interruptMeter,
+      hitReactionImmunityRemainingSteps: this.hitReactionImmunityRemainingSteps,
     }
   }
 }

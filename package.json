@@ -16,6 +16,7 @@
     "gate:m8-skirmisher-proof": "node scripts/browser/gate-m8-skirmisher-visual.mjs",
     "gate:m8-shrine": "node scripts/browser/gate-m8-shrine-visual.mjs",
     "gate:m9-guard-depth": "node scripts/browser/gate-m9-guard-depth.mjs",
+    "gate:m9-hit-reaction": "node scripts/browser/gate-m9-hit-reaction.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

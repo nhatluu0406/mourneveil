@@ -252,7 +252,7 @@ describe('M3 enemy framework verification', () => {
       for (const enemy of enemies) {
         expect(Number.isFinite(enemy.position.x)).toBe(true)
         expect(Number.isFinite(enemy.facing.x)).toBe(true)
-        expect(['idle', 'pursue', 'spacing', 'attack', 'recovery', 'defeated']).toContain(
+        expect(['idle', 'pursue', 'spacing', 'attack', 'recovery', 'hitReaction', 'defeated']).toContain(
           enemy.state,
         )
       }

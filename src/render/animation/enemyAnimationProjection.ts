@@ -2,13 +2,17 @@ import type { CombatContactSnapshot } from '../../game/combat/combatContact'
 import type { EnemyRuntimeSnapshot } from '../../game/enemies/enemyRuntime'
 import { projectAnimationPresentation, type AnimationPresentationState } from './animationPresentation'
 
-const HIT_REACTION_STEPS = 10
+const PRESENTATION_HIT_FLASH_STEPS = 10
 
 export function projectEnemyAnimation(
   enemy: EnemyRuntimeSnapshot,
   simulationStep: number,
   playerContact: CombatContactSnapshot,
 ): AnimationPresentationState {
+  const simulationReaction =
+    enemy.state === 'hitReaction'
+      ? `sim-hit-reaction:${enemy.id}:${enemy.hitReactionRemainingSteps}`
+      : null
   return projectAnimationPresentation({
     actorId: enemy.id,
     alive: enemy.alive,
@@ -16,9 +20,11 @@ export function projectEnemyAnimation(
     facing: enemy.facing,
     committedFacing: enemy.attackExecutionFacing,
     combat: enemy.action,
-    committedMode: enemy.action.phase === 'idle' ? null : 'enemy-attack',
+    committedMode: enemy.action.phase === 'idle' || enemy.state === 'hitReaction' ? null : 'enemy-attack',
     guarding: false,
-    hitReactionToken: enemyHitReactionToken(enemy.id, simulationStep, playerContact),
+    hitReactionToken:
+      simulationReaction ??
+      enemyHitReactionToken(enemy.id, simulationStep, playerContact),
   })
 }
 
@@ -32,7 +38,7 @@ function enemyHitReactionToken(
     hit === null ||
     hit.targetId !== enemyId ||
     hit.outcome !== 'damaged' ||
-    simulationStep - hit.simulationStep >= HIT_REACTION_STEPS
+    simulationStep - hit.simulationStep >= PRESENTATION_HIT_FLASH_STEPS
   ) {
     return null
   }

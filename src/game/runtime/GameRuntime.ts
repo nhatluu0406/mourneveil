@@ -838,6 +838,11 @@ export class GameRuntime {
             occlusionQuery: this.occlusionQuery ?? undefined,
           }),
         )
+        for (const hit of hitEvents) {
+          if (hit.outcome !== 'damaged') continue
+          const enemyRuntime = this.enemyRuntimes.find((entry) => entry.id === hit.targetId)
+          enemyRuntime?.applyHitReactionFromDamagedHit(hit)
+        }
         this.grantEchoRewardsForDefeatedEnemies()
         this.spawnLootForDefeatedEnemies()
         if (playerAlive) {

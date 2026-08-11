@@ -45,6 +45,11 @@ export function advanceMeleeEnemy(
   let enemy = runtime.snapshot()
   if (!enemy.alive) return
 
+  // Always tick reaction/immunity/meter clocks, including while reacting.
+  runtime.advanceHitReaction()
+  enemy = runtime.snapshot()
+  if (!enemy.alive || enemy.state === 'hitReaction') return
+
   const attackId = runtime.definition.attackActionIds[0]
   const targetAlive = options.targetAlive ?? true
   if (!targetAlive) {
