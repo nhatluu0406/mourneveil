@@ -1,54 +1,54 @@
-# PLAN: M9 Combat Depth — Telegraph + Punish Window Readability
+# PLAN: M9 Combat Depth — Player Attack Commitment + Hit Feedback
 <!-- Live M9 graph only. -->
 
-Input: Product Owner M9 macro-batch 3 | Stack: `STACK.md` | Task: `m9-combat-depth`
+Input: Product Owner M9 macro-batch 4 | Stack: `STACK.md` | Task: `m9-combat-depth`
 
 ## Goal
 
-Make enemy attack startup / active / recovery visually readable and create a perceivable punish window after committed attacks, without changing damage or contact authority.
+Make player light/heavy attacks read as committed actions and make hit outcomes visually distinguishable, without new combat authority.
 
 ## Non-goals
 
-- New VFX architecture, art/rigs, perfect guard/parry, posture, knockback, M10, closing/tagging M9, global damage/HP/guard/dodge rebalance.
+- Combos, charge attacks, stamina, parry, posture, knockback, animation-driven contact, VFX framework, M10, closing/tagging M9, global damage/HP/enemy timing rebalance.
 
 ## Steps
 
-- [x] 0. Audit current telegraph + lock timing/presentation contract
+- [x] 0. Audit player attack feel + lock timing/feedback contract
   - depends: —
   - risk: LOW
   - isolation: sequential
-  - owns/allows: PLAN locked timings; HANDOFF audit notes
-  - verifier: PLAN records before/after step counts and presentation channels
-- [x] 1. Tune authored attack timings + phase presentation
+  - owns/allows: PLAN locked values
+  - verifier: PLAN records before/after light/heavy steps and feedback hierarchy
+- [x] 1. Tune commitment presentation (+ optional fixed-step timing) and recovery movement scale
   - depends: 0
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `enemyRoles` attack steps, attack presentation projection, procedural pose/visual accents, focused tests
-  - verifier: focused timing/presentation/hit-reaction/guard tests PASS
-- [x] 2. Deterministic readability + startup-interrupt gate
-  - depends: 1
+  - owns/allows: `playerAttackActions`, procedural pose, attack presentation, movement constraint
+  - verifier: focused attack/pose/movement tests PASS
+- [x] 2. Hit-confirmation hierarchy (camera + material cues from authoritative contact)
+  - depends: 0
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: one owned Playwright gate + package script; screenshots under ignored tmp/
-  - verifier: `npm run gate:m9-telegraph-readability` PASS; cleanup/port reuse
-- [x] 3. Verify and hand off
+  - owns/allows: pure feedback projection, FollowCameraRig, PlayerVisual; focused tests
+  - verifier: miss/hit/interrupt/defeat/dedup tests PASS
+- [x] 3. Player-combat Playwright gate + verify/hand off
   - depends: 1, 2
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: PLAN/HANDOFF/current-state/REPOMAP; DEBT only if real deferred limitation
-  - verifier: lint/typecheck/test/build/verify + lifecycle + doctor/sync/git guard
+  - owns/allows: one owned gate + package script; PLAN/HANDOFF/current-state/REPOMAP; M9 readiness report
+  - verifier: `gate:m9-player-combat` PASS; lint/typecheck/test/build/verify; doctor/sync/git guard
 
 ## Locked contract
 
-- Simulation phases remain authoritative. Presentation derives from `action.phase` only.
-- Skirmisher attack steps: startup **20**, active **10**, recovery **24**.
-- Brute attack steps: startup **48**, active **12**, recovery **48**.
-- Startup: stronger wind-up pose + telegraph ring + brief emissive accent.
-- Active: committed swing pose; no interrupt (unchanged).
-- Recovery: readable open/recover pose + distinct recovery cue; no reattack until recovery completes; interruptible by heavy per MB2.
-- Punish window = recovery itself (not a new state). Light attack must be landable when in range.
+- Simulation phases remain authoritative. Presentation derives from combat phase + contact events only.
+- Light steps: startup **10**, active **5**, recovery **16** (was 8/4/14).
+- Heavy steps: startup **18**, active **8**, recovery **38** (was 18/6/30). Startup stays ≤ skirmisher startup (20) so simultaneous wind-ups remain interruptible; commitment weight moves into recovery.
+- Movement: startup/active fully constrained; recovery allows **0.35** intent scale; facing freeze unchanged.
+- Hit confirm hierarchy (outgoing): miss none < light damaged < heavy damaged < interrupt (enemy hitReaction) < defeat.
+- Camera impulse magnitudes follow that hierarchy; same execution cannot duplicate; miss produces no impulse.
+- No animation-driven contact; no new VFX system.
 
 ## Escalation
 
-- Stop if readability requires animation-driven contact or a new combat authority.
+- Stop if readability requires animation-owned timing or a new combat authority.
 - Same failure 3× → stuck report.

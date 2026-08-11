@@ -5,53 +5,56 @@ Task: m9-combat-depth
 
 ## Status
 
-ACTIVE — M9 macro-batch 3 PASS. Enemy telegraph + punish-window readability is complete; M9 is not closed or tagged.
+ACTIVE — M9 macro-batch 4 PASS. Player attack commitment + outgoing hit confirmation complete. M9 is **READY FOR PRODUCT OWNER ACCEPTANCE** (not closed/tagged).
 
 ## Prior
 
-- Macro-batch 1: guard impact / temporary guard break.
-- Macro-batch 2: heavy-hit reaction interrupt (`a6ac421`).
-- M8 remains accepted at `v0.8.0-production-asset-pipeline` → `244aab1`.
+- MB1: guard impact / temporary guard break
+- MB2: heavy-hit reaction interrupt
+- MB3: enemy telegraph + punish-window readability (`eb40ac8`)
+- M8 remains accepted at `v0.8.0-production-asset-pipeline` → `244aab1`
 
-## Timing contract (authoritative)
+## Player attack contract (authoritative)
 
-| Role | startup | active | recovery |
-|------|---------|--------|----------|
-| Before | 18 / 5 / 18 | 42 / 8 / 36 |
-| After | skirmisher **20 / 10 / 24** | brute **48 / 12 / 48** |
+| Attack | startup | active | recovery | notes |
+|--------|---------|--------|----------|-------|
+| Light | **10** | **5** | **16** | was 8/4/14 |
+| Heavy | **18** | **8** | **38** | was 18/6/30; startup kept ≤ skirmisher 20 for interrupt trading; weight in recovery |
 
-Simulation phases remain authoritative. Presentation derives from `action.phase` only. Punish window = recovery (no new state); recovery blocks reattack.
+- Startup/active: locomotion fully constrained; facing freeze unchanged.
+- Recovery: movement scale **0.35**.
+- Simulation phases own contact; presentation projects only.
 
-## Presentation
+## Hit confirmation hierarchy
 
-- Stronger procedural wind-up / swing / open-recover poses (role animation tuning).
-- Phase projection: telegraph ring (startup), recovery ring (recovery), emissive accents, `phaseAccent`.
-- DEV contact sphere unchanged.
+miss none < light damaged < heavy damaged < interrupt (`hitReaction`) < defeat
 
-## Interrupt / defense
-
-- MB2 interrupt rules unchanged; startup interrupt now deterministically proven in `gate:m9-telegraph-readability`.
-- Active non-interrupt remains unit-covered (player heavy startup 18 cannot connect inside skirmisher active 10).
-- Guard / guard-break / dodge / mistimed damage regressions PASS.
+- Camera impulse + player weapon/torso emissive + brief HUD line from authoritative `contact.lastHit`.
+- Per-execution dedup; miss produces no impulse/confirm cue.
+- Guard / guard-break / enemy reaction presentation remain distinct (unchanged systems).
 
 ## Runtime evidence
 
-- `npm run gate:m9-telegraph-readability` PASS (port 4195 reusable; screenshots under `tmp-m9-telegraph-readability/`).
-- Observed: skirmisher/brute phase frames; punish light in recovery; startup+recovery heavy interrupts; brute meter→reaction; guard/dodge/mistimed defense; no page errors.
-- `gate:m9-hit-reaction` / `gate:m9-guard-depth` / `gate:lifecycle` PASS.
+- `npm run gate:m9-player-combat` PASS (port 4195; screenshots `tmp-m9-player-combat/`).
+- Observed: light/heavy phase frames; miss no confirm; light hit once; mash blocked; skirmisher interrupt; brute meter→second interrupt; defeat; guard + dodge regressions.
+- Also PASS: `gate:m9-guard-depth`, `gate:m9-hit-reaction`, `gate:m9-telegraph-readability`, `gate:lifecycle`.
 
 ## Verification
 
-- Focused telegraph/presentation/hit-reaction/guard/animation suites PASS.
-- `npm run lint` / `typecheck` / `test` (71 files / 308 tests; Node heap flake possible under low memory) / `build` / `assets:verify` / `verify` PASS.
-- `git diff --check`, LeanLoop doctor `--strict`, sync `--check` PASS.
+- Focused attack/commitment/feedback/defense/hit-reaction suites PASS.
+- `npm run lint` / `typecheck` / `test` (73 files / 319 tests) / `build` / `assets:verify` / `verify` PASS.
+- `git diff --check` (CRLF warnings only), LeanLoop doctor `--strict`, sync `--check` PASS.
 
 ## Debt
 
-- No debt added. Placeholder procedural art remains roadmap scope, not a new deferred defect.
+- No new debt. Procedural player art limits remain roadmap/content scope (D-001 already covers weapon clipping).
+
+## M9 readiness
+
+Goal satisfied: deterministic melee deepened (guard depth, interrupt, enemy telegraph, player commitment, hit confirm) without new authority systems.
+
+**READY FOR PRODUCT OWNER ACCEPTANCE** — do not self-close/tag; do not start M10.
 
 ## Next
 
-Recommended M9 macro-batch 4 for **Cursor**: player attack commitment/readability or contact/hit feedback tuning — contained presentation/timing, no new authority.
-
-Recommend **Codex** only if Product Owner wants a shared stun/poise authority or animation-driven contact (rejected for this batch).
+Product Owner acceptance / optional close+tag of M9. If rejected, one highest-value blocker only (not a wishlist).

@@ -3,7 +3,7 @@
 - Updated: 2026-08-12
 - Accepted release: **`v0.8.0-production-asset-pipeline`** (M8)
 - Active task: `m9-combat-depth`
-- Status: **M9 ACTIVE** — macro-batch 3 adds readable enemy telegraph + recovery punish window; MB1 guard impact/break and MB2 hit-reaction remain.
+- Status: **M9 ACTIVE — READY FOR PRODUCT OWNER ACCEPTANCE** (macro-batches 1–4 green; not closed/tagged).
 
 ## What exists
 
@@ -14,7 +14,9 @@
 - Production asset path: source → import/verify → `/assets` → Drei, with GLB budgets and animation-semantic maps
 - Guard impact / temporary guard break (transient, unsaved)
 - Enemy heavy-hit interrupt into simulation-owned `hitReaction` (skirmisher threshold 1 / brute 2; attack active committed)
-- Enemy attack readability: skirmisher 20/10/24 and brute 48/12/48 startup/active/recovery with phase-derived telegraph/recovery cues
+- Enemy attack readability: skirmisher 20/10/24 and brute 48/12/48 with phase-derived telegraph/recovery cues
+- Player attack commitment: light 10/5/16, heavy 18/8/38, recovery move scale 0.35, facing freeze
+- Outgoing hit confirmation hierarchy (camera/material/HUD) from authoritative contact
 
 ## Highest-value limitations
 
@@ -24,4 +26,4 @@
 
 ## Next executable work
 
-Continue M9 from the telegraph/punish handoff; prefer a Cursor-sized player-attack readability or hit-feedback batch unless a new authority boundary is requested.
+Await Product Owner acceptance of M9. Do not start M10 or self-close/tag without authorization.
