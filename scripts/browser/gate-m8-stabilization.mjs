@@ -147,6 +147,45 @@ await runOwnedBrowserGate({
       facing: { x: 0, z: 1 },
       movement: { horizontal: 0.5, forward: 0 },
     })
+    await poseNearWall(page, {
+      name: '04-watch-column',
+      position: { x: -10.9, y: 0.82, z: 1.2 },
+      facing: { x: 1, z: 0 },
+      movement: { horizontal: 0, forward: 0.4 },
+    })
+
+    await fresh(page)
+    await gate(page, 'setPlayerPosition', { x: -9.5, y: 0.82, z: 2.5 })
+    await soak(page, 350)
+    await gate(page, 'setPlayerPosition', { x: -7.2, y: 0.82, z: 4.8 })
+    const navigationSamples = []
+    let reachedAttackRange = false
+    for (let index = 0; index < 32; index += 1) {
+      await soak(page, 250)
+      const navigationState = await snapshot(page)
+      const pursuingEnemy = navigationState.enemies.find(
+        (enemy) => enemy.id === 'enemy.skirmisher.introduction',
+      )
+      if (!pursuingEnemy) break
+      const distance = Math.hypot(
+        pursuingEnemy.position.x - navigationState.player.position.x,
+        pursuingEnemy.position.z - navigationState.player.position.z,
+      )
+      navigationSamples.push({
+        x: pursuingEnemy.position.x,
+        z: pursuingEnemy.position.z,
+        state: pursuingEnemy.state,
+        distance,
+      })
+      if (distance <= 1.4) {
+        reachedAttackRange = true
+        break
+      }
+    }
+    await page.screenshot({ path: `${OUT}/05-enemy-blocker-detour.png` })
+    reachedAttackRange
+      ? pass(`enemy detoured around blocker in ${navigationSamples.length} samples`)
+      : fail(`enemy remained blocked: ${JSON.stringify(navigationSamples.slice(-6))}`)
 
     await fresh(page)
     state = await snapshot(page)
@@ -161,7 +200,7 @@ await runOwnedBrowserGate({
         z: skirmisher.position.z,
       })
       await soak(page, 900)
-      await page.screenshot({ path: `${OUT}/04-playable-skirmisher-procedural.png` })
+      await page.screenshot({ path: `${OUT}/06-playable-skirmisher-procedural.png` })
       const enemyState = (await snapshot(page)).enemies.find((enemy) => enemy.id === skirmisher.id)
       enemyState?.alive ? pass(`procedural skirmisher combat state=${enemyState.state}`) : fail('skirmisher died unexpectedly')
       const healthBefore = enemyState?.health.current ?? 0

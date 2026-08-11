@@ -21,8 +21,18 @@ export interface ConnectedNavigationRoute {
 }
 
 export interface EnemyNavigationState {
+  readonly kind: 'authored-route' | 'local-detour'
   readonly routeNodeIds: readonly string[]
+  readonly positions: readonly Vector3Value[]
   readonly routeIndex: number
+}
+
+export interface LocalObstacleFootprint {
+  readonly id: string
+  readonly centerX: number
+  readonly centerZ: number
+  readonly halfX: number
+  readonly halfZ: number
 }
 
 export interface ConnectionOpenResolver {
@@ -190,9 +200,12 @@ function defineLocalNode(
 
 export function createEnemyNavigationState(
   route: ConnectedNavigationRoute,
+  kind: EnemyNavigationState['kind'] = 'authored-route',
 ): EnemyNavigationState {
   return {
+    kind,
     routeNodeIds: route.nodeIds,
+    positions: route.positions,
     routeIndex: 0,
   }
 }
@@ -201,10 +214,8 @@ export function currentNavigationWaypoint(
   state: EnemyNavigationState | null,
 ): Vector3Value | null {
   if (state === null) return null
-  const nodeId = state.routeNodeIds[state.routeIndex]
-  if (nodeId === undefined) return null
-  const node = navigationNodeById(nodeId)
-  return node === null ? null : { ...node.position }
+  const position = state.positions[state.routeIndex]
+  return position === undefined ? null : { ...position }
 }
 
 export function advanceNavigationState(
@@ -222,9 +233,151 @@ export function advanceNavigationState(
     return null
   }
   return {
+    kind: state.kind,
     routeNodeIds: state.routeNodeIds,
+    positions: state.positions,
     routeIndex: nextIndex,
   }
+}
+
+/**
+ * Plans one stable corner waypoint around the first authored footprint blocking
+ * the direct chase. Rapier still resolves every resulting movement step.
+ */
+export function planLocalObstacleDetour(
+  from: Vector3Value,
+  to: Vector3Value,
+  actorRadius: number,
+  obstacles: readonly LocalObstacleFootprint[],
+): ConnectedNavigationRoute | null {
+  const padding = actorRadius + 0.12
+  const obstruction = firstBlockingObstacle(from, to, padding, obstacles)
+  if (obstruction === null) return null
+
+  const box = expandedBox(obstruction.obstacle, padding)
+  const corners = {
+    southwest: { x: box.minimumX, y: from.y, z: box.minimumZ },
+    northwest: { x: box.minimumX, y: from.y, z: box.maximumZ },
+    southeast: { x: box.maximumX, y: from.y, z: box.minimumZ },
+    northeast: { x: box.maximumX, y: from.y, z: box.maximumZ },
+  }
+  const candidates = [
+    [corners.northwest, corners.southwest],
+    [corners.southwest, corners.northwest],
+    [corners.northeast, corners.southeast],
+    [corners.southeast, corners.northeast],
+    [corners.southwest, corners.southeast],
+    [corners.southeast, corners.southwest],
+    [corners.northwest, corners.northeast],
+    [corners.northeast, corners.northwest],
+  ] as const
+  let best: { readonly positions: readonly [Vector3Value, Vector3Value]; readonly score: number } | null = null
+  for (const candidate of candidates) {
+    if (
+      pathBlocked(from, candidate[0], padding, obstacles, obstruction.obstacle.id, 'end') ||
+      pathBlocked(candidate[0], candidate[1], padding, obstacles, obstruction.obstacle.id, 'boundary') ||
+      pathBlocked(candidate[1], to, padding, obstacles, obstruction.obstacle.id, 'start')
+    ) continue
+    const score =
+      horizontalDistance(from, candidate[0]) +
+      horizontalDistance(candidate[0], candidate[1]) +
+      horizontalDistance(candidate[1], to)
+    if (best === null || score < best.score - 1e-6) {
+      best = { positions: candidate, score }
+    }
+  }
+  if (best === null) return null
+  return {
+    nodeIds: Object.freeze([
+      `nav.local.${obstruction.obstacle.id}.entry`,
+      `nav.local.${obstruction.obstacle.id}.exit`,
+    ]),
+    positions: Object.freeze(best.positions.map((position) => ({ ...position }))),
+  }
+}
+
+export function isDirectPathObstructed(
+  from: Vector3Value,
+  to: Vector3Value,
+  actorRadius: number,
+  obstacles: readonly LocalObstacleFootprint[],
+): boolean {
+  return firstBlockingObstacle(from, to, actorRadius + 0.12, obstacles) !== null
+}
+
+function firstBlockingObstacle(
+  from: Vector3Value,
+  to: Vector3Value,
+  padding: number,
+  obstacles: readonly LocalObstacleFootprint[],
+): { readonly obstacle: LocalObstacleFootprint; readonly entry: number } | null {
+  let first: { readonly obstacle: LocalObstacleFootprint; readonly entry: number } | null = null
+  for (const obstacle of obstacles) {
+    const interval = segmentBoxInterval(from, to, expandedBox(obstacle, padding))
+    if (
+      interval === null ||
+      interval.exit <= 1e-4 ||
+      interval.entry >= 1 - 1e-4
+    ) continue
+    if (first === null || interval.entry < first.entry) {
+      first = { obstacle, entry: interval.entry }
+    }
+  }
+  return first
+}
+
+function pathBlocked(
+  from: Vector3Value,
+  to: Vector3Value,
+  padding: number,
+  obstacles: readonly LocalObstacleFootprint[],
+  allowedTouchId: string,
+  allowedTouch: 'start' | 'end' | 'boundary',
+): boolean {
+  for (const obstacle of obstacles) {
+    const interval = segmentBoxInterval(from, to, expandedBox(obstacle, padding))
+    if (interval === null) continue
+    if (obstacle.id === allowedTouchId) {
+      if (allowedTouch === 'boundary') continue
+      if (allowedTouch === 'start' && interval.exit <= 1e-4) continue
+      if (allowedTouch === 'end' && interval.entry >= 1 - 1e-4) continue
+    }
+    return true
+  }
+  return false
+}
+
+function expandedBox(obstacle: LocalObstacleFootprint, padding: number) {
+  return {
+    minimumX: obstacle.centerX - obstacle.halfX - padding,
+    maximumX: obstacle.centerX + obstacle.halfX + padding,
+    minimumZ: obstacle.centerZ - obstacle.halfZ - padding,
+    maximumZ: obstacle.centerZ + obstacle.halfZ + padding,
+  }
+}
+
+function segmentBoxInterval(
+  from: Vector3Value,
+  to: Vector3Value,
+  box: ReturnType<typeof expandedBox>,
+): { readonly entry: number; readonly exit: number } | null {
+  let entry = 0
+  let exit = 1
+  for (const [start, delta, minimum, maximum] of [
+    [from.x, to.x - from.x, box.minimumX, box.maximumX],
+    [from.z, to.z - from.z, box.minimumZ, box.maximumZ],
+  ] as const) {
+    if (Math.abs(delta) <= 1e-9) {
+      if (start < minimum || start > maximum) return null
+      continue
+    }
+    const first = (minimum - start) / delta
+    const second = (maximum - start) / delta
+    entry = Math.max(entry, Math.min(first, second))
+    exit = Math.min(exit, Math.max(first, second))
+    if (entry > exit) return null
+  }
+  return entry >= 0 && entry <= 1 ? { entry, exit } : null
 }
 
 function findOpenZonePath(

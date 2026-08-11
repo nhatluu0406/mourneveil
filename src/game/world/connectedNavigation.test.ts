@@ -4,9 +4,19 @@ import {
   advanceNavigationState,
   createEnemyNavigationState,
   currentNavigationWaypoint,
+  isDirectPathObstructed,
+  planLocalObstacleDetour,
   planConnectedNavigationRoute,
   zoneIdContainingPosition,
 } from './connectedNavigation'
+
+const pillar = (centerX = 0, centerZ = 0) => ({
+  id: `pillar.${centerX}.${centerZ}`,
+  centerX,
+  centerZ,
+  halfX: 0.5,
+  halfZ: 0.5,
+})
 
 describe('connected authored navigation', () => {
   it('returns null for clear same-zone direct cases when a local detour is unnecessary', () => {
@@ -102,5 +112,34 @@ describe('connected authored navigation', () => {
   it('resolves zone membership for authored anchors', () => {
     expect(zoneIdContainingPosition({ x: -14, y: 0.82, z: 6 })).toBe('zone.arrival')
     expect(CONNECTED_NAVIGATION_NODES.length).toBeGreaterThan(6)
+  })
+
+  it('keeps direct pursuit when the path is clear', () => {
+    const from = { x: -2, y: 0.82, z: 2 }
+    const to = { x: -2, y: 0.82, z: -2 }
+    expect(isDirectPathObstructed(from, to, 0.35, [pillar()])).toBe(false)
+    expect(planLocalObstacleDetour(from, to, 0.35, [pillar()])).toBeNull()
+  })
+
+  it.each([
+    ['centered', pillar(), { x: 0, y: 0.82, z: 3 }, { x: 0, y: 0.82, z: -3 }],
+    ['left-offset', pillar(-0.45), { x: 0, y: 0.82, z: 3 }, { x: 0, y: 0.82, z: -3 }],
+    ['right-offset', pillar(0.45), { x: 0, y: 0.82, z: 3 }, { x: 0, y: 0.82, z: -3 }],
+  ])('plans a stable two-corner %s detour', (_name, obstacle, from, to) => {
+    const first = planLocalObstacleDetour(from, to, 0.35, [obstacle])
+    const second = planLocalObstacleDetour(from, to, 0.35, [obstacle])
+    expect(first).toEqual(second)
+    expect(first?.positions).toHaveLength(2)
+    expect(first?.positions.every((position) => Number.isFinite(position.x + position.z))).toBe(true)
+  })
+
+  it('releases the local route after its exit corner clears the obstacle', () => {
+    const from = { x: 0, y: 0.82, z: 3 }
+    const to = { x: 0, y: 0.82, z: -3 }
+    const obstacle = pillar()
+    const route = planLocalObstacleDetour(from, to, 0.35, [obstacle])!
+    expect(isDirectPathObstructed(from, to, 0.35, [obstacle])).toBe(true)
+    expect(isDirectPathObstructed(route.positions[0]!, to, 0.35, [obstacle])).toBe(true)
+    expect(isDirectPathObstructed(route.positions[1]!, to, 0.35, [obstacle])).toBe(false)
   })
 })

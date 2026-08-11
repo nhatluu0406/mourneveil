@@ -76,9 +76,14 @@ import {
   advanceNavigationState,
   createEnemyNavigationState,
   currentNavigationWaypoint,
+  isDirectPathObstructed,
+  planLocalObstacleDetour,
   planConnectedNavigationRoute,
+  zoneIdContainingPosition,
   type EnemyNavigationState,
+  type LocalObstacleFootprint,
 } from '../world/connectedNavigation'
+import { activeConnectedLevelColliders } from '../../physics/connectedLevelCollision'
 import type { EnemyRuntime, EnemyRuntimeSnapshot } from '../enemies/enemyRuntime'
 import {
   CheckpointRuntime,
@@ -711,6 +716,7 @@ export class GameRuntime {
           this.markPersistentChange()
         }
       }
+      const localObstacles = this.localObstacleFootprints()
       for (const enemyRuntime of this.enemyRuntimes) {
         const simulationEnabled = this.encounterActivationRuntime.isEnemySimulationEnabled(
           enemyRuntime.id,
@@ -730,6 +736,40 @@ export class GameRuntime {
 
         let navigation = this.enemyNavigationStates.get(enemyRuntime.id) ?? null
         const enemySnapshot = enemyRuntime.snapshot()
+        const sameZone =
+          zoneIdContainingPosition(enemySnapshot.position) ===
+          zoneIdContainingPosition(this.playerState.position)
+        const directPathObstructed =
+          sameZone &&
+          isDirectPathObstructed(
+            enemySnapshot.position,
+            this.playerState.position,
+            enemyRuntime.definition.body.radius,
+            localObstacles,
+          )
+        if (
+          navigation?.kind === 'local-detour' &&
+          !directPathObstructed
+        ) {
+          this.enemyNavigationStates.delete(enemyRuntime.id)
+          navigation = null
+        }
+        if (
+          navigation === null &&
+          enemySnapshot.state === 'pursue' &&
+          directPathObstructed
+        ) {
+          const detour = planLocalObstacleDetour(
+            enemySnapshot.position,
+            this.playerState.position,
+            enemyRuntime.definition.body.radius,
+            localObstacles,
+          )
+          if (detour !== null) {
+            navigation = createEnemyNavigationState(detour, 'local-detour')
+            this.enemyNavigationStates.set(enemyRuntime.id, navigation)
+          }
+        }
         const distanceToPlayer = horizontalDistance(
           enemySnapshot.position,
           this.playerState.position,
@@ -742,7 +782,11 @@ export class GameRuntime {
           navigation = null
         }
         if (navigation !== null) {
-          navigation = advanceNavigationState(navigation, enemySnapshot.position)
+          navigation = advanceNavigationState(
+            navigation,
+            enemySnapshot.position,
+            navigation.kind === 'local-detour' ? 0.18 : 0.85,
+          )
           if (navigation === null) {
             this.enemyNavigationStates.delete(enemyRuntime.id)
           } else {
@@ -913,7 +957,9 @@ export class GameRuntime {
       const nextIndex = existing.routeIndex + 1
       if (nextIndex < existing.routeNodeIds.length) {
         this.enemyNavigationStates.set(enemyId, {
+          kind: existing.kind,
           routeNodeIds: existing.routeNodeIds,
+          positions: existing.positions,
           routeIndex: nextIndex,
         })
         return
@@ -929,6 +975,24 @@ export class GameRuntime {
     )
     if (route === null) return
     this.enemyNavigationStates.set(enemyId, createEnemyNavigationState(route))
+  }
+
+  private localObstacleFootprints(): readonly LocalObstacleFootprint[] {
+    const world = this.worldRuntime.snapshot()
+    return activeConnectedLevelColliders({
+      shortcutOpen: world.openedShortcutIds.includes(
+        'connection.shortcut-checkpoint-mixed',
+      ),
+      finalGateOpen: world.finalGateReached,
+    })
+      .filter((collider) => collider.kind !== 'floor')
+      .map((collider) => ({
+        id: collider.id,
+        centerX: collider.position[0],
+        centerZ: collider.position[2],
+        halfX: collider.size[0] / 2,
+        halfZ: collider.size[2] / 2,
+      }))
   }
 
   private resolvedDamageForAction(actionId: string | null): number | undefined {

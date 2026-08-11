@@ -8,6 +8,15 @@ import {
   createMeleeEnemyRuntime,
   horizontalDistance,
 } from '../game/enemies/meleeEnemy'
+import {
+  advanceNavigationState,
+  createEnemyNavigationState,
+  currentNavigationWaypoint,
+  isDirectPathObstructed,
+  planLocalObstacleDetour,
+  type EnemyNavigationState,
+  type LocalObstacleFootprint,
+} from '../game/world/connectedNavigation'
 import { GRAYBOX_CENTER_BLOCKER_SIZE } from './grayboxCollision'
 import {
   CHARACTER_COLLISION_OFFSET,
@@ -84,7 +93,93 @@ function stepEnemy(
   }
 }
 
+function stepEnemyWithLocalDetour(
+  world: RAPIER.World,
+  enemy: ReturnType<typeof createMeleeEnemyRuntime>,
+  playerPosition: Vector3Value,
+  resolveCollision: CharacterCollisionResolver,
+  obstacles: readonly LocalObstacleFootprint[],
+  steps: number,
+) {
+  let navigation: EnemyNavigationState | null = null
+  let usedDetour = false
+  let releasedDetour = false
+  for (let step = 0; step < steps; step += 1) {
+    const enemyPosition = enemy.snapshot().position
+    const directBlocked = isDirectPathObstructed(
+      enemyPosition,
+      playerPosition,
+      enemy.definition.body.radius,
+      obstacles,
+    )
+    if (navigation !== null && !directBlocked) {
+      navigation = null
+      releasedDetour = true
+    }
+    if (navigation !== null) {
+      navigation = advanceNavigationState(navigation, enemyPosition, 0.18)
+    }
+    if (usedDetour && navigation === null && !directBlocked) {
+      releasedDetour = true
+    }
+    if (navigation === null && directBlocked) {
+      const route = planLocalObstacleDetour(
+        enemyPosition,
+        playerPosition,
+        enemy.definition.body.radius,
+        obstacles,
+      )
+      if (route !== null) {
+        navigation = createEnemyNavigationState(route, 'local-detour')
+        usedDetour = true
+      }
+    }
+    advanceMeleeEnemy(
+      enemy,
+      playerPosition,
+      FIXED_STEP_SECONDS,
+      resolveCollision,
+      { navigationTarget: currentNavigationWaypoint(navigation) },
+    )
+    world.step()
+  }
+  return { usedDetour, releasedDetour }
+}
+
 describe('enemy Rapier movement integration', () => {
+  it.each([
+    ['centered blocker', 2, 0, 1],
+    ['left-offset blocker', 1.55, 0, 1],
+    ['right-offset blocker', 2.45, 0, 1],
+    ['narrow pillar corner', 2.18, 0, 0.45],
+  ])('takes a stable authored-footprint detour around a %s', (_name, x, z, size) => {
+    const world = createGrayboxWorld()
+    world.createCollider(
+      RAPIER.ColliderDesc.cuboid(size / 2, 0.75, size / 2).setTranslation(x, 0.75, z),
+    )
+    const obstacle = { id: 'test.blocker', centerX: x, centerZ: z, halfX: size / 2, halfZ: size / 2 }
+    const { enemy, resolveCollision, controller } = createEnemyController(world)
+    enemy.transition('pursue', 'player')
+    const playerPosition = { x: 2, y: 0.82, z: -3 }
+    const result = stepEnemyWithLocalDetour(
+      world,
+      enemy,
+      playerPosition,
+      resolveCollision,
+      [obstacle],
+      480,
+    )
+
+    expect(result.usedDetour).toBe(true)
+    expect(result.releasedDetour).toBe(true)
+    expect(horizontalDistance(enemy.snapshot().position, playerPosition)).toBeLessThanOrEqual(
+      enemy.definition.attackRange,
+    )
+    expect(['attack', 'recovery', 'spacing']).toContain(enemy.snapshot().state)
+    world.removeCharacterController(controller)
+    world.free()
+  })
+
   it('steers around the center blocker without penetration', () => {
     const world = createGrayboxWorld()
     world.createCollider(
