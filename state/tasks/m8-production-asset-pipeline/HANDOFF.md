@@ -5,7 +5,7 @@ Task: m8-production-asset-pipeline
 
 ## Status
 
-**READY FOR PRODUCT OWNER ACCEPTANCE.** M8 remains open and untagged; no M9 implementation or execution graph has started.
+**PRODUCT OWNER ACCEPTED / CLOSED.** Product Owner authorized the annotated closure tag `v0.8.0-production-asset-pipeline`. M9 starts only after the verified closure commit is tagged.
 
 ## Repository truth
 
@@ -43,6 +43,7 @@ Task: m8-production-asset-pipeline
 - CI-compatible Node 22.23.0/npm 10.9.2: focused lifecycle 2 files/5 tests PASS; full 68 files/285 tests PASS; `npm run verify`, assets, lint, typecheck, build PASS.
 - `git diff --check`, LeanLoop doctor/sync, focused diff review, and final process/port audit PASS; ports 4173 and 4191–4194 are reusable with zero gate-owned processes.
 - Existing Vite main chunk advisory remains and is recorded as D-004.
+- Closure re-verification on 2026-08-12 under Node 22.23.0/npm 10.9.2: lifecycle tests 2 files/5 tests PASS; `npm run gate:lifecycle` PASS with ports 4191/4192 released; `npm run verify` PASS with 68 files/285 tests; build/assets PASS.
 
 ## M9 handoff (planning only)
 
@@ -51,6 +52,9 @@ Task: m8-production-asset-pipeline
 - Recommended first macro-batch after M8 acceptance: Codex-led combat-contract audit and one narrowly scoped depth mechanic with explicit action/cancel/resource rules and regression gates. Exact mechanics require a new Product Owner task packet.
 - Recommended agent: Codex, because the first boundary-setting work is combat-authority sensitive; later tuning/content may route to Cursor.
 
-## Next
+## Closure
 
-Product Owner accepts/closes M8 and separately authorizes any M8 tag and M9 PLAN. Do not self-accept, tag, push, or start M9 from this handoff.
+- Product Owner acceptance: explicit, 2026-08-12.
+- Authorized annotated tag: `v0.8.0-production-asset-pipeline` on the verified M8 closure commit.
+- Durable deferred limitations remain in `state/DEBT.md`.
+- Next milestone: M9 — Combat Depth. No M9 implementation belongs in this closed record.

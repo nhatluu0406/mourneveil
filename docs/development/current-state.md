@@ -1,9 +1,9 @@
 # Current State
 
 - Updated: 2026-08-12
-- Accepted release: **`v0.7.0-animation-foundation`** (M7)
-- Active task: `m8-production-asset-pipeline`
-- Status: **M8 READY FOR PRODUCT OWNER ACCEPTANCE** — the lifecycle CI regression is fixed and CI-equivalent verification is green. M8 remains unaccepted/untagged until Product Owner closure.
+- Accepted release: **M8 — Production Asset Pipeline**
+- Active task: transition to `m9-combat-depth`
+- Status: **M8 PRODUCT OWNER ACCEPTED / CLOSED**. The verified closure commit is authorized for `v0.8.0-production-asset-pipeline`; M9 Combat Depth is next.
 
 ## What exists
 
@@ -25,4 +25,4 @@
 
 ## Next executable work
 
-Product Owner acceptance/closure of M8. If accepted, prepare M9 Combat Depth separately; do not add an M9 execution graph or implementation before closure.
+Initialize M9 Combat Depth with an authoritative combat-contract audit and one narrow guard-impact/guard-break vertical slice.
