@@ -1,4 +1,5 @@
 import type { GameRuntimeSnapshot } from '../game/runtime/GameRuntime'
+import { resolvePlayerOutgoingHitConfirm } from '../render/playerCombatFeedback'
 import {
   equippedCharmLabel,
   equippedWeaponLabel,
@@ -28,6 +29,21 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
         snapshot.simulation.stepCount - recentIncoming.simulationStep < 45
       ? `Blocked · Impact ${snapshot.defense.guardImpact}/${snapshot.defense.guardImpactThreshold}`
       : null
+  const outgoingConfirm = resolvePlayerOutgoingHitConfirm({
+    lastHit: snapshot.contact.lastHit,
+    enemies: snapshot.enemies,
+    simulationStep: snapshot.simulation.stepCount,
+  })
+  const hitConfirmLabel =
+    outgoingConfirm.kind === 'defeat'
+      ? 'Enemy Defeated'
+      : outgoingConfirm.kind === 'interrupt'
+        ? 'Interrupted'
+        : outgoingConfirm.kind === 'heavy'
+          ? 'Heavy Hit'
+          : outgoingConfirm.kind === 'light'
+            ? 'Hit'
+            : null
 
   return (
     <div
@@ -86,6 +102,11 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
             role="status"
           >
             {guardFeedback}
+          </div>
+        ) : null}
+        {hitConfirmLabel !== null && guardFeedback === null ? (
+          <div className="gameplay-hud__guard-feedback" role="status">
+            {hitConfirmLabel}
           </div>
         ) : null}
         {!health.alive ? <div className="gameplay-hud__death">Fallen</div> : null}

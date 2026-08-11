@@ -77,9 +77,9 @@ export const PLAYER_LIGHT_ATTACK = definePlayerAttack({
   kind: 'light',
   action: {
     id: PLAYER_LIGHT_ATTACK_ID,
-    startupSteps: 8,
-    activeSteps: 4,
-    recoverySteps: 14,
+    startupSteps: 10,
+    activeSteps: 5,
+    recoverySteps: 16,
     resourceCost: null,
     cancellationPolicy: 'recovery-only',
     interruptibilityPolicy: 'always',
@@ -101,9 +101,10 @@ export const PLAYER_HEAVY_ATTACK = definePlayerAttack({
   kind: 'heavy',
   action: {
     id: PLAYER_HEAVY_ATTACK_ID,
+    // Startup must stay ≤ skirmisher startup (20) so simultaneous wind-ups remain interruptible.
     startupSteps: 18,
-    activeSteps: 6,
-    recoverySteps: 30,
+    activeSteps: 8,
+    recoverySteps: 38,
     resourceCost: null,
     cancellationPolicy: 'recovery-only',
     interruptibilityPolicy: 'always',
@@ -170,13 +171,21 @@ export function attackContactOverlapsSphere(
   return dx * dx + dy * dy + dz * dz <= limit * limit
 }
 
+/** Recovery returns partial control; startup/active stay fully committed. */
+export const PLAYER_ATTACK_RECOVERY_MOVEMENT_SCALE = 0.35
+
 export function constrainMovementIntentForAttack(
   movementIntent: PlayerMovementIntent,
   combatPhase: CombatActionSnapshot['phase'],
 ): PlayerMovementIntent {
-  return combatPhase === 'idle'
-    ? movementIntent
-    : { horizontal: 0, forward: 0 }
+  if (combatPhase === 'idle') return movementIntent
+  if (combatPhase === 'recovery') {
+    return {
+      horizontal: movementIntent.horizontal * PLAYER_ATTACK_RECOVERY_MOVEMENT_SCALE,
+      forward: movementIntent.forward * PLAYER_ATTACK_RECOVERY_MOVEMENT_SCALE,
+    }
+  }
+  return { horizontal: 0, forward: 0 }
 }
 
 /**

@@ -14,6 +14,7 @@ import { localNegativeZFacingYaw } from './enemyAttackPresentation'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { projectPlayerAnimation } from './animation/playerAnimationProjection'
 import { resolvePlayerProceduralPose } from './animation/playerProceduralPose'
+import { resolvePlayerOutgoingHitConfirm } from './playerCombatFeedback'
 
 const PLAYER_PLACEHOLDER_BLADE_LENGTH = 0.56
 const PLAYER_PLACEHOLDER_WEAPON_X = 0.28
@@ -105,10 +106,44 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     rightArm.rotation.x = MathUtils.damp(rightArm.rotation.x, 0.15 + proceduralPose.rightArmPitch, damping, deltaSeconds)
     weaponSweep.rotation.x = MathUtils.damp(weaponSweep.rotation.x, proceduralPose.weaponPitch, damping, deltaSeconds)
 
-    const flash = animation.mode !== 'defeated' && animation.hitReactionToken !== null
+    const flashIncoming = animation.mode !== 'defeated' && animation.hitReactionToken !== null
+    const outgoingConfirm = resolvePlayerOutgoingHitConfirm({
+      lastHit: snapshot.contact.lastHit,
+      enemies: snapshot.enemies,
+      simulationStep: snapshot.simulation.stepCount,
+    })
+    const hitConfirmFlash =
+      !flashIncoming &&
+      outgoingConfirm.kind !== 'none' &&
+      outgoingConfirm.flashIntensity > 0
     for (const material of [torsoMaterial, cloakMaterial]) {
-      material.emissive.set(flash ? MOURNEVEIL_PALETTE.damage : '#000000')
-      material.emissiveIntensity = flash ? 0.45 : 0
+      if (flashIncoming) {
+        material.emissive.set(MOURNEVEIL_PALETTE.damage)
+        material.emissiveIntensity = 0.45
+      } else if (hitConfirmFlash) {
+        material.emissive.set(
+          outgoingConfirm.kind === 'defeat' || outgoingConfirm.kind === 'interrupt'
+            ? '#ffb070'
+            : '#f0d080',
+        )
+        material.emissiveIntensity = 0.2 + 0.55 * outgoingConfirm.flashIntensity
+      } else {
+        material.emissive.set('#000000')
+        material.emissiveIntensity = 0
+      }
+    }
+    if (hitConfirmFlash) {
+      weaponMaterial.emissive.set(
+        outgoingConfirm.kind === 'defeat'
+          ? '#ff6b4a'
+          : outgoingConfirm.kind === 'interrupt'
+            ? '#ff9a4a'
+            : '#ffe6a0',
+      )
+      weaponMaterial.emissiveIntensity = 0.35 + 0.65 * outgoingConfirm.flashIntensity
+    } else {
+      weaponMaterial.emissive.set('#000000')
+      weaponMaterial.emissiveIntensity = 0
     }
 
     const activeShape = snapshot.attack.activeContactShape

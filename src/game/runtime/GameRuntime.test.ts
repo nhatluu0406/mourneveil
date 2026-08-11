@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { PlayerMovementIntent } from '../../input/playerMovementIntent'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import {
+  PLAYER_HEAVY_ATTACK,
   PLAYER_LIGHT_ATTACK,
   PLAYER_LIGHT_ATTACK_ID,
 } from '../combat/playerAttackActions'
@@ -48,7 +49,10 @@ describe('GameRuntime', () => {
         .map((hurtbox) => ({ hurtboxId: hurtbox.id, targetId: hurtbox.ownerId })),
     )
     runtime.requestPlayerAttack(attackRequest(attack))
-    const startup = attack === 'light' ? 8 : 18
+    const startup =
+      attack === 'light'
+        ? PLAYER_LIGHT_ATTACK.action.startupSteps
+        : PLAYER_HEAVY_ATTACK.action.startupSteps
     for (let step = 0; step < startup; step += 1) {
       runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
     }

@@ -81,22 +81,32 @@ export function resolvePlayerProceduralPose(
       const anticipation = phase === 'startup' ? progress : 0
       const strike = phase === 'active' ? Math.sin(progress * Math.PI) : 0
       const recovery = phase === 'recovery' ? 1 - progress : 0
+      // Stronger silhouette commitment: coil → committed swing → open recover.
       return pose({
-        bodyOffsetY: -0.02 * anticipation - (heavy ? 0.04 : 0.015) * strike,
+        bodyOffsetY:
+          -0.03 * anticipation -
+          (heavy ? 0.055 : 0.022) * strike +
+          0.012 * recovery,
+        bodyScaleY: 1 - (heavy ? 0.04 : 0.02) * anticipation + (heavy ? 0.05 : 0.03) * strike,
+        bodyScaleZ: 1 + (heavy ? 0.06 : 0.03) * anticipation - (heavy ? 0.04 : 0.02) * strike,
         torsoPitch:
-          (heavy ? -0.48 : -0.18) * anticipation +
-          (heavy ? 0.55 : 0.28) * strike +
-          (heavy ? 0.2 : 0.08) * recovery,
+          (heavy ? -0.62 : -0.28) * anticipation +
+          (heavy ? 0.72 : 0.38) * strike +
+          (heavy ? 0.28 : 0.14) * recovery,
         bodyRoll:
-          (heavy ? -0.22 : -0.08) * anticipation + (heavy ? 0.28 : 0.12) * strike,
-        leftArmPitch: -0.28 * anticipation + 0.5 * strike,
+          (heavy ? -0.3 : -0.12) * anticipation +
+          (heavy ? 0.36 : 0.16) * strike -
+          (heavy ? 0.1 : 0.05) * recovery,
+        leftArmPitch: -0.4 * anticipation + 0.62 * strike + 0.12 * recovery,
         rightArmPitch:
-          (heavy ? -1.25 : -0.68) * anticipation + (heavy ? 1.35 : 0.98) * strike,
+          (heavy ? -1.45 : -0.88) * anticipation +
+          (heavy ? 1.55 : 1.15) * strike +
+          (heavy ? 0.25 : 0.12) * recovery,
         weaponPitch:
-          (heavy ? -0.55 : -0.2) * anticipation +
-          (heavy ? 0.48 : 0.32) * strike +
-          0.1 * recovery,
-        limbSwing: 0.12 * strike,
+          (heavy ? -0.78 : -0.35) * anticipation +
+          (heavy ? 0.72 : 0.48) * strike +
+          (heavy ? 0.22 : 0.14) * recovery,
+        limbSwing: (heavy ? 0.2 : 0.14) * strike,
       })
     }
     case 'hit-reaction':

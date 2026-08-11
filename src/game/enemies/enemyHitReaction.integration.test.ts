@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import { GameRuntime } from '../runtime/GameRuntime'
-import { PLAYER_HEAVY_ATTACK_ID } from '../combat/playerAttackActions'
+import {
+  PLAYER_HEAVY_ATTACK,
+  PLAYER_HEAVY_ATTACK_ID,
+} from '../combat/playerAttackActions'
 import { ENEMY_HIT_REACTION_DURATION_STEPS } from './enemyHitReaction'
 
 describe('GameRuntime enemy hit reaction integration', () => {
@@ -27,6 +30,7 @@ describe('GameRuntime enemy hit reaction integration', () => {
       y: 0.82,
       z: skirmisher!.position.z - 0.9,
     })
+    runtime.debugSetPlayerFacing({ x: 0, z: 1 })
 
     expect(
       runtime.requestPlayerAttack({
@@ -36,8 +40,12 @@ describe('GameRuntime enemy hit reaction integration', () => {
       }),
     ).toMatchObject({ accepted: true })
 
+    const heavyBudget =
+      PLAYER_HEAVY_ATTACK.action.startupSteps +
+      PLAYER_HEAVY_ATTACK.action.activeSteps +
+      10
     let reacted = false
-    for (let step = 0; step < 40; step += 1) {
+    for (let step = 0; step < heavyBudget; step += 1) {
       const frame = runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
       const enemy = runtime
         .snapshot()

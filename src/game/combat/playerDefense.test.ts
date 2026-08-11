@@ -11,6 +11,7 @@ import {
   PLAYER_GUARD_IMPACT_RESET_DELAY_STEPS,
   PlayerDefenseRuntime,
 } from './playerDefense'
+import { PLAYER_LIGHT_ATTACK } from './playerAttackActions'
 
 const flatGround: CharacterCollisionResolver = (_position, desired) => ({
   translation: { ...desired, y: 0 },
@@ -219,7 +220,12 @@ describe('player defensive actions', () => {
     runtime.setGuardIntent(true)
     advance(runtime, 1)
     expect(runtime.snapshot().defense.guarding).toBe(false)
-    advance(runtime, 25)
+    const remaining =
+      PLAYER_LIGHT_ATTACK.action.startupSteps +
+      PLAYER_LIGHT_ATTACK.action.activeSteps +
+      PLAYER_LIGHT_ATTACK.action.recoverySteps -
+      1
+    advance(runtime, remaining)
     expect(runtime.snapshot().combat.phase).toBe('idle')
     expect(runtime.snapshot().defense.guarding).toBe(true)
   })

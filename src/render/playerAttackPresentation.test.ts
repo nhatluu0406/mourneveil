@@ -25,13 +25,13 @@ describe('player attack presentation projection', () => {
     })
     const startup = computePlayerAttackPresentationPose(runtime.snapshot())
     expect(startup.weaponVisible).toBe(true)
-    expect(startup.color).toBe('#d6c7a4')
+    expect(startup.color).toBe('#e0d0a8')
 
     for (let step = 0; step < PLAYER_LIGHT_ATTACK.action.startupSteps; step += 1) {
       runtime.advanceFixedStep()
     }
     expect(computePlayerAttackPresentationPose(runtime.snapshot()).color).toBe(
-      '#f4d06f',
+      '#ffe08a',
     )
   })
 

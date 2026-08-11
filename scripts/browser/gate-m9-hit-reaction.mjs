@@ -73,11 +73,12 @@ await runOwnedBrowserGate({
         throw new Error(`timeout interruptible ${id}`)
       }
       const landHeavy = (id, aim) => {
+        while (g.snapshot().combat.phase !== 'idle') g.advance(1)
         waitInterruptible(id)
         const before = find(id)
         const attack = g.requestAttack(aim, 'heavy')
         if (attack?.accepted === false) throw new Error(`heavy rejected ${JSON.stringify(attack)}`)
-        for (let step = 0; step < 40; step += 1) {
+        for (let step = 0; step < 70; step += 1) {
           g.advance(1)
           const state = g.snapshot()
           const enemy = find(id)

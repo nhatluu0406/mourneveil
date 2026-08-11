@@ -125,7 +125,7 @@ describe('player attack definitions', () => {
       forward: 0,
     })
     expect(constrainMovementIntentForAttack(intent, 'recovery')).toEqual({
-      horizontal: 0,
+      horizontal: 0.35,
       forward: 0,
     })
   })

@@ -43,31 +43,31 @@ export function computePlayerAttackPresentationPose(
   const isHeavy = attack.kind === 'heavy'
   // Keep the sweep mostly along execution facing so the readable attack axis
   // matches the authoritative contact sphere (avoid large lateral misreads).
-  const maximumYaw = isHeavy ? 0.72 : 0.38
+  const maximumYaw = isHeavy ? 0.92 : 0.48
   const baseForward = -0.72
-  const lunge = isHeavy ? 0.32 : 0.18
+  const lunge = isHeavy ? 0.4 : 0.24
 
   switch (combat.phase) {
     case 'startup':
       return {
         weaponVisible: true,
-        weaponYawRadians: -maximumYaw * (isHeavy ? progress * 0.95 : progress * 0.75),
-        weaponForwardOffset: baseForward + (isHeavy ? 0.14 * progress : -0.04 * progress),
-        color: isHeavy ? '#a88858' : '#d6c7a4',
+        weaponYawRadians: -maximumYaw * (isHeavy ? progress * 0.98 : progress * 0.85),
+        weaponForwardOffset: baseForward + (isHeavy ? 0.18 * progress : -0.06 * progress),
+        color: isHeavy ? '#9a7340' : '#e0d0a8',
       }
     case 'active':
       return {
         weaponVisible: true,
-        weaponYawRadians: -maximumYaw + maximumYaw * 2.15 * progress,
+        weaponYawRadians: -maximumYaw + maximumYaw * 2.2 * progress,
         weaponForwardOffset: baseForward - lunge * Math.sin(progress * Math.PI),
-        color: isHeavy ? '#ffb454' : '#f4d06f',
+        color: isHeavy ? '#ff9d3a' : '#ffe08a',
       }
     case 'recovery':
       return {
         weaponVisible: true,
-        weaponYawRadians: maximumYaw * (1 - progress) * (isHeavy ? 0.85 : 0.55),
-        weaponForwardOffset: baseForward + (isHeavy ? 0.08 * (1 - progress) : 0),
-        color: isHeavy ? '#6f767e' : '#9da4ad',
+        weaponYawRadians: maximumYaw * (1 - progress) * (isHeavy ? 0.9 : 0.6),
+        weaponForwardOffset: baseForward + (isHeavy ? 0.1 * (1 - progress) : 0.04 * (1 - progress)),
+        color: isHeavy ? '#6a727a' : '#8f97a0',
       }
   }
 }
