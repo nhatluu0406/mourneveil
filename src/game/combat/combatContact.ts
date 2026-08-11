@@ -58,7 +58,7 @@ export interface CombatHitEvent {
   readonly simulationStep: number
   readonly damage: number
   readonly appliedDamage: number
-  readonly outcome: 'damaged' | 'dodged' | 'guarded'
+  readonly outcome: 'damaged' | 'dodged' | 'guarded' | 'guard-broken'
 }
 
 export interface CombatContactSnapshot {

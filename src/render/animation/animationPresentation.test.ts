@@ -122,6 +122,26 @@ describe('animation presentation architecture', () => {
     expect(projectPlayerAnimation(withHit).mode).toBe('hit-reaction')
   })
 
+  it('projects authoritative guard break as a presentation-only reaction', () => {
+    const runtime = new GameRuntime()
+    const source = runtime.snapshot()
+    const broken = {
+      ...source,
+      defense: {
+        ...source.defense,
+        guarding: false,
+        guardBroken: true,
+        guardBreakRemainingSteps: 40,
+      },
+    }
+
+    expect(projectPlayerAnimation(broken)).toMatchObject({
+      mode: 'hit-reaction',
+      hitReactionToken: 'guard-break',
+    })
+    expect(runtime.snapshot().defense.guardBroken).toBe(false)
+  })
+
   it('clamps normalized phase progress deterministically', () => {
     const action: CombatActionSnapshot = {
       actionId: 'test',

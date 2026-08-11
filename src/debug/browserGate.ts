@@ -18,7 +18,9 @@ declare global {
       respawn: () => void
       defeatEnemy: (enemyId: string) => void
       setPlayerPosition: (position: { x: number; y: number; z: number }) => void
+      setPlayerFacing: (facing: { x: number; z: number }) => void
       restorePlayer: () => void
+      resetMeleeFixture: () => void
       requestAttack: (
         aimDirection: { x: number; z: number },
         attack?: 'light' | 'heavy',
@@ -56,8 +58,14 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     setPlayerPosition: (position) => {
       runtime.debugSetPlayerPosition(position)
     },
+    setPlayerFacing: (facing) => {
+      runtime.debugSetPlayerFacing(facing)
+    },
     restorePlayer: () => {
       runtime.restorePlayerForDevelopment()
+    },
+    resetMeleeFixture: () => {
+      runtime.resetMeleeFixture()
     },
     requestAttack: (aimDirection: { x: number; z: number }, attack: 'light' | 'heavy' = 'light') =>
       runtime.requestPlayerAttack({

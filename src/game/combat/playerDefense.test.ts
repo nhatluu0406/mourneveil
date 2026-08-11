@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { GameRuntime } from '../runtime/GameRuntime'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
 import type { CharacterCollisionResolver } from '../character/playerMotor'
-import { PLAYER_DODGE_ACTION, PLAYER_DODGE_ACTION_ID } from './playerDefense'
+import { CombatActionRuntime } from './combatActionRuntime'
+import {
+  PLAYER_DODGE_ACTION,
+  PLAYER_DODGE_ACTION_ID,
+  PLAYER_GUARD_BREAK_DURATION_STEPS,
+  PLAYER_GUARD_IMPACT_THRESHOLD,
+  PLAYER_GUARD_IMPACT_RESET_DELAY_STEPS,
+  PlayerDefenseRuntime,
+} from './playerDefense'
 
 const flatGround: CharacterCollisionResolver = (_position, desired) => ({
   translation: { ...desired, y: 0 },
@@ -16,6 +24,96 @@ function advance(runtime: GameRuntime, steps: number, horizontal = 0, forward = 
 }
 
 describe('player defensive actions', () => {
+  it('accumulates frontal guard impact, breaks once, and recovers deterministically', () => {
+    const defense = new PlayerDefenseRuntime()
+    const combat = new CombatActionRuntime([]).snapshot()
+    const playerFacing = { x: 1, z: 0 } as const
+    const frontalAttackFacing = { x: -1, z: 0 } as const
+
+    defense.setGuardIntent(true)
+    defense.advanceFixedStep(combat)
+    expect(defense.resolveIncomingMelee(combat, playerFacing, frontalAttackFacing, 1)).toBe(
+      'guarded',
+    )
+    expect(defense.snapshot(combat).guardImpact).toBe(1)
+    expect(defense.resolveIncomingMelee(combat, playerFacing, frontalAttackFacing, 1)).toBe(
+      'guarded',
+    )
+    expect(defense.resolveIncomingMelee(combat, playerFacing, frontalAttackFacing, 1)).toBe(
+      'guard-broken',
+    )
+    expect(defense.snapshot(combat)).toMatchObject({
+      guarding: false,
+      guardImpact: PLAYER_GUARD_IMPACT_THRESHOLD,
+      guardBroken: true,
+      guardBreakRemainingSteps: PLAYER_GUARD_BREAK_DURATION_STEPS,
+    })
+
+    defense.setGuardIntent(true)
+    expect(defense.snapshot(combat).guardIntentHeld).toBe(false)
+    for (let step = 0; step < PLAYER_GUARD_BREAK_DURATION_STEPS; step += 1) {
+      defense.advanceFixedStep(combat)
+    }
+    expect(defense.snapshot(combat)).toMatchObject({
+      guardImpact: 0,
+      guardBroken: false,
+      guardBreakRemainingSteps: 0,
+    })
+    defense.setGuardIntent(true)
+    defense.advanceFixedStep(combat)
+    expect(defense.snapshot(combat).guarding).toBe(true)
+  })
+
+  it('does not accumulate impact for rear or unguarded contacts', () => {
+    const defense = new PlayerDefenseRuntime()
+    const combat = new CombatActionRuntime([]).snapshot()
+    const playerFacing = { x: 1, z: 0 } as const
+    defense.setGuardIntent(true)
+    defense.advanceFixedStep(combat)
+    expect(
+      defense.resolveIncomingMelee(combat, playerFacing, { x: 1, z: 0 }, 2),
+    ).toBe('damaged')
+    expect(defense.snapshot(combat).guardImpact).toBe(0)
+
+    defense.setGuardIntent(true)
+    defense.advanceFixedStep(combat)
+    expect(
+      defense.resolveIncomingMelee(combat, playerFacing, { x: 0, z: 1 }, 2),
+    ).toBe('damaged')
+    expect(defense.snapshot(combat).guardImpact).toBe(0)
+
+    defense.setGuardIntent(false)
+    defense.advanceFixedStep(combat)
+    expect(
+      defense.resolveIncomingMelee(combat, playerFacing, { x: -1, z: 0 }, 2),
+    ).toBe('damaged')
+    expect(defense.snapshot(combat).guardImpact).toBe(0)
+  })
+
+  it('clears partial guard impact after a deterministic quiet delay', () => {
+    const defense = new PlayerDefenseRuntime()
+    const combat = new CombatActionRuntime([]).snapshot()
+    defense.setGuardIntent(true)
+    defense.advanceFixedStep(combat)
+    expect(
+      defense.resolveIncomingMelee(
+        combat,
+        { x: 1, z: 0 },
+        { x: -1, z: 0 },
+        1,
+      ),
+    ).toBe('guarded')
+
+    for (let step = 0; step < PLAYER_GUARD_IMPACT_RESET_DELAY_STEPS; step += 1) {
+      defense.advanceFixedStep(combat)
+    }
+    expect(defense.snapshot(combat)).toMatchObject({
+      guarding: true,
+      guardImpact: 0,
+      guardBroken: false,
+    })
+  })
+
   it('snapshots accepted mouse aim for the full attack execution', () => {
     const runtime = new GameRuntime()
     runtime.attachCollisionResolver(flatGround)

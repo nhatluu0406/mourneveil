@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (52L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (48L)
+- PLAN.md (57L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (80L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (50L)
+- package.json (51L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -194,7 +194,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (30 files)
+  - **scripts/browser/** (31 files)
     - README.md (18L)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
@@ -207,7 +207,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m56-playthrough.mjs (240L)
     - gate-m561-correctness.mjs (279L)
     - gate-m562-regional-hp.mjs (113L)
-    - ... +18 more
+    - ... +19 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -225,7 +225,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - **src/app/** (4 files)
     - App.tsx (132L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
-    - styles.css (446L)
+    - styles.css (457L)
     - useGameRuntime.ts (209L) -- symbo
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

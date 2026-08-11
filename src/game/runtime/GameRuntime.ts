@@ -38,7 +38,6 @@ import {
   PLAYER_DODGE_ACTION_ID,
   PLAYER_DODGE_SPEED,
   PlayerDefenseRuntime,
-  resolveIncomingMeleeDefense,
   type PlayerDefenseSnapshot,
 } from '../combat/playerDefense'
 import {
@@ -54,6 +53,7 @@ import {
   advanceMeleeEnemy,
   createEnemyAttackSpatialSnapshot,
   enemyAttackDamage,
+  enemyAttackGuardImpact,
   horizontalDistance,
   type EnemyAttackSpatialSnapshot,
 } from '../enemies/meleeEnemy'
@@ -532,6 +532,17 @@ export class GameRuntime {
     this.worldRuntime.updatePlayerPosition(position)
   }
 
+  /** Development/gate helper: set authoritative facing without authoring movement. */
+  debugSetPlayerFacing(facing: PlayerFacingDirection): void {
+    if (!this.playerHealthRuntime.snapshot().health.alive) return
+    const magnitude = Math.hypot(facing.x, facing.z)
+    if (magnitude <= 0.0001) return
+    this.playerState = {
+      ...this.playerState,
+      facing: { x: facing.x / magnitude, z: facing.z / magnitude },
+    }
+  }
+
   /** Development/gate: sticky movement consumed by advanceFrame until cleared. */
   debugSetMovementOverride(intent: PlayerMovementIntent | null): void {
     this.movementOverride = intent === null ? null : { ...intent }
@@ -853,10 +864,11 @@ export class GameRuntime {
                 attackOrigin: enemy.position,
                 occlusionQuery: this.occlusionQuery ?? undefined,
                 resolveDamage: (target, damage) => {
-                  const outcome = resolveIncomingMeleeDefense(
-                    this.defenseRuntime.snapshot(combatSnapshot),
+                  const outcome = this.defenseRuntime.resolveIncomingMelee(
+                    combatSnapshot,
                     this.playerState.facing,
                     enemyAttack.executionFacing ?? enemy.facing,
+                    enemyAttackGuardImpact(enemy),
                   )
                   if (outcome === 'damaged') {
                     return { outcome, result: this.applyPlayerDamage(damage) }

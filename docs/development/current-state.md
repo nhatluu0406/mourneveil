@@ -1,9 +1,9 @@
 # Current State
 
 - Updated: 2026-08-12
-- Accepted release: **M8 — Production Asset Pipeline**
-- Active task: transition to `m9-combat-depth`
-- Status: **M8 PRODUCT OWNER ACCEPTED / CLOSED**. The verified closure commit is authorized for `v0.8.0-production-asset-pipeline`; M9 Combat Depth is next.
+- Accepted release: **`v0.8.0-production-asset-pipeline`** (M8)
+- Active task: `m9-combat-depth`
+- Status: **M9 ACTIVE** — macro-batch 1 adds deterministic guard impact and temporary guard break without adding stamina or changing contact authority.
 
 ## What exists
 
@@ -25,4 +25,4 @@
 
 ## Next executable work
 
-Initialize M9 Combat Depth with an authoritative combat-contract audit and one narrow guard-impact/guard-break vertical slice.
+Continue M9 from the guard-depth handoff; choose the next narrow mechanic from measured combat gaps rather than expanding into M10.

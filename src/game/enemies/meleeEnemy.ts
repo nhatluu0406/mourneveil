@@ -208,6 +208,10 @@ export function enemyAttackDamage(enemy: EnemyRuntimeSnapshot): number {
   return resolveRoleForEnemy(enemy)?.damage ?? 0
 }
 
+export function enemyAttackGuardImpact(enemy: EnemyRuntimeSnapshot): number {
+  return resolveRoleForEnemy(enemy)?.guardImpact ?? 0
+}
+
 export function horizontalDistance(a: Vector3Value, b: Vector3Value): number {
   return Math.hypot(a.x - b.x, a.z - b.z)
 }

@@ -26,6 +26,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const weaponMaterialRef = useRef<MeshStandardMaterial>(null)
   const contactShapeRef = useRef<Mesh>(null)
   const guardMarkerRef = useRef<Mesh>(null)
+  const guardMaterialRef = useRef<MeshStandardMaterial>(null)
   const torsoMaterialRef = useRef<MeshStandardMaterial>(null)
   const cloakMaterialRef = useRef<MeshStandardMaterial>(null)
   const torsoRef = useRef<Mesh>(null)
@@ -48,6 +49,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     const weaponMaterial = weaponMaterialRef.current
     const contactShape = contactShapeRef.current
     const guardMarker = guardMarkerRef.current
+    const guardMaterial = guardMaterialRef.current
     const torsoMaterial = torsoMaterialRef.current
     const cloakMaterial = cloakMaterialRef.current
     const torso = torsoRef.current
@@ -63,6 +65,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       weaponMaterial === null ||
       contactShape === null ||
       guardMarker === null ||
+      guardMaterial === null ||
       torsoMaterial === null ||
       cloakMaterial === null ||
       torso === null ||
@@ -73,7 +76,10 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     ) {
       return
     }
-    guardMarker.visible = animation.mode === 'guard'
+    guardMarker.visible = animation.mode === 'guard' || snapshot.defense.guardBroken
+    guardMaterial.color.set(snapshot.defense.guardBroken ? '#ff765e' : '#8fc4da')
+    guardMaterial.emissive.set(snapshot.defense.guardBroken ? '#9f241e' : '#17343d')
+    guardMaterial.emissiveIntensity = snapshot.defense.guardBroken ? 0.75 : 0.18
 
     const facing = resolveAttackPresentationFacing(snapshot.attack, {
       facing: animation.facing,
@@ -207,7 +213,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       </mesh>
       <mesh ref={guardMarkerRef} position={[0, 0.22, -0.36]} visible={false}>
         <boxGeometry args={[0.5, 0.55, 0.06]} />
-        <meshBasicMaterial color="#8fc4da" transparent opacity={0.5} />
+        <meshStandardMaterial ref={guardMaterialRef} color="#8fc4da" transparent opacity={0.5} />
       </mesh>
     </group>
   )

@@ -36,6 +36,7 @@ export interface EnemyMeleeRoleSpec {
   readonly definition: EnemyDefinition
   readonly attack: CombatActionDefinition
   readonly damage: number
+  readonly guardImpact: number
   readonly contact: EnemyMeleeContactShape
   readonly spawnPosition: Vector3Value
   readonly initialFacing: PlayerFacingDirection
@@ -90,6 +91,7 @@ export const SKIRMISHER_ROLE: EnemyMeleeRoleSpec = Object.freeze({
   }),
   attack: SKIRMISHER_ATTACK,
   damage: 10,
+  guardImpact: 1,
   contact: Object.freeze({
     id: 'enemy.skirmisher.attack.sphere',
     kind: 'sphere',
@@ -140,6 +142,7 @@ export const BRUTE_ROLE: EnemyMeleeRoleSpec = Object.freeze({
   }),
   attack: BRUTE_ATTACK,
   damage: 28,
+  guardImpact: 2,
   contact: Object.freeze({
     id: 'enemy.brute.attack.sphere',
     kind: 'sphere',

@@ -53,12 +53,20 @@ export function FollowCameraRig({
     const lastIncoming = snapshot.incomingContact.lastHit
     if (
       lastIncoming !== null &&
-      (lastIncoming.outcome === 'damaged' || lastIncoming.outcome === 'guarded')
+      (lastIncoming.outcome === 'damaged' ||
+        lastIncoming.outcome === 'guarded' ||
+        lastIncoming.outcome === 'guard-broken')
     ) {
       const hitKey = `in:${lastIncoming.executionId}:${lastIncoming.simulationStep}:${lastIncoming.outcome}`
       if (hitKey !== lastHitKeyRef.current) {
         lastHitKeyRef.current = hitKey
-        impulseRemainingRef.current = HIT_IMPULSE_SECONDS * (lastIncoming.outcome === 'damaged' ? 1.35 : 0.8)
+        impulseRemainingRef.current =
+          HIT_IMPULSE_SECONDS *
+          (lastIncoming.outcome === 'damaged'
+            ? 1.35
+            : lastIncoming.outcome === 'guard-broken'
+              ? 1.15
+              : 0.8)
       }
     }
 

@@ -34,6 +34,10 @@ function defense(overrides: Partial<PlayerDefenseSnapshot> = {}): PlayerDefenseS
     dodgeDirection: null,
     dodgeMovementActive: false,
     invulnerable: false,
+    guardImpact: 0,
+    guardImpactThreshold: 3,
+    guardBroken: false,
+    guardBreakRemainingSteps: 0,
     ...overrides,
   }
 }

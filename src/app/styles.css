@@ -383,6 +383,7 @@ body {
 }
 
 .gameplay-hud__prompt,
+.gameplay-hud__guard-feedback,
 .gameplay-hud__death {
   padding: 0.35rem 0.8rem;
   border: 1px solid var(--ui-hairline-strong);
@@ -392,6 +393,16 @@ body {
   font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0.03em;
+}
+
+.gameplay-hud__guard-feedback {
+  color: #a9dce8;
+  border-color: rgb(143 196 218 / 45%);
+}
+
+.gameplay-hud__guard-feedback.is-broken {
+  color: #ffb0a4;
+  border-color: rgb(255 100 80 / 55%);
 }
 
 .gameplay-hud__death {

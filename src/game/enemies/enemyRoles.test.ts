@@ -33,6 +33,7 @@ describe('enemy role variants', () => {
     )
     expect(SKIRMISHER_ROLE.attack.startupSteps).toBeLessThan(BRUTE_ROLE.attack.startupSteps)
     expect(BRUTE_ROLE.damage).toBeGreaterThan(SKIRMISHER_ROLE.damage)
+    expect(BRUTE_ROLE.guardImpact).toBeGreaterThan(SKIRMISHER_ROLE.guardImpact)
     expect(BRUTE_ROLE.definition.body.radius).toBeGreaterThan(
       SKIRMISHER_ROLE.definition.body.radius,
     )

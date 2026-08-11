@@ -20,6 +20,14 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
     snapshot.incomingContact.lastHit !== null &&
     snapshot.incomingContact.lastHit.outcome === 'damaged' &&
     snapshot.simulation.stepCount - snapshot.incomingContact.lastHit.simulationStep < 45
+  const recentIncoming = snapshot.incomingContact.lastHit
+  const guardFeedback = snapshot.defense.guardBroken
+    ? 'Guard Broken'
+    : recentIncoming !== null &&
+        (recentIncoming.outcome === 'guarded' || recentIncoming.outcome === 'guard-broken') &&
+        snapshot.simulation.stepCount - recentIncoming.simulationStep < 45
+      ? `Blocked · Impact ${snapshot.defense.guardImpact}/${snapshot.defense.guardImpactThreshold}`
+      : null
 
   return (
     <div
@@ -72,6 +80,14 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
 
       <div className="gameplay-hud__center">
         {prompt !== null ? <div className="gameplay-hud__prompt">{prompt}</div> : null}
+        {guardFeedback !== null ? (
+          <div
+            className={`gameplay-hud__guard-feedback${snapshot.defense.guardBroken ? ' is-broken' : ''}`}
+            role="status"
+          >
+            {guardFeedback}
+          </div>
+        ) : null}
         {!health.alive ? <div className="gameplay-hud__death">Fallen</div> : null}
         <ul className="gameplay-hud__commands" aria-label="Controls">
           {UI_COMMANDS.map((command) => (

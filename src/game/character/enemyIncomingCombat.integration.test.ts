@@ -83,6 +83,68 @@ describe('player runtime enemy incoming-melee integration', () => {
     expect(runtime.snapshot().playerHealth.health.current).toBe(100)
   })
 
+  it('deduplicates guard impact, breaks under repeated executions, then takes damage', () => {
+    const runtime = createApproachingRuntime()
+    runtime.setGuardIntent(true)
+
+    const first = advanceUntilIncoming(runtime)
+    expect(first.outcome).toBe('guarded')
+    const firstImpact = runtime.snapshot().defense.guardImpact
+    for (let step = 0; step < 4; step += 1) {
+      expect(runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL).incomingHitEvents).toEqual([])
+    }
+    expect(runtime.snapshot().defense.guardImpact).toBe(firstImpact)
+
+    expect(advanceUntilIncoming(runtime, 180).outcome).toBe('guarded')
+    expect(advanceUntilIncoming(runtime, 180).outcome).toBe('guard-broken')
+    expect(runtime.snapshot().defense).toMatchObject({
+      guarding: false,
+      guardImpact: 3,
+      guardBroken: true,
+    })
+    runtime.setGuardIntent(true)
+    expect(runtime.snapshot().defense.guardIntentHeld).toBe(false)
+
+    expect(advanceUntilIncoming(runtime, 180)).toMatchObject({
+      outcome: 'damaged',
+      appliedDamage: 10,
+    })
+    expect(runtime.snapshot().playerHealth.health.current).toBe(90)
+
+    for (let step = 0; step < 120 && runtime.snapshot().defense.guardBroken; step += 1) {
+      runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
+    }
+    runtime.setGuardIntent(true)
+    runtime.advanceFrame(FIXED_STEP_SECONDS, NEUTRAL)
+    expect(runtime.snapshot().defense).toMatchObject({
+      guarding: true,
+      guardImpact: 0,
+      guardBroken: false,
+    })
+  })
+
+  it('clears transient guard break on death and excludes it from save restoration', () => {
+    const runtime = createApproachingRuntime()
+    runtime.setGuardIntent(true)
+    expect(advanceUntilIncoming(runtime).outcome).toBe('guarded')
+    expect(advanceUntilIncoming(runtime, 180).outcome).toBe('guarded')
+    expect(advanceUntilIncoming(runtime, 180).outcome).toBe('guard-broken')
+    const save = runtime.captureSave()
+    expect(save).not.toHaveProperty('guardImpact')
+
+    runtime.applyPlayerDamage(999)
+    expect(runtime.snapshot()).toMatchObject({
+      playerHealth: { lifeState: 'dead' },
+      defense: { guardImpact: 0, guardBroken: false, guardBreakRemainingSteps: 0 },
+    })
+
+    runtime.applySave(save)
+    expect(runtime.snapshot()).toMatchObject({
+      playerHealth: { lifeState: 'alive' },
+      defense: { guardImpact: 0, guardBroken: false, guardBreakRemainingSteps: 0 },
+    })
+  })
+
   it('continues enemy action clocks after player defeat instead of freezing mid-attack', () => {
     const runtime = createApproachingRuntime()
     let defeated = false

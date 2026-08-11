@@ -54,6 +54,7 @@ function playerCommittedMode(actionId: string | null): CommittedAnimationMode | 
 }
 
 function playerHitReactionToken(snapshot: PlayerAnimationSource): string | null {
+  if (snapshot.defense.guardBroken) return 'guard-break'
   const hit = snapshot.incomingContact.lastHit
   if (
     hit === null ||
