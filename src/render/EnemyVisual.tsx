@@ -10,6 +10,7 @@ import {
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { projectEnemyAnimation } from './animation/enemyAnimationProjection'
 import { resolveEnemyProceduralPose } from './animation/enemyProceduralPose'
+import { SkirmisherProductionVisual } from './SkirmisherProductionVisual'
 
 const STATE_MIX = {
   idle: 0,
@@ -21,6 +22,23 @@ const STATE_MIX = {
 } as const
 
 export function EnemyVisual({
+  runtime,
+  enemyId,
+}: {
+  readonly runtime: GameRuntime
+  readonly enemyId: string
+}) {
+  const enemy =
+    runtime.snapshot().enemies.find((entry) => entry.id === enemyId) ?? null
+  const role = enemy === null ? null : meleeRoleByDefinitionId(enemy.definitionId)
+  if (role === null) return null
+  if (role.role === 'skirmisher') {
+    return <SkirmisherProductionVisual runtime={runtime} enemyId={enemyId} />
+  }
+  return <BruteProceduralVisual runtime={runtime} enemyId={enemyId} />
+}
+
+function BruteProceduralVisual({
   runtime,
   enemyId,
 }: {
@@ -40,7 +58,7 @@ export function EnemyVisual({
     if (enemyIndex < 0) return
     const enemy = runtimeSnapshot.enemies[enemyIndex]
     const role = meleeRoleByDefinitionId(enemy.definitionId)
-    if (role === null) return
+    if (role === null || role.role !== 'brute') return
     const enemyAttack = runtimeSnapshot.enemyAttacks[enemyIndex]
     const attackPresentation = createEnemyAttackPresentationSnapshot(enemy, enemyAttack)
     const animation = projectEnemyAnimation(
@@ -66,36 +84,36 @@ export function EnemyVisual({
       telegraph === null ||
       contact === null ||
       weapon === null
-    )
+    ) {
       return
+    }
 
     facing.rotation.y = localNegativeZFacingYaw(animation.facing)
-    const isBrute = role.role === 'brute'
     const damping = Math.max(1, 1 / Math.max(animation.transition.blendSeconds, 0.001))
-    body.scale.x = MathUtils.damp(body.scale.x, isBrute ? 1.15 : 0.88, damping, deltaSeconds)
+    body.scale.x = MathUtils.damp(body.scale.x, 1.15, damping, deltaSeconds)
     body.scale.y = MathUtils.damp(
       body.scale.y,
-      (isBrute ? 1.05 : 0.98) * proceduralPose.bodyScaleY,
+      1.05 * proceduralPose.bodyScaleY,
       damping,
       deltaSeconds,
     )
-    body.scale.z = MathUtils.damp(body.scale.z, isBrute ? 1.12 : 0.9, damping, deltaSeconds)
+    body.scale.z = MathUtils.damp(body.scale.z, 1.12, damping, deltaSeconds)
     body.rotation.x = MathUtils.damp(body.rotation.x, proceduralPose.bodyPitch, damping, deltaSeconds)
     body.rotation.z = MathUtils.damp(body.rotation.z, proceduralPose.bodyRoll, damping, deltaSeconds)
     body.position.y = MathUtils.damp(body.position.y, proceduralPose.bodyOffsetY, damping, deltaSeconds)
     weapon.rotation.x = MathUtils.damp(
       weapon.rotation.x,
-      (isBrute ? 0 : 0.55) + proceduralPose.weaponPitch,
+      proceduralPose.weaponPitch,
       damping,
       deltaSeconds,
     )
     weapon.rotation.y = MathUtils.damp(
       weapon.rotation.y,
-      (isBrute ? 0 : 0.1) + proceduralPose.weaponYaw,
+      proceduralPose.weaponYaw,
       damping,
       deltaSeconds,
     )
-    material.color.set(isBrute ? MOURNEVEIL_PALETTE.brute.body : MOURNEVEIL_PALETTE.skirmisher.body)
+    material.color.set(MOURNEVEIL_PALETTE.brute.body)
     material.color.offsetHSL(0, -0.05, -STATE_MIX[enemy.state] * 0.28)
     const damagedFlash = animation.mode !== 'defeated' && animation.hitReactionToken !== null
     material.emissive.set(damagedFlash ? MOURNEVEIL_PALETTE.damage : '#000000')
@@ -107,72 +125,39 @@ export function EnemyVisual({
   const enemy =
     runtime.snapshot().enemies.find((entry) => entry.id === enemyId) ?? null
   const role = enemy === null ? null : meleeRoleByDefinitionId(enemy.definitionId)
-  if (role === null) return null
-
-  const isBrute = role.role === 'brute'
+  if (role === null || role.role !== 'brute') return null
 
   return (
     <group ref={facingRef}>
       <group ref={bodyRef}>
-        {isBrute ? (
-          <>
-            <mesh castShadow receiveShadow position={[0, -0.05, 0]}>
-              <boxGeometry args={[0.7, 0.85, 0.48]} />
-              <meshStandardMaterial ref={materialRef} roughness={0.92} metalness={0.05} />
-            </mesh>
-            <mesh castShadow position={[0, 0.48, 0.04]}>
-              <boxGeometry args={[0.95, 0.32, 0.42]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.pauldron} roughness={0.9} />
-            </mesh>
-            <mesh castShadow position={[-0.48, 0.28, 0]}>
-              <boxGeometry args={[0.28, 0.4, 0.32]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.93} />
-            </mesh>
-            <mesh castShadow position={[0.48, 0.28, 0]}>
-              <boxGeometry args={[0.28, 0.4, 0.32]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.93} />
-            </mesh>
-            <mesh castShadow position={[0, 0.72, 0]}>
-              <boxGeometry args={[0.34, 0.28, 0.34]} />
-              <meshStandardMaterial color="#5a3830" roughness={0.88} />
-            </mesh>
-            <mesh ref={weaponRef} castShadow position={[0.42, 0.05, -0.55]}>
-              <boxGeometry args={[0.18, 0.85, 0.18]} />
-              <meshStandardMaterial
-                color={MOURNEVEIL_PALETTE.brute.weapon}
-                roughness={0.55}
-                metalness={0.35}
-              />
-            </mesh>
-          </>
-        ) : (
-          <>
-            <mesh castShadow receiveShadow position={[0, 0, 0]} rotation={[0.08, 0, 0]}>
-              <boxGeometry args={[0.28, 0.62, 0.22]} />
-              <meshStandardMaterial ref={materialRef} roughness={0.78} metalness={0.04} />
-            </mesh>
-            <mesh castShadow position={[0, 0.42, 0.02]}>
-              <boxGeometry args={[0.22, 0.2, 0.2]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.skirmisher.accent} roughness={0.7} />
-            </mesh>
-            <mesh castShadow position={[-0.2, 0.18, 0]} rotation={[0.2, 0, 0.45]}>
-              <boxGeometry args={[0.08, 0.4, 0.08]} />
-              <meshStandardMaterial color="#4a6a58" roughness={0.8} />
-            </mesh>
-            <mesh castShadow position={[0.2, 0.18, 0]} rotation={[0.2, 0, -0.45]}>
-              <boxGeometry args={[0.08, 0.4, 0.08]} />
-              <meshStandardMaterial color="#4a6a58" roughness={0.8} />
-            </mesh>
-            <mesh ref={weaponRef} castShadow position={[0.2, 0.05, -0.42]} rotation={[0.55, 0.1, 0]}>
-              <boxGeometry args={[0.05, 0.08, 0.62]} />
-              <meshStandardMaterial
-                color={MOURNEVEIL_PALETTE.skirmisher.blade}
-                roughness={0.32}
-                metalness={0.45}
-              />
-            </mesh>
-          </>
-        )}
+        <mesh castShadow receiveShadow position={[0, -0.05, 0]}>
+          <boxGeometry args={[0.7, 0.85, 0.48]} />
+          <meshStandardMaterial ref={materialRef} roughness={0.92} metalness={0.05} />
+        </mesh>
+        <mesh castShadow position={[0, 0.48, 0.04]}>
+          <boxGeometry args={[0.95, 0.32, 0.42]} />
+          <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.pauldron} roughness={0.9} />
+        </mesh>
+        <mesh castShadow position={[-0.48, 0.28, 0]}>
+          <boxGeometry args={[0.28, 0.4, 0.32]} />
+          <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.93} />
+        </mesh>
+        <mesh castShadow position={[0.48, 0.28, 0]}>
+          <boxGeometry args={[0.28, 0.4, 0.32]} />
+          <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.93} />
+        </mesh>
+        <mesh castShadow position={[0, 0.72, 0]}>
+          <boxGeometry args={[0.34, 0.28, 0.34]} />
+          <meshStandardMaterial color="#5a3830" roughness={0.88} />
+        </mesh>
+        <mesh ref={weaponRef} castShadow position={[0.42, 0.05, -0.55]}>
+          <boxGeometry args={[0.18, 0.85, 0.18]} />
+          <meshStandardMaterial
+            color={MOURNEVEIL_PALETTE.brute.weapon}
+            roughness={0.55}
+            metalness={0.35}
+          />
+        </mesh>
       </group>
       <mesh
         ref={telegraphRef}
@@ -180,18 +165,9 @@ export function EnemyVisual({
         rotation={[-Math.PI / 2, 0, 0]}
         visible={false}
       >
-        <ringGeometry
-          args={[
-            isBrute ? 0.55 : 0.35,
-            isBrute ? 1.15 : 0.78,
-            28,
-            1,
-            Math.PI * 0.15,
-            isBrute ? Math.PI * 0.7 : Math.PI * 0.55,
-          ]}
-        />
+        <ringGeometry args={[0.55, 1.15, 28, 1, Math.PI * 0.15, Math.PI * 0.7]} />
         <meshBasicMaterial
-          color={isBrute ? MOURNEVEIL_PALETTE.brute.telegraph : MOURNEVEIL_PALETTE.skirmisher.telegraph}
+          color={MOURNEVEIL_PALETTE.brute.telegraph}
           transparent
           opacity={0.72}
           side={2}
@@ -205,7 +181,7 @@ export function EnemyVisual({
       >
         <sphereGeometry args={[1, 12, 8]} />
         <meshBasicMaterial
-          color={isBrute ? MOURNEVEIL_PALETTE.brute.contact : MOURNEVEIL_PALETTE.skirmisher.contact}
+          color={MOURNEVEIL_PALETTE.brute.contact}
           transparent
           opacity={0.22}
           wireframe
