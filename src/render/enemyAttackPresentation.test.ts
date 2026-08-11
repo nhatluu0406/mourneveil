@@ -31,6 +31,9 @@ describe('enemy attack presentation projection', () => {
     expect(-Math.sin(presentation.yawRadians)).toBeCloseTo(expected.x)
     expect(-Math.cos(presentation.yawRadians)).toBeCloseTo(expected.z)
     expect(presentation.telegraphVisible).toBe(true)
+    expect(presentation.recoveryVisible).toBe(false)
+    expect(presentation.phase).toBe('startup')
+    expect(presentation.phaseAccent).toBeGreaterThan(0)
   })
 
   it('keeps telegraph and contact on one execution-facing projection', () => {
@@ -54,6 +57,28 @@ describe('enemy attack presentation projection', () => {
     expect(activeAttack.executionFacing).toEqual(startupAttack.executionFacing)
     expect(activePresentation.facing).toEqual(startupPresentation.facing)
     expect(activePresentation.contactVisible).toBe(true)
+    expect(activePresentation.telegraphVisible).toBe(false)
     expect(activeAttack.activeContactShape?.center.x).toBeLessThan(active.position.x)
+  })
+
+  it('shows recovery cue after active contact ends', () => {
+    const enemy = createMeleeEnemyRuntime()
+    advanceMeleeEnemy(enemy, { x: 1.5, y: 0.82, z: 3 }, STEP, FLAT_GROUND)
+    for (
+      let step = 0;
+      step < MELEE_ENEMY_ATTACK.startupSteps + MELEE_ENEMY_ATTACK.activeSteps;
+      step += 1
+    ) {
+      advanceMeleeEnemy(enemy, { x: 1.5, y: 0.82, z: 3 }, STEP, FLAT_GROUND)
+    }
+    const recovery = enemy.snapshot()
+    const presentation = createEnemyAttackPresentationSnapshot(
+      recovery,
+      createEnemyAttackSpatialSnapshot(recovery),
+    )
+    expect(recovery.action.phase).toBe('recovery')
+    expect(presentation.recoveryVisible).toBe(true)
+    expect(presentation.telegraphVisible).toBe(false)
+    expect(presentation.phaseAccent).toBeGreaterThan(0)
   })
 })

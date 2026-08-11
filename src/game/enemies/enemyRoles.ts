@@ -45,9 +45,9 @@ export interface EnemyMeleeRoleSpec {
 
 export const SKIRMISHER_ATTACK = defineCombatAction({
   id: 'enemy.skirmisher.attack',
-  startupSteps: 18,
-  activeSteps: 5,
-  recoverySteps: 18,
+  startupSteps: 20,
+  activeSteps: 10,
+  recoverySteps: 24,
   resourceCost: null,
   cancellationPolicy: 'never',
   interruptibilityPolicy: 'never',
@@ -57,9 +57,9 @@ export const SKIRMISHER_ATTACK = defineCombatAction({
 
 export const BRUTE_ATTACK = defineCombatAction({
   id: 'enemy.brute.attack',
-  startupSteps: 42,
-  activeSteps: 8,
-  recoverySteps: 36,
+  startupSteps: 48,
+  activeSteps: 12,
+  recoverySteps: 48,
   resourceCost: null,
   cancellationPolicy: 'never',
   interruptibilityPolicy: 'never',
@@ -110,9 +110,9 @@ export const SKIRMISHER_ROLE: EnemyMeleeRoleSpec = Object.freeze({
     animation: Object.freeze({
       idleAmplitude: 0.012,
       locomotionCadence: 0.22,
-      attackAnticipation: 0.22,
-      attackSwing: 0.55,
-      recoveryWeight: 0.14,
+      attackAnticipation: 0.38,
+      attackSwing: 0.62,
+      recoveryWeight: 0.32,
       hitRecoil: 0.22,
     }),
   }),
@@ -161,9 +161,9 @@ export const BRUTE_ROLE: EnemyMeleeRoleSpec = Object.freeze({
     animation: Object.freeze({
       idleAmplitude: 0.006,
       locomotionCadence: 0.09,
-      attackAnticipation: 0.58,
-      attackSwing: 0.82,
-      recoveryWeight: 0.4,
+      attackAnticipation: 0.78,
+      attackSwing: 0.95,
+      recoveryWeight: 0.58,
       hitRecoil: 0.1,
     }),
   }),

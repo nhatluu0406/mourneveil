@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
-import { MathUtils, type Group, type Mesh, type MeshStandardMaterial } from 'three'
+import { MathUtils, type Group, type Mesh, type MeshBasicMaterial, type MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { meleeRoleByDefinitionId } from '../game/enemies/enemyRoles'
 import {
@@ -57,6 +57,9 @@ function ProceduralEnemyVisual({
   const bodyRef = useRef<Group>(null)
   const materialRef = useRef<MeshStandardMaterial>(null)
   const telegraphRef = useRef<Mesh>(null)
+  const telegraphMaterialRef = useRef<MeshBasicMaterial>(null)
+  const recoveryRef = useRef<Mesh>(null)
+  const recoveryMaterialRef = useRef<MeshBasicMaterial>(null)
   const contactRef = useRef<Mesh>(null)
   const weaponRef = useRef<Mesh>(null)
 
@@ -83,6 +86,9 @@ function ProceduralEnemyVisual({
     const body = bodyRef.current
     const material = materialRef.current
     const telegraph = telegraphRef.current
+    const telegraphMaterial = telegraphMaterialRef.current
+    const recovery = recoveryRef.current
+    const recoveryMaterial = recoveryMaterialRef.current
     const contact = contactRef.current
     const weapon = weaponRef.current
     if (
@@ -90,6 +96,9 @@ function ProceduralEnemyVisual({
       body === null ||
       material === null ||
       telegraph === null ||
+      telegraphMaterial === null ||
+      recovery === null ||
+      recoveryMaterial === null ||
       contact === null ||
       weapon === null
     ) {
@@ -125,9 +134,30 @@ function ProceduralEnemyVisual({
     material.color.set(isBrute ? MOURNEVEIL_PALETTE.brute.body : MOURNEVEIL_PALETTE.skirmisher.body)
     material.color.offsetHSL(0, -0.05, -STATE_MIX[enemy.state] * 0.28)
     const damagedFlash = animation.mode !== 'defeated' && animation.hitReactionToken !== null
-    material.emissive.set(damagedFlash ? MOURNEVEIL_PALETTE.damage : '#000000')
-    material.emissiveIntensity = damagedFlash ? 0.55 : 0
+    if (damagedFlash) {
+      material.emissive.set(MOURNEVEIL_PALETTE.damage)
+      material.emissiveIntensity = 0.55
+    } else if (attackPresentation.phase === 'startup') {
+      material.emissive.set(
+        isBrute ? MOURNEVEIL_PALETTE.brute.telegraph : MOURNEVEIL_PALETTE.skirmisher.telegraph,
+      )
+      material.emissiveIntensity = 0.2 + 0.55 * attackPresentation.phaseAccent
+    } else if (attackPresentation.phase === 'active') {
+      material.emissive.set(
+        isBrute ? MOURNEVEIL_PALETTE.brute.contact : MOURNEVEIL_PALETTE.skirmisher.contact,
+      )
+      material.emissiveIntensity = 0.35
+    } else if (attackPresentation.phase === 'recovery') {
+      material.emissive.set('#8aa0b0')
+      material.emissiveIntensity = 0.12 + 0.28 * attackPresentation.phaseAccent
+    } else {
+      material.emissive.set('#000000')
+      material.emissiveIntensity = 0
+    }
     telegraph.visible = attackPresentation.telegraphVisible
+    telegraphMaterial.opacity = 0.35 + 0.55 * attackPresentation.phaseAccent
+    recovery.visible = attackPresentation.recoveryVisible
+    recoveryMaterial.opacity = 0.22 + 0.4 * attackPresentation.phaseAccent
     contact.visible = import.meta.env.DEV && attackPresentation.contactVisible
   })
 
@@ -209,17 +239,42 @@ function ProceduralEnemyVisual({
         <ringGeometry
           args={[
             isBrute ? 0.55 : 0.35,
-            isBrute ? 1.15 : 0.78,
+            isBrute ? 1.2 : 0.82,
             28,
             1,
-            Math.PI * 0.15,
-            isBrute ? Math.PI * 0.7 : Math.PI * 0.55,
+            Math.PI * 0.12,
+            isBrute ? Math.PI * 0.76 : Math.PI * 0.58,
           ]}
         />
         <meshBasicMaterial
+          ref={telegraphMaterialRef}
           color={isBrute ? MOURNEVEIL_PALETTE.brute.telegraph : MOURNEVEIL_PALETTE.skirmisher.telegraph}
           transparent
           opacity={0.72}
+          side={2}
+        />
+      </mesh>
+      <mesh
+        ref={recoveryRef}
+        position={[0, -0.76, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        visible={false}
+      >
+        <ringGeometry
+          args={[
+            isBrute ? 0.4 : 0.28,
+            isBrute ? 0.95 : 0.68,
+            24,
+            1,
+            0,
+            Math.PI * 2,
+          ]}
+        />
+        <meshBasicMaterial
+          ref={recoveryMaterialRef}
+          color="#8aa0b0"
+          transparent
+          opacity={0.4}
           side={2}
         />
       </mesh>

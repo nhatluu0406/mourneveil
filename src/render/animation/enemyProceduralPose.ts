@@ -50,22 +50,26 @@ export function resolveEnemyProceduralPose(
       const anticipation = phase === 'startup' ? progress : 0
       const strike = phase === 'active' ? Math.sin(progress * Math.PI) : 0
       const recovery = phase === 'recovery' ? 1 - progress : 0
+      // Recovery leans back and opens the guard line; startup coils opposite the strike.
       return pose({
-        bodyOffsetY: -0.04 * anticipation - 0.05 * strike,
+        bodyOffsetY: -0.05 * anticipation - 0.06 * strike + 0.03 * recovery,
         bodyPitch:
           -tuning.attackAnticipation * anticipation +
           tuning.attackSwing * strike +
           tuning.recoveryWeight * recovery,
         bodyRoll:
-          -tuning.attackAnticipation * 0.3 * anticipation +
-          tuning.attackSwing * 0.32 * strike,
+          -tuning.attackAnticipation * 0.35 * anticipation +
+          tuning.attackSwing * 0.34 * strike -
+          tuning.recoveryWeight * 0.18 * recovery,
+        bodyScaleY: 1 - 0.04 * anticipation + 0.06 * strike - 0.05 * recovery,
         weaponPitch:
-          -tuning.attackAnticipation * anticipation +
+          -tuning.attackAnticipation * 1.15 * anticipation +
           tuning.attackSwing * strike +
-          tuning.recoveryWeight * 0.35 * recovery,
+          tuning.recoveryWeight * 0.55 * recovery,
         weaponYaw:
-          -tuning.attackSwing * 0.4 * anticipation +
-          tuning.attackSwing * 0.75 * strike,
+          -tuning.attackSwing * 0.45 * anticipation +
+          tuning.attackSwing * 0.8 * strike -
+          tuning.recoveryWeight * 0.25 * recovery,
       })
     }
     case 'idle':

@@ -17,6 +17,7 @@
     "gate:m8-shrine": "node scripts/browser/gate-m8-shrine-visual.mjs",
     "gate:m9-guard-depth": "node scripts/browser/gate-m9-guard-depth.mjs",
     "gate:m9-hit-reaction": "node scripts/browser/gate-m9-hit-reaction.mjs",
+    "gate:m9-telegraph-readability": "node scripts/browser/gate-m9-telegraph-readability.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

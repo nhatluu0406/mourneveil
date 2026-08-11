@@ -40,7 +40,16 @@ describe('shared enemy animation foundation', () => {
     enemy.setMotion(enemy.snapshot().position, { x: 0, y: 0, z: -2 }, { x: 0, z: -1 })
     expect(projectEnemyAnimation(enemy.snapshot(), 2, NO_HIT).facing).toEqual({ x: 1, z: 0 })
 
-    for (let step = 0; step < 80 && enemy.snapshot().action.phase !== 'idle'; step += 1) {
+    for (
+      let step = 0;
+      step <
+        SKIRMISHER_ROLE.attack.startupSteps +
+          SKIRMISHER_ROLE.attack.activeSteps +
+          SKIRMISHER_ROLE.attack.recoverySteps +
+          4 &&
+      enemy.snapshot().action.phase !== 'idle';
+      step += 1
+    ) {
       enemy.advanceAction()
     }
     expect(enemy.snapshot().state).toBe('spacing')
@@ -56,9 +65,15 @@ describe('shared enemy animation foundation', () => {
     const action = projectEnemyAnimation(enemy.snapshot(), 1, NO_HIT)
     expect(action.action?.normalizedPhaseProgress).toBe(1 / BRUTE_ROLE.attack.startupSteps)
 
-    for (let step = 0; step < 100 && enemy.snapshot().action.phase !== 'idle'; step += 1) {
+    const attackBudget =
+      BRUTE_ROLE.attack.startupSteps +
+      BRUTE_ROLE.attack.activeSteps +
+      BRUTE_ROLE.attack.recoverySteps +
+      4
+    for (let step = 0; step < attackBudget && enemy.snapshot().action.phase !== 'idle'; step += 1) {
       enemy.advanceAction()
     }
+    expect(enemy.snapshot().action.phase).toBe('idle')
     const hitContact: CombatContactSnapshot = {
       totalHitCount: 1,
       lastHit: {
