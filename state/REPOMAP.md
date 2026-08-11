@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (53L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (54L)
+- PLAN.md (31L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (81L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (54L)
+- package.json (55L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -173,7 +173,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0001-web-stack.md (46L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (29L)
+    - current-state.md (24L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
@@ -194,7 +194,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (34 files)
+  - **scripts/browser/** (35 files)
     - README.md (18L)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
@@ -207,7 +207,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m56-playthrough.mjs (240L)
     - gate-m561-correctness.mjs (279L)
     - gate-m562-regional-hp.mjs (113L)
-    - ... +22 more
+    - ... +23 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -223,7 +223,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (132L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
+    - App.tsx (134L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
     - styles.css (457L)
     - useGameRuntime.ts (209L) -- symbo

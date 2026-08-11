@@ -5,56 +5,62 @@ Task: m9-combat-depth
 
 ## Status
 
-ACTIVE — M9 macro-batch 4 PASS. Player attack commitment + outgoing hit confirmation complete. M9 is **READY FOR PRODUCT OWNER ACCEPTANCE** (not closed/tagged).
+ACTIVE — M9 final stabilization PASS. Effect cue, tmp hygiene, and perf baseline complete.
 
-## Prior
+**M9 READY FOR PRODUCT OWNER ACCEPTANCE — FINAL** (not closed/tagged).
 
-- MB1: guard impact / temporary guard break
-- MB2: heavy-hit reaction interrupt
-- MB3: enemy telegraph + punish-window readability (`eb40ac8`)
-- M8 remains accepted at `v0.8.0-production-asset-pipeline` → `244aab1`
+## Prior batches
 
-## Player attack contract (authoritative)
+- MB1 guard impact/break · MB2 hit-reaction · MB3 telegraph · MB4 player commitment/hit confirm
+- M8 tag remains `v0.8.0-production-asset-pipeline`
 
-| Attack | startup | active | recovery | notes |
-|--------|---------|--------|----------|-------|
-| Light | **10** | **5** | **16** | was 8/4/14 |
-| Heavy | **18** | **8** | **38** | was 18/6/30; startup kept ≤ skirmisher 20 for interrupt trading; weight in recovery |
+## Stabilization outcomes
 
-- Startup/active: locomotion fully constrained; facing freeze unchanged.
-- Recovery: movement scale **0.35**.
-- Simulation phases own contact; presentation projects only.
+### Contact cue readability
 
-## Hit confirmation hierarchy
+- Root cause: full DEV/active wireframe spheres lost lower arcs to opaque floor depth under the isometric camera (depthTest correctly occluding against the floor).
+- Fix: mid-body horizontal ring + soft disc (`CombatContactVolumeCue` / `combatContactCueLayout`); depthTest remains enabled so walls still occlude.
+- Applied to player, procedural enemy, and skirmisher proof visuals.
 
-miss none < light damaged < heavy damaged < interrupt (`hitReaction`) < defeat
+### Tmp artifact hygiene
 
-- Camera impulse + player weapon/torso emissive + brief HUD line from authoritative `contact.lastHit`.
-- Per-execution dedup; miss produces no impulse/confirm cue.
-- Guard / guard-break / enemy reaction presentation remain distinct (unchanged systems).
+- `runOwnedBrowserGate({ artifactDir })` prepares only `tmp-m*` cwd folders and removes them in `finally` unless `KEEP_ARTIFACTS=1`.
+- Wired into M8/M9 screenshot gates; `.gitignore` uses `tmp-m*`.
+- Removed pre-existing `tmp-m9-*` evidence dirs during this batch.
 
-## Runtime evidence
+### Performance baseline (MEASURED, idle at checkpoint, headless 1440×900)
 
-- `npm run gate:m9-player-combat` PASS (port 4195; screenshots `tmp-m9-player-combat/`).
-- Observed: light/heavy phase frames; miss no confirm; light hit once; mash blocked; skirmisher interrupt; brute meter→second interrupt; defeat; guard + dodge regressions.
-- Also PASS: `gate:m9-guard-depth`, `gate:m9-hit-reaction`, `gate:m9-telegraph-readability`, `gate:lifecycle`.
+| Metric | Value |
+|--------|-------|
+| drawCalls | ~139 |
+| triangles | ~1.7k |
+| geometries | 85 |
+| textures | 3 |
+| programs | 3 |
+| pixelRatio | 1 (cap `[1, 1.5]`) |
+| drawing buffer | 1440×900 |
+| shadowMap | enabled, 1024 |
+| lights | 9 |
+| scene objects / meshes | 225 / 126 |
+| JS heap used | ~86 MB (`performance.memory`) |
+
+NOT reliably measurable: dedicated GPU VRAM.
+
+Low-risk fixes applied: DPR cap 1.5; disable castShadow on low decorative rubble; AnimationMixer `uncacheRoot` on skirmisher proof unmount; repeated-combat growth gate (geo/tex/mesh Δ bounded).
+
+Gate: `npm run gate:m9-perf-baseline`.
 
 ## Verification
 
-- Focused attack/commitment/feedback/defense/hit-reaction suites PASS.
-- `npm run lint` / `typecheck` / `test` (73 files / 319 tests) / `build` / `assets:verify` / `verify` PASS.
-- `git diff --check` (CRLF warnings only), LeanLoop doctor `--strict`, sync `--check` PASS.
+- All M9 gates + lifecycle PASS; owned tmp dirs removed after PASS.
+- `lint` / `typecheck` / `test` (75 files / 326 tests) / `build` / `verify` PASS.
+- LeanLoop doctor `--strict`, sync `--check` PASS.
 
 ## Debt
 
-- No new debt. Procedural player art limits remain roadmap/content scope (D-001 already covers weapon clipping).
-
-## M9 readiness
-
-Goal satisfied: deterministic melee deepened (guard depth, interrupt, enemy telegraph, player commitment, hit confirm) without new authority systems.
-
-**READY FOR PRODUCT OWNER ACCEPTANCE** — do not self-close/tag; do not start M10.
+- D-004 still open (bundle size advisory).
+- No new vague performance debt; GPU VRAM remains unmeasured platform limitation, not a registered debt.
 
 ## Next
 
-Product Owner acceptance / optional close+tag of M9. If rejected, one highest-value blocker only (not a wishlist).
+Product Owner acceptance / optional close+tag of M9. Do not start M10 without authorization.
