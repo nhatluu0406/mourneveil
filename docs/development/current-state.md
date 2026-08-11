@@ -3,22 +3,23 @@
 - Updated: 2026-08-11
 - Accepted release: **`v0.7.0-animation-foundation`** (M7)
 - Active task: `m8-production-asset-pipeline`
-- Status: **M8 ACTIVE** — macro-batch 1 complete; checkpoint shrine production path established.
+- Status: **M8 ACTIVE** — macro-batch 2 complete; shrine visual gate + skirmisher GLB actor proof established. M8 not tagged.
 
 ## What exists
 
 - Connected-level RPG loop (zones, checkpoint, shortcut, encounters, save V2)
 - Presentation foundation (HUD, occlusion fade, procedural dark-fantasy look)
-- Animation presentation architecture + tuned procedural player/enemy motion
+- Animation presentation architecture + tuned procedural player/brute motion
 - Hardened connected-level wall collision (paused Physics + explicit cuboids)
-- Canonical glTF source/import/validation/runtime path with the refuge shrine as its first visible integration
+- Production asset path: source → import/verify → `/assets` → Drei, with GLB budgets and animation-semantic maps
+- Visible production slices: refuge shrine glTF; skirmisher skinned proof GLB via M7 presentation
 
 ## Highest-value limitations
 
-- Procedural characters/environments remain except for M8 production-asset vertical slices
+- Brute/player/environment remain procedural placeholders except M8 slices above
+- Skirmisher proof mesh is intentionally minimal (project-authored box rig)
 - Two melee roles; authored navigation; controller deferred
-- Browser visual acceptance for M8 macro-batch 1 remains unobserved because no in-app browser backend was available
 
 ## Next executable work
 
-Plan the next M8 macro-batch around one narrowly chosen production-asset class; do not start M9.
+Plan the next M8 macro-batch around one additional owned production asset through the GLB contract; do not start M9.
