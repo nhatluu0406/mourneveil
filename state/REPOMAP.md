@@ -194,8 +194,8 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (28 files)
-    - README.md (17L)
+  - **scripts/browser/** (30 files)
+    - README.md (18L)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
@@ -207,7 +207,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m56-playthrough.mjs (240L)
     - gate-m561-correctness.mjs (279L)
     - gate-m562-regional-hp.mjs (113L)
-    - ... +16 more
+    - ... +18 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main

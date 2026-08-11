@@ -1,4 +1,4 @@
-import { chromium } from 'playwright'
+import { launchGateChromium } from './trackedGateBrowser.mjs'
 
 const BASE = 'http://127.0.0.1:4173/'
 const failures = []
@@ -57,7 +57,7 @@ async function pushCase(page, { name, start, move, solid, minClearance = 0.29 })
   return position
 }
 
-const browser = await chromium.launch({ headless: true })
+const browser = await launchGateChromium({ headless: true })
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } })
 const errors = []
 page.on('pageerror', (error) => errors.push(String(error)))

@@ -38,14 +38,14 @@ Task slug: `m8-production-asset-pipeline` (`python3 scripts/leanloop/task.py sta
   - isolation: sequential
   - owns/allows: `scripts/browser/` shared lifecycle + M8 gates, package scripts, focused lifecycle tests
   - verifier: `npm run test -- scripts/browser/runtimeGateLifecycle.test.mjs && npm run gate:lifecycle && npm run gate:m8-stabilization`
-  - evidence: PASS; unit child-port cleanup; real Vite + Playwright success and intentional-failure cleanup; M8 gates own server/browser; ports 4173/4191/4192 reusable.
+  - evidence: PASS; unit child-port cleanup; real Vite + Playwright success and intentional-failure cleanup; M8 gates own server/browser; 21 historical gates use failure/signal-safe browser tracking; ports 4173/4191/4192 reusable.
 - [x] 4. Full verification and durable M8 stabilization state
   - depends: 3
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: PLAN/HANDOFF/current-state/REPOMAP/STACK only if durable law changes
   - verifier: `npm run verify && git diff --check && python3 scripts/leanloop/doctor.py --strict && python3 scripts/leanloop/sync.py --check && python3 scripts/leanloop/git_guard.py`
-  - evidence: PASS; 68 files / 276 tests; lint/typecheck/build; focused 69 tests; assets import/verify; browser gates; diff/LeanLoop gates green.
+  - evidence: PASS; 69 files / 277 tests; lint/typecheck/build; focused 69 tests; assets import/verify; browser gates; diff/LeanLoop gates green.
 
 ## Parallel groups
 

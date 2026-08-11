@@ -40,13 +40,13 @@ Task: m8-production-asset-pipeline
 - Root cause: earlier gates expected agents to start `npm run dev` separately, so no script owned that Vite PID. Historical scripts also launch Chromium with only normal-tail closure, so early throws can bypass teardown.
 - Active M8 gates use `runOwnedBrowserGate`: one direct Vite child plus one Playwright page/context/browser, idempotent `finally` cleanup, signal cleanup, bounded termination, and Windows fallback limited to that recorded PID tree.
 - Lifecycle proof starts real Vite + Chromium on 4191 (success) and 4192 (intentional failure), verifies page/browser/server closure, then rebinds both ports. Unit coverage separately proves owned-child exit and port reuse.
-- `scripts/browser/README.md` names supported owned gates. Twenty-two older milestone scripts were audited as historical externally-served checks and must not be copied for new gates.
+- `scripts/browser/README.md` names supported owned gates. Twenty-one older milestone scripts were audited as historical externally-served checks; their tracked launcher closes Chromium on unexpected failure/signal, and they must not be copied for new gates.
 
 ## Verification
 
 - Focused weapon/enemy/M7/combat: 15 files / 69 tests PASS; lifecycle unit PASS.
 - `npm run assets:import`, `npm run assets:verify`, `npm run gate:lifecycle`, `npm run gate:m8-stabilization`, `npm run gate:m8-skirmisher-proof`, `npm run gate:m8-shrine` PASS.
-- `npm run verify` PASS: lint, typecheck, 68 files / 276 tests, asset-validated production build.
+- `npm run verify` PASS: lint, typecheck, 69 files / 277 tests, asset-validated production build.
 - `git diff --check`, LeanLoop doctor `--strict`, sync `--check`, git guard PASS after state refresh.
 - Screenshots: `tmp-m8-stabilization/`, `tmp-m8-skirmisher-proof/`, `tmp-m8-shrine/` (ignored local evidence).
 - In-app Browser discovery returned none; repository-owned Playwright Chromium supplied deterministic runtime observations.

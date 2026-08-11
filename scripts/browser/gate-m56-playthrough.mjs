@@ -1,4 +1,4 @@
-import { chromium } from 'playwright'
+import { launchGateChromium } from './trackedGateBrowser.mjs'
 
 const BASE = 'http://127.0.0.1:4173/'
 const failures = []
@@ -31,7 +31,7 @@ async function moveAlong(page, points, dwellMs = 200) {
   }
 }
 
-const browser = await chromium.launch({ headless: true })
+const browser = await launchGateChromium({ headless: true })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
 const errors = []
 page.on('pageerror', (error) => errors.push(String(error)))

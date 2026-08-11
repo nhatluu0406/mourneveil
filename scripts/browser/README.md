@@ -13,5 +13,6 @@ Run the supported M8 gates through package scripts:
 - `npm run gate:m8-shrine`
 
 Older milestone scripts are historical one-shot checks that expect an already running
-server. They do not own that server and must not be copied as the basis for new gates.
+server. They do not own that server; their shared tracked-browser launcher still closes
+Chromium after an unexpected throw or signal. They must not be copied as the basis for new gates.
 Do not start `npm run dev` as an untracked background prerequisite for an active gate.

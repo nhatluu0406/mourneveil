@@ -1,4 +1,4 @@
-import { chromium } from 'playwright'
+import { launchGateChromium } from './trackedGateBrowser.mjs'
 
 const BASE = 'http://127.0.0.1:4173/'
 const failures = []
@@ -24,7 +24,7 @@ async function soak(page, ms) {
   for (let i = 0; i < Math.ceil(ms / slice); i += 1) await page.waitForTimeout(slice)
 }
 
-const browser = await chromium.launch({ headless: true })
+const browser = await launchGateChromium({ headless: true })
 const page = await browser.newPage()
 const errors = []
 page.on('pageerror', (error) => errors.push(String(error)))

@@ -1,7 +1,7 @@
 /**
  * Final M4 end-to-end browser playthrough (compressed, gate-assisted where needed).
  */
-import { chromium } from 'playwright'
+import { launchGateChromium } from './trackedGateBrowser.mjs'
 
 const BASE = 'http://127.0.0.1:4173/'
 const failures = []
@@ -39,7 +39,7 @@ async function press(page, code) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true })
+  const browser = await launchGateChromium({ headless: true })
   const page = await browser.newPage()
   const errors = []
   page.on('pageerror', (e) => errors.push(String(e)))

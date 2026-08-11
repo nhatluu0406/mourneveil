@@ -1,7 +1,7 @@
 /**
  * M4.4 browser gate — Echo reward / death drop / recovery.
  */
-import { chromium } from 'playwright'
+import { launchGateChromium } from './trackedGateBrowser.mjs'
 
 const BASE = 'http://127.0.0.1:4173/'
 const failures = []
@@ -47,7 +47,7 @@ async function waitFor(page, pred, ms, label) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true })
+  const browser = await launchGateChromium({ headless: true })
   const page = await browser.newPage()
   const errors = []
   page.on('pageerror', (e) => errors.push(String(e)))

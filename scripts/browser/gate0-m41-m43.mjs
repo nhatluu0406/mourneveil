@@ -6,7 +6,7 @@
  * supplies snapshot reads and controlled damage for deterministic flask cases
  * after combat damage has been proven once.
  */
-import { chromium } from 'playwright'
+import { launchGateChromium } from './trackedGateBrowser.mjs'
 
 const BASE = 'http://127.0.0.1:4173/'
 const failures = []
@@ -358,7 +358,7 @@ async function verifyUiIsolation(page) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true })
+  const browser = await launchGateChromium({ headless: true })
   const page = await browser.newPage()
   const consoleErrors = []
   page.on('pageerror', (err) => consoleErrors.push(String(err)))
