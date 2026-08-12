@@ -31,3 +31,13 @@ This register holds only known cross-milestone limitations that were consciously
 - Revisit trigger: Performance profiling shows load/runtime impact, or Release Quality packaging/performance work begins.
 - Relevant: `vite.config.ts`, application/render dependency boundaries
 - Product Owner tolerance: Previously carried as a non-blocking build advisory; not a waiver of future performance acceptance.
+
+## D-005 — Connected-level solid presentation co-ownership
+
+- Status: OPEN
+- Observed: M10 macro-batch 3 architecture audit
+- Limitation: `ConnectedLevelVisual` still authors collider-proxy meshes, gate bar visuals, and zone floor planes beside the modular ossuary shell, so changing proxy presentation still touches collision projection code paths.
+- Why deferred: Macro-batch 3 scoped to modularize the ossuary kit and route composition without rewriting the connected-level collider projection layer.
+- Revisit trigger: Mixed-court / final-approach environment production needs proxy dressing split from physics projection, or a change requires editing both visual shell and collider presentation for the same solid.
+- Relevant: `src/render/ConnectedLevelVisual.tsx`, `src/physics/connectedLevelCollision.ts`, ADR-0002
+- Product Owner tolerance: Accepted for the hero-route modularization batch; not an invitation to invent a GameObject inheritance layer.

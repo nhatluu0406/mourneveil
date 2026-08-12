@@ -89,6 +89,7 @@ export function App() {
             </div>
           }
           onCreated={({ camera, gl }) => {
+            gl.toneMappingExposure = 1.45
             setRendererReady(true)
             attachGameplayInput(
               gl.domElement,

@@ -72,16 +72,16 @@ export const MOURNEVEIL_CONNECTED_LEVEL: ConnectedLevelDefinition = Object.freez
   zones: Object.freeze([
     defineZone('zone.arrival', [-16, -11, 3, 9], [
       'connection.arrival-first-combat',
-    ], '#27352f', { entryPosition: { x: -14, y: 0.82, z: 6 }, label: 'Arrival' }),
+    ], '#3a4a42', { entryPosition: { x: -14, y: 0.82, z: 6 }, label: 'Arrival' }),
     defineZone('zone.first-combat', [-12, -7, 0, 5], [
       'connection.arrival-first-combat',
       'connection.first-combat-checkpoint',
-    ], '#344238', { encounterId: 'encounter.m5.introduction', label: 'Outer Watch' }),
+    ], '#46584a', { encounterId: 'encounter.m5.introduction', label: 'Outer Watch' }),
     defineZone('zone.checkpoint', [-8, -4, -2, 2], [
       'connection.first-combat-checkpoint',
       'connection.checkpoint-mixed-long',
       'connection.shortcut-checkpoint-mixed',
-    ], '#33464a', { checkpointId: 'checkpoint.m5.refuge', label: 'Refuge' }),
+    ], '#455a5e', { checkpointId: 'checkpoint.m5.refuge', label: 'Refuge' }),
     defineZone('zone.mixed-combat', [-2, 4, -7, -1], [
       'connection.checkpoint-mixed-long',
       'connection.shortcut-checkpoint-mixed',

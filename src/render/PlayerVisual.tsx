@@ -17,11 +17,8 @@ import { resolvePlayerProceduralPose } from './animation/playerProceduralPose'
 import { resolvePlayerOutgoingHitConfirm } from './playerCombatFeedback'
 import { combatContactCueLayout, shouldShowCombatContactDebug } from './combatContactCueLayout'
 import { CombatContactVolumeCue } from './CombatContactVolumeCue'
-import {
-  createOathbladeGeometry,
-  createProfilePrismGeometry,
-  createTaperedPrismGeometry,
-} from './productionGeometry'
+import { createProfilePrismGeometry, createTaperedPrismGeometry } from './productionGeometry'
+import { OathbladeVisual } from './actors/OathbladeVisual'
 
 const PLAYER_WEAPON_X = 0.29
 const WARDEN_TORSO = createTaperedPrismGeometry({ bottomWidth: 0.38, topWidth: 0.52, height: 0.58, depth: 0.3 })
@@ -32,8 +29,6 @@ const WARDEN_CLOAK = createProfilePrismGeometry(
   [[-0.25, 0.28], [-0.34, -0.34], [0, -0.46], [0.34, -0.34], [0.25, 0.28]],
   0.055,
 )
-const OATHBLADE = createOathbladeGeometry()
-
 export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const facingGroupRef = useRef<Group>(null)
   const bodyGroupRef = useRef<Group>(null)
@@ -244,23 +239,8 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
         </mesh>
       </group>
       <group ref={weaponSweepRef}>
-        <group
-          ref={weaponRef}
-          position={[PLAYER_WEAPON_X, 0.06, -0.34]}
-          userData={{ productionAssetId: 'weapon.player.oathblade' }}
-        >
-          <mesh castShadow>
-            <primitive attach="geometry" object={OATHBLADE} />
-            <meshStandardMaterial ref={weaponMaterialRef} color="#bfc4ba" roughness={0.28} metalness={0.72} />
-          </mesh>
-          <mesh castShadow position={[0, 0, 0.06]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.035, 0.055, 0.28, 6]} />
-            <meshStandardMaterial color="#806642" roughness={0.4} metalness={0.68} />
-          </mesh>
-          <mesh castShadow position={[0, 0, 0.18]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.035, 0.045, 0.24, 7]} />
-            <meshStandardMaterial color="#211d1a" roughness={0.92} />
-          </mesh>
+        <group ref={weaponRef} position={[PLAYER_WEAPON_X, 0.06, -0.34]}>
+          <OathbladeVisual materialRef={weaponMaterialRef} />
         </group>
       </group>
       <CombatContactVolumeCue

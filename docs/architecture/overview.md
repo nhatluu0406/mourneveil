@@ -1,5 +1,7 @@
 # Architecture Overview
 
+See also ADR-0002 for data-driven modular world-object composition (render definitions vs gameplay authority).
+
 ## Design goal
 
 Keep gameplay authority explicit and testable while allowing React Three Fiber to render the world and React to present UI.

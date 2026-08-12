@@ -25,8 +25,8 @@ export const PRODUCTION_VISUAL_ASSETS = Object.freeze([
   },
   {
     id: 'weapon.player.oathblade',
-    sourcePath: 'src/render/productionGeometry.ts',
-    runtimeOwner: 'PlayerVisual',
+    sourcePath: 'src/render/actors/OathbladeVisual.tsx',
+    runtimeOwner: 'OathbladeVisual',
     units: 'meters',
     upAxis: 'Y',
     pivot: 'ground-center',
@@ -58,8 +58,8 @@ export const PRODUCTION_VISUAL_ASSETS = Object.freeze([
   },
   {
     id: 'world.kit.ossuary-hero',
-    sourcePath: 'src/render/OssuaryEnvironmentKit.tsx',
-    runtimeOwner: 'OssuaryEnvironmentKit',
+    sourcePath: 'src/render/world/ossuary/OssuaryEnvironmentComposition.tsx',
+    runtimeOwner: 'OssuaryEnvironmentComposition',
     units: 'meters',
     upAxis: 'Y',
     pivot: 'ground-center',

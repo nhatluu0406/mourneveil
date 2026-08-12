@@ -8,6 +8,7 @@
 - **Palette:** charcoal stone and near-black iron; pale ash/bone; desaturated moss and verdigris; cyan spectral veil energy; restrained amber practical light.
 - **Materials:** a small shared family with rough stone, metallic funerary fittings, matte cloth/leather, bone, and emissive veil accents. Texture-free authored geometry is valid when form/material separation carries the image.
 - **Lighting:** one cool veil/moon key, restrained ambient fill, and a few warm or spectral practicals. Darkness frames actors without hiding combat information.
+- **Readability value structure (hero route):** background darkest → architecture dark-mid with readable edges → walkable floor clearly navigable → player strong silhouette → enemies distinct from player/background → interactable/veil highest controlled spectral accents → warm practicals as secondary foci. Do not flatten to uniform brightness; do not lose gameplay-relevant blockers into pure black.
 - **Actors:** the Veilbound Warden is layered, compact, asymmetric, and cyan-accented; the skirmisher is lean, corrupted, narrow, and visibly hostile. Animation is an in-place projection of M7 semantics.
 - **Feedback/UI:** arcs, shards, rings, wisps, and short pulses replace developer visualizers in normal play. A dark funerary HUD uses pale text, restrained metal/bone lines, cyan resources, and limited warm danger accents.
 

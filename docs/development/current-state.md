@@ -3,13 +3,13 @@
 - Updated: 2026-08-12
 - Accepted release: **`v0.9.0-combat-depth`** (M9)
 - Active task: `m10-visual-production-identity`
-- Status: **M10 ACTIVE — macro-batch 2 ossuary environment production slice is verified and complete**; M9 remains Product Owner accepted/closed.
+- Status: **M10 ACTIVE — macro-batch 3 modular world-object architecture + readability recovery verified**; M9 remains Product Owner accepted/closed; M10 untagged.
 
 ## What exists
 
 - Connected-level RPG loop + presentation foundation + M7/M8 animation/assets
 - M9 combat depth: guard impact/break, enemy interrupt, telegraph/punish, player attack commitment, hit confirm
-- M10 hero slice in progress: Veilbound Warden/Oathblade, veil-riven skirmisher, secondary brute pass, and a composed refuge → rib corridor → Outer Watch environment with modular burial architecture, landmarks, lighting, material, VFX, and HUD cohesion
+- M10 hero slice: Veilbound Warden/Oathblade, veil-riven skirmisher, secondary brute pass, data-driven ossuary object composition (ADR-0002), shared material presets, declarative refuge → corridor → Outer Watch placements, readability lighting/value structure
 - Debug contact volumes are opt-in (`?debugContacts=1`); normal play uses authored veil-impact cues
 - Gate-owned `tmp-m*` cleanup (`KEEP_ARTIFACTS=1` opt-in keep)
 - Measured 1440×900 hero baseline and production visual ceilings; DPR capped at 1.5
@@ -22,4 +22,4 @@
 
 ## Next executable work
 
-Prioritize the mixed court/final-approach environment and material refinement by screenshot impact; do not start M11 or tag M10.
+Prioritize mixed-court/final-approach environment expansion on the modular placement contract; do not start M11 or tag M10.

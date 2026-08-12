@@ -7,7 +7,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (53L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (55L)
+- PLAN.md (67L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (82L)
@@ -168,11 +168,12 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - **docs/architecture/** (3 files)
     - animation-presentation.md (14L)
     - asset-pipeline.md (36L)
-    - overview.md (79L)
-    - **docs/architecture/decisions/** (1 files)
+    - overview.md (83L)
+    - **docs/architecture/decisions/** (2 files)
       - 0001-web-stack.md (46L)
+      - 0002-modular-world-objects.md (42L)
   - **docs/art/** (1 files)
-    - visual-direction.md (22L)
+    - visual-direction.md (23L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
     - current-state.md (25L)
@@ -225,7 +226,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (134L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
-    - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
+    - App.tsx (135L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
+    - RenderErrorBoundary.ts
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

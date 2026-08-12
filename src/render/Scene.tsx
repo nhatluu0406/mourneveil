@@ -62,32 +62,35 @@ export function Scene({
   return (
     <>
       <color attach="background" args={[MOURNEVEIL_PALETTE.background]} />
-      <fog attach="fog" args={['#080d10', 12, 34]} />
-      <ambientLight intensity={0.29} color="#72898d" />
-      <hemisphereLight args={['#8eabb3', '#18130f', 0.38]} />
+      <fog attach="fog" args={['#243238', 28, 58]} />
+      <ambientLight intensity={0.78} color="#a8bfc2" />
+      <hemisphereLight args={['#c4dde2', '#3a3224', 0.82]} />
       <directionalLight
         castShadow
-        intensity={1.56}
+        intensity={1.15}
         position={[8, 16, 6]}
-        color="#a9d2dc"
+        color="#d0eaf0"
         shadow-mapSize={[1024, 1024]}
+        shadow-bias={-0.00025}
+        shadow-normalBias={0.05}
+        shadow-intensity={0.32}
         shadow-camera-far={48}
         shadow-camera-left={-18}
         shadow-camera-right={18}
         shadow-camera-top={18}
         shadow-camera-bottom={-18}
       />
-      <directionalLight intensity={0.22} position={[-7, 5, -6]} color="#c59a72" />
+      <directionalLight intensity={0.72} position={[-7, 5, -6]} color="#e0bc96" />
       <pointLight
         position={[-9.7, 3.1, 2.7]}
-        intensity={0.92}
-        distance={8.2}
-        color="#90b9a5"
+        intensity={1.45}
+        distance={11}
+        color="#b8dcc6"
       />
       <pointLight
         position={[10, 3.1, -4]}
-        intensity={0.88}
-        distance={11}
+        intensity={1.05}
+        distance={12}
         color={MOURNEVEIL_PALETTE.finalGate.open}
       />
       <FollowCameraRig runtime={runtime} onDiagnostic={onCameraDiagnostic} />
