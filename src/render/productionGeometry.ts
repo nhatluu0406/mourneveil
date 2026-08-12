@@ -82,3 +82,19 @@ export function createOathbladeGeometry(): BufferGeometry {
     0.035,
   )
 }
+
+/** Broad, short grave-iron silhouette. Render reach remains unrelated to combat reach. */
+export function createGravebrandGeometry(): BufferGeometry {
+  return createProfilePrismGeometry(
+    [[-0.12, 0.04], [-0.16, -0.22], [-0.13, -0.48], [0, -0.58], [0.13, -0.48], [0.16, -0.22], [0.12, 0.04]],
+    0.065,
+  )
+}
+
+/** Slender hooked veil blade with an asymmetric thorn tip. */
+export function createVeilThornGeometry(): BufferGeometry {
+  return createProfilePrismGeometry(
+    [[-0.038, 0.04], [-0.055, -0.3], [-0.025, -0.58], [0.035, -0.7], [0.085, -0.54], [0.045, -0.32], [0.052, 0.04]],
+    0.026,
+  )
+}

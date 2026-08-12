@@ -957,6 +957,13 @@ body {
 .inventory-item-glyph svg { width: 1.7rem; height: 1.7rem; }
 .inventory-item-card--vitality-charm .inventory-item-glyph { color: #c76d5d; }
 .inventory-item-card--ward-seal .inventory-item-glyph { color: #9fc6b7; }
+.inventory-item-card--gravebrand .inventory-item-glyph { color: #b78a58; }
+.inventory-item-card--veil-thorn .inventory-item-glyph { color: #8bd7cf; }
+.inventory-item-card--oathbrand-ember .inventory-item-glyph { color: #d27a42; }
+.inventory-item-card--ash-circlet .inventory-item-glyph,
+.inventory-item-card--mourning-phial .inventory-item-glyph { color: #d7cca4; border-color: rgb(136 211 205 / 48%); box-shadow: inset 0 0 1rem rgb(78 171 169 / 12%); }
+.inventory-item-card[data-item-rarity="bound"] { border-left: 2px solid rgb(177 137 78 / 52%); }
+.inventory-item-card[data-item-rarity="reliquary"] { border-left: 2px solid #bdddd2; background: linear-gradient(100deg, rgb(112 90 48 / 12%), rgb(43 105 105 / 10%), transparent); }
 .inventory-equipped-card > div > span,
 .inventory-item-card__copy > span,
 .inventory-skill-card > div > span,
@@ -1148,6 +1155,8 @@ body {
   color: #9aa193;
   font: 500 0.68rem var(--ui-body);
 }
+.gameplay-hud__acquisition.is-bound { border-color: rgb(198 150 79 / 58%); box-shadow: inset 0 0 1.2rem rgb(131 76 30 / 14%); }
+.gameplay-hud__acquisition.is-reliquary { border-color: rgb(191 222 207 / 72%); background: linear-gradient(110deg, rgb(30 53 53 / 92%), rgb(57 43 27 / 92%)); box-shadow: 0 0 1.5rem rgb(93 194 188 / 18%), inset 0 0 1.2rem rgb(197 164 95 / 12%); }
 
 .gameplay-hud__prompt kbd,
 .gameplay-hud__equipment-slot kbd,
@@ -1219,6 +1228,11 @@ body {
 .gameplay-hud__item-glyph--flask svg { stroke: #83c4c5; }
 .gameplay-hud__item-glyph--echo svg { stroke: #80d3d8; }
 .gameplay-hud__item-glyph--charm svg { stroke: #9dc6a8; }
+.gameplay-hud__item-glyph--gravebrand svg { stroke: #c49b63; }
+.gameplay-hud__item-glyph--veil-thorn svg { stroke: #8bdcd4; }
+.gameplay-hud__item-glyph--oathbrand-ember svg { stroke: #d47b42; }
+.gameplay-hud__item-glyph--ash-circlet svg,
+.gameplay-hud__item-glyph--mourning-phial svg { stroke: #d8cfaa; filter: drop-shadow(0 0 0.38rem rgb(100 205 197 / 38%)); }
 
 .gameplay-hud__item-copy { min-width: 0; }
 .gameplay-hud__item-copy strong,

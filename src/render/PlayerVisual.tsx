@@ -18,7 +18,7 @@ import { resolvePlayerOutgoingHitConfirm } from './playerCombatFeedback'
 import { combatContactCueLayout, shouldShowCombatContactDebug } from './combatContactCueLayout'
 import { CombatContactVolumeCue } from './CombatContactVolumeCue'
 import { createProfilePrismGeometry, createTaperedPrismGeometry } from './productionGeometry'
-import { OathbladeVisual } from './actors/OathbladeVisual'
+import { PlayerWeaponVisual } from './actors/PlayerWeaponVisual'
 import { PlayerSkillVfx } from './PlayerSkillVfx'
 
 const PLAYER_WEAPON_X = 0.29
@@ -40,7 +40,12 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const bodyGroupRef = useRef<Group>(null)
   const weaponSweepRef = useRef<Group>(null)
   const weaponRef = useRef<Group>(null)
-  const weaponMaterialRef = useRef<MeshStandardMaterial>(null)
+  const oathbladeRef = useRef<Group>(null)
+  const gravebrandRef = useRef<Group>(null)
+  const veilThornRef = useRef<Group>(null)
+  const oathbladeMaterialRef = useRef<MeshStandardMaterial>(null)
+  const gravebrandMaterialRef = useRef<MeshStandardMaterial>(null)
+  const veilThornMaterialRef = useRef<MeshStandardMaterial>(null)
   const contactShapeRef = useRef<Group>(null)
   const guardMarkerRef = useRef<Mesh>(null)
   const guardMaterialRef = useRef<MeshStandardMaterial>(null)
@@ -63,7 +68,8 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     const bodyGroup = bodyGroupRef.current
     const weaponSweep = weaponSweepRef.current
     const weapon = weaponRef.current
-    const weaponMaterial = weaponMaterialRef.current
+    const weaponGroups = [oathbladeRef.current, gravebrandRef.current, veilThornRef.current]
+    const weaponMaterials = [oathbladeMaterialRef.current, gravebrandMaterialRef.current, veilThornMaterialRef.current]
     const contactShape = contactShapeRef.current
     const guardMarker = guardMarkerRef.current
     const guardMaterial = guardMaterialRef.current
@@ -79,7 +85,8 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       bodyGroup === null ||
       weaponSweep === null ||
       weapon === null ||
-      weaponMaterial === null ||
+      weaponGroups.some((entry) => entry === null) ||
+      weaponMaterials.some((entry) => entry === null) ||
       contactShape === null ||
       guardMarker === null ||
       guardMaterial === null ||
@@ -93,6 +100,10 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     ) {
       return
     }
+    const equippedWeapon = snapshot.equipment.weaponItemId
+    const weaponIndex = equippedWeapon === 'item.weapon.gravebrand' ? 1 : equippedWeapon === 'item.weapon.veil-thorn' ? 2 : 0
+    weaponGroups.forEach((entry, index) => { entry!.visible = index === weaponIndex })
+    const weaponMaterial = weaponMaterials[weaponIndex]!
     guardMarker.visible = animation.mode === 'guard' || snapshot.defense.guardBroken
     guardMaterial.color.set(snapshot.defense.guardBroken ? '#ff765e' : '#8fc4da')
     guardMaterial.emissive.set(snapshot.defense.guardBroken ? '#9f241e' : '#17343d')
@@ -262,7 +273,14 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
       </group>
       <group ref={weaponSweepRef}>
         <group ref={weaponRef} position={[PLAYER_WEAPON_X, 0.06, -0.34]}>
-          <OathbladeVisual materialRef={weaponMaterialRef} />
+          <PlayerWeaponVisual
+            oathbladeRef={oathbladeRef}
+            gravebrandRef={gravebrandRef}
+            veilThornRef={veilThornRef}
+            oathbladeMaterialRef={oathbladeMaterialRef}
+            gravebrandMaterialRef={gravebrandMaterialRef}
+            veilThornMaterialRef={veilThornMaterialRef}
+          />
         </group>
       </group>
       <CombatContactVolumeCue

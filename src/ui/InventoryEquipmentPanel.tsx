@@ -29,10 +29,15 @@ function itemLabel(itemId: ItemId | null): string {
   return getItemDefinition(itemId)?.displayName ?? 'Unknown item'
 }
 
-function itemIcon(itemId: ItemId): 'oathblade' | 'vitality-charm' | 'ward-seal' | 'charm' | 'echo' {
-  if (itemId.startsWith('item.weapon.')) return 'oathblade'
+function itemIcon(itemId: ItemId): import('./gameplayHudModel').EquipmentBarIcon {
+  if (itemId === 'item.weapon.oathblade') return 'oathblade'
+  if (itemId === 'item.weapon.gravebrand') return 'gravebrand'
+  if (itemId === 'item.weapon.veil-thorn') return 'veil-thorn'
   if (itemId === 'item.charm.vitality') return 'vitality-charm'
   if (itemId === 'item.charm.ward-seal') return 'ward-seal'
+  if (itemId === 'item.charm.oathbrand-ember') return 'oathbrand-ember'
+  if (itemId === 'item.charm.ash-circlet') return 'ash-circlet'
+  if (itemId === 'item.charm.mourning-phial') return 'mourning-phial'
   if (getItemDefinition(itemId)?.slot === 'charm') return 'charm'
   return 'echo'
 }

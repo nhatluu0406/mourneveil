@@ -26,7 +26,18 @@ export interface ZoneHudCopy {
   readonly objective: string
 }
 
-export type EquipmentBarIcon = 'oathblade' | 'vitality-charm' | 'ward-seal' | 'charm' | 'flask' | 'echo'
+export type EquipmentBarIcon =
+  | 'oathblade'
+  | 'gravebrand'
+  | 'veil-thorn'
+  | 'vitality-charm'
+  | 'ward-seal'
+  | 'oathbrand-ember'
+  | 'ash-circlet'
+  | 'mourning-phial'
+  | 'charm'
+  | 'flask'
+  | 'echo'
 
 export interface EquipmentBarSlot {
   readonly id: 'weapon' | 'charm' | 'flask' | 'echoes'
@@ -50,6 +61,7 @@ export interface SkillHudSlot {
 export interface AcquisitionToastCopy {
   readonly title: string
   readonly detail: string
+  readonly rarity: 'common' | 'bound' | 'reliquary' | 'echoes'
 }
 
 export interface ProgressionToastCopy {
@@ -135,6 +147,7 @@ export function resolveAcquisitionToast(
         ? `Duplicate ${acquisition.displayName}`
         : `Echoes +${acquisition.echoesGained}`,
       detail: acquisition.feedback,
+      rarity: 'echoes',
     }
   }
   if (acquisition.itemId === null || acquisition.displayName === null) return null
@@ -148,6 +161,7 @@ export function resolveAcquisitionToast(
     title: acquisition.isNew
       ? `New · ${acquisition.displayName}`
       : `Acquired ${acquisition.displayName}`,
+    rarity: acquisition.rarity === 'reliquary' ? 'reliquary' : acquisition.rarity === 'common' ? 'common' : 'bound',
     detail: [
       acquisition.slot ?? 'relic',
       acquisition.rarity,
@@ -268,7 +282,12 @@ export function resolveEquipmentBar(snapshot: GameRuntimeSnapshot): readonly Equ
       label: weapon,
       detail: snapshot.equipment.weaponItemId === null ? 'Weapon slot empty' : `Power ${Math.max(snapshot.resolvedAttackDamage.light, snapshot.resolvedAttackDamage.heavy)}`,
       binding: 'LMB' as const,
-      icon: 'oathblade' as const,
+      icon:
+        snapshot.equipment.weaponItemId === 'item.weapon.gravebrand'
+          ? ('gravebrand' as const)
+          : snapshot.equipment.weaponItemId === 'item.weapon.veil-thorn'
+            ? ('veil-thorn' as const)
+            : ('oathblade' as const),
       equipped: snapshot.equipment.weaponItemId !== null,
     }),
     Object.freeze({
@@ -284,7 +303,13 @@ export function resolveEquipmentBar(snapshot: GameRuntimeSnapshot): readonly Equ
           ? ('vitality-charm' as const)
           : snapshot.equipment.charmItemId === 'item.charm.ward-seal'
             ? ('ward-seal' as const)
-            : ('charm' as const),
+            : snapshot.equipment.charmItemId === 'item.charm.oathbrand-ember'
+              ? ('oathbrand-ember' as const)
+              : snapshot.equipment.charmItemId === 'item.charm.ash-circlet'
+                ? ('ash-circlet' as const)
+                : snapshot.equipment.charmItemId === 'item.charm.mourning-phial'
+                  ? ('mourning-phial' as const)
+                  : ('charm' as const),
       equipped: charm !== null,
     }),
     Object.freeze({

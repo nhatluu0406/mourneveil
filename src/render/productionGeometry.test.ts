@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   createOathbladeGeometry,
+  createGravebrandGeometry,
+  createVeilThornGeometry,
   createProfilePrismGeometry,
   createTaperedPrismGeometry,
 } from './productionGeometry'
@@ -29,5 +31,15 @@ describe('project-authored production geometry', () => {
     expect(blade.boundingBox?.min.z).toBeCloseTo(-0.62)
     expect(blade.boundingBox?.max.z).toBeCloseTo(0.05)
     expect((blade.boundingBox?.max.x ?? 0) - (blade.boundingBox?.min.x ?? 0)).toBeLessThan(0.2)
+  })
+
+  it('gives all three weapons compact, unmistakably different silhouettes', () => {
+    const oath = createOathbladeGeometry().boundingBox!
+    const grave = createGravebrandGeometry().boundingBox!
+    const thorn = createVeilThornGeometry().boundingBox!
+    expect(grave.max.x - grave.min.x).toBeGreaterThan((oath.max.x - oath.min.x) * 1.8)
+    expect(thorn.max.x - thorn.min.x).toBeLessThan(oath.max.x - oath.min.x)
+    expect(thorn.min.z).toBeGreaterThanOrEqual(-0.72)
+    expect(grave.min.z).toBeGreaterThanOrEqual(-0.6)
   })
 })

@@ -218,7 +218,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
       <div className="gameplay-hud__center">
         {prompt !== null ? <div className="gameplay-hud__prompt"><kbd>{prompt.split(' — ')[0]}</kbd><strong>{prompt.split(' — ')[1]}</strong></div> : null}
         {showAcquisitionToast && acquisition !== null ? (
-          <div className="gameplay-hud__acquisition" role="status" data-acquisition-toast="1">
+          <div className={`gameplay-hud__acquisition is-${acquisition.rarity}`} role="status" data-acquisition-toast="1" data-acquisition-rarity={acquisition.rarity}>
             <strong>{acquisition.title}</strong>
             <span>{acquisition.detail}</span>
           </div>

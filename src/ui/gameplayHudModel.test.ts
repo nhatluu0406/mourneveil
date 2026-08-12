@@ -104,4 +104,23 @@ describe('cinematic HUD projection helpers', () => {
     expect(resolveEquipmentBar(vitalitySnapshot).find((slot) => slot.id === 'charm')?.icon).toBe('vitality-charm')
     expect(resolveEquipmentBar(wardSnapshot).find((slot) => slot.id === 'charm')?.icon).toBe('ward-seal')
   })
+
+  it('projects every M14 equipped item through its own visual key', () => {
+    const runtime = new GameRuntime()
+    const base = runtime.snapshot()
+    const cases = [
+      ['item.weapon.oathblade', 'weapon', 'oathblade'],
+      ['item.weapon.gravebrand', 'weapon', 'gravebrand'],
+      ['item.weapon.veil-thorn', 'weapon', 'veil-thorn'],
+      ['item.charm.vitality', 'charm', 'vitality-charm'],
+      ['item.charm.ward-seal', 'charm', 'ward-seal'],
+      ['item.charm.oathbrand-ember', 'charm', 'oathbrand-ember'],
+      ['item.charm.ash-circlet', 'charm', 'ash-circlet'],
+      ['item.charm.mourning-phial', 'charm', 'mourning-phial'],
+    ] as const
+    for (const [itemId, slot, icon] of cases) {
+      const snapshot = { ...base, equipment: { ...base.equipment, [slot === 'weapon' ? 'weaponItemId' : 'charmItemId']: itemId } }
+      expect(resolveEquipmentBar(snapshot).find((entry) => entry.id === slot)?.icon).toBe(icon)
+    }
+  })
 })
