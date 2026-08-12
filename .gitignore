@@ -43,6 +43,9 @@ Desktop.ini
 vite.config.*.timestamp-*
 tmp-m*
 
+# Local toolchain caches (portable Node, etc.)
+.tools/
+
 # LEANLOOP:IGNORE:START
 state/CURRENT_TASK
 state/CHECKPOINT.md
