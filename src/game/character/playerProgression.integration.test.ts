@@ -39,12 +39,7 @@ describe('progression integration', () => {
     })
     expect(runtime.snapshot().progression.unspentPoints).toBe(0)
 
-    runtime.debugDefeatEnemy('enemy.brute.1')
-    // pickup vitality charm
-    const loot = runtime.snapshot().lootPickup
-    expect(loot.itemId).toBe('item.charm.vitality')
-    runtime.debugSetPlayerPosition(loot.position!)
-    runtime.advanceFrame(1 / 60, { horizontal: 0, forward: 0 })
+    runtime.debugGrantItem('item.charm.vitality')
     runtime.equipItem('item.charm.vitality')
     expect(runtime.snapshot().playerHealth.health.maximum).toBe(PLAYER_MAXIMUM_HEALTH + 10 + 20)
 
@@ -52,7 +47,9 @@ describe('progression integration', () => {
     expect(runtime.snapshot().playerHealth.health.maximum).toBe(PLAYER_MAXIMUM_HEALTH + 10)
 
     // Spend another point into resolve after more XP (brute 60 → total 110 → still level 2)
+    runtime.debugDefeatEnemy('enemy.brute.1')
     expect(runtime.snapshot().progression.level).toBe(2)
+    expect(runtime.snapshot().lootPickup.itemId).toBe('item.weapon.gravebrand')
     runtime.debugDefeatEnemy(BOSS_RUNTIME_ID)
     // 110 + 200 = 310 → level 4 (thresholds 50/120/220/350)
     expect(runtime.snapshot().progression.level).toBe(4)

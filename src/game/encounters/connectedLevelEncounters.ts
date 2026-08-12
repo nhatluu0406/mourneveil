@@ -49,8 +49,17 @@ export const M5_ENEMY_PLACEMENTS: readonly ConnectedEnemyPlacement[] = Object.fr
   // Mixed court: skirmisher holds the near approach; brute anchors the south pocket.
   definePlacement('enemy.skirmisher.1', 'encounter.m5.mixed', 'skirmisher', 1.4, -2.6, -1, 0, 'loot.skirmisher-early'),
   definePlacement('enemy.brute.1', 'encounter.m5.mixed', 'brute', 2.6, -5.4, -1, 0, 'loot.brute-middle'),
-  // Introduction: stand-off just inside Outer Watch so arrival crossing feels intentional.
-  definePlacement('enemy.skirmisher.introduction', 'encounter.m5.introduction', 'skirmisher', -10.2, 3.1, 1, 0, null),
+  // Introduction: early survivability charm teach.
+  definePlacement(
+    'enemy.skirmisher.introduction',
+    'encounter.m5.introduction',
+    'skirmisher',
+    -10.2,
+    3.1,
+    1,
+    0,
+    'loot.intro-survivability',
+  ),
   // Pressure: final-approach sentry near the ash-walk cairn, before the sealed gate.
   definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7.6, -3.4, -1, 0, 'loot.pressure'),
   // M11 technical boss in sealed arena (gameplay foundation; Codex owns art later).

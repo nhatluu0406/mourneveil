@@ -23,6 +23,7 @@ import {
   restoreProgressionState,
 } from '../character/playerProgression'
 import { isSkillId, skillUnlockedAtLevel } from '../skills/skillDefinition'
+import { getItemDefinition } from '../items/itemDefinition'
 
 /**
  * Migration entry point. V1–V3 migrate forward; unknown versions reject safely.
@@ -262,16 +263,21 @@ function asEchoRecovery(value: unknown): SaveFileV1['echoRecovery'] {
 
 function asInventory(value: unknown): SaveFileV1['inventory'] {
   if (!Array.isArray(value)) return []
-  const entries: SaveFileV1['inventory'][number][] = []
+  const quantities = new Map<string, number>()
   for (const entry of value) {
     if (entry === null || typeof entry !== 'object') continue
     const record = entry as Record<string, unknown>
     if (typeof record.itemId !== 'string') continue
+    const definition = getItemDefinition(record.itemId)
+    if (definition === null) continue
     const quantity = asNonNegativeInt(record.quantity, 0)
     if (quantity <= 0) continue
-    entries.push({ itemId: record.itemId, quantity })
+    const next = (quantities.get(record.itemId) ?? 0) + quantity
+    quantities.set(record.itemId, definition.unique ? 1 : next)
   }
-  return entries
+  return [...quantities.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([itemId, quantity]) => ({ itemId, quantity }))
 }
 
 function asEquipment(value: unknown): SaveFileV1['equipment'] {
@@ -279,10 +285,15 @@ function asEquipment(value: unknown): SaveFileV1['equipment'] {
     return { weaponItemId: null, charmItemId: null }
   }
   const record = value as Record<string, unknown>
-  return {
-    weaponItemId: typeof record.weaponItemId === 'string' ? record.weaponItemId : null,
-    charmItemId: typeof record.charmItemId === 'string' ? record.charmItemId : null,
-  }
+  const weaponItemId =
+    typeof record.weaponItemId === 'string' && getItemDefinition(record.weaponItemId)?.slot === 'weapon'
+      ? record.weaponItemId
+      : null
+  const charmItemId =
+    typeof record.charmItemId === 'string' && getItemDefinition(record.charmItemId)?.slot === 'charm'
+      ? record.charmItemId
+      : null
+  return { weaponItemId, charmItemId }
 }
 
 function asLoot(value: unknown): SaveFileV1['lootPickup'] {

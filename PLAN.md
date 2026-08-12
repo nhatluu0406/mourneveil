@@ -1,54 +1,54 @@
-# PLAN: M14 Itemization & Loot Depth — Macro-batch 1
+# PLAN: M14 Itemization & Loot Depth — Macro-batch 2
 <!-- Live M14 graph only. -->
 
-Input: Product Owner M14 MB1 systems brief | Stack: `STACK.md`
+Input: Product Owner M14 MB2 loot ecosystem + pacing + UX brief | Stack: `STACK.md`
 Task slug: `m14-itemization-loot-depth`
 Agent: Cursor only
 
 ## Goal
 
-Turn the small equipment set into a meaningful authored loot ecosystem that strengthens build identity and exploration, without a procedural ARPG loot-generator framework.
+Make the authored 8-item ecosystem discoverable and meaningful on the existing playable-alpha route: loot arc, proven weapon/charm tradeoffs, skill/flask composition, functional acquisition/compare/equip UX, save safety — without art polish or M15.
 
 ## Non-goals
 
-- Helmet/chest/gloves/boots/rings/amulet/belt slots
-- Random affixes, procedural stat rolls, legendary frameworks
-- New weapon movesets / per-weapon combat runtimes
-- Salvage/crafting
-- Codex art/lighting/floor coverage (record handoff only)
+- New weapon movesets, affixes, procedural rolls, rarity explosion
+- Auto-equip unless already product law
+- Codex art (icons, models, VFX, floors, lighting)
+- Closing/tagging M14
 - M15+
 
 ## Steps
 
-- [x] 1. Equipment + modifier + definition contract (~8 authored items)
+- [x] 1. Authored first-run loot arc (≥6/8 discoverable) + encounter-clear grants + boss Reliquary close
   - depends: —
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/game/items/**`, `src/game/character/playerStatResolution.ts`, flask/skill cooldown composition hooks
-  - verifier: focused item/modifier/stat unit tests
-- [x] 2. Loot tables, duplicate→Echo policy, acquisition/equip/compare, save restore
+  - owns/allows: `src/game/items/loot*.ts`, encounters, GameRuntime spawn/acquire, STACK loot law
+  - verifier: focused loot-table/journey unit tests
+- [x] 2. Composition safety (CD floor/ceiling, flask, skill matrix, equip-during-combat rule) + compare/acquisition UX + threat priority
   - depends: 1
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/game/items/loot*.ts`, encounters placements, `GameRuntime` pickup path, UI comparison plumbing, SaveFileV4 (no bump unless required)
-  - verifier: focused inventory/equipment/save tests + comparison pure tests
-- [x] 3. `gate:m14-itemization` + alpha regressions + docs/state
+  - owns/allows: itemDefinition/comparison, combat cooldown resolver, GameRuntime equip, UI HUD/inventory, save validation
+  - verifier: focused composition/flask/equip/save tests + HUD threat tests
+- [x] 3. Gates + regressions + art handoff + docs/state
   - depends: 2
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `scripts/browser/gate-m14-*.mjs`, `package.json`, STACK/PLAN/HANDOFF/current-state/REPOMAP as needed
-  - verifier: `gate:m14-itemization` + M13 skill/progression + M12 alpha + boss + lifecycle + `npm run verify`
+  - owns/allows: `gate:m14-itemization`, `gate:m14-loot-journey`, package.json, HANDOFF/PLAN/current-state/REPOMAP/art handoff
+  - verifier: both M14 gates + M13/M12/M11/lifecycle + `npm run verify`
 
 ## Locked decisions
 
-- Slots: weapon + charm only (no third slot in MB1).
-- Rarity vocabulary: Common / Bound / Reliquary (authored only; no random affixes).
-- Duplicate unique item → Echo reward (no salvage).
-- Prefer SaveFileV4; bump only if persistence shape cannot hold acquired IDs + equipped slots.
-- Combat consumes resolved modifiers; UI must not recompute gameplay authority.
-- Codex owns later icon/weapon-attachment/loot-VFX polish from exposed art hooks.
+- First-run exposes 7 of 8 via authored encounter + clear grants; Mourning Phial is replay/alternate.
+- No Math.random loot; deterministic first-unowned / authored placement only.
+- Cooldown steps clamp to floor 60 / ceiling 360 after equipment delta (base > 0).
+- Equipment swap blocked while player combat action is non-idle (or dead); idle OK.
+- RITE COMPLETE dominates terminal HUD; threat chrome suppressed after slice complete.
+- Boss/rite first reward = Ash Circlet (Reliquary); Mourning Phial is late/alternate sustain.
+- Codex owns one large subsequent art batch from `docs/development/m14-codex-art-handoff.md`.
 
 ## Escalation
 
 - Same failure 3× → stuck report + stop.
-- Any need for full ARPG loot engine or new movesets → stop for review.
+- Need for 9th item or procedural loot → stop for review.

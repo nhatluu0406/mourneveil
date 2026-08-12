@@ -19,12 +19,18 @@ export type EquipResult =
   | { readonly accepted: true; readonly slot: EquipSlot; readonly itemId: ItemId }
   | {
       readonly accepted: false
-      readonly reason: 'unknown-item' | 'not-owned' | 'wrong-slot' | 'not-equippable'
+      readonly reason:
+        | 'unknown-item'
+        | 'not-owned'
+        | 'wrong-slot'
+        | 'not-equippable'
+        | 'combat-busy'
+        | 'actor-defeated'
     }
 
 export type UnequipResult =
   | { readonly accepted: true; readonly slot: EquipSlot; readonly itemId: ItemId | null }
-  | { readonly accepted: false; readonly reason: 'slot-empty' }
+  | { readonly accepted: false; readonly reason: 'slot-empty' | 'combat-busy' | 'actor-defeated' }
 
 export class PlayerEquipmentRuntime {
   private weaponItemId: ItemId | null = null

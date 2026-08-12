@@ -130,36 +130,32 @@ export function resolveAcquisitionToast(
   const acquisition = snapshot.lastLootAcquisition
   if (acquisition === null) return null
   if (acquisition.kind === 'echoes') {
-    const name =
-      acquisition.itemId === null
-        ? null
-        : getItemDefinition(acquisition.itemId)?.displayName ?? null
     return {
-      title: name === null ? `Echoes +${acquisition.echoesGained}` : `Duplicate ${name}`,
-      detail:
-        name === null
-          ? 'Authored loot pool already claimed'
-          : `Already owned · +${acquisition.echoesGained} Echoes`,
+      title: acquisition.displayName
+        ? `Duplicate ${acquisition.displayName}`
+        : `Echoes +${acquisition.echoesGained}`,
+      detail: acquisition.feedback,
     }
   }
-  if (acquisition.itemId === null) return null
-  const definition = getItemDefinition(acquisition.itemId)
-  if (definition === null) return null
+  if (acquisition.itemId === null || acquisition.displayName === null) return null
   const equipped =
-    definition.slot === 'weapon'
+    acquisition.slot === 'weapon'
       ? snapshot.equipment.weaponItemId === acquisition.itemId
-      : definition.slot === 'charm'
+      : acquisition.slot === 'charm'
         ? snapshot.equipment.charmItemId === acquisition.itemId
         : true
-  const detail =
-    definition.slot === null
-      ? definition.description
-      : equipped
-        ? 'Added to inventory'
-        : 'Press I to equip'
   return {
-    title: `Acquired ${definition.displayName}`,
-    detail,
+    title: acquisition.isNew
+      ? `New · ${acquisition.displayName}`
+      : `Acquired ${acquisition.displayName}`,
+    detail: [
+      acquisition.slot ?? 'relic',
+      acquisition.rarity,
+      acquisition.tradeoffSummary,
+      equipped ? 'Bound' : 'Press I to compare & equip',
+    ]
+      .filter((part) => part !== null && part !== '')
+      .join(' · '),
   }
 }
 
@@ -191,6 +187,8 @@ export function resolveNearestThreat(
   snapshot: GameRuntimeSnapshot,
   range = THREAT_PRESENTATION_RANGE,
 ): GameRuntimeSnapshot['enemies'][number] | null {
+  // Terminal rite-complete state owns HUD priority; do not project hunting chrome over it.
+  if (isVerticalSliceComplete(snapshot)) return null
   const nearest =
     snapshot.enemies
       .filter((enemy) => enemy.alive)

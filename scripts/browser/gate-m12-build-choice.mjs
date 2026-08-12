@@ -52,7 +52,7 @@ await runOwnedBrowserGate({
       const base = g.snapshot()
       notes.push(`base hpMax=${base.playerHealth.health.maximum} guard=${base.defense.guardImpactThreshold}`)
 
-      g.defeatEnemy('enemy.brute.1')
+      g.defeatEnemy('enemy.skirmisher.introduction')
       if (g.snapshot().lootPickup.itemId !== VITALITY) {
         throw new Error(`expected vitality loot, got ${g.snapshot().lootPickup.itemId}`)
       }

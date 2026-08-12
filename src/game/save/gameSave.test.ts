@@ -154,4 +154,27 @@ describe('versioned local save', () => {
     bad.writeRaw('{')
     expect(new GameSaveService(bad).load()).toEqual({ ok: false, reason: 'malformed' })
   })
+
+  it('drops unknown items and wrong-slot equipment during V4 validation', () => {
+    const result = migrateAndValidateSave({
+      ...createDefaultSaveV4(),
+      inventory: [
+        { itemId: 'item.weapon.oathblade', quantity: 2 },
+        { itemId: 'item.ghost.missing', quantity: 9 },
+        { itemId: 'item.charm.vitality', quantity: 1 },
+        { itemId: 'item.charm.vitality', quantity: 3 },
+      ],
+      equipment: {
+        weaponItemId: 'item.charm.vitality',
+        charmItemId: 'item.weapon.oathblade',
+      },
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.save.inventory).toEqual([
+      { itemId: 'item.charm.vitality', quantity: 1 },
+      { itemId: 'item.weapon.oathblade', quantity: 1 },
+    ])
+    expect(result.save.equipment).toEqual({ weaponItemId: null, charmItemId: null })
+  })
 })

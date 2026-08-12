@@ -129,7 +129,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
     ? 0
     : Math.max(0, 1 - snapshot.defense.guardImpact / Math.max(1, snapshot.defense.guardImpactThreshold))
   const power = Math.max(snapshot.resolvedAttackDamage.light, snapshot.resolvedAttackDamage.heavy)
-  const bossThreat = threat !== null && isBossThreat(threat.definitionId)
+  const bossThreat = !sliceComplete && threat !== null && isBossThreat(threat.definitionId)
   const bossPhase = bossThreat && threat !== null && threatRatio <= 0.5 ? 2 : 1
   const progressionRange =
     snapshot.progression.experienceIntoLevel + (snapshot.progression.experienceToNextLevel ?? 0)
@@ -151,7 +151,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
     >
       {bossThreat ? null : <ZonePresentation key={zoneKey} presentationKey={zoneKey} zone={zone} />}
 
-      {threat !== null ? (
+      {threat !== null && !sliceComplete ? (
         <section className={`gameplay-hud__threat${bossThreat ? ' gameplay-hud__threat--boss' : ''}`} aria-label={bossThreat ? 'Boss threat' : 'Nearest threat'}>
           <div className="gameplay-hud__threat-heading">
             <strong>{threatTitle(threat.definitionId)}</strong>
@@ -230,7 +230,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
             <span>{progressionToast.detail}</span>
           </div>
         ) : null}
-        {sliceComplete && !bossThreat ? (
+        {sliceComplete ? (
           <div className="gameplay-hud__slice-complete" role="status" data-slice-complete-banner="1">
             Rite complete
           </div>

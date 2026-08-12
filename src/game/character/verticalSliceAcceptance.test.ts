@@ -5,6 +5,7 @@ import { GameRuntime } from '../runtime/GameRuntime'
 import {
   isVerticalSliceComplete,
   resolveAcquisitionToast,
+  resolveNearestThreat,
   resolveZoneHudCopy,
 } from '../../ui/gameplayHudModel'
 
@@ -49,9 +50,25 @@ describe('vertical slice completion projection', () => {
       runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
     }
     expect(runtime.snapshot().lastLootAcquisition?.itemId).toBe('item.weapon.oathblade')
-    expect(resolveAcquisitionToast(runtime.snapshot())).toEqual({
-      title: 'Acquired Oathblade',
-      detail: 'Press I to equip',
+    expect(runtime.snapshot().lastLootAcquisition?.isNew).toBe(true)
+    expect(resolveAcquisitionToast(runtime.snapshot())).toMatchObject({
+      title: 'New · Oathblade',
+      detail: expect.stringContaining('Press I to compare & equip'),
     })
+  })
+
+  it('hides threat projection after rite complete', () => {
+    const runtime = new GameRuntime()
+    runtime.applySave({
+      ...runtime.captureSave(),
+      world: {
+        openedShortcutIds: [],
+        finalGateReached: true,
+        defeatedBossIds: [BOSS_TECHNICAL_ID],
+      },
+    })
+    runtime.debugSetPlayerPosition({ x: 1.4, y: 0.82, z: -2.6 })
+    expect(isVerticalSliceComplete(runtime.snapshot())).toBe(true)
+    expect(resolveNearestThreat(runtime.snapshot())).toBeNull()
   })
 })

@@ -88,6 +88,13 @@ await runOwnedBrowserGate({
     ])
     await page.evaluate(() => {
       const g = window.__MOURNEVEIL_GATE__
+      g.defeatEnemy('enemy.skirmisher.introduction')
+      for (let step = 0; step < 6; step += 1) g.advance(1)
+      const vitalityLoot = g.snapshot().lootPickup
+      if (vitalityLoot.active && vitalityLoot.position) {
+        g.setPlayerPosition(vitalityLoot.position)
+        for (let step = 0; step < 10; step += 1) g.advance(1)
+      }
       g.defeatEnemy('enemy.skirmisher.1')
       for (let step = 0; step < 6; step += 1) g.advance(1)
       const loot = g.snapshot().lootPickup
@@ -96,14 +103,14 @@ await runOwnedBrowserGate({
         for (let step = 0; step < 10; step += 1) g.advance(1)
       }
       g.equipItem('item.weapon.oathblade')
+      g.equipItem('item.charm.vitality')
       g.defeatEnemy('enemy.brute.1')
       for (let step = 0; step < 6; step += 1) g.advance(1)
-      const charmLoot = g.snapshot().lootPickup
-      if (charmLoot.active && charmLoot.position) {
-        g.setPlayerPosition(charmLoot.position)
+      const weaponLoot = g.snapshot().lootPickup
+      if (weaponLoot.active && weaponLoot.position) {
+        g.setPlayerPosition(weaponLoot.position)
         for (let step = 0; step < 10; step += 1) g.advance(1)
       }
-      g.equipItem('item.charm.vitality')
     })
     await soak(page, 250)
     state = await page.evaluate(() => window.__MOURNEVEIL_GATE__.snapshot())
@@ -116,7 +123,7 @@ await runOwnedBrowserGate({
     const toast = await page.evaluate(
       () => document.querySelector('[data-acquisition-toast="1"]')?.textContent ?? null,
     )
-    toast?.includes('Acquired')
+    toast?.includes('New') || toast?.includes('Acquired')
       ? pass(`6 acquisition toast visible (${toast})`)
       : pass('6 acquisition toast already expired (non-fatal)')
 

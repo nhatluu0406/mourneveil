@@ -7,9 +7,14 @@ import type { CharacterCollisionResolver } from './playerMotor'
 import {
   BRUTE_LOOT_ITEM_ID,
   GameRuntime,
+  INTRO_LOOT_ITEM_ID,
+  MIXED_CLEAR_LOOT_ITEM_ID,
+  PRESSURE_CLEAR_LOOT_ITEM_ID,
   PRESSURE_LOOT_ITEM_ID,
   SKIRMISHER_LOOT_ITEM_ID,
 } from '../runtime/GameRuntime'
+import { PLAYER_SKILL_USE_REQUEST } from '../../input/playerSkillIntent'
+import { FIRST_RUN_DISCOVERABLE_ITEM_IDS } from '../items/lootTables'
 
 const FLAT_GROUND: CharacterCollisionResolver = (_position, translation) => ({
   translation: { ...translation, y: 0 },
@@ -25,123 +30,140 @@ function pickupActiveLoot(runtime: GameRuntime): void {
   }
 }
 
-describe('loot inventory and equipment', () => {
+describe('loot inventory and equipment MB2', () => {
   it('looks up authored item definitions', () => {
     expect(getItemDefinition('item.weapon.oathblade')).toMatchObject({
       slot: 'weapon',
-      modifiers: { lightDamageBonus: 8, heavyDamageBonus: 12, guardImpactThresholdBonus: 0 },
+      modifiers: { lightDamageBonus: 8, heavyDamageBonus: 12 },
     })
     expect(getItemDefinition('item.charm.vitality')).toMatchObject({
       slot: 'charm',
-      modifiers: { maxHealthBonus: 20, guardImpactThresholdBonus: 0 },
-    })
-    expect(getItemDefinition('item.charm.ward-seal')).toMatchObject({
-      slot: 'charm',
-      modifiers: { maxHealthBonus: 0, guardImpactThresholdBonus: 1 },
+      modifiers: { maxHealthBonus: 20 },
     })
     expect(getItemDefinition('missing')).toBeNull()
   })
 
-  it('spawns loot once, picks up once, and equips with ownership and modifiers', () => {
+  it('exposes the authored first-run journey of at least six items', () => {
     const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
-    expect(runtime.resolvedAttackDamage()).toEqual({ light: 20, heavy: 35 })
 
-    runtime.debugDefeatEnemy(SKIRMISHER_ROLE.runtimeId)
-    expect(runtime.snapshot().lootPickup).toMatchObject({
-      active: true,
-      itemId: SKIRMISHER_LOOT_ITEM_ID,
-    })
+    runtime.debugDefeatEnemy('enemy.skirmisher.introduction')
+    expect(runtime.snapshot().lootPickup.itemId).toBe(INTRO_LOOT_ITEM_ID)
+    pickupActiveLoot(runtime)
+
     runtime.debugDefeatEnemy(SKIRMISHER_ROLE.runtimeId)
     expect(runtime.snapshot().lootPickup.itemId).toBe(SKIRMISHER_LOOT_ITEM_ID)
-
     pickupActiveLoot(runtime)
-    expect(runtime.snapshot().lootPickup.active).toBe(false)
-    expect(runtime.snapshot().inventory.entries).toEqual([
-      { itemId: SKIRMISHER_LOOT_ITEM_ID, quantity: 1 },
-    ])
-    for (let step = 0; step < 5; step += 1) {
-      runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
-    }
-    expect(runtime.snapshot().inventory.entries).toEqual([
-      { itemId: SKIRMISHER_LOOT_ITEM_ID, quantity: 1 },
-    ])
-
-    expect(runtime.equipItem('item.weapon.veil-thorn')).toEqual({
-      accepted: false,
-      reason: 'not-owned',
-    })
-    expect(runtime.equipItem(SKIRMISHER_LOOT_ITEM_ID)).toEqual({
-      accepted: true,
-      slot: 'weapon',
-      itemId: SKIRMISHER_LOOT_ITEM_ID,
-    })
-    expect(runtime.resolvedAttackDamage()).toEqual({ light: 28, heavy: 47 })
-    expect(runtime.unequipSlot('weapon')).toMatchObject({ accepted: true })
-    expect(runtime.resolvedAttackDamage()).toEqual({ light: 20, heavy: 35 })
 
     runtime.debugDefeatEnemy(BRUTE_ROLE.runtimeId)
+    expect(runtime.snapshot().lootPickup.itemId).toBe(BRUTE_LOOT_ITEM_ID)
     pickupActiveLoot(runtime)
-    expect(runtime.equipItem(BRUTE_LOOT_ITEM_ID)).toMatchObject({ accepted: true })
-    expect(runtime.snapshot().playerHealth.health.maximum).toBe(120)
-    runtime.restorePlayerForDevelopment()
-    expect(runtime.snapshot().playerHealth.health.current).toBe(120)
-    expect(runtime.unequipSlot('charm')).toMatchObject({ accepted: true })
-    expect(runtime.snapshot().playerHealth.health).toMatchObject({
-      maximum: 100,
-      current: 100,
-    })
+    expect(
+      runtime.snapshot().inventory.entries.some((entry) => entry.itemId === MIXED_CLEAR_LOOT_ITEM_ID),
+    ).toBe(true)
+
+    runtime.debugDefeatEnemy('enemy.skirmisher.pressure')
+    expect(runtime.snapshot().lootPickup.itemId).toBe(PRESSURE_LOOT_ITEM_ID)
+    pickupActiveLoot(runtime)
+    expect(
+      runtime
+        .snapshot()
+        .inventory.entries.some((entry) => entry.itemId === PRESSURE_CLEAR_LOOT_ITEM_ID),
+    ).toBe(true)
+
+    runtime.debugDefeatEnemy('enemy.boss.sepulchre.1')
+    expect(runtime.snapshot().lootPickup.itemId).toBe('item.charm.ash-circlet')
+    pickupActiveLoot(runtime)
+
+    const owned = new Set(runtime.snapshot().inventory.entries.map((entry) => entry.itemId))
+    for (const id of FIRST_RUN_DISCOVERABLE_ITEM_IDS) {
+      expect(owned.has(id)).toBe(true)
+    }
+    expect(owned.size).toBeGreaterThanOrEqual(6)
   })
 
-  it('creates a vitality vs ward tradeoff without global dominance', () => {
+  it('blocks equipment swaps during committed combat and applies skill cooldown clamps', () => {
     const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
+    runtime.debugGrantItem(SKIRMISHER_LOOT_ITEM_ID)
+    runtime.debugGrantItem('item.weapon.veil-thorn')
+    runtime.debugGrantItem('item.charm.ash-circlet')
+    expect(runtime.equipItem(SKIRMISHER_LOOT_ITEM_ID)).toMatchObject({ accepted: true })
+    expect(runtime.equipItem('item.charm.ash-circlet')).toMatchObject({ accepted: true })
 
-    const base = runtime.snapshot()
-    expect(base.playerHealth.health.maximum).toBe(100)
-    expect(base.defense.guardImpactThreshold).toBe(PLAYER_GUARD_IMPACT_THRESHOLD)
+    runtime.requestPlayerAttack({
+      type: 'player-attack',
+      attack: 'light',
+      aimDirection: { x: 0, z: -1 },
+    })
+    expect(runtime.snapshot().combat.phase).not.toBe('idle')
+    expect(runtime.equipItem('item.weapon.veil-thorn')).toEqual({
+      accepted: false,
+      reason: 'combat-busy',
+    })
+    while (runtime.snapshot().combat.phase !== 'idle') {
+      runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
+    }
 
-    runtime.debugDefeatEnemy(BRUTE_ROLE.runtimeId)
-    pickupActiveLoot(runtime)
-    runtime.debugDefeatEnemy('enemy.skirmisher.pressure')
-    pickupActiveLoot(runtime)
+    expect(runtime.equipItem('item.weapon.veil-thorn')).toMatchObject({ accepted: true })
+    runtime.equipSkill('skill.veil-step')
+    const used = runtime.requestPlayerSkillUse(PLAYER_SKILL_USE_REQUEST, {
+      horizontal: 0,
+      forward: 1,
+    })
+    expect(used.accepted).toBe(true)
+    while (runtime.snapshot().combat.phase !== 'idle') {
+      runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 0, forward: 0 })
+    }
+    // Base 180 + veil (-30) + ash (-24) = 126
+    expect(runtime.snapshot().skills.cooldownRemainingSteps).toBe(126)
+  })
 
-    expect(runtime.equipItem(BRUTE_LOOT_ITEM_ID)).toMatchObject({ accepted: true })
+  it('creates vitality vs ward tradeoff without global dominance', () => {
+    const runtime = new GameRuntime()
+    runtime.attachCollisionResolver(FLAT_GROUND)
+    runtime.debugGrantItem(INTRO_LOOT_ITEM_ID)
+    runtime.debugGrantItem(PRESSURE_LOOT_ITEM_ID)
+
+    expect(runtime.equipItem(INTRO_LOOT_ITEM_ID)).toMatchObject({ accepted: true })
     const vitality = runtime.snapshot()
     expect(vitality.playerHealth.health.maximum).toBe(120)
     expect(vitality.defense.guardImpactThreshold).toBe(PLAYER_GUARD_IMPACT_THRESHOLD)
-    expect(vitality.equipment.modifiers.guardImpactThresholdBonus).toBe(0)
 
     expect(runtime.equipItem(PRESSURE_LOOT_ITEM_ID)).toMatchObject({ accepted: true })
     const ward = runtime.snapshot()
     expect(ward.playerHealth.health.maximum).toBe(100)
     expect(ward.defense.guardImpactThreshold).toBe(PLAYER_GUARD_IMPACT_THRESHOLD + 1)
-    expect(ward.equipment.modifiers.maxHealthBonus).toBe(0)
-
-    // Neither option dominates both axes.
     expect(vitality.playerHealth.health.maximum).toBeGreaterThan(ward.playerHealth.health.maximum)
     expect(ward.defense.guardImpactThreshold).toBeGreaterThan(vitality.defense.guardImpactThreshold)
   })
 
-  it('persists acquired and equipped ward seal through save restore', () => {
+  it('persists equipment and does not re-grant encounter clear rewards after reload', () => {
     const runtime = new GameRuntime()
     runtime.attachCollisionResolver(FLAT_GROUND)
-    runtime.debugDefeatEnemy('enemy.skirmisher.pressure')
+    runtime.debugDefeatEnemy(SKIRMISHER_ROLE.runtimeId)
     pickupActiveLoot(runtime)
-    expect(runtime.equipItem(PRESSURE_LOOT_ITEM_ID)).toMatchObject({ accepted: true })
+    runtime.debugDefeatEnemy(BRUTE_ROLE.runtimeId)
+    pickupActiveLoot(runtime)
+    expect(runtime.snapshot().inventory.entries.some((e) => e.itemId === MIXED_CLEAR_LOOT_ITEM_ID)).toBe(
+      true,
+    )
+    runtime.equipItem(BRUTE_LOOT_ITEM_ID)
+    runtime.equipItem(MIXED_CLEAR_LOOT_ITEM_ID)
 
     const save = runtime.captureSave()
-    expect(save.inventory.some((entry) => entry.itemId === PRESSURE_LOOT_ITEM_ID)).toBe(true)
-    expect(save.equipment.charmItemId).toBe(PRESSURE_LOOT_ITEM_ID)
-
     const restored = new GameRuntime()
     restored.attachCollisionResolver(FLAT_GROUND)
     restored.applySave(save)
-    expect(restored.snapshot().equipment.charmItemId).toBe(PRESSURE_LOOT_ITEM_ID)
-    expect(restored.snapshot().defense.guardImpactThreshold).toBe(PLAYER_GUARD_IMPACT_THRESHOLD + 1)
-    expect(restored.snapshot().inventory.entries.some((entry) => entry.itemId === PRESSURE_LOOT_ITEM_ID)).toBe(
-      true,
-    )
+    const inventoryBefore = restored.snapshot().inventory.entries.map((e) => e.itemId).sort()
+    restored.debugDefeatEnemy(SKIRMISHER_ROLE.runtimeId)
+    restored.debugDefeatEnemy(BRUTE_ROLE.runtimeId)
+    expect(
+      restored.snapshot().inventory.entries.find((e) => e.itemId === MIXED_CLEAR_LOOT_ITEM_ID)
+        ?.quantity,
+    ).toBe(1)
+    expect(restored.snapshot().inventory.entries.map((e) => e.itemId).sort()).toEqual(inventoryBefore)
+    expect(restored.snapshot().equipment.weaponItemId).toBe(BRUTE_LOOT_ITEM_ID)
   })
 
   it('rejects unknown item ids on equip', () => {

@@ -95,6 +95,7 @@ await runOwnedBrowserGate({
 
       g.defeatEnemy('enemy.brute.1')
       pickup()
+      g.grantItem(VITALITY)
       const equip = g.equipItem(VITALITY)
       if (equip?.accepted !== true) throw new Error(`equip vitality failed: ${JSON.stringify(equip)}`)
       snap = g.snapshot()

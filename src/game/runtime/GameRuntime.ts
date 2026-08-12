@@ -136,7 +136,14 @@ import {
 } from '../items/lootPickup'
 import { resolveLootTable } from '../items/lootTables'
 import {
+  LOOT_REWARD_MIXED_CLEAR_ITEM_ID,
+  LOOT_REWARD_MIXED_CLEAR_SOURCE_ID,
+  LOOT_REWARD_PRESSURE_CLEAR_ITEM_ID,
+  LOOT_REWARD_PRESSURE_CLEAR_SOURCE_ID,
+} from '../items/lootTables'
+import {
   compareItemToEquipped,
+  formatModifierSummary,
   type ItemComparisonView,
 } from '../items/itemComparison'
 import {
@@ -178,16 +185,25 @@ import {
   type PlayerMotorState,
 } from '../character/playerMotor'
 
+export const INTRO_LOOT_ITEM_ID = 'item.charm.vitality' as const
 export const SKIRMISHER_LOOT_ITEM_ID = 'item.weapon.oathblade' as const
-export const BRUTE_LOOT_ITEM_ID = 'item.charm.vitality' as const
+export const BRUTE_LOOT_ITEM_ID = 'item.weapon.gravebrand' as const
 export const PRESSURE_LOOT_ITEM_ID = 'item.charm.ward-seal' as const
 export const BOSS_LOOT_ITEM_ID = 'item.charm.ash-circlet' as const
+export const MIXED_CLEAR_LOOT_ITEM_ID = 'item.charm.oathbrand-ember' as const
+export const PRESSURE_CLEAR_LOOT_ITEM_ID = 'item.weapon.veil-thorn' as const
 
 export interface LootAcquisitionCue {
   readonly kind: 'item' | 'echoes'
   readonly itemId: ItemId | null
   readonly echoesGained: number
   readonly simulationStep: number
+  readonly isNew: boolean
+  readonly displayName: string | null
+  readonly slot: EquipSlot | null
+  readonly rarity: string | null
+  readonly tradeoffSummary: string
+  readonly feedback: string
 }
 
 export interface GameRuntimeSnapshot {
@@ -394,12 +410,14 @@ export class GameRuntime {
     this.inventoryRuntime.replaceAll(owned)
     const weapon =
       save.equipment.weaponItemId !== null &&
-      this.inventoryRuntime.has(save.equipment.weaponItemId)
+      this.inventoryRuntime.has(save.equipment.weaponItemId) &&
+      getItemDefinition(save.equipment.weaponItemId)?.slot === 'weapon'
         ? save.equipment.weaponItemId
         : null
     const charm =
       save.equipment.charmItemId !== null &&
-      this.inventoryRuntime.has(save.equipment.charmItemId)
+      this.inventoryRuntime.has(save.equipment.charmItemId) &&
+      getItemDefinition(save.equipment.charmItemId)?.slot === 'charm'
         ? save.equipment.charmItemId
         : null
     this.equipmentRuntime.restore(weapon, charm)
@@ -662,6 +680,12 @@ export class GameRuntime {
   }
 
   equipItem(itemId: ItemId): EquipResult {
+    if (!this.playerHealthRuntime.snapshot().health.alive) {
+      return { accepted: false, reason: 'actor-defeated' }
+    }
+    if (this.combatRuntime.snapshot().phase !== 'idle') {
+      return { accepted: false, reason: 'combat-busy' }
+    }
     const result = this.equipmentRuntime.equip(itemId, this.inventoryRuntime)
     if (result.accepted) {
       this.syncResolvedCombatStats()
@@ -671,6 +695,12 @@ export class GameRuntime {
   }
 
   unequipSlot(slot: EquipSlot): UnequipResult {
+    if (!this.playerHealthRuntime.snapshot().health.alive) {
+      return { accepted: false, reason: 'actor-defeated' }
+    }
+    if (this.combatRuntime.snapshot().phase !== 'idle') {
+      return { accepted: false, reason: 'combat-busy' }
+    }
     const result = this.equipmentRuntime.unequip(slot)
     if (result.accepted) {
       this.syncResolvedCombatStats()
@@ -1280,6 +1310,7 @@ export class GameRuntime {
 
   private acquireAuthoredItem(itemId: ItemId, simulationStep: number): void {
     const definition = requireItemDefinition(itemId)
+    const tradeoffSummary = formatModifierSummary(definition.modifiers).join(' · ')
     if (definition.unique && this.inventoryRuntime.has(itemId)) {
       this.echoesRuntime.add(definition.duplicateEchoReward)
       this.lastLootAcquisition = {
@@ -1287,6 +1318,12 @@ export class GameRuntime {
         itemId,
         echoesGained: definition.duplicateEchoReward,
         simulationStep,
+        isNew: false,
+        displayName: definition.displayName,
+        slot: definition.slot,
+        rarity: definition.rarity,
+        tradeoffSummary,
+        feedback: `Relic already bound — converted to ${definition.duplicateEchoReward} Echoes`,
       }
     } else {
       this.inventoryRuntime.add(itemId)
@@ -1295,6 +1332,12 @@ export class GameRuntime {
         itemId,
         echoesGained: 0,
         simulationStep,
+        isNew: true,
+        displayName: definition.displayName,
+        slot: definition.slot,
+        rarity: definition.rarity,
+        tradeoffSummary,
+        feedback: `New ${definition.rarity} ${definition.slot ?? definition.type} · ${tradeoffSummary}`,
       }
     }
     this.markPersistentChange()
@@ -1316,6 +1359,12 @@ export class GameRuntime {
           itemId: null,
           echoesGained: resolution.amount,
           simulationStep: this.clock.snapshot().stepCount,
+          isNew: false,
+          displayName: null,
+          slot: null,
+          rarity: null,
+          tradeoffSummary: '',
+          feedback: `Authored loot claimed — converted to ${resolution.amount} Echoes`,
         }
         this.markPersistentChange()
         continue
@@ -1331,6 +1380,31 @@ export class GameRuntime {
       ) {
         owned.add(resolution.itemId)
         this.markPersistentChange()
+      }
+    }
+    this.grantAuthoredEncounterClearRewards(owned)
+  }
+
+  /** Deterministic inventory grants that complete the first-run arc beyond per-enemy pickups. */
+  private grantAuthoredEncounterClearRewards(owned: Set<ItemId>): void {
+    const step = this.clock.snapshot().stepCount
+    const mixedIds = ['enemy.skirmisher.1', 'enemy.brute.1'] as const
+    if (mixedIds.every((id) => this.enemyRuntimes.find((enemy) => enemy.id === id)?.snapshot().alive === false)) {
+      if (this.lootPickupRuntime.rememberEnemySpawn(LOOT_REWARD_MIXED_CLEAR_SOURCE_ID)) {
+        if (!owned.has(LOOT_REWARD_MIXED_CLEAR_ITEM_ID)) {
+          this.acquireAuthoredItem(LOOT_REWARD_MIXED_CLEAR_ITEM_ID, step)
+          owned.add(LOOT_REWARD_MIXED_CLEAR_ITEM_ID)
+        }
+      }
+    }
+
+    const pressure = this.enemyRuntimes.find((enemy) => enemy.id === 'enemy.skirmisher.pressure')
+    if (pressure !== undefined && !pressure.snapshot().alive) {
+      if (this.lootPickupRuntime.rememberEnemySpawn(LOOT_REWARD_PRESSURE_CLEAR_SOURCE_ID)) {
+        if (!owned.has(LOOT_REWARD_PRESSURE_CLEAR_ITEM_ID)) {
+          this.acquireAuthoredItem(LOOT_REWARD_PRESSURE_CLEAR_ITEM_ID, step)
+          owned.add(LOOT_REWARD_PRESSURE_CLEAR_ITEM_ID)
+        }
       }
     }
   }

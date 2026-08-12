@@ -16,12 +16,16 @@ export interface ItemGameplayModifiers {
   readonly guardImpactThresholdBonus: number
   /**
    * Added to active-skill cooldown steps after an execution completes.
-   * Negative shortens cooldown; clamped at 0 by the combat cooldown resolver.
+   * Negative shortens cooldown; authoritative resolver clamps to floor/ceiling.
    */
   readonly activeSkillCooldownStepDelta: number
   /** Added to flask heal amount when the flask active step applies. */
   readonly flaskHealBonus: number
 }
+
+/** Floor/ceiling for equipment-adjusted active-skill cooldowns (base > 0 only). */
+export const ACTIVE_SKILL_COOLDOWN_MIN_STEPS = 60
+export const ACTIVE_SKILL_COOLDOWN_MAX_STEPS = 360
 
 export interface ItemPresentationHooks {
   readonly iconKey: string
@@ -312,7 +316,12 @@ export function effectiveActiveSkillCooldownSteps(
   if (!Number.isInteger(baseCooldownSteps) || baseCooldownSteps < 0) {
     throw new RangeError('baseCooldownSteps must be a non-negative integer')
   }
-  return Math.max(0, baseCooldownSteps + equipment.activeSkillCooldownStepDelta)
+  if (baseCooldownSteps === 0) return 0
+  const raw = baseCooldownSteps + equipment.activeSkillCooldownStepDelta
+  return Math.min(
+    ACTIVE_SKILL_COOLDOWN_MAX_STEPS,
+    Math.max(ACTIVE_SKILL_COOLDOWN_MIN_STEPS, raw),
+  )
 }
 
 export function effectiveFlaskHealAmount(
