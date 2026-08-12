@@ -65,9 +65,21 @@ describe('ossuary route placements', () => {
       'ossuary.light.candle-cluster',
       'ossuary.light.candelabrum',
       'ossuary.light.reliquary-lantern',
+      'ossuary.light.double-sconce',
+      'ossuary.light.ember-bowl',
+      'ossuary.light.spectral-reliquary',
     ]))
     expect(practicals.filter((entry) => entry.variant === 'actual-light')).toHaveLength(7)
     expect(practicals.length).toBeGreaterThan(5)
+  })
+
+  it('gives the Court of Quiet Names distinct pointed architecture and source fixtures', () => {
+    const court = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'mixed-court')
+    expect(court.some((entry) => entry.objectId === 'ossuary.arch.lancet')).toBe(true)
+    expect(court.some((entry) => entry.objectId === 'ossuary.arch.lancet-broken')).toBe(true)
+    expect(court.filter((entry) => entry.objectId === 'ossuary.niche.cluster')).toHaveLength(2)
+    expect(court.some((entry) => entry.objectId === 'ossuary.light.spectral-reliquary')).toBe(true)
+    expect(court.filter((entry) => entry.variant === 'actual-light')).toHaveLength(2)
   })
 
   it('authors a readable final arena with reusable funeral assets and a clear center', () => {

@@ -1,52 +1,50 @@
-# PLAN: M13 Character Progression & Build Identity — Macro-batch 1
+# PLAN: M13 Character Progression & Build Identity — Macro-batch 2
 <!-- Live M13 graph only. -->
 
-Input: PO close-M12 + start-M13 brief | Stack: `STACK.md`
+Input: Product Owner M13 presentation brief | Stack: `STACK.md`
 Task slug: `m13-character-progression-build-identity`
-Agent: Cursor only
+Agent: Codex only
 
 ## Goal
 
-Add the smallest durable progression layer (XP/level 1–5, Vitality/Resolve/Might points, authoritative stat resolution composing with equipment, save persistence, minimal UI/feedback, `gate:m13-progression`) without destabilizing combat authority.
+Make the accepted M13 progression/build facts visually legible through a compact character panel, authored attribute/item iconography, restrained HUD feedback, and a targeted Court of Quiet Names readability pass. Gameplay progression, equipment, save, and combat authority remain unchanged.
 
 ## Non-goals
 
-- M14 / world expansion / NPC / dialogue / quests / crafting / rarity / respec / vendors
-- Large skill tree, mana system, crit/penetration, dynamic enemy level scaling
-- Souls-like XP loss on death
-- Codex polish (skill VFX/icons/UI art) — defer; active skill foundation only if core stays small
+- Active-skill runtime/UI, cooldowns, mana, skill tree, M14
+- XP thresholds/rewards, attribute effects, charm modifiers, save schema, allocation authority
+- Camera, collision, or global-lighting redesign
+- Third-party art/icons, production asset download, broad world rebuild
 
 ## Steps
 
-- [x] 1. Stat contract + resolver + XP/level/allocation pure runtimes + tests
+- [x] 1. Progression/build presentation contract and authored icon family
   - depends: —
-  - risk: HIGH
+  - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `src/game/character/playerProgression*`, `playerStatResolution*`; enemy `xpReward`; STACK progression law
-  - verifier: `npx vitest run src/game/character/playerProgression.test.ts src/game/character/playerProgression.integration.test.ts`
-- [x] 2. Wire GameRuntime + SaveFileV3 migration + death durability + HUD/inventory projection
+  - owns/allows: `src/ui/*progression*`, `ItemGlyph*`, inventory/HUD model/components/tests, UI styles
+  - verifier: `npx vitest run src/ui`
+- [x] 2. Court readability and reusable funerary vocabulary
   - depends: 1
-  - risk: HIGH
+  - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `GameRuntime*`, `save/*`, `browserGate`, `ui/*`, item equipment composition tests
-  - verifier: `npx vitest run src/game/save src/game/character src/game/runtime/GameRuntime.test.ts src/ui`
-- [x] 3. `gate:m13-progression` + regression + docs/HANDOFF
-  - depends: 2
-  - risk: HIGH
+  - owns/allows: `src/render/world/ossuary/**`, world object contracts/registry/tests, visual direction
+  - verifier: focused world/render tests + `npm run gate:m10-perf-baseline`
+- [x] 3. Deterministic M13 visual evidence and integration gate
+  - depends: 1, 2
+  - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `scripts/browser/gate-m13-progression.mjs`, package script, PLAN/HANDOFF/current-state/DEBT
-  - verifier: `npm run gate:m13-progression && npm run gate:m12-alpha-slice && npm run verify`
+  - owns/allows: M13 browser gate/scripts/package entry, PLAN/HANDOFF/current-state/REPOMAP
+  - verifier: `npm run gate:m13-progression` + M13 visual gate + requested regression gates + `npm run verify`
 
 ## Decisions
 
-- Canonical M13 name: Character Progression & Build Identity (roadmap Playable Alpha train).
-- Initial attributes: Vitality / Resolve / Might; levels 1–5; one point per level-up; no respec.
-- Active skill foundation deferred to MB2 (progression + Save V3 + gate already filled MB1).
-- Persist only durable progression facts; recompute resolved combat stats.
-- XP rewards mirror echo authorship (25 / 60 / 200); cumulative XP thresholds 0 / 50 / 120 / 220 / 350.
-- Effects: Vitality +10 max HP; Resolve +1 guard threshold; Might +2 light / +3 heavy.
+- UI consumes resolved snapshot values and dispatches the existing allocation request; it does not calculate combat outcomes.
+- Vitality / Resolve / Might use distinct ember-crimson / bone-ward / ash-gold motifs; no fake active-skill affordance.
+- World work is presentation-only through ADR-0002 objects/placements over unchanged collider proxies.
+- `.tools/node22` is unreferenced ignored agent-local tooling and is removed; `.tools/` remains ignored. Verification records host toolchain truth if canonical Node 22 is unavailable.
 
 ## Escalation
 
-- Same failure 3× → stuck report.
-- Combat authority redesign → stop for review.
+- Any required gameplay/save authority change → stop for review.
+- Same failure 3× → write a stuck report and stop retrying.

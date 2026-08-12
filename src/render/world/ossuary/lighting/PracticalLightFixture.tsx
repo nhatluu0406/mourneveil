@@ -147,6 +147,39 @@ function ReliquaryLantern({ actualLight }: { readonly actualLight: boolean }) {
   )
 }
 
+function DoubleSconce({ actualLight }: { readonly actualLight: boolean }) {
+  return <group>
+    {[-0.3, 0.3].map((x) => <group key={x} position={[x, 0, 0]} scale={0.72}><mesh geometry={PRACTICAL_FIXTURE_GEOMETRIES.sconceIron} material={getOssuaryMaterial('iron')} castShadow/><mesh geometry={PRACTICAL_FIXTURE_GEOMETRIES.sconceBronze} material={getOssuaryMaterial('bronze')} castShadow/><group position={[0, 0.32, 0.46]}><FlameCue scale={0.8} glow={actualLight}/></group></group>)}
+    {actualLight ? <pointLight position={[0, 0.48, 0.34]} intensity={6.2} distance={8.5} decay={2} color={WARM}/> : null}
+  </group>
+}
+
+function ProcessionalTorch({ actualLight }: { readonly actualLight: boolean }) {
+  return <group>
+    <mesh castShadow position={[0, 0.78, 0]}><cylinderGeometry args={[0.045, 0.085, 1.56, 7]}/><primitive attach="material" object={getOssuaryMaterial('iron')}/></mesh>
+    <mesh castShadow position={[0, 1.5, 0]}><cylinderGeometry args={[0.24, 0.12, 0.34, 7, 1, true]}/><primitive attach="material" object={getOssuaryMaterial('bronze')}/></mesh>
+    <group position={[0, 1.72, 0]}><FlameCue scale={0.92} glow={actualLight}/></group>
+    {actualLight ? <pointLight position={[0, 1.85, 0]} intensity={6.8} distance={9.2} decay={2} color={WARM}/> : null}
+  </group>
+}
+
+function EmberBowl({ actualLight }: { readonly actualLight: boolean }) {
+  return <group>
+    <mesh geometry={PRACTICAL_FIXTURE_GEOMETRIES.brazierBronze} material={getOssuaryMaterial('bronze')} position={[0, -0.48, 0]} scale={[1.1, 0.78, 1.1]} castShadow/>
+    <group position={[0, 0.36, 0]}><FlameCue scale={1.05} glow={actualLight}/></group>
+    {actualLight ? <pointLight position={[0, 0.72, 0]} intensity={7.4} distance={9.5} decay={2} color={WARM}/> : null}
+  </group>
+}
+
+function SpectralReliquary({ actualLight }: { readonly actualLight: boolean }) {
+  return <group>
+    <mesh geometry={PRACTICAL_FIXTURE_GEOMETRIES.veilLampPole} material={getOssuaryMaterial('darkStone')} scale={[1.8, 0.92, 1.8]} castShadow/>
+    <mesh geometry={PRACTICAL_FIXTURE_GEOMETRIES.veilLampIron} material={getOssuaryMaterial('iron')} scale={1.3} castShadow/>
+    <group position={[0, 1.35, 0]}><FlameCue veil scale={1.05} glow/></group>
+    {actualLight ? <pointLight position={[0, 1.55, 0]} intensity={5.8} distance={9} decay={2} color={VEIL}/> : null}
+  </group>
+}
+
 /** Presentation-only fixture. `actual-light` selects sparse photometric sources; all fixtures remain visual projections. */
 export function PracticalLightFixture({ placement }: { readonly placement: WorldObjectPlacement }) {
   const actualLight = placement.variant === 'actual-light'
@@ -169,6 +202,18 @@ export function PracticalLightFixture({ placement }: { readonly placement: World
       break
     case 'ossuary.light.reliquary-lantern':
       fixture = <ReliquaryLantern actualLight={actualLight} />
+      break
+    case 'ossuary.light.double-sconce':
+      fixture = <DoubleSconce actualLight={actualLight} />
+      break
+    case 'ossuary.light.processional-torch':
+      fixture = <ProcessionalTorch actualLight={actualLight} />
+      break
+    case 'ossuary.light.ember-bowl':
+      fixture = <EmberBowl actualLight={actualLight} />
+      break
+    case 'ossuary.light.spectral-reliquary':
+      fixture = <SpectralReliquary actualLight={actualLight} />
       break
   }
   return (

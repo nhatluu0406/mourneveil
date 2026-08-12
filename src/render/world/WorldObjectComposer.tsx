@@ -105,6 +105,10 @@ function UniqueObject({ placement }: { readonly placement: WorldObjectPlacement 
     case 'ossuary.light.candle-cluster':
     case 'ossuary.light.candelabrum':
     case 'ossuary.light.reliquary-lantern':
+    case 'ossuary.light.double-sconce':
+    case 'ossuary.light.processional-torch':
+    case 'ossuary.light.ember-bowl':
+    case 'ossuary.light.spectral-reliquary':
       return <PracticalLightFixture placement={placement} />
     case 'ossuary.landmark.arena-seal':
       return <SepulchreArenaSeal placement={placement} />

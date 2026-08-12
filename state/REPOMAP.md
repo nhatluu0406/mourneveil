@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (56L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (52L)
+- PLAN.md (50L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (65L)
+- package.json (66L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -174,7 +174,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0002-modular-world-objects.md (42L)
   - **docs/art/** (2 files)
     - m11-boss-visual-handoff.md (95L)
-    - visual-direction.md (35L)
+    - visual-direction.md (41L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
     - current-state.md (27L)
@@ -198,7 +198,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (46 files)
+  - **scripts/browser/** (47 files)
     - README.md (18L)
     - gate-m10-camera-occlusion-repro.mjs (101L)
     - gate-m10-camera-stability.mjs (194L)
@@ -210,8 +210,8 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m11-boss-visual.mjs (320L)
     - gate-m12-alpha-slice.mjs (210L)
     - gate-m12-build-choice.mjs (161L)
-    - gate-m13-progression.mjs (227L)
-    - ... +34 more
+    - gate-m13-progression-visual.mjs (116L)
+    - ... +35 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -227,6 +227,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (137L) -- symbols: App; imports
+    - App.tsx (137L) -- symbols: App;
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

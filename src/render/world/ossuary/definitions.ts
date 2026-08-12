@@ -102,6 +102,24 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     occlusionPolicy: 'fade',
     visualBounds: [0.24, 1.7, 0.22],
   }),
+  'ossuary.arch.lancet': define({
+    id: 'ossuary.arch.lancet', family: 'architecture', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [1.5, 2.25, 0.22],
+  }),
+  'ossuary.arch.lancet-broken': define({
+    id: 'ossuary.arch.lancet-broken', family: 'architecture', materialKey: 'recessStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [1.35, 1.8, 0.26],
+  }),
+  'ossuary.buttress.split': define({
+    id: 'ossuary.buttress.split', family: 'architecture', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.56, 1.9, 0.5],
+  }),
+  'ossuary.niche.cluster': define({
+    id: 'ossuary.niche.cluster', family: 'burial', materialKey: 'recessStone', castShadow: false, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.1, 1.25, 1.15],
+  }),
+  'ossuary.memorial.cluster': define({
+    id: 'ossuary.memorial.cluster', family: 'burial', materialKey: 'bone', castShadow: true, receiveShadow: true, renderMode: 'instanced', visualBounds: [0.8, 0.85, 0.28],
+  }),
+  'ossuary.reliquary.chain': define({
+    id: 'ossuary.reliquary.chain', family: 'metal', materialKey: 'iron', castShadow: true, receiveShadow: false, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.24, 1.7, 0.12],
+  }),
   'ossuary.niche.recess': define({
     id: 'ossuary.niche.recess',
     family: 'burial',
@@ -270,6 +288,10 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     receiveShadow: false,
     renderMode: 'unique',
   }),
+  'ossuary.light.double-sconce': define({ id: 'ossuary.light.double-sconce', family: 'dressing', materialKey: 'bronze', castShadow: true, receiveShadow: false, renderMode: 'unique' }),
+  'ossuary.light.processional-torch': define({ id: 'ossuary.light.processional-torch', family: 'dressing', materialKey: 'iron', castShadow: true, receiveShadow: false, renderMode: 'unique' }),
+  'ossuary.light.ember-bowl': define({ id: 'ossuary.light.ember-bowl', family: 'dressing', materialKey: 'bronze', castShadow: true, receiveShadow: true, renderMode: 'unique' }),
+  'ossuary.light.spectral-reliquary': define({ id: 'ossuary.light.spectral-reliquary', family: 'landmark', materialKey: 'verdigris', castShadow: true, receiveShadow: false, renderMode: 'unique' }),
   'ossuary.metal.burial-screen': define({
     id: 'ossuary.metal.burial-screen',
     family: 'metal',

@@ -36,6 +36,27 @@ const ARCH_RIB = createTaperedPrismGeometry({
   height: 1.7,
   depth: 0.22,
 })
+const ARCH_LANCET = createProfilePrismGeometry(
+  [[-0.78, -1.05], [-0.78, 0.35], [-0.48, 0.76], [0, 1.14], [0.48, 0.76], [0.78, 0.35], [0.78, -1.05], [0.56, -1.05], [0.56, 0.25], [0, 0.88], [-0.56, 0.25], [-0.56, -1.05]],
+  0.11,
+)
+const ARCH_LANCET_BROKEN = createProfilePrismGeometry(
+  [[-0.72, -0.88], [-0.72, 0.3], [-0.4, 0.7], [-0.08, 0.92], [0.16, 0.66], [0.42, 0.54], [0.66, 0.1], [0.66, -0.88], [0.48, -0.88], [0.48, 0.05], [0, 0.7], [-0.5, 0.2], [-0.5, -0.88]],
+  0.13,
+)
+const SPLIT_BUTTRESS = createProfilePrismGeometry(
+  [[-0.3, -0.95], [-0.18, 0.95], [-0.04, 0.95], [0, 0.18], [0.12, 0.84], [0.25, 0.72], [0.34, -0.95]],
+  0.25,
+)
+const NICHE_CLUSTER = createProfilePrismGeometry(
+  [[-0.06, -0.62], [-0.06, 0.62], [0.06, 0.62], [0.06, -0.62]],
+  0.58,
+)
+const MEMORIAL_CLUSTER = createProfilePrismGeometry(
+  [[-0.4, -0.38], [-0.34, 0.28], [-0.18, 0.42], [-0.04, 0.2], [0.08, 0.38], [0.22, 0.3], [0.4, -0.38]],
+  0.14,
+)
+const RELIQUARY_CHAIN = new TorusGeometry(0.12, 0.018, 4, 10, Math.PI * 1.65)
 const NICHE_RECESS = new BoxGeometry(0.06, 0.74, 0.62)
 const NICHE_ARCH = new TorusGeometry(0.29, 0.034, 5, 18, Math.PI)
 const SARCOPHAGUS_BODY = createTaperedPrismGeometry({
@@ -84,6 +105,12 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   'ossuary.buttress': BUTTRESS,
   'ossuary.arch.full': ARCH_FULL,
   'ossuary.arch.rib': ARCH_RIB,
+  'ossuary.arch.lancet': ARCH_LANCET,
+  'ossuary.arch.lancet-broken': ARCH_LANCET_BROKEN,
+  'ossuary.buttress.split': SPLIT_BUTTRESS,
+  'ossuary.niche.cluster': NICHE_CLUSTER,
+  'ossuary.memorial.cluster': MEMORIAL_CLUSTER,
+  'ossuary.reliquary.chain': RELIQUARY_CHAIN,
   'ossuary.niche.recess': NICHE_RECESS,
   'ossuary.niche.arch': NICHE_ARCH,
   'ossuary.sarcophagus.body': SARCOPHAGUS_BODY,
