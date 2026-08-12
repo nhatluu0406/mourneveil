@@ -50,6 +50,8 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
+    visualBounds: [0.16, 1.25, 1.2],
   }),
   'ossuary.wall.break': define({
     id: 'ossuary.wall.break',
@@ -58,6 +60,8 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
+    visualBounds: [0.68, 0.68, 0.68],
   }),
   'ossuary.buttress': define({
     id: 'ossuary.buttress',
@@ -66,6 +70,8 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
+    visualBounds: [0.42, 2.04, 0.4],
   }),
   'ossuary.arch.full': define({
     id: 'ossuary.arch.full',
@@ -74,6 +80,8 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
+    visualBounds: [1.92, 1.1, 0.22],
   }),
   'ossuary.arch.rib': define({
     id: 'ossuary.arch.rib',
@@ -82,6 +90,8 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
+    visualBounds: [0.24, 1.7, 0.22],
   }),
   'ossuary.niche.recess': define({
     id: 'ossuary.niche.recess',
@@ -90,6 +100,8 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: true,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
+    visualBounds: [0.06, 0.74, 0.62],
   }),
   'ossuary.niche.arch': define({
     id: 'ossuary.niche.arch',
@@ -98,6 +110,8 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: false,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
+    visualBounds: [0.58, 0.58, 0.07],
   }),
   'ossuary.sarcophagus.body': define({
     id: 'ossuary.sarcophagus.body',
@@ -186,6 +200,7 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: false,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
     visualBounds: [2.4, 3.2, 0.55],
   }),
   'ossuary.silhouette.column': define({
@@ -195,6 +210,7 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: false,
     renderMode: 'instanced',
+    occlusionPolicy: 'fade',
     visualBounds: [0.55, 3.4, 0.55],
   }),
   'ossuary.light.wall-sconce': define({

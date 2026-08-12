@@ -6,6 +6,12 @@ import {
   PLAYER_RESPAWN_REQUEST,
   PLAYER_WORLD_INTERACTION_REQUEST,
 } from '../input/playerRecoveryIntent'
+import { readCameraDiagnostic } from './cameraDiagnosticPublish'
+import { readInstanceMatrixProbe } from './instanceMatrixProbe'
+import {
+  readOccludedPlacementIds,
+  setOcclusionOverride,
+} from '../render/world/occlusionPlacementState'
 import { readRendererStats } from './rendererStats'
 
 declare global {
@@ -34,6 +40,11 @@ declare global {
       equipItem: (itemId: string) => unknown
       unequipSlot: (slot: 'weapon' | 'charm') => unknown
       rendererStats: () => unknown
+      cameraDiagnostic: () => unknown
+      occludedPlacementIds: () => unknown
+      instanceMatrixProbe: () => unknown
+      forceOccludeAllFadePlacements: () => unknown
+      clearOcclusionOverride: () => unknown
     }
   }
 }
@@ -87,6 +98,17 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     equipItem: (itemId) => runtime.equipItem(itemId),
     unequipSlot: (slot) => runtime.unequipSlot(slot),
     rendererStats: () => readRendererStats(),
+    cameraDiagnostic: () => readCameraDiagnostic(),
+    occludedPlacementIds: () => readOccludedPlacementIds(),
+    instanceMatrixProbe: () => readInstanceMatrixProbe(),
+    forceOccludeAllFadePlacements: () => {
+      setOcclusionOverride('all-fade')
+      return readOccludedPlacementIds()
+    },
+    clearOcclusionOverride: () => {
+      setOcclusionOverride('auto')
+      return readOccludedPlacementIds()
+    },
   }
 
   return () => {

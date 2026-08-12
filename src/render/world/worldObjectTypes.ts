@@ -61,6 +61,9 @@ export type OssuaryObjectId =
 
 export type WorldObjectRenderMode = 'instanced' | 'unique'
 
+/** Presentation-only camera readability: fade eligible tall architecture when it occludes. */
+export type WorldObjectOcclusionPolicy = 'fade' | 'solid'
+
 export interface WorldObjectDefinition {
   readonly id: OssuaryObjectId
   readonly family: WorldObjectFamily
@@ -69,6 +72,7 @@ export interface WorldObjectDefinition {
   readonly castShadow: boolean
   readonly receiveShadow: boolean
   readonly renderMode: WorldObjectRenderMode
+  readonly occlusionPolicy?: WorldObjectOcclusionPolicy
   /** Optional authored visual bounds hint for documentation/debug — not collision. */
   readonly visualBounds?: readonly [number, number, number]
 }

@@ -1,13 +1,13 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useRef } from 'react'
+import { publishCameraDiagnostic } from '../debug/cameraDiagnosticPublish'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import {
   FOLLOW_CAMERA_MODE,
-  FOLLOW_DAMPING,
-  createInitialFollowCameraPose,
+  createInitialFollowCameraState,
   stepFollowCamera,
   type CameraDiagnostic,
-  type FollowCameraPose,
+  type FollowCameraState,
 } from './followCamera'
 import { resolvePlayerOutgoingHitConfirm } from './playerCombatFeedback'
 
@@ -25,7 +25,7 @@ export function FollowCameraRig({
   onDiagnostic,
 }: FollowCameraRigProps) {
   const { camera } = useThree()
-  const poseRef = useRef<FollowCameraPose | null>(null)
+  const stateRef = useRef<FollowCameraState | null>(null)
   const diagnosticFrameRef = useRef(0)
   const lastHitKeyRef = useRef<string | null>(null)
   const impulseRemainingRef = useRef(0)
@@ -36,15 +36,9 @@ export function FollowCameraRig({
     const playerPosition = snapshot.player.position
     const facing = snapshot.player.facing
     const previous =
-      poseRef.current ?? createInitialFollowCameraPose(playerPosition, facing)
-    const next = stepFollowCamera(
-      previous,
-      playerPosition,
-      deltaSeconds,
-      FOLLOW_DAMPING,
-      facing,
-    )
-    poseRef.current = next
+      stateRef.current ?? createInitialFollowCameraState(playerPosition, facing)
+    const next = stepFollowCamera(previous, playerPosition, deltaSeconds, facing)
+    stateRef.current = next
 
     const outgoing = resolvePlayerOutgoingHitConfirm({
       lastHit: snapshot.contact.lastHit,
@@ -92,27 +86,27 @@ export function FollowCameraRig({
           impulseScaleRef.current
         : 0
 
-    camera.position.set(
-      next.position.x + impulseStrength * 0.35,
-      next.position.y + impulseStrength * 0.2,
-      next.position.z + impulseStrength * 0.35,
-    )
-    camera.lookAt(next.lookAt.x, next.lookAt.y, next.lookAt.z)
+    const cameraPosition = {
+      x: next.pose.position.x + impulseStrength * 0.35,
+      y: next.pose.position.y + impulseStrength * 0.2,
+      z: next.pose.position.z + impulseStrength * 0.35,
+    }
+    camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z)
+    camera.lookAt(next.pose.lookAt.x, next.pose.lookAt.y, next.pose.lookAt.z)
     camera.updateMatrixWorld(true)
+
+    const diagnostic: CameraDiagnostic = {
+      mode: FOLLOW_CAMERA_MODE,
+      followLookAt: next.pose.lookAt,
+      lookAheadDir: next.lookAheadDir,
+      cameraPosition,
+    }
+    publishCameraDiagnostic(diagnostic)
 
     if (onDiagnostic) {
       diagnosticFrameRef.current += 1
-      // Throttle React diagnostic updates; camera itself updates every frame.
-      if (diagnosticFrameRef.current % 6 === 0) {
-        onDiagnostic({
-          mode: FOLLOW_CAMERA_MODE,
-          followLookAt: next.lookAt,
-          cameraPosition: {
-            x: camera.position.x,
-            y: camera.position.y,
-            z: camera.position.z,
-          },
-        })
+      if (diagnosticFrameRef.current % 12 === 0) {
+        onDiagnostic(diagnostic)
       }
     }
   })

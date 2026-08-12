@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
 import { Object3D, type InstancedMesh, type MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import {
-  CONNECTED_LEVEL_LANDMARKS,
   activeConnectedLevelColliders,
   type ConnectedLevelBoxCollider,
 } from '../physics/connectedLevelCollision'
@@ -12,29 +11,22 @@ import { aabbFromCenterSize, occludingSolidIds } from './cameraOcclusion'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { forEachOcclusionMaterial, registerOcclusionMaterial } from './occlusionMaterials'
 import { OssuaryEnvironmentKit } from './OssuaryEnvironmentKit'
+import {
+  listFadeOcclusionSolids,
+  setOccludedPlacementIds,
+} from './world/occlusionPlacementState'
 
-const COLORS = {
-  wall: MOURNEVEIL_PALETTE.environment.wall,
-  blocker: MOURNEVEIL_PALETTE.environment.blocker,
-  'shortcut-gate': MOURNEVEIL_PALETTE.shortcut.closed,
-  'final-gate': MOURNEVEIL_PALETTE.finalGate.sealed,
-} as const
+const FADE_OPACITY = 0.05
+const FADE_LERP = 14
 
-/** Blockers/landmarks dressed by ADR-0002 production shells — collider only. */
-const DRESSED_PROXY_IDS = Object.freeze(
-  new Set([
-    'blocker.first-combat',
-    'blocker.mixed.west',
-    'blocker.mixed.east',
-    'blocker.approach',
-    'landmark.watch-column',
-    'landmark.court-obelisk',
-    'landmark.approach-cairn',
-  ]),
-)
-
-const FADE_OPACITY = 0.22
-const FADE_LERP = 10
+/**
+ * Default presentation: gameplay colliders only for walls/blockers/floors/checkpoints.
+ * Authored ADR-0002 shell owns visible architecture (resolves D-005 default double-draw).
+ * Gates keep presentation because their visual state is simulation-driven.
+ */
+function shouldRenderProxyMesh(collider: ConnectedLevelBoxCollider): boolean {
+  return collider.kind === 'shortcut-gate' || collider.kind === 'final-gate'
+}
 
 function FuneraryGateVisual({
   collider,
@@ -95,19 +87,15 @@ function FuneraryGateVisual({
   )
 }
 
-function SolidVisual({ collider, color }: { readonly collider: ConnectedLevelBoxCollider; readonly color: string }) {
+function SolidVisual({ collider }: { readonly collider: ConnectedLevelBoxCollider }) {
   const materialRef = useRef<MeshStandardMaterial>(null)
-  const isFloor = collider.kind === 'floor'
-  const isGate = collider.kind === 'shortcut-gate' || collider.kind === 'final-gate'
-  const isCheckpoint = collider.kind === 'checkpoint'
-  const isDressedBlocker = DRESSED_PROXY_IDS.has(collider.id)
-  const showProxyMesh = !isFloor && !isCheckpoint && !isDressedBlocker
+  const showProxyMesh = shouldRenderProxyMesh(collider)
 
   useEffect(() => {
     const material = materialRef.current
-    if (material === null || !showProxyMesh || isGate) return
+    if (material === null || !showProxyMesh) return
     return registerOcclusionMaterial({ id: collider.id, material, baseOpacity: 1 })
-  }, [collider.id, isGate, showProxyMesh])
+  }, [collider.id, showProxyMesh])
 
   const halfExtents: [number, number, number] = [
     collider.size[0] / 2,
@@ -118,57 +106,41 @@ function SolidVisual({ collider, color }: { readonly collider: ConnectedLevelBox
   return (
     <RigidBody type="fixed" colliders={false} position={collider.position}>
       <CuboidCollider args={halfExtents} />
-      {!showProxyMesh ? null : isGate ? (
-        <FuneraryGateVisual collider={collider} materialRef={materialRef} />
-      ) : (
-        <mesh castShadow receiveShadow userData={{ solidId: collider.id }}>
-          <boxGeometry args={collider.size} />
-          <meshStandardMaterial
-            ref={materialRef}
-            color={color}
-            roughness={0.9}
-            metalness={0.03}
-            transparent
-            opacity={1}
-            depthWrite
-          />
-        </mesh>
-      )}
+      {showProxyMesh ? <FuneraryGateVisual collider={collider} materialRef={materialRef} /> : null}
     </RigidBody>
   )
 }
 
-/** Presentation-only fade of foreground solids between camera and player. */
+/** Presentation-only fade of foreground gate bars + ADR-0002 fade-eligible architecture. */
 export function CameraOcclusionFader({ runtime }: { readonly runtime: GameRuntime }) {
-  const solidsRef = useRef<Array<{ id: string; box: ReturnType<typeof aabbFromCenterSize> }>>([])
-
   useFrame(({ camera }, delta) => {
     const world = runtime.snapshot().world
-    solidsRef.current = activeConnectedLevelColliders({
+    const gateSolids = activeConnectedLevelColliders({
       shortcutOpen: world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed'),
       finalGateOpen: world.finalGateReached,
     })
-      .filter((collider) => collider.kind !== 'floor')
+      .filter((collider) => shouldRenderProxyMesh(collider))
       .map((collider) => ({ id: collider.id, box: aabbFromCenterSize(collider.position, collider.size) }))
 
     const player = runtime.snapshot().player.position
-    const occluded = new Set(
-      occludingSolidIds(
-        { x: camera.position.x, y: camera.position.y, z: camera.position.z },
-        { x: player.x, y: player.y + 0.55, z: player.z },
-        solidsRef.current,
-      ),
-    )
+    const focus = { x: player.x, y: player.y + 0.55, z: player.z }
+    const cameraPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z }
+    const placementSolids = listFadeOcclusionSolids()
+    setOccludedPlacementIds(new Set(occludingSolidIds(cameraPos, focus, placementSolids)))
+
+    const occludedGates = new Set(occludingSolidIds(cameraPos, focus, gateSolids))
     const blend = Math.min(1, delta * FADE_LERP)
 
     forEachOcclusionMaterial((id, entry) => {
-      const target = occluded.has(id) ? FADE_OPACITY : entry.baseOpacity
+      const target = occludedGates.has(id) ? FADE_OPACITY : entry.baseOpacity
+      const next = entry.material.opacity + (target - entry.material.opacity) * blend
+      if (Math.abs(next - entry.material.opacity) < 0.001) return
       entry.material.transparent = true
-      entry.material.opacity += (target - entry.material.opacity) * blend
+      entry.material.opacity = next
       entry.material.depthWrite = entry.material.opacity > 0.85
       entry.material.needsUpdate = true
     })
-  })
+  }, -1)
 
   return null
 }
@@ -179,21 +151,11 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
     shortcutOpen: world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed'),
     finalGateOpen: world.finalGateReached,
   })
-  const landmarkIds = new Set(CONNECTED_LEVEL_LANDMARKS.map((entry) => entry.id))
 
   return (
     <>
       {colliders.map((collider) => (
-        <SolidVisual
-          key={collider.id}
-          collider={collider}
-          color={
-            collider.color ??
-            (landmarkIds.has(collider.id)
-              ? COLORS.blocker
-              : COLORS[collider.kind as keyof typeof COLORS] ?? COLORS.wall)
-          }
-        />
+        <SolidVisual key={collider.id} collider={collider} />
       ))}
 
       <OssuaryEnvironmentKit />

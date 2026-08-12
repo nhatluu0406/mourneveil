@@ -74,5 +74,6 @@ describe('ossuary route placements', () => {
     expect(
       silhouettes.some((entry) => entry.objectId === 'ossuary.silhouette.mass'),
     ).toBe(true)
+    expect(silhouettes.some((entry) => entry.instanceId.includes('.se'))).toBe(false)
   })
 })

@@ -29,8 +29,9 @@ export function App() {
   } = useGameRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
   const reportCameraDiagnostic = useCallback((diagnostic: CameraDiagnostic) => {
+    if (!devDetailsVisible) return
     setCameraDiagnostic(diagnostic)
-  }, [])
+  }, [devDetailsVisible])
   const diagnostic = useMemo(
     () =>
       createDevelopmentDiagnostic(

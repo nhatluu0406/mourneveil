@@ -38,8 +38,8 @@ function GameWorld({ onPhysicsReady, runtime }: SceneProps) {
   return (
     <Physics gravity={[0, -9.81, 0]} timeStep={FIXED_STEP_SECONDS} paused>
       <PhysicsReadySignal onReady={onPhysicsReady} />
-      <ConnectedLevelVisual runtime={runtime} />
       <CameraOcclusionFader runtime={runtime} />
+      <ConnectedLevelVisual runtime={runtime} />
       <CheckpointVisual runtime={runtime} />
       <EchoRecoveryVisual runtime={runtime} />
       <LootPickupVisual runtime={runtime} />

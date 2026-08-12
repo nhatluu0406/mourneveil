@@ -7,6 +7,7 @@ import {
   type Object3D,
   type WebGLShadowMap,
 } from 'three'
+import { publishInstanceMatrixProbe } from '../debug/instanceMatrixProbe'
 import { publishRendererStats } from '../debug/rendererStats'
 
 function countBy(
@@ -57,6 +58,7 @@ export function RendererStatsPublisher() {
     })
 
     const drawingBuffer = gl.getDrawingBufferSize(drawingBufferRef.current)
+    publishInstanceMatrixProbe(scene)
     publishRendererStats({
       drawCalls: info.render.calls,
       triangles: info.render.triangles,

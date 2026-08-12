@@ -28,11 +28,12 @@ function slabField(
   zs: readonly number[],
   phase: number,
   objectId: 'ossuary.floor.slab' | 'ossuary.floor.ash-slab' = 'ossuary.floor.slab',
+  idPrefix = `floor.${area}`,
 ): WorldObjectPlacement[] {
   return xs.flatMap((x, xIndex) =>
     zs.map((z, zIndex) =>
       place(
-        `floor.${area}.${xIndex}.${zIndex}`,
+        `${idPrefix}.${xIndex}.${zIndex}`,
         objectId,
         area,
         [x, 0.045 + ((xIndex + zIndex) % 3) * 0.002, z],
@@ -156,6 +157,8 @@ const LATE_ROUTE_PRACTICALS: readonly WorldObjectPlacement[] = Object.freeze([
 
 const MIXED_COURT_SHELL: readonly WorldObjectPlacement[] = Object.freeze([
   ...slabField('mixed-court', [-1.45, -0.35, 0.75, 1.85, 2.95], [-6.45, -5.35, -4.25, -3.15, -2.05], 3),
+  // Southern divider detour: keep authored walkable floor visually continuous (no new art types).
+  ...slabField('mixed-court', [-4.35, -3.25], [-6.45, -5.35], 5, 'ossuary.floor.slab', 'floor.mixed-court.detour'),
   ...[-6.4, -4.8, -3.2, -1.65].flatMap((z, index) => [
     place(`bay.court.${index}`, 'ossuary.wall.bay', 'mixed-court', [-2.83, 0.88, z], [0, Math.PI, 0]),
     place(`buttress.court.${index}`, 'ossuary.buttress', 'mixed-court', [-2.72, 1.02, z - 0.72], [0, Math.PI, 0], [0.72, 1, 0.72]),
@@ -187,29 +190,24 @@ const ASH_WALK_TRANSITION: readonly WorldObjectPlacement[] = Object.freeze([
 
 /**
  * Cheap non-interactive distant masses outside the walkable route.
- * Fill dead-black camera margins without gameplay colliders or shadow casters.
- * SE placements target the high-oblique camera-near screen corners.
+ * Keep only far-field silhouettes — camera-near SE masses caused opaque occlusion.
  */
 const PERIMETER_SILHOUETTES: readonly WorldObjectPlacement[] = Object.freeze([
-  place('silhouette.refuge.north', 'ossuary.silhouette.mass', 'perimeter', [-5.4, 1.55, 4.85], [0, 0.08, 0], [1.35, 1.1, 1]),
-  place('silhouette.refuge.south', 'ossuary.silhouette.mass', 'perimeter', [-5.1, 1.4, -4.7], [0, -0.06, 0], [1.2, 1, 1]),
-  place('silhouette.refuge.se', 'ossuary.silhouette.mass', 'perimeter', [-1.6, 1.55, 3.55], [0, -0.4, 0], [1.55, 1.2, 1.1]),
-  place('silhouette.refuge.se.low', 'ossuary.silhouette.mass', 'perimeter', [-2.4, 1.25, -2.85], [0, 0.35, 0], [1.2, 0.95, 1]),
-  place('silhouette.watch.west', 'ossuary.silhouette.mass', 'perimeter', [-14.2, 1.7, 2.4], [0, Math.PI / 2, 0], [1.55, 1.25, 1]),
-  place('silhouette.watch.se', 'ossuary.silhouette.mass', 'perimeter', [-6.4, 1.6, 6.35], [0, -0.55, 0], [1.7, 1.25, 1.15]),
-  place('silhouette.court.south', 'ossuary.silhouette.mass', 'perimeter', [1.2, 1.55, -9.4], ZERO_ROTATION, [1.8, 1.15, 1]),
-  place('silhouette.court.se', 'ossuary.silhouette.mass', 'perimeter', [5.35, 1.5, -1.15], [0, -0.7, 0], [1.55, 1.2, 1.1]),
-  place('silhouette.ash.east', 'ossuary.silhouette.mass', 'perimeter', [12.4, 1.65, -4.1], [0, Math.PI / 2, 0], [1.45, 1.2, 1]),
-  place('silhouette.ash.north', 'ossuary.silhouette.mass', 'perimeter', [7.4, 1.5, -9.1], ZERO_ROTATION, [1.25, 1.05, 1]),
-  place('silhouette.ash.se', 'ossuary.silhouette.mass', 'perimeter', [10.6, 1.55, -0.85], [0, -0.5, 0], [1.5, 1.15, 1.1]),
+  place('silhouette.refuge.north', 'ossuary.silhouette.mass', 'perimeter', [-5.4, 1.55, 5.6], [0, 0.08, 0], [1.2, 1.05, 1]),
+  // Keep south mass far outside the divider detour — prior [-5.1,-5.5] sat in-camera and blacked out the actor.
+  place('silhouette.refuge.south', 'ossuary.silhouette.mass', 'perimeter', [-6.2, 1.55, -11.4], [0, -0.06, 0], [1.15, 1.05, 1]),
+  place('silhouette.watch.west', 'ossuary.silhouette.mass', 'perimeter', [-15.1, 1.7, 2.4], [0, Math.PI / 2, 0], [1.4, 1.15, 1]),
+  place('silhouette.court.south', 'ossuary.silhouette.mass', 'perimeter', [1.2, 1.55, -10.2], ZERO_ROTATION, [1.6, 1.05, 1]),
+  place('silhouette.ash.east', 'ossuary.silhouette.mass', 'perimeter', [13.2, 1.65, -4.1], [0, Math.PI / 2, 0], [1.35, 1.1, 1]),
+  place('silhouette.ash.north', 'ossuary.silhouette.mass', 'perimeter', [7.4, 1.5, -9.8], ZERO_ROTATION, [1.15, 1, 1]),
   ...[-1.6, 0.2, 2.0, 3.8].map((z, index) =>
     place(
       `silhouette.column.watch.${index}`,
       'ossuary.silhouette.column',
       'perimeter',
-      [-13.35, 1.7, z],
+      [-14.4, 1.7, z],
       ZERO_ROTATION,
-      [0.9 + (index % 2) * 0.12, 0.95 + (index % 3) * 0.08, 0.9],
+      [0.85 + (index % 2) * 0.1, 0.9 + (index % 3) * 0.06, 0.85],
     ),
   ),
   ...[5.2, 7.1, 9.0].map((x, index) =>
@@ -217,16 +215,13 @@ const PERIMETER_SILHOUETTES: readonly WorldObjectPlacement[] = Object.freeze([
       `silhouette.column.ash.${index}`,
       'ossuary.silhouette.column',
       'perimeter',
-      [x, 1.65, -8.55],
+      [x, 1.65, -9.35],
       ZERO_ROTATION,
-      [0.85, 0.9 + index * 0.08, 0.85],
+      [0.8, 0.85 + index * 0.06, 0.8],
     ),
   ),
-  place('silhouette.column.refuge.se.0', 'ossuary.silhouette.column', 'perimeter', [-0.85, 1.55, 2.4], ZERO_ROTATION, [1.05, 1.15, 1.05]),
-  place('silhouette.column.refuge.se.1', 'ossuary.silhouette.column', 'perimeter', [-1.35, 1.45, -1.8], ZERO_ROTATION, [0.95, 1.05, 0.95]),
-  place('silhouette.arch.court', 'ossuary.arch.full', 'perimeter', [1.1, 1.85, -10.2], [0, 0.12, 0], [1.6, 1.35, 1.2]),
-  place('silhouette.arch.ash', 'ossuary.arch.full', 'perimeter', [11.6, 1.7, -4], [0, Math.PI / 2, 0.05], [1.35, 1.15, 1.1]),
-  place('silhouette.arch.refuge.se', 'ossuary.arch.full', 'perimeter', [-0.4, 1.75, 4.2], [0, -0.85, 0], [1.25, 1.15, 1.1]),
+  place('silhouette.arch.court', 'ossuary.arch.full', 'perimeter', [1.1, 1.85, -10.9], [0, 0.12, 0], [1.45, 1.2, 1.1]),
+  place('silhouette.arch.ash', 'ossuary.arch.full', 'perimeter', [12.5, 1.7, -4], [0, Math.PI / 2, 0.05], [1.25, 1.1, 1]),
 ])
 
 /**

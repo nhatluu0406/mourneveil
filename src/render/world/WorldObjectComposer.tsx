@@ -1,3 +1,4 @@
+import { useFrame } from '@react-three/fiber'
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { Object3D, type InstancedMesh } from 'three'
 import {
@@ -12,6 +13,28 @@ import { CombatVeilMonolith } from './ossuary/landmarks/CombatVeilMonolith'
 import { ReliquaryPlinth } from './ossuary/landmarks/ReliquaryPlinth'
 import { VeilWispMotion } from './ossuary/dressing/VeilWispMotion'
 import { PracticalLightFixture } from './ossuary/lighting/PracticalLightFixture'
+import {
+  isPlacementOccluded,
+  rebuildFadeOcclusionSolids,
+} from './occlusionPlacementState'
+
+const FADE_SCALE = 0.001
+const FADE_SINK_Y = -40
+const scratch = new Object3D()
+
+function writeInstanceMatrix(
+  mesh: InstancedMesh,
+  index: number,
+  position: readonly [number, number, number],
+  rotation: readonly [number, number, number],
+  scale: readonly [number, number, number],
+): void {
+  scratch.position.set(position[0], position[1], position[2])
+  scratch.rotation.set(rotation[0], rotation[1], rotation[2])
+  scratch.scale.set(scale[0], scale[1], scale[2])
+  scratch.updateMatrix()
+  mesh.setMatrixAt(index, scratch.matrix)
+}
 
 function InstancedObjectGroup({
   objectId,
@@ -26,21 +49,40 @@ function InstancedObjectGroup({
     () => placements.map((placement) => placementTransformMatrixInputs(placement)),
     [placements],
   )
+  const fadeable = resolved.definition.occlusionPolicy === 'fade'
+  const instanceIds = useMemo(() => placements.map((placement) => placement.instanceId), [placements])
 
   useLayoutEffect(() => {
     const mesh = ref.current
     if (mesh === null) return
-    const transform = new Object3D()
-    transforms.forEach((entry, index) => {
-      transform.position.set(entry.position[0], entry.position[1], entry.position[2])
-      transform.rotation.set(entry.rotation[0], entry.rotation[1], entry.rotation[2])
-      transform.scale.set(entry.scale[0], entry.scale[1], entry.scale[2])
-      transform.updateMatrix()
-      mesh.setMatrixAt(index, transform.matrix)
-    })
+    for (let index = 0; index < transforms.length; index += 1) {
+      const entry = transforms[index]!
+      writeInstanceMatrix(mesh, index, entry.position, entry.rotation, entry.scale)
+    }
     mesh.instanceMatrix.needsUpdate = true
     mesh.computeBoundingSphere()
   }, [transforms])
+
+  useFrame(() => {
+    if (!fadeable) return
+    const mesh = ref.current
+    if (mesh === null) return
+    for (let index = 0; index < transforms.length; index += 1) {
+      const entry = transforms[index]!
+      if (isPlacementOccluded(instanceIds[index]!)) {
+        writeInstanceMatrix(
+          mesh,
+          index,
+          [entry.position[0], FADE_SINK_Y, entry.position[2]],
+          entry.rotation,
+          [FADE_SCALE, FADE_SCALE, FADE_SCALE],
+        )
+      } else {
+        writeInstanceMatrix(mesh, index, entry.position, entry.rotation, entry.scale)
+      }
+    }
+    mesh.instanceMatrix.needsUpdate = true
+  })
 
   return (
     <instancedMesh
@@ -49,7 +91,7 @@ function InstancedObjectGroup({
       args={[resolved.geometry, resolved.material, placements.length]}
       castShadow={resolved.definition.castShadow}
       receiveShadow={resolved.definition.receiveShadow}
-      frustumCulled
+      frustumCulled={false}
     />
   )
 }
@@ -78,6 +120,10 @@ export function WorldObjectComposer({
 }: {
   readonly placements: readonly WorldObjectPlacement[]
 }) {
+  useLayoutEffect(() => {
+    rebuildFadeOcclusionSolids(placements)
+  }, [placements])
+
   const instanced = placements.filter(
     (placement) => resolveWorldObjectDefinition(placement.objectId).renderMode === 'instanced',
   )

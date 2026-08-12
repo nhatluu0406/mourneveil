@@ -34,10 +34,8 @@ This register holds only known cross-milestone limitations that were consciously
 
 ## D-005 — Connected-level solid presentation co-ownership
 
-- Status: OPEN (partially mitigated in M10 MB6)
-- Observed: M10 macro-batch 3 architecture audit; MB6 reduced co-ownership by skipping floor/zone-plane proxy meshes and dressed blocker/landmark proxy meshes while retaining RigidBody colliders and gate visuals.
-- Limitation: Perimeter walls and undressed landmark proxies still render from `ConnectedLevelVisual` beside the modular ossuary shell; occlusion fade still registers on those proxy materials.
-- Why deferred: Full separation needs occlusion materials owned by production wall instances without shared-material fade side effects.
-- Revisit trigger: Final-arena production needs proxy dressing fully split from physics projection, or a change requires editing both visual shell and collider presentation for the same solid.
+- Status: RESOLVED (M10 final stabilization)
+- Observed: M10 macro-batch 3 architecture audit; MB6 partial mitigation; final stabilization made wall/blocker/floor/checkpoint proxies collider-only by default.
+- Resolution: `ConnectedLevelVisual` now renders only simulation-driven gate visuals; ADR-0002 ossuary shell owns default architecture presentation. Camera occlusion sinks fade-eligible placements and fades gate bars; gameplay colliders unchanged.
 - Relevant: `src/render/ConnectedLevelVisual.tsx`, `src/physics/connectedLevelCollision.ts`, ADR-0002
-- Product Owner tolerance: Accepted for the hero-route modularization batch; not an invitation to invent a GameObject inheritance layer.
+- Product Owner tolerance: Accepted as the end of default double-draw for solids; debug proxy visualization may return later as opt-in.
