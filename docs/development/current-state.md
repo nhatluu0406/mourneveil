@@ -1,13 +1,13 @@
 # Current State
 
-- Updated: 2026-08-12
-- Accepted: **M12 Vertical Slice Alpha** → `v0.12.0-vertical-slice-alpha` (`ab1b270`)
-- Prior: `v0.11.0-boss-vertical-slice` (M11)
-- Active task: `m13-character-progression-build-identity` (MB4 complete locally)
+- Updated: 2026-08-13
+- Accepted: **M13 Character Progression & Build Identity** → `v0.13.0-character-progression-build`
+- Prior: `v0.12.0-vertical-slice-alpha` (M12)
+- Active task: `m14-itemization-loot-depth`
 
 ## Status
 
-**M12 CLOSED.** **M13 MB4 complete locally** — build identity is playable and presented: three distinct active-skill motifs/poses, authoritative cooldown projection, responsive Oath & Armory with measured no-scroll fit at 1440×900, and a brighter, richer Refuge–Court route. M13 is ready for final hardening; do not start M14.
+**M13 CLOSED.** Playable Alpha continues with **M14 Itemization & Loot Depth** — authored equipment ecosystem, compact modifier vocabulary, deterministic loot tables, and item↔skill synergy without a procedural ARPG loot framework.
 
 ## What exists
 
@@ -22,7 +22,8 @@
 - D-002 local enemy navigation scope
 - D-003 controller verification deferred
 - D-004 main bundle size advisory (~3.6 MB)
+- World floor continuity and practical-light fixture density deferred to Codex art batches (not M14 systems scope)
 
 ## Next executable work
 
-Cursor final hardening: Product Owner visual review plus one full M13 acceptance pass; no new mechanics.
+Cursor M14 macro-batch 1: equipment-slot contract, authored item set (~8), typed modifiers, loot tables, duplicate→Echo policy, comparison data, itemization gate, functional UI plumbing only.
