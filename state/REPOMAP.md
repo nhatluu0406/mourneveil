@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (56L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (50L)
+- PLAN.md (56L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (66L)
+- package.json (67L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -177,7 +177,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - visual-direction.md (41L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (27L)
+    - current-state.md (28L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
@@ -198,7 +198,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (47 files)
+  - **scripts/browser/** (48 files)
     - README.md (18L)
     - gate-m10-camera-occlusion-repro.mjs (101L)
     - gate-m10-camera-stability.mjs (194L)
@@ -210,8 +210,8 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m11-boss-visual.mjs (320L)
     - gate-m12-alpha-slice.mjs (210L)
     - gate-m12-build-choice.mjs (161L)
-    - gate-m13-progression-visual.mjs (116L)
-    - ... +35 more
+    - gate-m13-active-skills.mjs (306L)
+    - ... +36 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -227,6 +227,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (137L) -- symbols: App;
+    - App.tsx (137L) -- symbols: App; impor
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

@@ -33,6 +33,7 @@ await runOwnedBrowserGate({
       timeout: 30_000,
     })
     await page.evaluate(() => {
+      localStorage.removeItem('mourneveil.save.v4')
       localStorage.removeItem('mourneveil.save.v3')
       localStorage.removeItem('mourneveil.save.v2')
       localStorage.removeItem('mourneveil.save.v1')
@@ -117,7 +118,7 @@ await runOwnedBrowserGate({
 
       // Save/load through storage key used by the app
       const payload = {
-        version: 3,
+        version: 4,
         activeCheckpointId: saved.checkpoint.currentCheckpointId,
         checkpointActivated: saved.checkpoint.activated,
         flaskCharges: saved.flask.currentCharges,
@@ -151,8 +152,11 @@ await runOwnedBrowserGate({
           unspentPoints: saved.progression.unspentPoints,
           allocation: { ...saved.progression.allocation },
         },
+        skills: {
+          equippedSkillId: saved.skills.equippedSkillId,
+        },
       }
-      localStorage.setItem('mourneveil.save.v3', JSON.stringify(payload))
+      localStorage.setItem('mourneveil.save.v4', JSON.stringify(payload))
       notes.push('10 save written')
 
       return { notes, xpBefore, levelBefore, allocBefore, pageReload: true }

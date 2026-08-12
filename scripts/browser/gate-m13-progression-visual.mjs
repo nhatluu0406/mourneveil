@@ -27,6 +27,7 @@ await runOwnedBrowserGate({
     await page.goto(baseUrl, { waitUntil: 'load' })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await page.evaluate(() => {
+      localStorage.removeItem('mourneveil.save.v4')
       localStorage.removeItem('mourneveil.save.v3')
       const g = window.__MOURNEVEIL_GATE__
       g.resetMeleeFixture()
@@ -87,13 +88,32 @@ await runOwnedBrowserGate({
     wardOwned && vitalityOwned ? pass('both canonical charm choices available') : fail('charm comparison inventory incomplete')
     await page.locator('[data-item-id="item.charm.vitality"]').screenshot({ path: `${artifactDir}/07-vitality-charm-comparison.png` })
     await page.locator('[data-item-id="item.charm.ward-seal"]').screenshot({ path: `${artifactDir}/08-ward-seal-comparison.png` })
-    const icons = await page.evaluate(() => ({
-      vitality: document.querySelector('[data-item-id="item.charm.vitality"] .inventory-item-glyph')?.innerHTML ?? '',
-      ward: document.querySelector('[data-item-id="item.charm.ward-seal"] .inventory-item-glyph')?.innerHTML ?? '',
-      skillUi: document.body.textContent?.match(/cooldown|mana|skill slot/i)?.[0] ?? null,
-    }))
-    icons.vitality !== icons.ward ? pass('Vitality and Ward use distinct authored glyphs') : fail('charm glyphs are not distinct')
-    icons.skillUi === null ? pass('no fake active-skill UI') : fail(`unexpected skill UI: ${icons.skillUi}`)
+    const panelEvidence = await page.evaluate(() => {
+      const panel = document.querySelector('.inventory-panel--build')
+      const owned = document.querySelector('[data-inventory-scroll="1"]')
+      const skills = document.querySelector('[data-skill-loadout="1"]')
+      const style = panel ? getComputedStyle(panel) : null
+      const ownedStyle = owned ? getComputedStyle(owned) : null
+      return {
+        vitality: document.querySelector('[data-item-id="item.charm.vitality"] .inventory-item-glyph')?.innerHTML ?? '',
+        ward: document.querySelector('[data-item-id="item.charm.ward-seal"] .inventory-item-glyph')?.innerHTML ?? '',
+        skillLoadout: Boolean(skills),
+        skillCards: document.querySelectorAll('[data-skill-id]').length,
+        panelOverflowY: style?.overflowY ?? null,
+        ownedOverflowY: ownedStyle?.overflowY ?? null,
+        panelScrollHeight: panel?.scrollHeight ?? 0,
+        panelClientHeight: panel?.clientHeight ?? 0,
+        bodyScroll: document.documentElement.scrollHeight > document.documentElement.clientHeight + 1,
+      }
+    })
+    panelEvidence.vitality !== panelEvidence.ward ? pass('Vitality and Ward use distinct authored glyphs') : fail('charm glyphs are not distinct')
+    panelEvidence.skillLoadout && panelEvidence.skillCards >= 3
+      ? pass('active skill loadout visible with three skill cards')
+      : fail(`skill loadout missing ${JSON.stringify(panelEvidence)}`)
+    panelEvidence.panelOverflowY === 'hidden' && !panelEvidence.bodyScroll
+      ? pass('1440×900 panel uses contained overflow without page scroll')
+      : fail(`scrollbar policy fail @1440 ${JSON.stringify(panelEvidence)}`)
+    await capture(page, artifactDir, '08b-skill-loadout')
 
     await page.keyboard.press('i')
     await page.evaluate(() => { const g = window.__MOURNEVEIL_GATE__; g.setPlayerPosition({ x: 2.5, y: 0.82, z: -5.45 }); g.setPlayerFacing({ x: 0.7, z: 0.7 }); g.advance(2) })
@@ -102,6 +122,23 @@ await runOwnedBrowserGate({
     await page.keyboard.press('i')
     await page.waitForSelector('[data-progression-panel="1"]')
     await capture(page, artifactDir, '10-progression-panel-1280x720')
+    const compactEvidence = await page.evaluate(() => {
+      const panel = document.querySelector('.inventory-panel--build')
+      const owned = document.querySelector('[data-inventory-scroll="1"]')
+      const skills = document.querySelector('[data-skill-loadout="1"]')
+      return {
+        skillVisible: Boolean(skills?.getBoundingClientRect().height),
+        ownedOverflowY: owned ? getComputedStyle(owned).overflowY : null,
+        panelOverflowY: panel ? getComputedStyle(panel).overflowY : null,
+        bodyScroll: document.documentElement.scrollHeight > document.documentElement.clientHeight + 1,
+      }
+    })
+    !compactEvidence.bodyScroll && compactEvidence.skillVisible
+      ? pass('1280×720 content accessible without page scroll')
+      : fail(`1280×720 accessibility fail ${JSON.stringify(compactEvidence)}`)
+    compactEvidence.panelOverflowY === 'hidden'
+      ? pass('1280×720 panel keeps native page/panel scrollbar suppressed')
+      : fail(`1280 panel overflow ${compactEvidence.panelOverflowY}`)
 
     const stats = await page.evaluate(() => window.__MOURNEVEIL_GATE__.rendererStats())
     console.log('M13 VISUAL METRICS:', JSON.stringify(stats, null, 2))

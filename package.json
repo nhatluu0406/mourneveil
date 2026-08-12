@@ -31,6 +31,7 @@
     "gate:m12-alpha-slice": "node scripts/browser/gate-m12-alpha-slice.mjs",
     "gate:m13-progression": "node scripts/browser/gate-m13-progression.mjs",
     "gate:m13-progression-visual": "node scripts/browser/gate-m13-progression-visual.mjs",
+    "gate:m13-active-skills": "node scripts/browser/gate-m13-active-skills.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
