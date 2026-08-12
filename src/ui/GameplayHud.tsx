@@ -17,6 +17,7 @@ import {
 } from './gameplayHudModel'
 import { UI_COMPACT_HINTS } from './uiTheme'
 import { ItemGlyph } from './ItemGlyph'
+import { ProgressionGlyph } from './ProgressionGlyph'
 
 interface GameplayHudProps {
   readonly snapshot: GameRuntimeSnapshot
@@ -127,6 +128,13 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
   const power = Math.max(snapshot.resolvedAttackDamage.light, snapshot.resolvedAttackDamage.heavy)
   const bossThreat = threat !== null && isBossThreat(threat.definitionId)
   const bossPhase = bossThreat && threat !== null && threatRatio <= 0.5 ? 2 : 1
+  const progressionRange =
+    snapshot.progression.experienceIntoLevel + (snapshot.progression.experienceToNextLevel ?? 0)
+  const progressionRatio = snapshot.progression.atMaxLevel
+    ? 1
+    : progressionRange <= 0
+      ? 0
+      : snapshot.progression.experienceIntoLevel / progressionRange
   const zoneKey = sliceComplete
     ? 'slice-complete'
     : (snapshot.world.currentZoneId ?? 'between')
@@ -163,9 +171,10 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
 
       <section className="gameplay-hud__status" aria-label="Player status">
         <div className="gameplay-hud__identity">
-          <div><strong>WARDEN</strong></div>
+          <div className="gameplay-hud__level"><ProgressionGlyph id="level"/><span>LV</span><strong>{snapshot.progression.level}</strong></div>
           <div className="gameplay-hud__identity-gear"><span>{weapon}</span><small>{charm ?? 'No charm'}</small></div>
         </div>
+        <div className="gameplay-hud__xp" aria-label="Experience progress"><span style={{ width: `${Math.max(0, Math.min(1, progressionRatio)) * 100}%` }}/></div>
 
         <div
           className="gameplay-hud__hp"
@@ -212,7 +221,8 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
           </div>
         ) : null}
         {showProgressionToast && progressionToast !== null ? (
-          <div className="gameplay-hud__acquisition" role="status" data-progression-toast="1">
+          <div className={`gameplay-hud__acquisition gameplay-hud__progression-toast${snapshot.lastProgressionFeedback?.levelsGained ? ' is-level-up' : ''}`} role="status" data-progression-toast="1">
+            <ProgressionGlyph id={snapshot.lastProgressionFeedback?.levelsGained ? 'level' : 'experience'}/>
             <strong>{progressionToast.title}</strong>
             <span>{progressionToast.detail}</span>
           </div>

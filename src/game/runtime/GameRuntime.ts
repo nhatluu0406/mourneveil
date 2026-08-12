@@ -204,6 +204,13 @@ export interface GameRuntimeSnapshot {
     readonly light: number
     readonly heavy: number
   }
+  /** Authoritative resolved contributions projected for character/build UI. */
+  readonly resolvedProgressionContributions: {
+    readonly maxHealth: number
+    readonly guardImpactThreshold: number
+    readonly lightDamage: number
+    readonly heavyDamage: number
+  }
 }
 
 export interface GameRuntimeAdvance extends GameRuntimeSnapshot {
@@ -1028,6 +1035,7 @@ export class GameRuntime {
       world: this.worldRuntime.snapshot(),
       encounterActivation: this.encounterActivationRuntime.snapshot(),
       resolvedAttackDamage: this.resolvedAttackDamage(),
+      resolvedProgressionContributions: this.resolvedProgressionContributions(),
     }
   }
 
@@ -1091,6 +1099,19 @@ export class GameRuntime {
     )
     this.playerHealthRuntime.setMaximumHealthBonus(resolved.maximumHealthBonus)
     this.defenseRuntime.setGuardImpactThreshold(resolved.guardImpactThreshold)
+  }
+
+  private resolvedProgressionContributions(): GameRuntimeSnapshot['resolvedProgressionContributions'] {
+    const resolved = resolvePlayerCombatStats(
+      this.progressionRuntime.durable().allocation,
+      this.equipmentRuntime.resolvedModifiers(),
+    )
+    return {
+      maxHealth: resolved.progression.maxHealthFromProgression,
+      guardImpactThreshold: resolved.progression.guardFromProgression,
+      lightDamage: resolved.progression.lightDamageFromProgression,
+      heavyDamage: resolved.progression.heavyDamageFromProgression,
+    }
   }
 
   private spawnLootForDefeatedEnemies(): void {

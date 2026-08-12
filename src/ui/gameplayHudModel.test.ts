@@ -76,4 +76,18 @@ describe('cinematic HUD projection helpers', () => {
     expect(slots.find((slot) => slot.id === 'weapon')?.binding).toBe('LMB')
     expect(slots.every((slot) => !['Dodge', 'Interact', 'Inventory'].includes(slot.label))).toBe(true)
   })
+
+  it('projects distinct authored charm identities from canonical equipment state', () => {
+    const runtime = new GameRuntime()
+    const vitalitySnapshot = {
+      ...runtime.snapshot(),
+      equipment: { ...runtime.snapshot().equipment, charmItemId: 'item.charm.vitality' },
+    }
+    const wardSnapshot = {
+      ...runtime.snapshot(),
+      equipment: { ...runtime.snapshot().equipment, charmItemId: 'item.charm.ward-seal' },
+    }
+    expect(resolveEquipmentBar(vitalitySnapshot).find((slot) => slot.id === 'charm')?.icon).toBe('vitality-charm')
+    expect(resolveEquipmentBar(wardSnapshot).find((slot) => slot.id === 'charm')?.icon).toBe('ward-seal')
+  })
 })

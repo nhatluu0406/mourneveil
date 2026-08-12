@@ -21,7 +21,7 @@ export interface ZoneHudCopy {
   readonly objective: string
 }
 
-export type EquipmentBarIcon = 'oathblade' | 'charm' | 'flask' | 'echo'
+export type EquipmentBarIcon = 'oathblade' | 'vitality-charm' | 'ward-seal' | 'charm' | 'flask' | 'echo'
 
 export interface EquipmentBarSlot {
   readonly id: 'weapon' | 'charm' | 'flask' | 'echoes'
@@ -142,7 +142,7 @@ export function resolveProgressionToast(
   const progression = snapshot.progression
   if (feedback.levelsGained > 0) {
     return {
-      title: `Level ${progression.level}`,
+      title: `Veilbound · Level ${progression.level}`,
       detail:
         feedback.pointsGained > 0
           ? `+${feedback.experienceGained} XP · ${progression.unspentPoints} point${progression.unspentPoints === 1 ? '' : 's'} available`
@@ -252,7 +252,12 @@ export function resolveEquipmentBar(snapshot: GameRuntimeSnapshot): readonly Equ
           ? 'No charm equipped'
           : `HP ${snapshot.playerHealth.health.maximum} · Guard ${snapshot.defense.guardImpactThreshold}`,
       binding: null,
-      icon: 'charm' as const,
+      icon:
+        snapshot.equipment.charmItemId === 'item.charm.vitality'
+          ? ('vitality-charm' as const)
+          : snapshot.equipment.charmItemId === 'item.charm.ward-seal'
+            ? ('ward-seal' as const)
+            : ('charm' as const),
       equipped: charm !== null,
     }),
     Object.freeze({

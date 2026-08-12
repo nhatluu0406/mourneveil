@@ -31,6 +31,12 @@ describe('progression integration', () => {
     expect(runtime.allocateProgression('unknown').accepted).toBe(false)
     expect(runtime.allocateProgression('vitality')).toMatchObject({ accepted: true })
     expect(runtime.snapshot().playerHealth.health.maximum).toBe(PLAYER_MAXIMUM_HEALTH + 10)
+    expect(runtime.snapshot().resolvedProgressionContributions).toEqual({
+      maxHealth: 10,
+      guardImpactThreshold: 0,
+      lightDamage: 0,
+      heavyDamage: 0,
+    })
     expect(runtime.snapshot().progression.unspentPoints).toBe(0)
 
     runtime.debugDefeatEnemy('enemy.brute.1')
@@ -53,6 +59,7 @@ describe('progression integration', () => {
     expect(runtime.snapshot().progression.unspentPoints).toBe(2)
     expect(runtime.allocateProgression('resolve')).toMatchObject({ accepted: true })
     expect(runtime.snapshot().defense.guardImpactThreshold).toBe(PLAYER_GUARD_IMPACT_THRESHOLD + 1)
+    expect(runtime.snapshot().resolvedProgressionContributions.guardImpactThreshold).toBe(1)
 
     // Ward seal stacks with resolve
     runtime.debugSetPlayerPosition(runtime.snapshot().lootPickup.position ?? runtime.snapshot().player.position)
@@ -77,6 +84,10 @@ describe('progression integration', () => {
     runtime.debugDefeatEnemy('enemy.skirmisher.pressure')
     runtime.allocateProgression('might')
     expect(runtime.resolvedAttackDamage()).toEqual({ light: 22, heavy: 38 })
+    expect(runtime.snapshot().resolvedProgressionContributions).toMatchObject({
+      lightDamage: 2,
+      heavyDamage: 3,
+    })
 
     const beforeDeath = runtime.captureSave()
     runtime.debugSetPlayerPosition(runtime.snapshot().checkpoint.respawnPosition)
