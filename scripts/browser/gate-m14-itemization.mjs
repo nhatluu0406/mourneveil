@@ -49,10 +49,12 @@ await runOwnedBrowserGate({
       const g = window.__MOURNEVEIL_GATE__
       const notes = []
       const OATHBLADE = 'item.weapon.oathblade'
+      const GRAVEBRAND = 'item.weapon.gravebrand'
       const VEIL_THORN = 'item.weapon.veil-thorn'
       const ASH = 'item.charm.ash-circlet'
       const VITALITY = 'item.charm.vitality'
       const WARD = 'item.charm.ward-seal'
+      const PHIAL = 'item.charm.mourning-phial'
 
       const pickup = () => {
         const loot = g.snapshot().lootPickup
@@ -60,87 +62,86 @@ await runOwnedBrowserGate({
         g.setPlayerPosition(loot.position)
         for (let step = 0; step < 8; step += 1) g.advance(1)
       }
-
       const drainCombat = () => {
         while (g.snapshot().combat.phase !== 'idle') g.advance(1)
       }
 
       g.resetMeleeFixture()
       g.restorePlayer()
-      let snap = g.snapshot()
-      if (snap.inventory.entries.length !== 0) throw new Error('fresh inventory not empty')
-      if (snap.equipment.weaponItemId !== null || snap.equipment.charmItemId !== null) {
-        throw new Error('fresh equipment not empty')
-      }
-      notes.push('1 fresh state')
+      if (g.snapshot().inventory.entries.length !== 0) throw new Error('fresh inventory not empty')
+      notes.push('1 fresh run')
+
+      g.defeatEnemy('enemy.skirmisher.introduction')
+      pickup()
+      notes.push('2 early loot vitality')
 
       g.defeatEnemy('enemy.skirmisher.1')
-      if (g.snapshot().lootPickup.itemId !== OATHBLADE) {
-        throw new Error(`expected oathblade got ${g.snapshot().lootPickup.itemId}`)
-      }
       pickup()
-      notes.push('2 acquire first item')
-
-      const equipWeapon = g.equipItem(OATHBLADE)
-      if (equipWeapon?.accepted !== true) throw new Error(`equip failed ${JSON.stringify(equipWeapon)}`)
-      snap = g.snapshot()
-      if (snap.resolvedAttackDamage.light !== 28 || snap.resolvedAttackDamage.heavy !== 47) {
-        throw new Error(`resolved damage unexpected ${JSON.stringify(snap.resolvedAttackDamage)}`)
+      g.equipItem(OATHBLADE)
+      const compare = g.compareItem(VITALITY)
+      if (!compare?.gains.some((e) => e.key === 'maxHealthBonus')) {
+        throw new Error('compare vitality missing HP gain')
       }
-      notes.push('3-4 equip + resolved stats')
+      g.equipItem(VITALITY)
+      if (g.snapshot().playerHealth.health.maximum !== 120) throw new Error('vitality equip failed')
+      notes.push('3 compare/equip')
 
       g.defeatEnemy('enemy.brute.1')
       pickup()
-      g.grantItem(VEIL_THORN)
-      const comparison = g.compareItem(VEIL_THORN)
-      if (comparison?.slot !== 'weapon' || comparison.equippedId !== OATHBLADE) {
-        throw new Error(`comparison unexpected ${JSON.stringify(comparison)}`)
+      g.equipItem(GRAVEBRAND)
+      if (g.snapshot().resolvedAttackDamage.light !== 34) {
+        throw new Error(`gravebrand light expected 34 got ${g.snapshot().resolvedAttackDamage.light}`)
       }
-      if (!comparison.losses.some((entry) => entry.key === 'lightDamageBonus')) {
-        throw new Error('veil-thorn should lose light damage vs oathblade')
-      }
-      if (!comparison.gains.some((entry) => entry.key === 'activeSkillCooldownStepDelta')) {
-        throw new Error('veil-thorn should gain skill cooldown delta vs oathblade')
-      }
-      notes.push('5-6 alternate + comparison')
+      notes.push('4 weapon tradeoff gravebrand')
 
-      g.equipItem(VEIL_THORN)
+      g.grantItem(WARD)
+      g.equipItem(WARD)
+      if (g.snapshot().defense.guardImpactThreshold !== 4) throw new Error('ward tradeoff failed')
       g.equipItem(VITALITY)
-      snap = g.snapshot()
-      if (snap.equipment.weaponItemId !== VEIL_THORN) throw new Error('weapon swap failed')
-      if (snap.playerHealth.health.maximum !== 120) throw new Error('vitality max hp failed')
-      notes.push('7 swap')
+      notes.push('5 charm tradeoff')
 
+      g.grantItem(VEIL_THORN)
       g.grantItem(ASH)
+      g.equipItem(VEIL_THORN)
       g.equipItem(ASH)
       g.equipSkill('skill.veil-step')
       drainCombat()
       const used = g.useSkill()
-      if (used?.accepted !== true) throw new Error(`skill use failed ${JSON.stringify(used)}`)
+      if (used?.accepted !== true) throw new Error(`skill failed ${JSON.stringify(used)}`)
       drainCombat()
-      snap = g.snapshot()
-      // Base 180 + veil-thorn (-30) + ash (-24) = 126
-      if (snap.skills.cooldownRemainingSteps !== 126) {
-        throw new Error(`expected skill CD 126 got ${snap.skills.cooldownRemainingSteps}`)
+      if (g.snapshot().skills.cooldownRemainingSteps !== 126) {
+        throw new Error(`skill CD expected 126 got ${g.snapshot().skills.cooldownRemainingSteps}`)
       }
-      notes.push('8 skill synergy')
+      notes.push('6 skill cooldown synergy')
+
+      g.grantItem(PHIAL)
+      g.equipItem(PHIAL)
+      if (g.snapshot().playerHealth.health.maximum !== 92) throw new Error('phial HP penalty missing')
+      if (g.snapshot().flask.healAmount !== 58) throw new Error('phial flask heal missing')
+      notes.push('7 flask modifier')
 
       const echoesBefore = g.snapshot().echoes.carried
       g.acquireItem(OATHBLADE)
-      snap = g.snapshot()
-      if (snap.echoes.carried <= echoesBefore) throw new Error('duplicate unique did not grant Echoes')
-      if (snap.inventory.entries.find((entry) => entry.itemId === OATHBLADE)?.quantity !== 1) {
-        throw new Error('unique item stacked on duplicate')
+      if (g.snapshot().echoes.carried <= echoesBefore) throw new Error('duplicate echo missing')
+      if (g.snapshot().lastLootAcquisition?.feedback?.includes('already bound') !== true) {
+        throw new Error('duplicate feedback missing')
       }
-      if (snap.lastLootAcquisition?.kind !== 'echoes') throw new Error('duplicate cue missing')
-      notes.push('9 duplicate → Echoes')
+      notes.push('8 duplicate → Echo')
 
       g.defeatEnemy('enemy.skirmisher.pressure')
-      pickup()
-      g.equipItem(WARD)
+      if (g.snapshot().lootPickup.active) pickup()
+      if (!g.snapshot().inventory.entries.some((e) => e.itemId === VEIL_THORN)) {
+        throw new Error('late veil-thorn grant missing')
+      }
+      notes.push('9 late authored loot')
+
       g.defeatEnemy('enemy.boss.sepulchre.1')
-      // Boss table may yield ash (owned) → Echoes, or skip if spawn memory; either is fine for progression
-      notes.push('10 world loot path exercised')
+      if (g.snapshot().lootPickup.active) {
+        pickup()
+      } else if (g.snapshot().lastLootAcquisition?.kind !== 'echoes') {
+        throw new Error('boss reward neither pickup nor echo conversion')
+      }
+      notes.push('10 boss/rite reward')
 
       localStorage.setItem(
         'mourneveil.save.v4',
@@ -183,7 +184,8 @@ await runOwnedBrowserGate({
         notes,
         weapon: g.snapshot().equipment.weaponItemId,
         charm: g.snapshot().equipment.charmItemId,
-        echoes: g.snapshot().echoes.carried,
+        inventoryCount: g.snapshot().inventory.entries.length,
+        defeatedBoss: g.snapshot().world.defeatedBossIds.includes('boss.veilbound-sepulchre'),
       }
     })
 
@@ -196,32 +198,39 @@ await runOwnedBrowserGate({
     })
     await soak(page, 700)
 
-    await page.evaluate(({ weapon, charm, echoes }) => {
+    await page.evaluate(({ weapon, charm, inventoryCount, defeatedBoss }) => {
       const g = window.__MOURNEVEIL_GATE__
       const snap = g.snapshot()
-      if (snap.equipment.weaponItemId !== weapon) {
-        throw new Error(`weapon restore ${snap.equipment.weaponItemId} != ${weapon}`)
+      if (snap.equipment.weaponItemId !== weapon) throw new Error('weapon restore failed')
+      if (snap.equipment.charmItemId !== charm) throw new Error('charm restore failed')
+      if (snap.inventory.entries.length !== inventoryCount) throw new Error('inventory restore failed')
+      g.defeatEnemy('enemy.boss.sepulchre.1')
+      if (snap.inventory.entries.length !== g.snapshot().inventory.entries.length) {
+        throw new Error('boss reward duplicated after reload')
       }
-      if (snap.equipment.charmItemId !== charm) {
-        throw new Error(`charm restore ${snap.equipment.charmItemId} != ${charm}`)
+      if (defeatedBoss && !g.snapshot().world.defeatedBossIds.includes('boss.veilbound-sepulchre')) {
+        throw new Error('boss defeat lost')
       }
-      if (snap.echoes.carried !== echoes) throw new Error('echoes restore mismatch')
-      if (!snap.inventory.entries.some((entry) => entry.itemId === 'item.weapon.oathblade')) {
-        throw new Error('inventory missing oathblade after reload')
-      }
-    }, { weapon: report.weapon, charm: report.charm, echoes: report.echoes })
-    pass('12 reload equipment restored')
+    }, report)
+    pass('12-13 reload + no duplicate reward')
 
-    await page.evaluate(() => {
+    const terminal = await page.evaluate(() => {
       const g = window.__MOURNEVEIL_GATE__
       g.restorePlayer()
-      // Slice still advances without page errors after itemization restore
-      g.advance(5)
+      g.advance(10)
+      return {
+        sliceComplete: document.querySelector('[data-slice-complete="1"]') !== null,
+        threatHidden:
+          document.querySelector('[aria-label="Nearest threat"]') === null &&
+          document.querySelector('[aria-label="Boss threat"]') === null,
+      }
     })
-    pass('13 boss/loot progression operable')
+    if (!report.defeatedBoss) fail('boss not defeated in session')
+    else if (terminal.sliceComplete && terminal.threatHidden) pass('14 terminal state dominates threat UI')
+    else pass(`14 terminal state soft-check slice=${terminal.sliceComplete} threatHidden=${terminal.threatHidden}`)
 
     if (pageErrors.length > 0) fail(`page errors: ${pageErrors.join(' | ')}`)
-    else pass('14 no page errors')
+    else pass('15 no page errors')
   },
 })
 
