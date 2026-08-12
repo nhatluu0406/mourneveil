@@ -1,52 +1,51 @@
-# PLAN: M10 Final Stabilization — Camera Jitter + Foreground Occlusion
-<!-- Live M10 graph only. -->
+# PLAN: M11 Boss Vertical Slice — Macro-batch 1 (Gameplay Foundation)
+<!-- Live M11 graph only. -->
 
-Input: Product Owner blocking regressions (occlusion + camera jitter) | Stack: `STACK.md`
-Task slug: `m10-visual-production-identity`
+Input: M10 closed; roadmap M11 Boss Vertical Slice | Stack: `STACK.md`
+Task slug: `m11-boss-vertical-slice`
 
 ## Goal
 
-Fix camera jitter and foreground wall occlusion so the player/playable space stay readable; verify green; report M10 acceptance readiness. No new M10 art content.
+Ship one complete technical boss encounter vertical slice that reuses existing combat/AI/world/save/UI foundations. Temporary presentation only — Codex owns boss/arena art later.
 
 ## Non-goals
 
-- M11 implementation; M10 tag/push unless PO acceptance handled at closure
-- New environment kit, actors, textures, HUD redesign, VFX system
-- Cinematic/spline/lock-on camera frameworks
-- Making all walls transparent or changing gameplay collision
+- M12; M11 tag/completion; polished boss art/arena/VFX/UI redesign
+- Behavior-tree / boss scripting language / lock-on camera / posture system
+- Full reward/progression systems; ECS/manager frameworks
 
 ## Steps
 
-- [x] 1. Reproduce both bugs with diagnostics; identify root causes (camera + occluders)
+- [ ] 1. M10 hygiene close + tag `v0.10.0-visual-production-identity`
   - depends: —
-  - risk: HIGH
+  - risk: MED
   - isolation: sequential
-  - owns/allows: PLAN, diagnostic gate scripts, HANDOFF notes
-  - verifier: focused browser repro capturing camera/occluder state
-- [x] 2. Fix camera smoothing contract (stable look-ahead, frame-rate-independent damping)
+  - owns/allows: tmp cleanup, docs, debt, PLAN transition, tag
+  - verifier: `npm run verify && npm run gate:lifecycle && git tag -l v0.10.0-visual-production-identity`
+- [ ] 2. Boss contract + role/kit/phase/AI policy (pure modules + tests)
   - depends: 1
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/render/followCamera*`, FollowCameraRig, camera tests/gate
-  - verifier: `npm run test -- src/render/followCamera.test.ts && npm run gate:m10-camera-stability`
-- [x] 3. Fix foreground occlusion (stable-ID fade; resolve D-005 duplicate walls if causal)
-  - depends: 1
+  - owns/allows: `src/game/enemies/boss*`, enemyRoles/hitReaction extensions
+  - verifier: `npx vitest run src/game/enemies`
+- [ ] 3. Arena encounter wiring + save defeated flag + UI threat titles
+  - depends: 2
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: ConnectedLevelVisual, occlusion materials, world object flags, silhouette placements
-  - verifier: `npm run test -- src/render/cameraOcclusion.test.ts src/render/world && npm run gate:m10-occlusion-readability`
-- [x] 4. Full regression + M10 closure readiness report (no tag without PO)
-  - depends: 2, 3
-  - risk: HIGH
+  - owns/allows: encounters, connectedLevel, save, GameRuntime, GameplayHud model
+  - verifier: `npx vitest run src/game/encounters src/game/save src/ui`
+- [ ] 4. Temporary boss presentation + technical runtime gate + Codex handoff
+  - depends: 3
+  - risk: MED
   - isolation: sequential
-  - owns/allows: gates, HANDOFF/current-state/DEBT/PLAN/roadmap note
-  - verifier: `npm run verify && npm run gate:m8-stabilization && npm run gate:m9-player-combat && npm run gate:m9-guard-depth && npm run gate:m9-hit-reaction && npm run gate:m9-telegraph-readability && npm run gate:m9-perf-baseline && npm run gate:m10-perf-baseline && npm run gate:m10-hero-visual && npm run gate:m10-ui-compact && npm run gate:lifecycle`
+  - owns/allows: EnemyVisual boss branch, `gate:m11-boss-foundation`, docs handoff
+  - verifier: `npm run gate:m11-boss-foundation && npm run verify`
 
 ## Decisions
 
-- One presentation system owns camera follow transform.
-- Occlusion fade is presentation-only on eligible solid architecture IDs.
-- No new M10 art content.
+- Technical ID: `boss.veilbound-sepulchre` / runtime `enemy.boss.sepulchre.1`
+- Two phases max; 3–4 attacks; reuse FollowCameraRig and enemy contact authority
+- Codex later owns visual/arena/VFX/UI polish
 
 ## Escalation
 

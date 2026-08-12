@@ -1,23 +1,26 @@
-# Current state
+# Current State
 
-Updated: 2026-08-12
-
-## Milestone
-
-**M10 Visual Production & Identity — READY FOR PRODUCT OWNER ACCEPTANCE (FINAL)** (untagged).
+- Updated: 2026-08-12
+- Accepted release pending tag: **M10 Visual Production & Identity** → `v0.10.0-visual-production-identity`
+- Prior accepted: `v0.9.0-combat-depth` (M9)
+- Active task: `m11-boss-vertical-slice` (Macro-batch 1 — gameplay foundation)
 
 ## Status
 
-- Modular ADR-0002 ossuary identity, practical lighting, equipment-first HUD, production actors, route language, and M10 visual/perf gates remain in place.
-- Final stabilization fixed camera jitter (damped look-ahead) and foreground occlusion (proxy removal + fade sink + far-field silhouette move).
-- D-005 resolved: gameplay colliders no longer double-draw wall/blocker/floor proxies by default.
+**M10 PRODUCT OWNER ACCEPTED / CLOSED** after hygiene + verification. M11 boss vertical slice initialized (technical boss only; Codex owns later art/arena/VFX/UI).
 
-## Known limitations
+## What exists
 
-- Far-field void/mood darkness remains intentional; not a blocker for M10 close.
-- D-004 main bundle size advisory unchanged (~3.6 MB).
-- Future art/UI/VFX richness continues in later milestones — not required to close M10.
+- Connected RPG loop through M9 combat depth and M10 visual production identity
+- Camera follow damping + camera-near architecture occlusion readability
+- Gate-owned `tmp-m*` cleanup (`KEEP_ARTIFACTS=1` opt-in keep)
 
-## Next PLAN step
+## Highest-value limitations
 
-Await Product Owner acceptance → tag if authorized → open **M11 Boss Vertical Slice** (no M11 implementation started).
+- D-002 local enemy navigation scope
+- D-003 controller verification deferred
+- D-004 main bundle size advisory (~3.6 MB)
+
+## Next executable work
+
+M11 Macro-batch 1: boss contract, arena encounter, deterministic attacks/phases, technical gate — then Codex visual/arena/VFX/UI presentation.

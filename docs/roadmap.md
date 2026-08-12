@@ -15,8 +15,8 @@ This is a directional product roadmap, not an immutable feature contract. Milest
 | **M7** | Animation & Character Feel — **PRODUCT OWNER ACCEPTED** (`v0.7.0-animation-foundation`) |
 | **M8** | Production Asset Pipeline — **PRODUCT OWNER ACCEPTED** (`v0.8.0-production-asset-pipeline`) |
 | **M9** | Combat Depth — **PRODUCT OWNER ACCEPTED** (`v0.9.0-combat-depth`) |
-| **M10** | Visual Production & Identity — **ACTIVE** (Product Owner reprioritization; replaces prior Ranged / Magic slot) |
-| **M11** | Boss Vertical Slice |
+| **M10** | Visual Production & Identity — **PRODUCT OWNER ACCEPTED** (`v0.10.0-visual-production-identity`) |
+| **M11** | Boss Vertical Slice — **ACTIVE** |
 | **M12** | Vertical Slice Alpha acceptance |
 
 Directional version targets: `v0.7` animated combat / production-slice progression; `v0.8` vertical-slice alpha.
@@ -52,7 +52,8 @@ Versions describe product maturity; milestones describe development work. One ve
 - `v0.7` — animation foundation (`v0.7.0-animation-foundation`)
 - `v0.8` — production asset pipeline (`v0.8.0-production-asset-pipeline`)
 - `v0.9` — combat depth (`v0.9.0-combat-depth`)
-- later pre-1.0 versions — visual-production, vertical-slice alpha, and content-beta acceptance trains
+- `v0.10` — visual production identity (`v0.10.0-visual-production-identity`)
+- later pre-1.0 versions — vertical-slice alpha and content-beta acceptance trains
 - `v1.0` — first production release
 
 Distant milestone numbers are directional, not immutable project law.
