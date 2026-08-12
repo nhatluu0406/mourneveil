@@ -57,9 +57,15 @@ export class PlayerDefenseRuntime {
   private guardImpact = 0
   private guardImpactResetDelaySteps = 0
   private guardBreakRemainingSteps = 0
+  private guardImpactThreshold = PLAYER_GUARD_IMPACT_THRESHOLD
 
   setGuardIntent(held: boolean): void {
     this.guardIntentHeld = this.guardBreakRemainingSteps === 0 && held
+  }
+
+  /** Equipment-derived threshold; base remains PLAYER_GUARD_IMPACT_THRESHOLD. */
+  setGuardImpactThreshold(threshold: number): void {
+    this.guardImpactThreshold = Math.max(1, Math.floor(threshold))
   }
 
   reset(): void {
@@ -69,6 +75,7 @@ export class PlayerDefenseRuntime {
     this.guardImpact = 0
     this.guardImpactResetDelaySteps = 0
     this.guardBreakRemainingSteps = 0
+    this.guardImpactThreshold = PLAYER_GUARD_IMPACT_THRESHOLD
   }
 
   canStartAction(): boolean {
@@ -134,11 +141,11 @@ export class PlayerDefenseRuntime {
     if (outcome !== 'guarded') return outcome
 
     this.guardImpact = Math.min(
-      PLAYER_GUARD_IMPACT_THRESHOLD,
+      this.guardImpactThreshold,
       this.guardImpact + Math.max(0, impact),
     )
     this.guardImpactResetDelaySteps = PLAYER_GUARD_IMPACT_RESET_DELAY_STEPS
-    if (this.guardImpact < PLAYER_GUARD_IMPACT_THRESHOLD) return 'guarded'
+    if (this.guardImpact < this.guardImpactThreshold) return 'guarded'
 
     this.guardIntentHeld = false
     this.guarding = false
@@ -164,7 +171,7 @@ export class PlayerDefenseRuntime {
       dodgeMovementActive: activeDodge !== null && combat.phase === 'active',
       invulnerable: activeDodge !== null && combat.phase === 'active',
       guardImpact: this.guardImpact,
-      guardImpactThreshold: PLAYER_GUARD_IMPACT_THRESHOLD,
+      guardImpactThreshold: this.guardImpactThreshold,
       guardBroken: this.guardBreakRemainingSteps > 0,
       guardBreakRemainingSteps: this.guardBreakRemainingSteps,
     }

@@ -27,6 +27,7 @@
     "gate:m10-ui-compact": "node scripts/browser/gate-m10-ui-compact.mjs",
     "gate:m11-boss-foundation": "node scripts/browser/gate-m11-boss-foundation.mjs",
     "gate:m11-boss-visual": "node scripts/browser/gate-m11-boss-visual.mjs",
+    "gate:m12-build-choice": "node scripts/browser/gate-m12-build-choice.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

@@ -1,6 +1,7 @@
 import {
   getItemDefinition,
   requireItemDefinition,
+  ZERO_ITEM_MODIFIERS,
   type EquipSlot,
   type ItemGameplayModifiers,
   type ItemId,
@@ -23,12 +24,6 @@ export type EquipResult =
 export type UnequipResult =
   | { readonly accepted: true; readonly slot: EquipSlot; readonly itemId: ItemId | null }
   | { readonly accepted: false; readonly reason: 'slot-empty' }
-
-const ZERO_MODIFIERS: ItemGameplayModifiers = Object.freeze({
-  lightDamageBonus: 0,
-  heavyDamageBonus: 0,
-  maxHealthBonus: 0,
-})
 
 export class PlayerEquipmentRuntime {
   private weaponItemId: ItemId | null = null
@@ -71,16 +66,18 @@ export class PlayerEquipmentRuntime {
   resolvedModifiers(): ItemGameplayModifiers {
     const weapon =
       this.weaponItemId === null
-        ? ZERO_MODIFIERS
+        ? ZERO_ITEM_MODIFIERS
         : requireItemDefinition(this.weaponItemId).modifiers
     const charm =
       this.charmItemId === null
-        ? ZERO_MODIFIERS
+        ? ZERO_ITEM_MODIFIERS
         : requireItemDefinition(this.charmItemId).modifiers
     return {
       lightDamageBonus: weapon.lightDamageBonus + charm.lightDamageBonus,
       heavyDamageBonus: weapon.heavyDamageBonus + charm.heavyDamageBonus,
       maxHealthBonus: weapon.maxHealthBonus + charm.maxHealthBonus,
+      guardImpactThresholdBonus:
+        weapon.guardImpactThresholdBonus + charm.guardImpactThresholdBonus,
     }
   }
 

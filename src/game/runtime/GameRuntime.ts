@@ -37,6 +37,7 @@ import {
   PLAYER_DODGE_ACTION,
   PLAYER_DODGE_ACTION_ID,
   PLAYER_DODGE_SPEED,
+  PLAYER_GUARD_IMPACT_THRESHOLD,
   PlayerDefenseRuntime,
   type PlayerDefenseSnapshot,
 } from '../combat/playerDefense'
@@ -152,6 +153,7 @@ import {
 
 export const SKIRMISHER_LOOT_ITEM_ID = 'item.weapon.oathblade' as const
 export const BRUTE_LOOT_ITEM_ID = 'item.charm.vitality' as const
+export const PRESSURE_LOOT_ITEM_ID = 'item.charm.ward-seal' as const
 
 export interface GameRuntimeSnapshot {
   readonly simulation: SimulationTimeSnapshot
@@ -1028,8 +1030,10 @@ export class GameRuntime {
   }
 
   private syncEquipmentDerivedStats(): void {
-    this.playerHealthRuntime.setMaximumHealthBonus(
-      this.equipmentRuntime.resolvedModifiers().maxHealthBonus,
+    const modifiers = this.equipmentRuntime.resolvedModifiers()
+    this.playerHealthRuntime.setMaximumHealthBonus(modifiers.maxHealthBonus)
+    this.defenseRuntime.setGuardImpactThreshold(
+      PLAYER_GUARD_IMPACT_THRESHOLD + modifiers.guardImpactThresholdBonus,
     )
   }
 

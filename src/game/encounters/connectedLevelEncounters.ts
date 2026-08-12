@@ -51,7 +51,7 @@ export const M5_ENEMY_PLACEMENTS: readonly ConnectedEnemyPlacement[] = Object.fr
   // Introduction: stand-off just inside Outer Watch so arrival crossing feels intentional.
   definePlacement('enemy.skirmisher.introduction', 'encounter.m5.introduction', 'skirmisher', -10.2, 3.1, 1, 0, null),
   // Pressure: final-approach sentry near the ash-walk cairn, before the sealed gate.
-  definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7.6, -3.4, -1, 0, null),
+  definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7.6, -3.4, -1, 0, 'item.charm.ward-seal'),
   // M11 technical boss in sealed arena (gameplay foundation; Codex owns art later).
   definePlacement(BOSS_RUNTIME_ID, BOSS_ENCOUNTER_ID, 'boss', 13, -4, -1, 0, null),
 ])

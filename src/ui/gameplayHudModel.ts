@@ -169,7 +169,10 @@ export function resolveEquipmentBar(snapshot: GameRuntimeSnapshot): readonly Equ
     Object.freeze({
       id: 'charm' as const,
       label: charm ?? 'Empty Charm Socket',
-      detail: charm === null ? 'No charm equipped' : `Vitality ${snapshot.playerHealth.health.maximum}`,
+      detail:
+        charm === null
+          ? 'No charm equipped'
+          : `HP ${snapshot.playerHealth.health.maximum} · Guard ${snapshot.defense.guardImpactThreshold}`,
       binding: null,
       icon: 'charm' as const,
       equipped: charm !== null,

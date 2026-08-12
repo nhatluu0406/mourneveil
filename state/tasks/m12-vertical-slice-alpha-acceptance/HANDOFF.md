@@ -5,23 +5,26 @@ Task: m12-vertical-slice-alpha-acceptance
 
 ## Status
 
-ACTIVE — Macro-batch 1 starting after M11 closure.
+ACTIVE — Macro-batch 1 complete locally. M12 not closed / not tagged.
 
 ## Locked decisions
 
-- Canonical M12 = **Vertical Slice Alpha acceptance** (roadmap). Deeper itemization/build identity expansion is Playable Alpha (M13+).
-- MB1 closes alpha gap: meaningful vitality vs ward charm tradeoff via existing equipment modifiers.
-- No class-heavy item hierarchy; definition → resolved modifiers remain authority.
+- Canonical M12 = **Vertical Slice Alpha acceptance** (roadmap). Deeper itemization remains Playable Alpha (M13+).
+- Charm tradeoff: Vitality (+20 HP) vs Ward Seal (+1 guard threshold). Neither dominates both axes.
+- Modifiers stay definition-driven; GameRuntime syncs health max + defense threshold.
 
-## In flight
+## Delivered (MB1)
 
-- PLAN step 1: equipment modifier contract + ward charm
+- `guardImpactThresholdBonus` on item modifiers
+- `item.charm.ward-seal` + pressure-encounter loot source
+- Authoritative defense threshold sync; HUD projects `HP · Guard`
+- Tests: tradeoff, save/load, unknown id, threshold break
+- Gate: `npm run gate:m12-build-choice`
 
-## Known traps
+## Next
 
-- Use Node 22.x / npm 10.9.2 for gates (`npx npm@10.9.2`).
-- Guard impact threshold was a constant; equipment must sync it through defense runtime, not UI.
+M12 Macro-batch 2 — remaining alpha acceptance gaps (PO scope). Item art/icons/loot VFX → Codex. Further build plumbing → Cursor.
 
-## Next session starts with
+## Non-goals still hold
 
-1. Implement ward-seal charm + `guardImpactThresholdBonus` through authoritative sync.
+M12 tag without PO; M13 deep progression; crafting/affixes/skill trees; HUD redesign.

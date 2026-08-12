@@ -6,6 +6,8 @@ export interface ItemGameplayModifiers {
   readonly lightDamageBonus: number
   readonly heavyDamageBonus: number
   readonly maxHealthBonus: number
+  /** Added to base player guard impact threshold (not a second guard system). */
+  readonly guardImpactThresholdBonus: number
 }
 
 export interface ItemDefinition {
@@ -17,10 +19,11 @@ export interface ItemDefinition {
   readonly modifiers: ItemGameplayModifiers
 }
 
-const ZERO_MODIFIERS: ItemGameplayModifiers = Object.freeze({
+export const ZERO_ITEM_MODIFIERS: ItemGameplayModifiers = Object.freeze({
   lightDamageBonus: 0,
   heavyDamageBonus: 0,
   maxHealthBonus: 0,
+  guardImpactThresholdBonus: 0,
 })
 
 export const ITEM_DEFINITIONS: readonly ItemDefinition[] = Object.freeze([
@@ -34,6 +37,7 @@ export const ITEM_DEFINITIONS: readonly ItemDefinition[] = Object.freeze([
       lightDamageBonus: 8,
       heavyDamageBonus: 12,
       maxHealthBonus: 0,
+      guardImpactThresholdBonus: 0,
     }),
   }),
   Object.freeze({
@@ -42,18 +46,32 @@ export const ITEM_DEFINITIONS: readonly ItemDefinition[] = Object.freeze([
     type: 'weapon',
     slot: 'weapon',
     description: 'Lightweight practice blade with no damage bonus.',
-    modifiers: ZERO_MODIFIERS,
+    modifiers: ZERO_ITEM_MODIFIERS,
   }),
   Object.freeze({
     id: 'item.charm.vitality',
     displayName: 'Vitality Charm',
     type: 'charm',
     slot: 'charm',
-    description: 'Increases maximum health by a small deterministic amount.',
+    description: 'Increases maximum health. Does not improve guard capacity.',
     modifiers: Object.freeze({
       lightDamageBonus: 0,
       heavyDamageBonus: 0,
       maxHealthBonus: 20,
+      guardImpactThresholdBonus: 0,
+    }),
+  }),
+  Object.freeze({
+    id: 'item.charm.ward-seal',
+    displayName: 'Ward Seal',
+    type: 'charm',
+    slot: 'charm',
+    description: 'Raises guard impact threshold. Does not increase maximum health.',
+    modifiers: Object.freeze({
+      lightDamageBonus: 0,
+      heavyDamageBonus: 0,
+      maxHealthBonus: 0,
+      guardImpactThresholdBonus: 1,
     }),
   }),
   Object.freeze({
@@ -62,7 +80,7 @@ export const ITEM_DEFINITIONS: readonly ItemDefinition[] = Object.freeze([
     type: 'charm',
     slot: 'charm',
     description: 'Decorative charm with no combat modifiers.',
-    modifiers: ZERO_MODIFIERS,
+    modifiers: ZERO_ITEM_MODIFIERS,
   }),
   Object.freeze({
     id: 'item.misc.ash-token',
@@ -70,7 +88,7 @@ export const ITEM_DEFINITIONS: readonly ItemDefinition[] = Object.freeze([
     type: 'misc',
     slot: null,
     description: 'Non-equippable proof pickup.',
-    modifiers: ZERO_MODIFIERS,
+    modifiers: ZERO_ITEM_MODIFIERS,
   }),
   Object.freeze({
     id: 'item.misc.echo-shard',
@@ -78,7 +96,7 @@ export const ITEM_DEFINITIONS: readonly ItemDefinition[] = Object.freeze([
     type: 'misc',
     slot: null,
     description: 'Fragment with no equipment slot.',
-    modifiers: ZERO_MODIFIERS,
+    modifiers: ZERO_ITEM_MODIFIERS,
   }),
 ])
 
