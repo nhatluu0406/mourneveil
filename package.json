@@ -35,6 +35,7 @@
     "gate:m13-active-skills": "node scripts/browser/gate-m13-active-skills.mjs",
     "gate:m14-itemization": "node scripts/browser/gate-m14-itemization.mjs",
     "gate:m14-loot-journey": "node scripts/browser/gate-m14-loot-journey.mjs",
+    "gate:m14-art-production": "node scripts/browser/gate-m14-art-production.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

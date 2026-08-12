@@ -21,6 +21,9 @@ const FLOOR_SLAB = createProfilePrismGeometry(
   0.035,
 )
 const FLOOR_INLAY = new BoxGeometry(0.55, 0.025, 0.055)
+const FLOOR_FOUNDATION = new BoxGeometry(1, 0.055, 1)
+const FLOOR_BROKEN_EDGE = createProfilePrismGeometry([[-0.5, -0.18], [-0.31, -0.3], [-0.08, -0.2], [0.16, -0.33], [0.5, -0.16], [0.5, 0.16], [-0.5, 0.16]], 0.08)
+const FLOOR_PIT_RIM = FLOOR_BROKEN_EDGE
 const WALL_BAY = new BoxGeometry(0.16, 1.25, 1.2)
 const WALL_BREAK = new DodecahedronGeometry(0.34, 0)
 const BUTTRESS = createTaperedPrismGeometry({
@@ -57,6 +60,9 @@ const MEMORIAL_CLUSTER = createProfilePrismGeometry(
   0.14,
 )
 const RELIQUARY_CHAIN = new TorusGeometry(0.12, 0.018, 4, 10, Math.PI * 1.65)
+const WALL_LEDGE = FLOOR_BROKEN_EDGE
+const GRAVE_PLAQUE = MEMORIAL_CLUSTER
+const BRONZE_BRACE = ARCH_RIB
 const NICHE_RECESS = new BoxGeometry(0.06, 0.74, 0.62)
 const NICHE_ARCH = new TorusGeometry(0.29, 0.034, 5, 18, Math.PI)
 const SARCOPHAGUS_BODY = createTaperedPrismGeometry({
@@ -100,6 +106,9 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   'ossuary.floor.ash-slab': FLOOR_SLAB,
   'ossuary.floor.seal-slab': FLOOR_SLAB,
   'ossuary.floor.inlay': FLOOR_INLAY,
+  'ossuary.floor.foundation': FLOOR_FOUNDATION,
+  'ossuary.floor.broken-edge': FLOOR_BROKEN_EDGE,
+  'ossuary.floor.pit-rim': FLOOR_PIT_RIM,
   'ossuary.wall.bay': WALL_BAY,
   'ossuary.wall.break': WALL_BREAK,
   'ossuary.buttress': BUTTRESS,
@@ -111,6 +120,9 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   'ossuary.niche.cluster': NICHE_CLUSTER,
   'ossuary.memorial.cluster': MEMORIAL_CLUSTER,
   'ossuary.reliquary.chain': RELIQUARY_CHAIN,
+  'ossuary.wall.ledge': WALL_LEDGE,
+  'ossuary.grave.plaque': GRAVE_PLAQUE,
+  'ossuary.metal.bronze-brace': BRONZE_BRACE,
   'ossuary.niche.recess': NICHE_RECESS,
   'ossuary.niche.arch': NICHE_ARCH,
   'ossuary.sarcophagus.body': SARCOPHAGUS_BODY,

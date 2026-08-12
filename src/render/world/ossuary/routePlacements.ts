@@ -140,6 +140,38 @@ const CANDLES: readonly WorldObjectPlacement[] = Object.freeze(
   ),
 )
 
+/** Dark foundation establishes room continuity beneath irregular authored slabs. */
+const ROUTE_FOUNDATIONS: readonly WorldObjectPlacement[] = Object.freeze([
+  place('foundation.refuge', 'ossuary.floor.foundation', 'refuge', [-5.8, 0.012, 0], ZERO_ROTATION, [4.8, 1, 4.25]),
+  place('foundation.corridor', 'ossuary.floor.foundation', 'corridor', [-8.05, 0.01, 2.05], [0, -0.62, 0], [3.25, 1, 5.1]),
+  place('foundation.watch', 'ossuary.floor.foundation', 'first-combat', [-9.8, 0.01, 2.35], ZERO_ROTATION, [5.25, 1, 6.2]),
+  place('foundation.court', 'ossuary.floor.foundation', 'mixed-court', [0.15, 0.008, -4.2], ZERO_ROTATION, [8.7, 1, 6.75]),
+  place('foundation.ash', 'ossuary.floor.foundation', 'ash-walk', [6.85, 0.005, -4.05], ZERO_ROTATION, [6.7, 1, 6.7]),
+  place('foundation.approach', 'ossuary.floor.foundation', 'ash-walk', [9.45, 0.004, -4], ZERO_ROTATION, [2.5, 1, 3.8]),
+  place('foundation.sepulchre', 'ossuary.floor.foundation', 'final-arena', [13.05, 0.003, -4.1], ZERO_ROTATION, [7.1, 1, 8.4]),
+])
+
+const BROKEN_FLOOR_LANGUAGE: readonly WorldObjectPlacement[] = Object.freeze([
+  ...[[-7.8, -1.98, 0.05], [-3.7, 1.98, Math.PI], [-11.95, -0.35, 0], [-7.65, 4.95, Math.PI], [-2.65, -6.95, 0], [3.75, -1.15, Math.PI], [4.25, -6.7, 0], [9.25, -1.15, Math.PI], [9.78, -7.7, 0], [16.25, -0.35, Math.PI]].map(([x, z, yaw], index) =>
+    place(`broken-edge.${index}`, 'ossuary.floor.broken-edge', index < 2 ? 'refuge' : index < 4 ? 'first-combat' : index < 6 ? 'mixed-court' : index < 8 ? 'ash-walk' : 'final-arena', [x!, 0.09, z!], [Math.PI / 2, yaw!, 0], [1.2 + (index % 3) * 0.28, 1, 1]),
+  ),
+  ...[[-2.9, -7.05], [3.85, -7.05], [4.05, -1.05], [9.5, -6.85], [9.55, -1.1], [16.35, -7.4]].map(([x, z], index) =>
+    place(`pit-rim.${index}`, 'ossuary.floor.pit-rim', index < 2 ? 'mixed-court' : index < 4 ? 'ash-walk' : 'final-arena', [x!, 0.075, z!], [Math.PI / 2, index % 2 ? Math.PI / 2 : 0, 0], [1.5, 1, 1]),
+  ),
+])
+
+const MID_FREQUENCY_ARCHITECTURE: readonly WorldObjectPlacement[] = Object.freeze([
+  ...[[-10.58, -0.5, 'first-combat'], [-10.58, 1.15, 'first-combat'], [-10.58, 2.8, 'first-combat'], [-3.42, 0.2, 'refuge'], [-3.42, 1.85, 'corridor'], [-2.7, -5.6, 'mixed-court'], [-2.7, -3.3, 'mixed-court'], [9.9, -6.1, 'final-arena'], [9.9, -2.4, 'final-arena']].map(([x, z, area], index) =>
+    place(`ledge.${index}`, 'ossuary.wall.ledge', area as OssuaryRouteArea, [x as number, 1.28, z as number], [0, Math.PI / 2, 0], [1.1, 1, 1]),
+  ),
+  ...[[-10.48, 0.45, 'first-combat'], [-10.48, 2.1, 'first-combat'], [-3.5, 1.0, 'refuge'], [-2.62, -4.7, 'mixed-court'], [9.82, -4.8, 'final-arena']].map(([x, z, area], index) =>
+    place(`grave-plaque.${index}`, 'ossuary.grave.plaque', area as OssuaryRouteArea, [x as number, 1.05, z as number], [0, Math.PI / 2, 0], [1.05, 1.05, 1.05]),
+  ),
+  ...[[-10.42, -1.1, 'first-combat'], [-10.42, 3.55, 'first-combat'], [-2.55, -2.25, 'mixed-court'], [9.74, -6.8, 'final-arena'], [16.25, -1.4, 'final-arena']].map(([x, z, area], index) =>
+    place(`bronze-brace.${index}`, 'ossuary.metal.bronze-brace', area as OssuaryRouteArea, [x as number, 1.15, z as number], [0, Math.PI / 2, 0], [1, 1.2, 1]),
+  ),
+])
+
 const LATE_ROUTE_PRACTICALS: readonly WorldObjectPlacement[] = Object.freeze([
   place('sconce.refuge.north', 'ossuary.light.wall-sconce', 'refuge', [-6.75, 1.28, 1.82], [0, Math.PI, 0], undefined, 'actual-light'),
   place('sconce.refuge.south', 'ossuary.light.wall-sconce', 'refuge', [-4.55, 1.2, -1.82], ZERO_ROTATION),
@@ -159,6 +191,12 @@ const HERO_PROCESSIONAL_STANDS: readonly WorldObjectPlacement[] = Object.freeze(
     ['refuge.entry', 'refuge', -3.72, -0.9],
     ['court.south', 'mixed-court', -1.15, -2],
     ['court.north', 'mixed-court', 2.8, -6.25],
+    ['watch.north', 'first-combat', -10.15, 3.95],
+    ['court.entry', 'mixed-court', -1.55, -3.25],
+    ['court.processional', 'mixed-court', 3.35, -4.8],
+    ['ash.west', 'ash-walk', 5.3, -5.85],
+    ['ash.east', 'ash-walk', 8.55, -2.15],
+    ['approach', 'ash-walk', 9.35, -4],
   ] as const).flatMap(([id, area, x, z]) => [
     place(`processional.${id}`, 'ossuary.marker.body', area, [x, 0.78, z], ZERO_ROTATION, [0.72, 2.15, 0.72]),
     place(`processional.${id}.flame`, 'ossuary.candle.flame', area, [x, 1.44, z], ZERO_ROTATION, [2.3, 2.8, 2.3]),
@@ -283,6 +321,8 @@ const PERIMETER_SILHOUETTES: readonly WorldObjectPlacement[] = Object.freeze([
  * Object modules own HOW each type renders.
  */
 export const OSSUARY_ROUTE_PLACEMENTS: readonly WorldObjectPlacement[] = Object.freeze([
+  ...ROUTE_FOUNDATIONS,
+  ...BROKEN_FLOOR_LANGUAGE,
   ...slabField('refuge', [-7.45, -6.35, -5.25, -4.15], [-1.55, -0.5, 0.55, 1.6], 0),
   ...slabField('corridor', [-8.55, -7.55], [0.45, 1.5, 2.55, 3.6], 1),
   ...slabField('first-combat', [-11.45, -10.35, -9.25, -8.15], [0.25, 1.3, 2.35, 3.4, 4.45], 2),
@@ -292,6 +332,7 @@ export const OSSUARY_ROUTE_PLACEMENTS: readonly WorldObjectPlacement[] = Object.
   ...LATE_ROUTE_PRACTICALS,
   ...HERO_PROCESSIONAL_STANDS,
   ...PERIMETER_SILHOUETTES,
+  ...MID_FREQUENCY_ARCHITECTURE,
 
   place('inlay.refuge.west', 'ossuary.floor.inlay', 'refuge', [-6.95, 0.072, 0], [0, 0.06, 0], [1.5, 1, 1]),
   place('inlay.refuge.east', 'ossuary.floor.inlay', 'refuge', [-4.55, 0.072, 0], [0, -0.06, 0], [1.5, 1, 1]),

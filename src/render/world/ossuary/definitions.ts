@@ -52,6 +52,9 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     receiveShadow: true,
     renderMode: 'instanced',
   }),
+  'ossuary.floor.foundation': define({ id: 'ossuary.floor.foundation', family: 'architecture', materialKey: 'ashStone', castShadow: false, receiveShadow: true, renderMode: 'instanced' }),
+  'ossuary.floor.broken-edge': define({ id: 'ossuary.floor.broken-edge', family: 'architecture', materialKey: 'ashStone', castShadow: true, receiveShadow: true, renderMode: 'instanced' }),
+  'ossuary.floor.pit-rim': define({ id: 'ossuary.floor.pit-rim', family: 'architecture', materialKey: 'floorSlab', castShadow: true, receiveShadow: true, renderMode: 'instanced' }),
   'ossuary.wall.bay': define({
     id: 'ossuary.wall.bay',
     family: 'architecture',
@@ -120,6 +123,9 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
   'ossuary.reliquary.chain': define({
     id: 'ossuary.reliquary.chain', family: 'metal', materialKey: 'iron', castShadow: true, receiveShadow: false, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.24, 1.7, 0.12],
   }),
+  'ossuary.wall.ledge': define({ id: 'ossuary.wall.ledge', family: 'architecture', materialKey: 'floorSlab', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.18, 0.16, 1.1] }),
+  'ossuary.grave.plaque': define({ id: 'ossuary.grave.plaque', family: 'burial', materialKey: 'bone', castShadow: false, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.05, 0.4, 0.28] }),
+  'ossuary.metal.bronze-brace': define({ id: 'ossuary.metal.bronze-brace', family: 'metal', materialKey: 'bronze', castShadow: false, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.08, 0.64, 0.08] }),
   'ossuary.niche.recess': define({
     id: 'ossuary.niche.recess',
     family: 'burial',
