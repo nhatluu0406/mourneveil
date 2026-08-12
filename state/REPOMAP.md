@@ -4,16 +4,16 @@
 Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 
 ## Tree & entry points
-- .gitignore (53L)
+- .gitignore (56L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (49L)
+- PLAN.md (52L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (64L)
+- package.json (65L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -164,7 +164,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - **assets/source/world/checkpoint/** (1 files)
         - refuge-shrine.gltf (35L)
 - **docs/** (1 files)
-  - roadmap.md (60L)
+  - roadmap.md (64L)
   - **docs/architecture/** (3 files)
     - animation-presentation.md (14L)
     - asset-pipeline.md (36L)
@@ -198,7 +198,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (45 files)
+  - **scripts/browser/** (46 files)
     - README.md (18L)
     - gate-m10-camera-occlusion-repro.mjs (101L)
     - gate-m10-camera-stability.mjs (194L)
@@ -210,8 +210,8 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m11-boss-visual.mjs (320L)
     - gate-m12-alpha-slice.mjs (210L)
     - gate-m12-build-choice.mjs (161L)
-    - gate-m4-e2e.mjs (139L)
-    - ... +33 more
+    - gate-m13-progression.mjs (227L)
+    - ... +34 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -227,6 +227,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (137L) -- symbols: App; imports: ../debu
+    - App.tsx (137L) -- symbols: App; imports
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

@@ -37,7 +37,6 @@ import {
   PLAYER_DODGE_ACTION,
   PLAYER_DODGE_ACTION_ID,
   PLAYER_DODGE_SPEED,
-  PLAYER_GUARD_IMPACT_THRESHOLD,
   PlayerDefenseRuntime,
   type PlayerDefenseSnapshot,
 } from '../combat/playerDefense'
@@ -131,9 +130,15 @@ import {
   type LootPickupSnapshot,
 } from '../items/lootPickup'
 import {
-  createDefaultSaveV2,
-  type SaveFileV2,
+  createDefaultSaveV3,
+  type SaveFileV3,
 } from '../save/saveSchema'
+import {
+  PlayerProgressionRuntime,
+  type AllocateProgressionResult,
+  type ProgressionSnapshot,
+} from '../character/playerProgression'
+import { resolvePlayerCombatStats } from '../character/playerStatResolution'
 import {
   ConnectedWorldRuntime,
   type ConnectedWorldSnapshot,
@@ -185,6 +190,14 @@ export interface GameRuntimeSnapshot {
     readonly itemId: ItemId
     readonly simulationStep: number
   } | null
+  /** Presentation-only progression feedback; not persisted. */
+  readonly lastProgressionFeedback: {
+    readonly experienceGained: number
+    readonly levelsGained: number
+    readonly pointsGained: number
+    readonly simulationStep: number
+  } | null
+  readonly progression: ProgressionSnapshot
   readonly world: ConnectedWorldSnapshot
   readonly encounterActivation: EncounterActivationSnapshot
   readonly resolvedAttackDamage: {
@@ -218,10 +231,12 @@ export class GameRuntime {
   private readonly echoRecoveryRuntime = new EchoRecoveryRuntime()
   private readonly inventoryRuntime = new PlayerInventoryRuntime()
   private readonly equipmentRuntime = new PlayerEquipmentRuntime()
+  private readonly progressionRuntime = new PlayerProgressionRuntime()
   private readonly lootPickupRuntime = new LootPickupRuntime()
   private readonly worldRuntime = new ConnectedWorldRuntime()
   private readonly encounterActivationRuntime = new EncounterActivationRuntime()
   private readonly echoRewardedEnemyIds = new Set<string>()
+  private readonly xpRewardedEnemyIds = new Set<string>()
   private lootInstanceCounter = 0
   private playerState = createPlayerMotorState(
     MOURNEVEIL_CONNECTED_LEVEL.entryPosition,
@@ -240,20 +255,27 @@ export class GameRuntime {
   private movementOverride: PlayerMovementIntent | null = null
   private persistHandler: (() => void) | null = null
   private lastLootAcquisition: { itemId: ItemId; simulationStep: number } | null = null
+  private lastProgressionFeedback: {
+    experienceGained: number
+    levelsGained: number
+    pointsGained: number
+    simulationStep: number
+  } | null = null
 
   setPersistHandler(handler: (() => void) | null): void {
     this.persistHandler = handler
   }
 
-  captureSave(): SaveFileV2 {
+  captureSave(): SaveFileV3 {
     const checkpoint = this.checkpointRuntime.snapshot()
     const flask = this.flaskRuntime.snapshot()
     const echoes = this.echoesRuntime.snapshot()
     const recovery = this.echoRecoveryRuntime.snapshot()
     const equipment = this.equipmentRuntime.snapshot()
     const loot = this.lootPickupRuntime.snapshot()
+    const progression = this.progressionRuntime.durable()
     return {
-      version: 2,
+      version: 3,
       activeCheckpointId: checkpoint.currentCheckpointId,
       checkpointActivated: checkpoint.activated,
       flaskCharges: flask.currentCharges,
@@ -281,13 +303,19 @@ export class GameRuntime {
         finalGateReached: this.worldRuntime.snapshot().finalGateReached,
         defeatedBossIds: this.worldRuntime.snapshot().defeatedBossIds,
       },
+      progression: {
+        level: progression.level,
+        experience: progression.experience,
+        unspentPoints: progression.unspentPoints,
+        allocation: { ...progression.allocation },
+      },
     }
   }
 
   /**
    * Restores persistent facts only. Encounter enemies reset; transient combat/input cleared.
    */
-  applySave(save: SaveFileV2 = createDefaultSaveV2()): void {
+  applySave(save: SaveFileV3 = createDefaultSaveV3()): void {
     this.resetPlayerActionState()
     this.checkpointRuntime.restore(
       save.checkpointActivated,
@@ -323,7 +351,9 @@ export class GameRuntime {
         ? save.equipment.charmItemId
         : null
     this.equipmentRuntime.restore(weapon, charm)
-    this.syncEquipmentDerivedStats()
+    this.progressionRuntime.restore(save.progression)
+    this.lastProgressionFeedback = null
+    this.syncResolvedCombatStats()
     this.playerHealthRuntime.restoreToMaximum()
     this.lootPickupRuntime.restore({
       active: save.lootPickup.active && save.lootPickup.itemId !== null,
@@ -353,6 +383,7 @@ export class GameRuntime {
     }
     this.encounterActivationRuntime.reset()
     this.echoRewardedEnemyIds.clear()
+    this.xpRewardedEnemyIds.clear()
     // Keep loot spawn memory / active pickup from save; do not resetLifecycle.
   }
 
@@ -506,6 +537,7 @@ export class GameRuntime {
     }
     this.encounterActivationRuntime.reset()
     this.echoRewardedEnemyIds.clear()
+    this.xpRewardedEnemyIds.clear()
     this.lootPickupRuntime.resetLifecycle()
   }
 
@@ -564,7 +596,7 @@ export class GameRuntime {
   equipItem(itemId: ItemId): EquipResult {
     const result = this.equipmentRuntime.equip(itemId, this.inventoryRuntime)
     if (result.accepted) {
-      this.syncEquipmentDerivedStats()
+      this.syncResolvedCombatStats()
       this.markPersistentChange()
     }
     return result
@@ -573,19 +605,29 @@ export class GameRuntime {
   unequipSlot(slot: EquipSlot): UnequipResult {
     const result = this.equipmentRuntime.unequip(slot)
     if (result.accepted) {
-      this.syncEquipmentDerivedStats()
+      this.syncResolvedCombatStats()
+      this.markPersistentChange()
+    }
+    return result
+  }
+
+  allocateProgression(attribute: string): AllocateProgressionResult {
+    const result = this.progressionRuntime.allocate(attribute)
+    if (result.accepted) {
+      this.syncResolvedCombatStats()
       this.markPersistentChange()
     }
     return result
   }
 
   resolvedAttackDamage(): { readonly light: number; readonly heavy: number } {
-    const modifiers = this.equipmentRuntime.resolvedModifiers()
-    const light = PLAYER_ATTACK_DEFINITIONS.find((entry) => entry.kind === 'light')!
-    const heavy = PLAYER_ATTACK_DEFINITIONS.find((entry) => entry.kind === 'heavy')!
+    const resolved = resolvePlayerCombatStats(
+      this.progressionRuntime.durable().allocation,
+      this.equipmentRuntime.resolvedModifiers(),
+    )
     return {
-      light: light.damage + modifiers.lightDamageBonus,
-      heavy: heavy.damage + modifiers.heavyDamageBonus,
+      light: resolved.lightDamage,
+      heavy: resolved.heavyDamage,
     }
   }
 
@@ -981,6 +1023,8 @@ export class GameRuntime {
       equipment: this.equipmentRuntime.snapshot(),
       lootPickup: this.lootPickupRuntime.snapshot(),
       lastLootAcquisition: this.lastLootAcquisition,
+      lastProgressionFeedback: this.lastProgressionFeedback,
+      progression: this.progressionRuntime.snapshot(),
       world: this.worldRuntime.snapshot(),
       encounterActivation: this.encounterActivationRuntime.snapshot(),
       resolvedAttackDamage: this.resolvedAttackDamage(),
@@ -1035,17 +1079,18 @@ export class GameRuntime {
     if (actionId === null) return undefined
     const attack = playerAttackForActionId(actionId)
     if (attack === null) return undefined
-    const modifiers = this.equipmentRuntime.resolvedModifiers()
-    if (attack.kind === 'light') return attack.damage + modifiers.lightDamageBonus
-    return attack.damage + modifiers.heavyDamageBonus
+    const damage = this.resolvedAttackDamage()
+    if (attack.kind === 'light') return damage.light
+    return damage.heavy
   }
 
-  private syncEquipmentDerivedStats(): void {
-    const modifiers = this.equipmentRuntime.resolvedModifiers()
-    this.playerHealthRuntime.setMaximumHealthBonus(modifiers.maxHealthBonus)
-    this.defenseRuntime.setGuardImpactThreshold(
-      PLAYER_GUARD_IMPACT_THRESHOLD + modifiers.guardImpactThresholdBonus,
+  private syncResolvedCombatStats(): void {
+    const resolved = resolvePlayerCombatStats(
+      this.progressionRuntime.durable().allocation,
+      this.equipmentRuntime.resolvedModifiers(),
     )
+    this.playerHealthRuntime.setMaximumHealthBonus(resolved.maximumHealthBonus)
+    this.defenseRuntime.setGuardImpactThreshold(resolved.guardImpactThreshold)
   }
 
   private spawnLootForDefeatedEnemies(): void {
@@ -1069,10 +1114,23 @@ export class GameRuntime {
   }
 
   private grantEchoRewardsForDefeatedEnemies(): void {
+    let experienceGained = 0
+    let levelsGained = 0
+    let pointsGained = 0
     for (const enemy of this.enemyRuntimes) {
       const snapshot = enemy.snapshot()
       if (snapshot.alive || this.echoRewardedEnemyIds.has(enemy.id)) continue
       this.echoRewardedEnemyIds.add(enemy.id)
+
+      // Persistently defeated bosses must not re-grant Echoes/XP after reload.
+      if (
+        enemy.definition.role === 'boss' &&
+        this.worldRuntime.isBossDefeated(BOSS_TECHNICAL_ID)
+      ) {
+        this.xpRewardedEnemyIds.add(enemy.id)
+        continue
+      }
+
       if (enemy.definition.role === 'boss') {
         if (this.worldRuntime.markBossDefeated(BOSS_TECHNICAL_ID)) {
           this.markPersistentChange()
@@ -1082,6 +1140,27 @@ export class GameRuntime {
       if (reward > 0) {
         this.echoesRuntime.add(reward)
         this.markPersistentChange()
+      }
+      if (!this.xpRewardedEnemyIds.has(enemy.id)) {
+        this.xpRewardedEnemyIds.add(enemy.id)
+        const xp = enemy.definition.xpReward
+        if (xp > 0) {
+          const granted = this.progressionRuntime.grantExperience(xp)
+          if (granted.applied) {
+            experienceGained += granted.experienceGained
+            levelsGained += granted.levelsGained
+            pointsGained += granted.pointsGained
+            this.markPersistentChange()
+          }
+        }
+      }
+    }
+    if (experienceGained > 0) {
+      this.lastProgressionFeedback = {
+        experienceGained,
+        levelsGained,
+        pointsGained,
+        simulationStep: this.clock.snapshot().stepCount,
       }
     }
   }

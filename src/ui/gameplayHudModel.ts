@@ -37,6 +37,11 @@ export interface AcquisitionToastCopy {
   readonly detail: string
 }
 
+export interface ProgressionToastCopy {
+  readonly title: string
+  readonly detail: string
+}
+
 const ZONE_COPY: Readonly<Record<MourneveilZoneId, ZoneHudCopy>> = Object.freeze({
   'zone.arrival': {
     eyebrow: 'The Mourneveil · Rite I',
@@ -126,6 +131,30 @@ export function resolveAcquisitionToast(
   return {
     title: `Acquired ${definition.displayName}`,
     detail,
+  }
+}
+
+export function resolveProgressionToast(
+  snapshot: GameRuntimeSnapshot,
+): ProgressionToastCopy | null {
+  const feedback = snapshot.lastProgressionFeedback
+  if (feedback === null || feedback.experienceGained <= 0) return null
+  const progression = snapshot.progression
+  if (feedback.levelsGained > 0) {
+    return {
+      title: `Level ${progression.level}`,
+      detail:
+        feedback.pointsGained > 0
+          ? `+${feedback.experienceGained} XP · ${progression.unspentPoints} point${progression.unspentPoints === 1 ? '' : 's'} available`
+          : `+${feedback.experienceGained} XP`,
+    }
+  }
+  return {
+    title: `+${feedback.experienceGained} XP`,
+    detail:
+      progression.experienceToNextLevel === null
+        ? 'Max level'
+        : `${progression.experienceToNextLevel} to next level`,
   }
 }
 

@@ -10,7 +10,7 @@ import { BOSS_ROLE, createEnemyRuntimeFromRole } from './enemyRoles'
 import { advanceMeleeEnemy, createEnemyAttackSpatialSnapshot, enemyAttackDamage } from './meleeEnemy'
 import { ENEMY_INTERRUPT_THRESHOLD } from './enemyHitReaction'
 import { GameRuntime } from '../runtime/GameRuntime'
-import { createDefaultSaveV2 } from '../save/saveSchema'
+import { createDefaultSaveV3 } from '../save/saveSchema'
 import { CONNECTED_LEVEL_CHECKPOINT_DEFINITION } from '../world/checkpoint'
 
 describe('boss foundation', () => {
@@ -60,7 +60,7 @@ describe('boss foundation', () => {
   it('activates arena encounter, damages, defeats, and persists defeat across respawn', () => {
     const runtime = new GameRuntime()
     runtime.applySave({
-      ...createDefaultSaveV2(),
+      ...createDefaultSaveV3(),
       checkpointActivated: true,
       activeCheckpointId: CONNECTED_LEVEL_CHECKPOINT_DEFINITION.id,
       world: {

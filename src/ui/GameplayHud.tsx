@@ -7,6 +7,7 @@ import {
   isBossThreat,
   isVerticalSliceComplete,
   resolveAcquisitionToast,
+  resolveProgressionToast,
   resolveGameplayInteractionPrompt,
   resolveEquipmentBar,
   resolveNearestThreat,
@@ -57,8 +58,11 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
   const zone = resolveZoneHudCopy(snapshot.world.currentZoneId, snapshot)
   const equipmentBar = resolveEquipmentBar(snapshot)
   const acquisition = resolveAcquisitionToast(snapshot)
+  const progressionToast = resolveProgressionToast(snapshot)
   const [toastStep, setToastStep] = useState<number | null>(null)
+  const [progressionToastStep, setProgressionToastStep] = useState<number | null>(null)
   const seenAcquisition = useRef<number | null>(null)
+  const seenProgression = useRef<number | null>(null)
   useEffect(() => {
     const step = snapshot.lastLootAcquisition?.simulationStep ?? null
     if (step === null || step === seenAcquisition.current) return
@@ -67,10 +71,25 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
     const timeout = window.setTimeout(() => setToastStep((current) => (current === step ? null : current)), 4200)
     return () => window.clearTimeout(timeout)
   }, [snapshot.lastLootAcquisition?.simulationStep])
+  useEffect(() => {
+    const step = snapshot.lastProgressionFeedback?.simulationStep ?? null
+    if (step === null || step === seenProgression.current) return
+    seenProgression.current = step
+    setProgressionToastStep(step)
+    const timeout = window.setTimeout(
+      () => setProgressionToastStep((current) => (current === step ? null : current)),
+      4200,
+    )
+    return () => window.clearTimeout(timeout)
+  }, [snapshot.lastProgressionFeedback?.simulationStep])
   const showAcquisitionToast =
     toastStep !== null &&
     acquisition !== null &&
     snapshot.lastLootAcquisition?.simulationStep === toastStep
+  const showProgressionToast =
+    progressionToastStep !== null &&
+    progressionToast !== null &&
+    snapshot.lastProgressionFeedback?.simulationStep === progressionToastStep
   const damagedRecently =
     snapshot.incomingContact.lastHit !== null &&
     snapshot.incomingContact.lastHit.outcome === 'damaged' &&
@@ -190,6 +209,12 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
           <div className="gameplay-hud__acquisition" role="status" data-acquisition-toast="1">
             <strong>{acquisition.title}</strong>
             <span>{acquisition.detail}</span>
+          </div>
+        ) : null}
+        {showProgressionToast && progressionToast !== null ? (
+          <div className="gameplay-hud__acquisition" role="status" data-progression-toast="1">
+            <strong>{progressionToast.title}</strong>
+            <span>{progressionToast.detail}</span>
           </div>
         ) : null}
         {sliceComplete && !bossThreat ? (

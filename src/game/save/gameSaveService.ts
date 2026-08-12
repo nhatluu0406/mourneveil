@@ -2,8 +2,9 @@ import { migrateAndValidateSave } from './migrateSave'
 import {
   SAVE_STORAGE_KEY,
   LEGACY_SAVE_STORAGE_KEY_V1,
-  createDefaultSaveV2,
-  type SaveFileV2,
+  LEGACY_SAVE_STORAGE_KEY_V2,
+  createDefaultSaveV3,
+  type SaveFileV3,
   type SaveLoadResult,
 } from './saveSchema'
 
@@ -17,12 +18,21 @@ export class LocalStorageSaveStorage implements SaveStorage {
   constructor(
     private readonly storage: Storage,
     private readonly key: string = SAVE_STORAGE_KEY,
-    private readonly legacyKey: string = LEGACY_SAVE_STORAGE_KEY_V1,
+    private readonly legacyKeys: readonly string[] = [
+      LEGACY_SAVE_STORAGE_KEY_V2,
+      LEGACY_SAVE_STORAGE_KEY_V1,
+    ],
   ) {}
 
   readRaw(): string | null {
     try {
-      return this.storage.getItem(this.key) ?? this.storage.getItem(this.legacyKey)
+      const current = this.storage.getItem(this.key)
+      if (current !== null) return current
+      for (const legacy of this.legacyKeys) {
+        const value = this.storage.getItem(legacy)
+        if (value !== null) return value
+      }
+      return null
     } catch {
       return null
     }
@@ -31,7 +41,9 @@ export class LocalStorageSaveStorage implements SaveStorage {
   writeRaw(value: string): void {
     try {
       this.storage.setItem(this.key, value)
-      if (this.legacyKey !== this.key) this.storage.removeItem(this.legacyKey)
+      for (const legacy of this.legacyKeys) {
+        this.storage.removeItem(legacy)
+      }
     } catch {
       // Quota / private mode — ignore for local slice.
     }
@@ -40,7 +52,9 @@ export class LocalStorageSaveStorage implements SaveStorage {
   clear(): void {
     try {
       this.storage.removeItem(this.key)
-      if (this.legacyKey !== this.key) this.storage.removeItem(this.legacyKey)
+      for (const legacy of this.legacyKeys) {
+        this.storage.removeItem(legacy)
+      }
     } catch {
       // ignore
     }
@@ -66,7 +80,7 @@ export class MemorySaveStorage implements SaveStorage {
 export class GameSaveService {
   constructor(private readonly storage: SaveStorage) {}
 
-  save(save: SaveFileV2): void {
+  save(save: SaveFileV3): void {
     this.storage.writeRaw(JSON.stringify(save))
   }
 
@@ -80,9 +94,9 @@ export class GameSaveService {
     }
   }
 
-  loadOrDefault(): SaveFileV2 {
+  loadOrDefault(): SaveFileV3 {
     const result = this.load()
-    return result.ok ? result.save : createDefaultSaveV2()
+    return result.ok ? result.save : createDefaultSaveV3()
   }
 
   clear(): void {

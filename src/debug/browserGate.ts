@@ -39,6 +39,7 @@ declare global {
       setMovementOverride: (movement: PlayerMovementIntent | null) => void
       equipItem: (itemId: string) => unknown
       unequipSlot: (slot: 'weapon' | 'charm') => unknown
+      allocateProgression: (attribute: string) => unknown
       rendererStats: () => unknown
       cameraDiagnostic: () => unknown
       occludedPlacementIds: () => unknown
@@ -97,6 +98,7 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     },
     equipItem: (itemId) => runtime.equipItem(itemId),
     unequipSlot: (slot) => runtime.unequipSlot(slot),
+    allocateProgression: (attribute) => runtime.allocateProgression(attribute),
     rendererStats: () => readRendererStats(),
     cameraDiagnostic: () => readCameraDiagnostic(),
     occludedPlacementIds: () => readOccludedPlacementIds(),

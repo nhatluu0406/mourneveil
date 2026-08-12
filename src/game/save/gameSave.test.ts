@@ -5,20 +5,27 @@ import { migrateAndValidateSave } from './migrateSave'
 import {
   createDefaultSaveV1,
   createDefaultSaveV2,
-  type SaveFileV2,
+  createDefaultSaveV3,
+  type SaveFileV3,
 } from './saveSchema'
 
 describe('versioned local save', () => {
-  it('creates a default V2 save without transient combat fields', () => {
-    const save = createDefaultSaveV2()
-    expect(save.version).toBe(2)
+  it('creates a default V3 save without transient combat fields', () => {
+    const save = createDefaultSaveV3()
+    expect(save.version).toBe(3)
     expect(save.world).toEqual({ openedShortcutIds: [], finalGateReached: false, defeatedBossIds: [] })
+    expect(save.progression).toEqual({
+      level: 1,
+      experience: 0,
+      unspentPoints: 0,
+      allocation: { vitality: 0, resolve: 0, might: 0 },
+    })
     expect(save).not.toHaveProperty('combat')
     expect(save).not.toHaveProperty('defense')
     expect(save).not.toHaveProperty('camera')
   })
 
-  it('round-trips V2 through storage and restores persistent gameplay facts', () => {
+  it('round-trips V3 through storage and restores persistent gameplay facts', () => {
     const runtime = new GameRuntime()
     runtime.debugSetPlayerPosition(runtime.snapshot().checkpoint.respawnPosition)
     runtime.requestCheckpointInteraction({ type: 'player-checkpoint-interaction' })
@@ -31,12 +38,11 @@ describe('versioned local save', () => {
     runtime.advanceFrame(1 / 60, { horizontal: 0, forward: 0 })
     runtime.equipItem('item.weapon.oathblade')
     runtime.applyPlayerDamage(40)
-    // consume one flask charge via direct set after damage for charge persistence
-    // (committed flask use needs more steps; setCharges path covers schema)
     const mid = runtime.captureSave()
     expect(mid.checkpointActivated).toBe(true)
-    expect(mid.version).toBe(2)
+    expect(mid.version).toBe(3)
     expect(mid.echoesCarried).toBe(25)
+    expect(mid.progression.experience).toBe(25)
     expect(mid.inventory.some((entry) => entry.itemId === 'item.weapon.oathblade')).toBe(true)
     expect(mid.equipment.weaponItemId).toBe('item.weapon.oathblade')
 
@@ -45,6 +51,7 @@ describe('versioned local save', () => {
     const withRecovery = runtime.captureSave()
     expect(withRecovery.echoRecovery.active).toBe(true)
     expect(withRecovery.echoesCarried).toBe(0)
+    expect(withRecovery.progression.experience).toBe(25)
 
     const storage = new MemorySaveStorage()
     const service = new GameSaveService(storage)
@@ -63,25 +70,30 @@ describe('versioned local save', () => {
       combat: { phase: 'idle' },
       playerHealth: { lifeState: 'alive' },
       world: { openedShortcutIds: [], finalGateReached: false, defeatedBossIds: [] },
+      progression: { level: 1, experience: 25, unspentPoints: 0 },
     })
     expect(restored.resolvedAttackDamage()).toEqual({ light: 28, heavy: 47 })
     expect(restored.snapshot().enemies.every((enemy) => enemy.alive)).toBe(true)
   })
 
-  it('migrates V1 with safe default world facts', () => {
-    const result = migrateAndValidateSave(createDefaultSaveV1())
-    expect(result).toEqual({
+  it('migrates V1 and V2 into V3 with default progression', () => {
+    expect(migrateAndValidateSave(createDefaultSaveV1())).toEqual({
       ok: true,
-      save: createDefaultSaveV2(),
+      save: createDefaultSaveV3(),
       migratedFromVersion: 1,
+    })
+    expect(migrateAndValidateSave(createDefaultSaveV2())).toEqual({
+      ok: true,
+      save: createDefaultSaveV3(),
+      migratedFromVersion: 2,
     })
   })
 
-  it('round-trips stable V2 world flags without transient zone state', () => {
+  it('round-trips stable V3 world flags without transient zone state', () => {
     const storage = new MemorySaveStorage()
     const service = new GameSaveService(storage)
     service.save({
-      ...createDefaultSaveV2(),
+      ...createDefaultSaveV3(),
       world: {
         openedShortcutIds: ['connection.shortcut-checkpoint-mixed'],
         finalGateReached: true,
@@ -92,12 +104,13 @@ describe('versioned local save', () => {
     expect(loaded).toMatchObject({
       ok: true,
       save: {
-        version: 2,
+        version: 3,
         world: {
           openedShortcutIds: ['connection.shortcut-checkpoint-mixed'],
           finalGateReached: true,
           defeatedBossIds: [],
         },
+        progression: { level: 1, experience: 0 },
       },
     })
     if (loaded.ok) expect(loaded.save).not.toHaveProperty('currentZoneId')
@@ -113,11 +126,13 @@ describe('versioned local save', () => {
     expect(migrateAndValidateSave({ version: 1, flaskCharges: 'nope' }).ok).toBe(true)
     expect(migrateAndValidateSave({ version: 2, world: { openedShortcutIds: [3] } })).toMatchObject({
       ok: true,
-      save: { world: { openedShortcutIds: [], finalGateReached: false, defeatedBossIds: [] } },
+      save: {
+        version: 3,
+        world: { openedShortcutIds: [], finalGateReached: false, defeatedBossIds: [] },
+      },
     })
     const service = new GameSaveService(new MemorySaveStorage())
-    service.save({ not: 'a save' } as unknown as SaveFileV2)
-    // overwrite with bad JSON
+    service.save({ not: 'a save' } as unknown as SaveFileV3)
     const bad = new MemorySaveStorage()
     bad.writeRaw('{')
     expect(new GameSaveService(bad).load()).toEqual({ ok: false, reason: 'malformed' })

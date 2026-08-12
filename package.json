@@ -29,6 +29,7 @@
     "gate:m11-boss-visual": "node scripts/browser/gate-m11-boss-visual.mjs",
     "gate:m12-build-choice": "node scripts/browser/gate-m12-build-choice.mjs",
     "gate:m12-alpha-slice": "node scripts/browser/gate-m12-alpha-slice.mjs",
+    "gate:m13-progression": "node scripts/browser/gate-m13-progression.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

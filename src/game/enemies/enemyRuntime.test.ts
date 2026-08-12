@@ -28,6 +28,7 @@ const DEFINITION = defineEnemy({
   attackRange: 1.4,
   attackActionIds: [ATTACK.id],
   echoReward: 10,
+  xpReward: 10,
 })
 
 function createRuntime(id = 'enemy.test.1') {

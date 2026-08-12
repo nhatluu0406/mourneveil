@@ -1,20 +1,19 @@
 # Current State
 
 - Updated: 2026-08-12
-- Accepted: **M12 Vertical Slice Alpha** → `v0.12.0-vertical-slice-alpha`
-- Prior: `v0.11.0-boss-vertical-slice` (M11), `v0.10.0-visual-production-identity` (M10)
-- Active task: `m13-character-progression-build-identity` (Macro-batch 1 — progression foundation)
+- Accepted: **M12 Vertical Slice Alpha** → `v0.12.0-vertical-slice-alpha` (`ab1b270`)
+- Prior: `v0.11.0-boss-vertical-slice` (M11)
+- Active task: `m13-character-progression-build-identity` (MB1 complete locally)
 
 ## Status
 
-**M12 CLOSED.** Fresh-start-to-boss vertical slice accepted. Active work is M13 Character Progression & Build Identity — durable XP/level, Vitality/Resolve/Might allocation, equipment composition, save persistence. Do not start M14.
+**M12 CLOSED.** **M13 MB1 complete locally** — XP/level 1–5, Vitality/Resolve/Might allocation, equipment composition, SaveFileV3, `gate:m13-progression`. Active skills deferred to MB2. Do not start M14.
 
 ## What exists
 
-- Full authored vertical-slice journey through boss defeat with rite-complete endpoint
-- Vitality vs Ward charm tradeoff, acquisition feedback, inventory Guard comparison
+- Full vertical-slice journey (M12) plus durable character progression/build identity foundation
+- Vitality vs Ward charms compose with progression points
 - Camera/occlusion stability, production visual identity, combat depth
-- Gate-owned `tmp-m*` cleanup (`KEEP_ARTIFACTS=1` opt-in keep)
 
 ## Highest-value limitations
 
@@ -24,4 +23,4 @@
 
 ## Next executable work
 
-M13 Macro-batch 1: progression foundation (stats resolver, XP/level, allocation, save V3, `gate:m13-progression`). Active skills deferred unless foundation stays small.
+M13 Macro-batch 2 recommendation: active skill foundation (runtime/cooldown/equip) under Cursor; Codex later for progression UI/icons/VFX.

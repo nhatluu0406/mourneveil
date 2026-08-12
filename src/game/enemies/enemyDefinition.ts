@@ -31,6 +31,8 @@ export interface EnemyDefinition {
   readonly attackActionIds: readonly CombatActionId[]
   /** Provisional Echo reward granted once when this enemy is defeated. */
   readonly echoReward: number
+  /** Authored XP reward granted once per encounter-lifecycle defeat. */
+  readonly xpReward: number
 }
 
 export function defineEnemy(definition: EnemyDefinition): EnemyDefinition {
@@ -55,6 +57,7 @@ export function defineEnemy(definition: EnemyDefinition): EnemyDefinition {
     throw new TypeError('Enemy requires at least one tag and attack action id')
   }
   assertNonNegativeInteger(definition.echoReward, 'Enemy echo reward')
+  assertNonNegativeInteger(definition.xpReward, 'Enemy XP reward')
   definition.tags.forEach((tag) => assertNonEmpty(tag, 'Enemy tag'))
   definition.attackActionIds.forEach((id) => assertNonEmpty(id, 'Attack action id'))
 

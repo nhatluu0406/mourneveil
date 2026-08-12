@@ -1,49 +1,52 @@
-# PLAN: M12 Vertical Slice Alpha Acceptance — Macro-batch 2
-<!-- Live M12 graph only. -->
+# PLAN: M13 Character Progression & Build Identity — Macro-batch 1
+<!-- Live M13 graph only. -->
 
-Input: MB1 at `2826701`; M11 tag on `19abed3` | Stack: `STACK.md`
-Task slug: `m12-vertical-slice-alpha-acceptance`
+Input: PO close-M12 + start-M13 brief | Stack: `STACK.md`
+Task slug: `m13-character-progression-build-identity`
 Agent: Cursor only
 
 ## Goal
 
-Audit the complete vertical slice against `docs/product/vertical-slice.md`, close at most three genuine alpha blockers, and add `gate:m12-alpha-slice`. No M13 systems.
+Add the smallest durable progression layer (XP/level 1–5, Vitality/Resolve/Might points, authoritative stat resolution composing with equipment, save persistence, minimal UI/feedback, `gate:m13-progression`) without destabilizing combat authority.
 
 ## Non-goals
 
-- M12 tag/self-close; M13 Playable Alpha depth
-- Skill trees, XP, NPC/dialogue, crafting, rarity economy, quest engine
-- Broad art/camera redesign; triangle chasing
+- M14 / world expansion / NPC / dialogue / quests / crafting / rarity / respec / vendors
+- Large skill tree, mana system, crit/penetration, dynamic enemy level scaling
+- Souls-like XP loss on death
+- Codex polish (skill VFX/icons/UI art) — defer; active skill foundation only if core stays small
 
 ## Steps
 
-- [x] 1. Acceptance criteria + playthrough audit + M11 tag correction
+- [x] 1. Stat contract + resolver + XP/level/allocation pure runtimes + tests
   - depends: —
-  - risk: LOW
+  - risk: HIGH
   - isolation: sequential
-  - owns/allows: PLAN/HANDOFF notes; local tag retarget only
-  - verifier: `git show v0.11.0-boss-vertical-slice --no-patch`
-- [x] 2. Close ≤3 alpha blockers (endpoint, loot feedback, build clarity)
+  - owns/allows: `src/game/character/playerProgression*`, `playerStatResolution*`; enemy `xpReward`; STACK progression law
+  - verifier: `npx vitest run src/game/character/playerProgression.test.ts src/game/character/playerProgression.integration.test.ts`
+- [x] 2. Wire GameRuntime + SaveFileV3 migration + death durability + HUD/inventory projection
   - depends: 1
-  - risk: MEDIUM
+  - risk: HIGH
   - isolation: sequential
-  - owns/allows: HUD/inventory projection, thin acquisition signal; no combat redesign
-  - verifier: `npx vitest run src/ui src/game/character/verticalSliceAcceptance.test.ts`
-- [x] 3. End-to-end `gate:m12-alpha-slice` + regression + docs
+  - owns/allows: `GameRuntime*`, `save/*`, `browserGate`, `ui/*`, item equipment composition tests
+  - verifier: `npx vitest run src/game/save src/game/character src/game/runtime/GameRuntime.test.ts src/ui`
+- [x] 3. `gate:m13-progression` + regression + docs/HANDOFF
   - depends: 2
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `scripts/browser/gate-m12-alpha-slice.mjs`, package script, HANDOFF/current-state
-  - verifier: `npm run gate:m12-alpha-slice && npm run gate:m12-build-choice && npm run verify`
+  - owns/allows: `scripts/browser/gate-m13-progression.mjs`, package script, PLAN/HANDOFF/current-state/DEBT
+  - verifier: `npm run gate:m13-progression && npm run gate:m12-alpha-slice && npm run verify`
 
 ## Decisions
 
-- Vertical-slice contract (`docs/product/vertical-slice.md`) is the M12 acceptance source of truth.
-- M11 tag convention is closure-docs commit (M7–M10); local tag retargeted to `19abed3`.
-- Blockers closed: (1) post-boss rite-complete endpoint, (2) acquisition toast + I-to-equip cue, (3) inventory Guard/build comparison.
-- Elite variation / controller / deep itemization remain out of M12 scope.
+- Canonical M13 name: Character Progression & Build Identity (roadmap Playable Alpha train).
+- Initial attributes: Vitality / Resolve / Might; levels 1–5; one point per level-up; no respec.
+- Active skill foundation deferred to MB2 (progression + Save V3 + gate already filled MB1).
+- Persist only durable progression facts; recompute resolved combat stats.
+- XP rewards mirror echo authorship (25 / 60 / 200); cumulative XP thresholds 0 / 50 / 120 / 220 / 350.
+- Effects: Vitality +10 max HP; Resolve +1 guard threshold; Might +2 light / +3 heavy.
 
 ## Escalation
 
 - Same failure 3× → stuck report.
-- New gameplay-authority redesign → stop for review.
+- Combat authority redesign → stop for review.

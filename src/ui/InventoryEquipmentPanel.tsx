@@ -3,6 +3,7 @@ import type {
   GameRuntimeSnapshot,
 } from '../game/runtime/GameRuntime'
 import { getItemDefinition, type EquipSlot, type ItemId } from '../game/items/itemDefinition'
+import type { ProgressionAttributeId } from '../game/character/playerProgression'
 
 interface InventoryEquipmentPanelProps {
   snapshot: GameRuntimeSnapshot
@@ -22,7 +23,8 @@ export function InventoryEquipmentPanel({
   open,
   onClose,
 }: InventoryEquipmentPanelProps) {
-  const { inventory, equipment, resolvedAttackDamage, playerHealth, defense } = snapshot
+  const { inventory, equipment, resolvedAttackDamage, playerHealth, defense, progression } =
+    snapshot
 
   if (!open) return null
 
@@ -31,6 +33,9 @@ export function InventoryEquipmentPanel({
   }
   const unequip = (slot: EquipSlot): void => {
     runtime.unequipSlot(slot)
+  }
+  const allocate = (attribute: ProgressionAttributeId): void => {
+    runtime.allocateProgression(attribute)
   }
 
   return (
@@ -47,9 +52,55 @@ export function InventoryEquipmentPanel({
         </header>
 
         <p className="inventory-panel__meta">
-          Light {resolvedAttackDamage.light} · Heavy {resolvedAttackDamage.heavy} · Max HP{' '}
-          {playerHealth.health.maximum} · Guard {defense.guardImpactThreshold}
+          Lv {progression.level} · XP {progression.experience}
+          {progression.experienceToNextLevel === null
+            ? ' · Max'
+            : ` · Next ${progression.experienceToNextLevel}`}{' '}
+          · Points {progression.unspentPoints} · Light {resolvedAttackDamage.light} · Heavy{' '}
+          {resolvedAttackDamage.heavy} · Max HP {playerHealth.health.maximum} · Guard{' '}
+          {defense.guardImpactThreshold}
         </p>
+
+        <section data-progression-panel="1">
+          <h3>Build</h3>
+          <p className="inventory-panel__empty">
+            Vitality {progression.allocation.vitality} · Resolve {progression.allocation.resolve} ·
+            Might {progression.allocation.might}
+          </p>
+          <div className="inventory-panel__row">
+            <span>Vitality</span>
+            <strong className="inventory-panel__name">+Max HP</strong>
+            <button
+              type="button"
+              disabled={progression.unspentPoints <= 0}
+              onClick={() => allocate('vitality')}
+            >
+              Spend
+            </button>
+          </div>
+          <div className="inventory-panel__row">
+            <span>Resolve</span>
+            <strong className="inventory-panel__name">+Guard</strong>
+            <button
+              type="button"
+              disabled={progression.unspentPoints <= 0}
+              onClick={() => allocate('resolve')}
+            >
+              Spend
+            </button>
+          </div>
+          <div className="inventory-panel__row">
+            <span>Might</span>
+            <strong className="inventory-panel__name">+Melee</strong>
+            <button
+              type="button"
+              disabled={progression.unspentPoints <= 0}
+              onClick={() => allocate('might')}
+            >
+              Spend
+            </button>
+          </div>
+        </section>
 
         <section>
           <h3>Equipped</h3>

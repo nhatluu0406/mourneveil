@@ -1,15 +1,25 @@
 import {
   SAVE_VERSION_V1,
   SAVE_VERSION_V2,
+  SAVE_VERSION_V3,
   createDefaultSaveV1,
   createDefaultSaveV2,
+  createDefaultSaveV3,
+  createDefaultProgressionSave,
   type SaveFileV1,
   type SaveFileV2,
+  type SaveFileV3,
   type SaveLoadResult,
+  type SaveProgressionV3,
 } from './saveSchema'
+import {
+  PLAYER_MAX_LEVEL,
+  PLAYER_MIN_LEVEL,
+  restoreProgressionState,
+} from '../character/playerProgression'
 
 /**
- * Migration entry point. Only V1 exists; unknown versions reject safely.
+ * Migration entry point. V1/V2 migrate forward; unknown versions reject safely.
  */
 export function migrateAndValidateSave(raw: unknown): SaveLoadResult {
   if (raw === null || raw === undefined) {
@@ -22,20 +32,31 @@ export function migrateAndValidateSave(raw: unknown): SaveLoadResult {
   if (!('version' in record)) {
     return { ok: false, reason: 'malformed' }
   }
-  if (record.version !== SAVE_VERSION_V1 && record.version !== SAVE_VERSION_V2) {
+  if (
+    record.version !== SAVE_VERSION_V1 &&
+    record.version !== SAVE_VERSION_V2 &&
+    record.version !== SAVE_VERSION_V3
+  ) {
     return { ok: false, reason: 'unsupported-version' }
   }
   try {
     if (record.version === SAVE_VERSION_V1) {
       return {
         ok: true,
-        save: migrateV1ToV2(validateSaveV1(record)),
+        save: migrateV2ToV3(migrateV1ToV2(validateSaveV1(record))),
         migratedFromVersion: SAVE_VERSION_V1,
+      }
+    }
+    if (record.version === SAVE_VERSION_V2) {
+      return {
+        ok: true,
+        save: migrateV2ToV3(validateSaveV2(record)),
+        migratedFromVersion: SAVE_VERSION_V2,
       }
     }
     return {
       ok: true,
-      save: validateSaveV2(record),
+      save: validateSaveV3(record),
       migratedFromVersion: null,
     }
   } catch {
@@ -59,6 +80,26 @@ export function migrateV1ToV2(save: SaveFileV1): SaveFileV2 {
       finalGateReached: false,
       defeatedBossIds: [],
     },
+  }
+}
+
+export function migrateV2ToV3(save: SaveFileV2): SaveFileV3 {
+  return {
+    ...save,
+    version: SAVE_VERSION_V3,
+    progression: createDefaultProgressionSave(),
+  }
+}
+
+function validateSaveV3(record: Record<string, unknown>): SaveFileV3 {
+  const defaults = createDefaultSaveV3()
+  const common = validateCommonSave(record)
+  return {
+    version: SAVE_VERSION_V3,
+    ...common,
+    lootPickup: asLootV2(record.lootPickup),
+    world: asWorld(record.world, defaults.world),
+    progression: asProgression(record.progression),
   }
 }
 
@@ -100,6 +141,39 @@ function validateCommonSave(record: Record<string, unknown>): Omit<SaveFileV1, '
     equipment,
     lootPickup,
   }
+}
+
+function asProgression(value: unknown): SaveProgressionV3 {
+  const defaults = createDefaultProgressionSave()
+  if (value === null || typeof value !== 'object') return defaults
+  const record = value as Record<string, unknown>
+  const allocationRecord =
+    record.allocation !== null && typeof record.allocation === 'object'
+      ? (record.allocation as Record<string, unknown>)
+      : {}
+  const allocation = {
+    vitality: asNonNegativeInt(allocationRecord.vitality, 0),
+    resolve: asNonNegativeInt(allocationRecord.resolve, 0),
+    might: asNonNegativeInt(allocationRecord.might, 0),
+  }
+  const restored = restoreProgressionState({
+    level: asLevel(record.level, defaults.level),
+    experience: asNonNegativeInt(record.experience, defaults.experience),
+    unspentPoints: asNonNegativeInt(record.unspentPoints, defaults.unspentPoints),
+    allocation,
+  })
+  return {
+    level: restored.level,
+    experience: restored.experience,
+    unspentPoints: restored.unspentPoints,
+    allocation: restored.allocation,
+  }
+}
+
+function asLevel(value: unknown, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isInteger(value)) return fallback
+  if (value < PLAYER_MIN_LEVEL || value > PLAYER_MAX_LEVEL) return fallback
+  return value
 }
 
 function asWorld(value: unknown, fallback: SaveFileV2['world']): SaveFileV2['world'] {
