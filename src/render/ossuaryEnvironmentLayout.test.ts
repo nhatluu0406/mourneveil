@@ -12,7 +12,7 @@ describe('ossuary environment route layout', () => {
       new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk']),
     )
     expect(new Set(OSSUARY_WALL_BAYS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court']),
+      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'final-arena']),
     )
   })
 
@@ -31,9 +31,10 @@ describe('ossuary environment route layout', () => {
       'landmark.combat-veil-monolith',
       'landmark.mixed-funeral-brazier',
       'landmark.ash-veil-lamp',
+      'landmark.sepulchre-seal',
     ])
     expect(new Set(OSSUARY_LANDMARKS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'first-combat', 'mixed-court', 'ash-walk']),
+      new Set(['refuge', 'first-combat', 'mixed-court', 'ash-walk', 'final-arena']),
     )
   })
 

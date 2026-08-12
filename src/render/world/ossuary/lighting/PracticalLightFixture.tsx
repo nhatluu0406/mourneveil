@@ -124,6 +124,29 @@ function CandleCluster() {
   )
 }
 
+function Candelabrum({ actualLight }: { readonly actualLight: boolean }) {
+  return (
+    <group>
+      <mesh castShadow position={[0, 0.58, 0]}><cylinderGeometry args={[0.055, 0.11, 1.16, 8]} /><primitive attach="material" object={getOssuaryMaterial('bronze')} /></mesh>
+      <mesh castShadow position={[0, 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.28, 0.04, 6, 18]} /><primitive attach="material" object={getOssuaryMaterial('iron')} /></mesh>
+      {[-0.31, 0, 0.31].map((x, index) => <group key={x} position={[x, 1.12 + (index === 1 ? 0.18 : 0), 0]}><mesh><cylinderGeometry args={[0.035, 0.045, 0.22, 7]} /><primitive attach="material" object={getOssuaryMaterial('bone')} /></mesh><group position={[0, 0.16, 0]}><FlameCue scale={0.46} glow={false} /></group></group>)}
+      {actualLight ? <pointLight position={[0, 1.48, 0]} intensity={4.2} distance={6.8} decay={2} color={WARM} /> : null}
+    </group>
+  )
+}
+
+function ReliquaryLantern({ actualLight }: { readonly actualLight: boolean }) {
+  return (
+    <group>
+      <mesh position={[0, 0.62, 0]}><cylinderGeometry args={[0.025, 0.025, 1.24, 6]} /><primitive attach="material" object={getOssuaryMaterial('iron')} /></mesh>
+      <mesh castShadow position={[0, -0.05, 0]}><octahedronGeometry args={[0.3, 0]} /><primitive attach="material" object={getOssuaryMaterial('bronze')} /></mesh>
+      {[0, Math.PI / 2].map((rotation) => <mesh key={rotation} position={[0, -0.05, 0]} rotation={[0, rotation, 0]}><torusGeometry args={[0.33, 0.025, 5, 14]} /><primitive attach="material" object={getOssuaryMaterial('iron')} /></mesh>)}
+      <group position={[0, -0.05, 0]}><FlameCue veil scale={0.72} glow={actualLight} /></group>
+      {actualLight ? <pointLight position={[0, -0.05, 0]} intensity={4.8} distance={8} decay={2} color={VEIL} /> : null}
+    </group>
+  )
+}
+
 /** Presentation-only fixture. `actual-light` selects sparse photometric sources; all fixtures remain visual projections. */
 export function PracticalLightFixture({ placement }: { readonly placement: WorldObjectPlacement }) {
   const actualLight = placement.variant === 'actual-light'
@@ -140,6 +163,12 @@ export function PracticalLightFixture({ placement }: { readonly placement: World
       break
     case 'ossuary.light.candle-cluster':
       fixture = <CandleCluster />
+      break
+    case 'ossuary.light.candelabrum':
+      fixture = <Candelabrum actualLight={actualLight} />
+      break
+    case 'ossuary.light.reliquary-lantern':
+      fixture = <ReliquaryLantern actualLight={actualLight} />
       break
   }
   return (

@@ -13,6 +13,7 @@ import { CombatVeilMonolith } from './ossuary/landmarks/CombatVeilMonolith'
 import { ReliquaryPlinth } from './ossuary/landmarks/ReliquaryPlinth'
 import { VeilWispMotion } from './ossuary/dressing/VeilWispMotion'
 import { PracticalLightFixture } from './ossuary/lighting/PracticalLightFixture'
+import { SepulchreArenaSeal } from './ossuary/landmarks/SepulchreArenaSeal'
 import {
   isPlacementOccluded,
   rebuildFadeOcclusionSolids,
@@ -102,7 +103,11 @@ function UniqueObject({ placement }: { readonly placement: WorldObjectPlacement 
     case 'ossuary.light.brazier':
     case 'ossuary.light.veil-lamp':
     case 'ossuary.light.candle-cluster':
+    case 'ossuary.light.candelabrum':
+    case 'ossuary.light.reliquary-lantern':
       return <PracticalLightFixture placement={placement} />
+    case 'ossuary.landmark.arena-seal':
+      return <SepulchreArenaSeal placement={placement} />
     case 'ossuary.landmark.veil-monolith':
       return <CombatVeilMonolith placement={placement} />
     case 'ossuary.landmark.reliquary-plinth':

@@ -26,6 +26,12 @@ export const OSSUARY_MATERIALS: Readonly<Record<OssuaryMaterialKey, MeshStandard
       metalness: 0.02,
       flatShading: true,
     }),
+    sealStone: new MeshStandardMaterial({
+      color: '#353d40',
+      roughness: 0.82,
+      metalness: 0.06,
+      flatShading: true,
+    }),
     ashStone: new MeshStandardMaterial({
       color: MOURNEVEIL_PALETTE.environment.ashStone,
       roughness: 0.98,

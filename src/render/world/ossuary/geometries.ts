@@ -65,6 +65,11 @@ const ROOT = new TorusGeometry(0.46, 0.035, 5, 16, Math.PI * 1.35)
 const WISP = new OctahedronGeometry(0.065, 0)
 const SILHOUETTE_MASS = new BoxGeometry(2.4, 3.2, 0.55)
 const SILHOUETTE_COLUMN = new CylinderGeometry(0.22, 0.28, 3.4, 6)
+const BURIAL_SCREEN = createProfilePrismGeometry(
+  [[-0.7, -0.65], [-0.7, 0.42], [-0.42, 0.65], [0, 0.76], [0.42, 0.65], [0.7, 0.42], [0.7, -0.65]],
+  0.045,
+)
+const BROKEN_RELIQUARY = createTaperedPrismGeometry({ bottomWidth: 0.72, topWidth: 0.46, height: 0.72, depth: 0.42 })
 
 /** Shared geometries for instanced ossuary object types. Unique landmarks own local meshes. */
 export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
@@ -72,6 +77,7 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
 > = Object.freeze({
   'ossuary.floor.slab': FLOOR_SLAB,
   'ossuary.floor.ash-slab': FLOOR_SLAB,
+  'ossuary.floor.seal-slab': FLOOR_SLAB,
   'ossuary.floor.inlay': FLOOR_INLAY,
   'ossuary.wall.bay': WALL_BAY,
   'ossuary.wall.break': WALL_BREAK,
@@ -92,6 +98,8 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   'ossuary.wisp': WISP,
   'ossuary.silhouette.mass': SILHOUETTE_MASS,
   'ossuary.silhouette.column': SILHOUETTE_COLUMN,
+  'ossuary.metal.burial-screen': BURIAL_SCREEN,
+  'ossuary.reliquary.broken': BROKEN_RELIQUARY,
 })
 
 export function getOssuaryObjectGeometry(objectId: OssuaryObjectId): BufferGeometry {

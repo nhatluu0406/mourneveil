@@ -27,7 +27,7 @@ function slabField(
   xs: readonly number[],
   zs: readonly number[],
   phase: number,
-  objectId: 'ossuary.floor.slab' | 'ossuary.floor.ash-slab' = 'ossuary.floor.slab',
+  objectId: 'ossuary.floor.slab' | 'ossuary.floor.ash-slab' | 'ossuary.floor.seal-slab' = 'ossuary.floor.slab',
   idPrefix = `floor.${area}`,
 ): WorldObjectPlacement[] {
   return xs.flatMap((x, xIndex) =>
@@ -188,6 +188,37 @@ const ASH_WALK_TRANSITION: readonly WorldObjectPlacement[] = Object.freeze([
   place('dressing.blocker.approach', 'ossuary.landmark.reliquary-plinth', 'ash-walk', [7.2, 0, -6.1], ZERO_ROTATION, [0.82, 0.82, 0.82]),
 ])
 
+const SEPULCHRE_ARENA: readonly WorldObjectPlacement[] = Object.freeze([
+  ...slabField('final-arena', [10.35, 11.45, 12.55, 13.65, 14.75, 15.85], [-7.45, -6.35, -5.25, -4.15, -3.05, -1.95, -0.85], 6, 'ossuary.floor.seal-slab', 'floor.sepulchre'),
+  place('landmark.sepulchre.seal', 'ossuary.landmark.arena-seal', 'final-arena', [13, 0, -4]),
+  ...[-7.7, -5.85, -2.15, -0.3].flatMap((z, index) => [
+    place(`bay.sepulchre.west.${index}`, 'ossuary.wall.bay', 'final-arena', [9.8, 0.88, z], [0, Math.PI, 0], [1.08, 1.12, 1.08]),
+    place(`bay.sepulchre.east.${index}`, 'ossuary.wall.bay', 'final-arena', [16.2, 0.88, z], ZERO_ROTATION, [1.08, 1.12, 1.08]),
+    place(`buttress.sepulchre.west.${index}`, 'ossuary.buttress', 'final-arena', [9.92, 1.02, z + 0.75], [0, Math.PI, 0], [0.78, 1.08, 0.78]),
+    place(`buttress.sepulchre.east.${index}`, 'ossuary.buttress', 'final-arena', [16.08, 1.02, z + 0.75], ZERO_ROTATION, [0.78, 1.08, 0.78]),
+  ]),
+  place('arch.sepulchre.entry', 'ossuary.arch.full', 'final-arena', [10.2, 1.75, -4], [0, Math.PI / 2, 0], [1.55, 1.45, 1.45]),
+  place('arch.sepulchre.reliquary', 'ossuary.arch.full', 'final-arena', [16.05, 1.92, -4], [0, -Math.PI / 2, 0], [1.5, 1.52, 1.3]),
+  ...[-6.9, -1.1].flatMap((z, index) => [
+    place(`screen.sepulchre.west.${index}`, 'ossuary.metal.burial-screen', 'final-arena', [10.25, 0.75, z], [0, Math.PI / 2, 0], [1.05, 1.05, 1]),
+    place(`screen.sepulchre.east.${index}`, 'ossuary.metal.burial-screen', 'final-arena', [15.75, 0.75, z], [0, -Math.PI / 2, 0], [1.05, 1.05, 1]),
+  ]),
+  place('reliquary.sepulchre.north.0', 'ossuary.reliquary.broken', 'final-arena', [11.15, 0.36, -7.45], [0.05, 0.32, 0.12], [1.15, 0.82, 1.1]),
+  place('reliquary.sepulchre.north.1', 'ossuary.reliquary.broken', 'final-arena', [14.8, 0.34, -7.35], [-0.08, -0.5, -0.08], [0.95, 0.78, 1.25]),
+  place('reliquary.sepulchre.south', 'ossuary.reliquary.broken', 'final-arena', [14.95, 0.3, -0.6], [0.12, 0.8, 0.18], [0.82, 0.65, 0.9]),
+  place('banner.sepulchre.west', 'ossuary.banner', 'final-arena', [9.92, 1.38, -5.1], [0, Math.PI / 2, -0.05], [1.25, 1.45, 1]),
+  place('banner.sepulchre.east', 'ossuary.banner', 'final-arena', [16.08, 1.38, -2.9], [0, -Math.PI / 2, 0.05], [1.25, 1.45, 1]),
+  place('candelabrum.sepulchre.west', 'ossuary.light.candelabrum', 'final-arena', [10.75, 0.02, -6.25], ZERO_ROTATION, [0.92, 0.92, 0.92], 'actual-light'),
+  place('candelabrum.sepulchre.east', 'ossuary.light.candelabrum', 'final-arena', [15.25, 0.02, -1.75], ZERO_ROTATION, [0.92, 0.92, 0.92]),
+  place('lantern.sepulchre.center', 'ossuary.light.reliquary-lantern', 'final-arena', [13, 2.75, -7.1], ZERO_ROTATION, [1.1, 1.1, 1.1]),
+  place('lantern.sepulchre.west', 'ossuary.light.reliquary-lantern', 'final-arena', [10.55, 2.55, -3.1], ZERO_ROTATION, [0.82, 0.82, 0.82]),
+  place('veil-lamp.sepulchre.east', 'ossuary.light.veil-lamp', 'final-arena', [15.45, 0.02, -5.85], ZERO_ROTATION, [0.86, 0.86, 0.86], 'actual-light'),
+  place('candles.sepulchre.entry', 'ossuary.light.candle-cluster', 'final-arena', [10.55, 0.05, -4.75], [0, 0.25, 0]),
+  ...[[10.55, -7.2], [15.45, -7.1], [10.55, -0.8], [15.45, -0.9]].map(([x, z], index) =>
+    place(`rubble.sepulchre.${index}`, 'ossuary.rubble.cluster', 'final-arena', [x!, 0.1, z!], [0.08, index * 0.68, 0.04], [0.72, 0.42, 0.62]),
+  ),
+])
+
 /**
  * Cheap non-interactive distant masses outside the walkable route.
  * Keep only far-field silhouettes — camera-near SE masses caused opaque occlusion.
@@ -198,7 +229,8 @@ const PERIMETER_SILHOUETTES: readonly WorldObjectPlacement[] = Object.freeze([
   place('silhouette.refuge.south', 'ossuary.silhouette.mass', 'perimeter', [-6.2, 1.55, -11.4], [0, -0.06, 0], [1.15, 1.05, 1]),
   place('silhouette.watch.west', 'ossuary.silhouette.mass', 'perimeter', [-15.1, 1.7, 2.4], [0, Math.PI / 2, 0], [1.4, 1.15, 1]),
   place('silhouette.court.south', 'ossuary.silhouette.mass', 'perimeter', [1.2, 1.55, -10.2], ZERO_ROTATION, [1.6, 1.05, 1]),
-  place('silhouette.ash.east', 'ossuary.silhouette.mass', 'perimeter', [13.2, 1.65, -4.1], [0, Math.PI / 2, 0], [1.35, 1.1, 1]),
+  // M11 arena now occupies the former far-field sightline; keep this mass beyond its east wall.
+  place('silhouette.ash.east', 'ossuary.silhouette.mass', 'perimeter', [18.8, 1.65, -4.1], [0, Math.PI / 2, 0], [1.35, 1.1, 1]),
   place('silhouette.ash.north', 'ossuary.silhouette.mass', 'perimeter', [7.4, 1.5, -9.8], ZERO_ROTATION, [1.15, 1, 1]),
   ...[-1.6, 0.2, 2.0, 3.8].map((z, index) =>
     place(
@@ -221,7 +253,7 @@ const PERIMETER_SILHOUETTES: readonly WorldObjectPlacement[] = Object.freeze([
     ),
   ),
   place('silhouette.arch.court', 'ossuary.arch.full', 'perimeter', [1.1, 1.85, -10.9], [0, 0.12, 0], [1.45, 1.2, 1.1]),
-  place('silhouette.arch.ash', 'ossuary.arch.full', 'perimeter', [12.5, 1.7, -4], [0, Math.PI / 2, 0.05], [1.25, 1.1, 1]),
+  place('silhouette.arch.ash', 'ossuary.arch.full', 'perimeter', [18.2, 1.7, -4], [0, Math.PI / 2, 0.05], [1.25, 1.1, 1]),
 ])
 
 /**
@@ -234,6 +266,7 @@ export const OSSUARY_ROUTE_PLACEMENTS: readonly WorldObjectPlacement[] = Object.
   ...slabField('first-combat', [-11.45, -10.35, -9.25, -8.15], [0.25, 1.3, 2.35, 3.4, 4.45], 2),
   ...MIXED_COURT_SHELL,
   ...ASH_WALK_TRANSITION,
+  ...SEPULCHRE_ARENA,
   ...LATE_ROUTE_PRACTICALS,
   ...PERIMETER_SILHOUETTES,
 
@@ -420,6 +453,7 @@ export interface OssuaryLandmarkDefinition {
     | 'landmark.combat-veil-monolith'
     | 'landmark.mixed-funeral-brazier'
     | 'landmark.ash-veil-lamp'
+    | 'landmark.sepulchre-seal'
   readonly area: OssuaryRouteArea
   readonly position: readonly [number, number, number]
   readonly description: string
@@ -450,6 +484,12 @@ export const OSSUARY_LANDMARKS: readonly OssuaryLandmarkDefinition[] = Object.fr
     position: Object.freeze([8.4, 0.72, -2.4] as const),
     description: 'A lone veil lamp marks the ashen processional route toward the sealed arena.',
   }),
+  Object.freeze({
+    id: 'landmark.sepulchre-seal',
+    area: 'final-arena',
+    position: Object.freeze([13, 0, -4] as const),
+    description: 'A fractured radial containment seal defines the boss arena and its failed funerary purpose.',
+  }),
 ])
 
 export const OSSUARY_ROUTE_CAPTURE_POINTS = Object.freeze({
@@ -460,4 +500,5 @@ export const OSSUARY_ROUTE_CAPTURE_POINTS = Object.freeze({
   progressionLandmark: Object.freeze({ x: -9.15, y: 0.82, z: 3.85 }),
   mixedCourt: Object.freeze({ x: 1.1, y: 0.82, z: -4.15 }),
   ashWalk: Object.freeze({ x: 6.3, y: 0.82, z: -4.1 }),
+  finalArena: Object.freeze({ x: 11.2, y: 0.82, z: -4 }),
 })

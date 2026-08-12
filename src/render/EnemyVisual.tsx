@@ -11,6 +11,7 @@ import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { projectEnemyAnimation } from './animation/enemyAnimationProjection'
 import { resolveEnemyProceduralPose } from './animation/enemyProceduralPose'
 import { SkirmisherProductionVisual } from './SkirmisherProductionVisual'
+import { SepulchreBossVisual } from './boss/SepulchreBossVisual'
 import {
   requestedEnemyProofAsset,
   resolveEnemyPresentationBackend,
@@ -51,6 +52,9 @@ export function EnemyVisual({
     runtime.snapshot().enemies.find((entry) => entry.id === enemyId) ?? null
   const role = enemy === null ? null : meleeRoleByDefinitionId(enemy.definitionId)
   if (role === null) return null
+  if (role.role === 'boss') {
+    return <SepulchreBossVisual runtime={runtime} enemyId={enemyId} />
+  }
   const proofAssetId = import.meta.env.DEV
     ? requestedEnemyProofAsset(globalThis.location?.search ?? '')
     : null
@@ -122,16 +126,15 @@ function ProceduralEnemyVisual({
     facing.rotation.y = localNegativeZFacingYaw(animation.facing)
     const damping = Math.max(1, 1 / Math.max(animation.transition.blendSeconds, 0.001))
     const isBrute = role.role === 'brute'
-    const isBoss = role.role === 'boss'
-    const largeBody = isBrute || isBoss
-    body.scale.x = MathUtils.damp(body.scale.x, largeBody ? (isBoss ? 1.45 : 1.15) : 0.88, damping, deltaSeconds)
+    const largeBody = isBrute
+    body.scale.x = MathUtils.damp(body.scale.x, largeBody ? 1.15 : 0.88, damping, deltaSeconds)
     body.scale.y = MathUtils.damp(
       body.scale.y,
-      (largeBody ? (isBoss ? 1.35 : 1.05) : 0.98) * proceduralPose.bodyScaleY,
+      (largeBody ? 1.05 : 0.98) * proceduralPose.bodyScaleY,
       damping,
       deltaSeconds,
     )
-    body.scale.z = MathUtils.damp(body.scale.z, largeBody ? (isBoss ? 1.4 : 1.12) : 0.9, damping, deltaSeconds)
+    body.scale.z = MathUtils.damp(body.scale.z, largeBody ? 1.12 : 0.9, damping, deltaSeconds)
     body.rotation.x = MathUtils.damp(body.rotation.x, proceduralPose.bodyPitch, damping, deltaSeconds)
     body.rotation.z = MathUtils.damp(body.rotation.z, proceduralPose.bodyRoll, damping, deltaSeconds)
     body.position.y = MathUtils.damp(body.position.y, proceduralPose.bodyOffsetY, damping, deltaSeconds)
@@ -148,9 +151,7 @@ function ProceduralEnemyVisual({
       deltaSeconds,
     )
     material.color.set(
-      isBoss
-        ? role.presentation.primaryColor
-        : isBrute
+      isBrute
           ? MOURNEVEIL_PALETTE.brute.body
           : MOURNEVEIL_PALETTE.skirmisher.body,
     )
@@ -195,19 +196,15 @@ function ProceduralEnemyVisual({
   const role = enemy === null ? null : meleeRoleByDefinitionId(enemy.definitionId)
   if (role === null) return null
   const isBrute = role.role === 'brute'
-  const isBoss = role.role === 'boss'
-  const largeBody = isBrute || isBoss
+  const largeBody = isBrute
 
   return (
     <group
       ref={facingRef}
       userData={{
-        productionAssetId: isBoss
-          ? 'enemy.boss.veilbound-sepulchre.technical'
-          : isBrute
+        productionAssetId: isBrute
             ? 'enemy.brute.ossuary-bulwark'
             : 'enemy.skirmisher.veil-riven',
-        technicalBossPresentation: isBoss,
       }}
     >
       <group ref={bodyRef}>

@@ -57,6 +57,17 @@ export const PRODUCTION_VISUAL_ASSETS = Object.freeze([
     license: 'Project-owned; redistribution remains controlled by the repository owner.',
   },
   {
+    id: 'enemy.boss.veilbound-sepulchre',
+    sourcePath: 'src/render/boss/',
+    runtimeOwner: 'SepulchreBossVisual',
+    units: 'meters',
+    upAxis: 'Y',
+    pivot: 'ground-center',
+    colliderPolicy: 'existing-authored-proxy',
+    provenance: 'Original Mourneveil project-authored geometry; no third-party content.',
+    license: 'Project-owned; redistribution remains controlled by the repository owner.',
+  },
+  {
     id: 'world.kit.ossuary-hero',
     sourcePath: 'src/render/world/ossuary/',
     runtimeOwner: 'OssuaryEnvironmentComposition',

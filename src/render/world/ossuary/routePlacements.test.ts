@@ -5,7 +5,7 @@ import { groupPlacementsByObjectId, resolveWorldObjectDefinition } from '../worl
 describe('ossuary route placements', () => {
   it('covers each authored route area with reusable object types', () => {
     expect(new Set(OSSUARY_ROUTE_PLACEMENTS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk', 'perimeter']),
+      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk', 'final-arena', 'perimeter']),
     )
     expect(
       OSSUARY_ROUTE_PLACEMENTS.some((entry) => entry.objectId === 'ossuary.floor.slab'),
@@ -49,6 +49,7 @@ describe('ossuary route placements', () => {
       'landmark.combat-veil-monolith',
       'landmark.mixed-funeral-brazier',
       'landmark.ash-veil-lamp',
+      'landmark.sepulchre-seal',
     ])
     for (const position of Object.values(OSSUARY_ROUTE_CAPTURE_POINTS)) {
       expect([position.x, position.y, position.z].every(Number.isFinite)).toBe(true)
@@ -62,9 +63,22 @@ describe('ossuary route placements', () => {
       'ossuary.light.brazier',
       'ossuary.light.veil-lamp',
       'ossuary.light.candle-cluster',
+      'ossuary.light.candelabrum',
+      'ossuary.light.reliquary-lantern',
     ]))
-    expect(practicals.filter((entry) => entry.variant === 'actual-light')).toHaveLength(5)
+    expect(practicals.filter((entry) => entry.variant === 'actual-light')).toHaveLength(7)
     expect(practicals.length).toBeGreaterThan(5)
+  })
+
+  it('authors a readable final arena with reusable funeral assets and a clear center', () => {
+    const arena = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'final-arena')
+    expect(arena.filter((entry) => entry.objectId === 'ossuary.floor.seal-slab').length).toBeGreaterThan(30)
+    expect(arena.some((entry) => entry.objectId === 'ossuary.landmark.arena-seal')).toBe(true)
+    expect(arena.some((entry) => entry.objectId === 'ossuary.metal.burial-screen')).toBe(true)
+    expect(arena.some((entry) => entry.objectId === 'ossuary.reliquary.broken')).toBe(true)
+    expect(arena.filter((entry) => entry.variant === 'actual-light')).toHaveLength(2)
+    const centerClutter = arena.filter((entry) => entry.position[0] > 11.6 && entry.position[0] < 14.4 && entry.position[2] > -5.4 && entry.position[2] < -2.6 && entry.objectId !== 'ossuary.floor.seal-slab' && entry.objectId !== 'ossuary.landmark.arena-seal')
+    expect(centerClutter).toHaveLength(0)
   })
 
   it('keeps perimeter silhouettes outside the walkable route and non-colliding by construction', () => {
@@ -75,5 +89,6 @@ describe('ossuary route placements', () => {
       silhouettes.some((entry) => entry.objectId === 'ossuary.silhouette.mass'),
     ).toBe(true)
     expect(silhouettes.some((entry) => entry.instanceId.includes('.se'))).toBe(false)
+    expect(silhouettes.find((entry) => entry.instanceId === 'silhouette.ash.east')?.position[0]).toBeGreaterThan(16.5)
   })
 })

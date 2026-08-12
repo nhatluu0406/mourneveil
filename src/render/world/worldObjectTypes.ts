@@ -6,6 +6,7 @@ export type OssuaryRouteArea =
   | 'first-combat'
   | 'mixed-court'
   | 'ash-walk'
+  | 'final-arena'
   | 'perimeter'
 
 export type WorldObjectFamily =
@@ -19,6 +20,7 @@ export type OssuaryMaterialKey =
   | 'darkStone'
   | 'recessStone'
   | 'floorSlab'
+  | 'sealStone'
   | 'ashStone'
   | 'bone'
   | 'bronze'
@@ -31,6 +33,7 @@ export type OssuaryMaterialKey =
 export type OssuaryObjectId =
   | 'ossuary.floor.slab'
   | 'ossuary.floor.ash-slab'
+  | 'ossuary.floor.seal-slab'
   | 'ossuary.floor.inlay'
   | 'ossuary.wall.bay'
   | 'ossuary.wall.break'
@@ -55,6 +58,11 @@ export type OssuaryObjectId =
   | 'ossuary.light.brazier'
   | 'ossuary.light.veil-lamp'
   | 'ossuary.light.candle-cluster'
+  | 'ossuary.light.candelabrum'
+  | 'ossuary.light.reliquary-lantern'
+  | 'ossuary.metal.burial-screen'
+  | 'ossuary.reliquary.broken'
+  | 'ossuary.landmark.arena-seal'
   | 'ossuary.landmark.veil-monolith'
   | 'ossuary.landmark.reliquary-plinth'
   | 'ossuary.corridor.bell'
