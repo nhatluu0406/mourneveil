@@ -154,6 +154,17 @@ const LATE_ROUTE_PRACTICALS: readonly WorldObjectPlacement[] = Object.freeze([
   place('spectral-reliquary.court', 'ossuary.light.spectral-reliquary', 'mixed-court', [3.75, 0.02, -6.4], ZERO_ROTATION, [0.78, 0.78, 0.78], 'actual-light'),
 ])
 
+const HERO_PROCESSIONAL_STANDS: readonly WorldObjectPlacement[] = Object.freeze(
+  ([
+    ['refuge.entry', 'refuge', -3.72, -0.9],
+    ['court.south', 'mixed-court', -1.15, -2],
+    ['court.north', 'mixed-court', 2.8, -6.25],
+  ] as const).flatMap(([id, area, x, z]) => [
+    place(`processional.${id}`, 'ossuary.marker.body', area, [x, 0.78, z], ZERO_ROTATION, [0.72, 2.15, 0.72]),
+    place(`processional.${id}.flame`, 'ossuary.candle.flame', area, [x, 1.44, z], ZERO_ROTATION, [2.3, 2.8, 2.3]),
+  ]),
+)
+
 const MIXED_COURT_SHELL: readonly WorldObjectPlacement[] = Object.freeze([
   ...slabField('mixed-court', [-1.45, -0.35, 0.75, 1.85, 2.95], [-6.45, -5.35, -4.25, -3.15, -2.05], 3),
   // Southern divider detour: keep authored walkable floor visually continuous (no new art types).
@@ -179,6 +190,9 @@ const MIXED_COURT_SHELL: readonly WorldObjectPlacement[] = Object.freeze([
   place('inlay.court.cross.z', 'ossuary.floor.inlay', 'mixed-court', [1, 0.076, -4.25], ZERO_ROTATION, [7.2, 1, 1]),
   place('dressing.blocker.mixed.west', 'ossuary.memorial.cluster', 'mixed-court', [0, 0.5, -5.8], [0, 0.12, 0], [1.5, 1.35, 1.45]),
   place('dressing.blocker.mixed.east', 'ossuary.memorial.cluster', 'mixed-court', [2.7, 0.5, -2], [0, -0.18, 0], [1.5, 1.35, 1.45]),
+  place('screen.court.west', 'ossuary.metal.burial-screen', 'mixed-court', [-2.55, 0.78, -4.05], [0, Math.PI / 2, 0], [0.82, 0.9, 0.82]),
+  place('screen.court.north', 'ossuary.metal.burial-screen', 'mixed-court', [2.15, 0.72, -6.7], ZERO_ROTATION, [0.72, 0.82, 0.72]),
+  place('banner.court.west', 'ossuary.banner', 'mixed-court', [-2.66, 1.4, -3.25], [0, Math.PI / 2, -0.04], [0.9, 1.28, 1]),
   ...[-1.6, -0.8, 2.85, 3.45].map((x, index) => place(`marker.court.${index}`, 'ossuary.marker.body', 'mixed-court', [x, 0.36, index % 2 === 0 ? -6.65 : -1.35], [0, index * 0.28, 0])),
   ...[-1.75, -0.65, 2.3, 3.6].map((x, index) => place(`rubble.court.${index}`, 'ossuary.rubble.cluster', 'mixed-court', [x, 0.09, index % 2 === 0 ? -2 : -6.5], [0.1, index * 0.7, 0], [0.65, 0.42, 0.55])),
 ])
@@ -276,6 +290,7 @@ export const OSSUARY_ROUTE_PLACEMENTS: readonly WorldObjectPlacement[] = Object.
   ...ASH_WALK_TRANSITION,
   ...SEPULCHRE_ARENA,
   ...LATE_ROUTE_PRACTICALS,
+  ...HERO_PROCESSIONAL_STANDS,
   ...PERIMETER_SILHOUETTES,
 
   place('inlay.refuge.west', 'ossuary.floor.inlay', 'refuge', [-6.95, 0.072, 0], [0, 0.06, 0], [1.5, 1, 1]),

@@ -85,7 +85,7 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
   'ossuary.arch.full': define({
     id: 'ossuary.arch.full',
     family: 'architecture',
-    materialKey: 'bone',
+    materialKey: 'darkStone',
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
@@ -115,7 +115,7 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     id: 'ossuary.niche.cluster', family: 'burial', materialKey: 'recessStone', castShadow: false, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.1, 1.25, 1.15],
   }),
   'ossuary.memorial.cluster': define({
-    id: 'ossuary.memorial.cluster', family: 'burial', materialKey: 'bone', castShadow: true, receiveShadow: true, renderMode: 'instanced', visualBounds: [0.8, 0.85, 0.28],
+    id: 'ossuary.memorial.cluster', family: 'burial', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', visualBounds: [0.8, 0.85, 0.28],
   }),
   'ossuary.reliquary.chain': define({
     id: 'ossuary.reliquary.chain', family: 'metal', materialKey: 'iron', castShadow: true, receiveShadow: false, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.24, 1.7, 0.12],
