@@ -13,7 +13,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (57L)
+- package.json (62L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -164,7 +164,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - **assets/source/world/checkpoint/** (1 files)
         - refuge-shrine.gltf (35L)
 - **docs/** (1 files)
-  - roadmap.md (58L)
+  - roadmap.md (59L)
   - **docs/architecture/** (3 files)
     - animation-presentation.md (14L)
     - asset-pipeline.md (36L)
@@ -172,11 +172,12 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - **docs/architecture/decisions/** (2 files)
       - 0001-web-stack.md (46L)
       - 0002-modular-world-objects.md (42L)
-  - **docs/art/** (1 files)
-    - visual-direction.md (29L)
+  - **docs/art/** (2 files)
+    - m11-boss-visual-handoff.md (95L)
+    - visual-direction.md (35L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (25L)
+    - current-state.md (26L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
@@ -197,20 +198,20 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (37 files)
+  - **scripts/browser/** (43 files)
     - README.md (18L)
+    - gate-m10-camera-occlusion-repro.mjs (101L)
+    - gate-m10-camera-stability.mjs (194L)
     - gate-m10-hero-visual.mjs (306L)
+    - gate-m10-occlusion-readability.mjs (201L)
+    - gate-m10-perf-baseline.mjs (225L)
     - gate-m10-ui-compact.mjs (129L)
+    - gate-m11-boss-foundation.mjs (198L)
+    - gate-m11-boss-visual.mjs (174L)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
-    - gate-m46-save.mjs (124L)
-    - gate-m52-world.mjs (69L)
-    - gate-m531-correctness.mjs (157L)
-    - gate-m54-readability.mjs (79L)
-    - gate-m55-tuning.mjs (124L)
-    - gate-m56-playthrough.mjs (240L)
-    - ... +25 more
+    - ... +31 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -226,7 +227,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (136L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
-    - RenderErrorBoundary.tsx
+    - App.tsx (137L) -- symbols: App; imports: ../debug/Development
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

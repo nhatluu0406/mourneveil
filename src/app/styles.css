@@ -837,6 +837,54 @@ body {
   }
 }
 
+/* M11 boss-combat hierarchy: vitals + items + threat, with presentation chrome receding. */
+.gameplay-hud__threat--boss {
+  top: 1.35rem;
+  width: min(42rem, 52vw);
+  padding: 0.25rem 1.25rem 0.55rem;
+  background: linear-gradient(90deg, transparent, rgb(4 7 8 / 78%) 18% 82%, transparent);
+}
+
+.gameplay-hud__threat--boss .gameplay-hud__threat-heading { justify-content: center; gap: 1.4rem; }
+.gameplay-hud__threat--boss .gameplay-hud__threat-heading strong { color: #eee5d5; font-size: 1rem; letter-spacing: 0.11em; }
+.gameplay-hud__threat--boss .gameplay-hud__threat-heading span { color: rgb(170 214 209 / 68%); }
+.gameplay-hud__threat--boss .gameplay-hud__threat-track { height: 0.46rem; border: 1px solid rgb(166 137 92 / 28%); }
+.gameplay-hud__threat--boss .gameplay-hud__threat-fill { background: linear-gradient(90deg, #5d2420, #a94f37 52%, #7bc4ba); }
+
+.gameplay-hud__status {
+  width: min(17rem, 21vw);
+  padding: 0.55rem 0.72rem 0.58rem;
+  background: linear-gradient(110deg, rgb(5 9 10 / 88%), rgb(5 8 10 / 56%), transparent);
+}
+
+.gameplay-hud__identity { align-items: center; padding-bottom: 0.3rem; }
+.gameplay-hud__identity > div:first-child strong { color: rgb(219 211 194 / 68%); font-size: 0.68rem; letter-spacing: 0.12em; }
+.gameplay-hud__identity-gear span { font-size: 0.66rem; }
+.gameplay-hud__identity-gear small { font-size: 0.54rem; }
+.gameplay-hud__hp,
+.gameplay-hud__resolve { margin-top: 0.38rem; }
+.gameplay-hud__status-line { display: flex; justify-content: space-between; margin-top: 0.38rem; color: rgb(201 195 180 / 48%); font-size: 0.54rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+.gameplay-hud__center { width: min(38rem, 48vw); }
+.gameplay-hud__equipment-bar { padding: 0.12rem; background: linear-gradient(180deg, rgb(9 12 13 / 86%), rgb(3 6 8 / 91%)); }
+.gameplay-hud__equipment-slot { min-height: 3.45rem; grid-template-columns: 2.35rem minmax(0, 1fr); gap: 0.34rem; padding: 0.28rem 0.34rem; }
+.gameplay-hud__item-glyph { width: 2.15rem; height: 2.45rem; border-color: rgb(174 154 111 / 16%); }
+.gameplay-hud__item-glyph svg { width: 1.65rem; height: 1.65rem; }
+.gameplay-hud__item-copy strong { font-size: 0.68rem; }
+.gameplay-hud__item-copy small { font-size: 0.52rem; }
+.gameplay-hud__control-hints { gap: 0.58rem; opacity: 0.42; font-size: 0.52rem; }
+
+.gameplay-hud__objective.is-compact { max-width: 22rem; }
+.gameplay-hud__objective.is-compact strong { display: block; overflow: hidden; max-width: 21rem; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .gameplay-hud__threat--boss { width: min(34rem, 78vw); }
+  .gameplay-hud__status { width: min(15rem, 38vw); }
+  .gameplay-hud__center { width: min(25rem, calc(100vw - 16rem)); }
+  .gameplay-hud__equipment-slot { grid-template-columns: 2rem minmax(0, 1fr); }
+  .gameplay-hud__item-glyph { width: 1.9rem; height: 2.1rem; }
+}
+
 @media (max-width: 720px) {
   .gameplay-hud__threat-heading span {
     display: none;
@@ -1001,4 +1049,23 @@ body {
   .gameplay-hud__equipment-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gameplay-hud__equipment-slot:nth-child(2) { border-right: 0; }
   .gameplay-hud__control-hints span { display: none; }
+}
+
+/* Final M11 precedence over the M10 dock sizing. */
+.gameplay-hud__status { width: min(17rem, 21vw); padding: 0.55rem 0.72rem 0.58rem; }
+.gameplay-hud__center { width: min(38rem, 48vw); }
+.gameplay-hud__equipment-bar { padding: 0.12rem; background: linear-gradient(180deg, rgb(9 12 13 / 86%), rgb(3 6 8 / 91%)); }
+.gameplay-hud__equipment-slot { min-height: 3.45rem; grid-template-columns: 2.35rem minmax(0, 1fr); gap: 0.34rem; padding: 0.28rem 0.34rem; }
+.gameplay-hud__item-glyph { width: 2.15rem; height: 2.45rem; }
+.gameplay-hud__item-glyph svg { width: 1.65rem; height: 1.65rem; }
+.gameplay-hud__item-copy strong { font-size: 0.68rem; }
+.gameplay-hud__item-copy small { font-size: 0.52rem; }
+.gameplay-hud__control-hints { gap: 0.58rem; opacity: 0.42; font-size: 0.52rem; }
+
+@media (max-width: 900px) {
+  .gameplay-hud__threat--boss { width: min(34rem, 78vw); }
+  .gameplay-hud__status { width: min(15rem, 38vw); }
+  .gameplay-hud__center { width: min(25rem, calc(100vw - 16rem)); }
+  .gameplay-hud__equipment-slot { grid-template-columns: 2rem minmax(0, 1fr); }
+  .gameplay-hud__item-glyph { width: 1.9rem; height: 2.1rem; }
 }

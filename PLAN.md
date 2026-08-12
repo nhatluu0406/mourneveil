@@ -1,52 +1,55 @@
-# PLAN: M11 Boss Vertical Slice — Macro-batch 1 (Gameplay Foundation)
+# PLAN: M11 Boss Vertical Slice — Macro-batch 2 (Visual Production)
 <!-- Live M11 graph only. -->
 
-Input: M10 closed; roadmap M11 Boss Vertical Slice | Stack: `STACK.md`
+Input: M11 MB1 gameplay foundation at `67a3d43` | Stack: `STACK.md`
 Task slug: `m11-boss-vertical-slice`
 
 ## Goal
 
-Ship one complete technical boss encounter vertical slice that reuses existing combat/AI/world/save/UI foundations. Temporary presentation only — Codex owns boss/arena art later.
+Produce one screenshot-worthy Veilbound Sepulchre encounter: unique project-authored boss, readable authored arena, boss-specific presentation, and a calmer combat HUD. Gameplay authority remains unchanged.
 
 ## Non-goals
 
-- M12; M11 tag/completion; polished boss art/arena/VFX/UI redesign
-- Behavior-tree / boss scripting language / lock-on camera / posture system
-- Full reward/progression systems; ECS/manager frameworks
+- M11 closure/tag; M12; boss gameplay, phase, attack, contact, damage, save, or camera redesign
+- Third-party assets; generalized particles, animation graphs, lighting managers, or UI frameworks
+- Broad route/actor polish outside the final arena
 
 ## Steps
 
-- [x] 1. M10 hygiene close + tag `v0.10.0-visual-production-identity`
+- [x] 1. Boss visual contract and modular production candidate
   - depends: —
-  - risk: MED
+  - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: tmp cleanup, docs, debt, PLAN transition, tag
-  - verifier: `npm run verify && npm run gate:lifecycle && git tag -l v0.10.0-visual-production-identity`
-- [x] 2. Boss contract + role/kit/phase/AI policy (pure modules + tests)
+  - owns/allows: `src/render/boss/**`, boss branch in `EnemyVisual`, production visual ledger, focused pure presentation tests
+  - verifier: `npx vitest run src/render/boss src/content/assets/productionVisualLedger.test.ts`
+- [x] 2. Funeral prop family and Veilbound Sepulchre arena
   - depends: 1
+  - risk: MEDIUM
+  - isolation: sequential
+  - owns/allows: ADR-0002 object types/registry/geometries/materials/placements, arena-only unique render modules
+  - verifier: `npx vitest run src/render/world src/render/ossuaryEnvironmentLayout.test.ts`
+- [x] 3. Boss VFX and combat-HUD hierarchy
+  - depends: 1, 2
+  - risk: MEDIUM
+  - isolation: sequential
+  - owns/allows: boss presentation/VFX projection, `GameplayHud`, HUD model/styles; authoritative snapshot reads only
+  - verifier: `npx vitest run src/render src/ui`
+- [x] 4. Deterministic visual acceptance and full regression gate
+  - depends: 1, 2, 3
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/game/enemies/boss*`, enemyRoles/hitReaction extensions
-  - verifier: `npx vitest run src/game/enemies`
-- [x] 3. Arena encounter wiring + save defeated flag + UI threat titles
-  - depends: 2
-  - risk: HIGH
-  - isolation: sequential
-  - owns/allows: encounters, connectedLevel, save, GameRuntime, GameplayHud model
-  - verifier: `npx vitest run src/game/encounters src/game/save src/ui`
-- [x] 4. Temporary boss presentation + technical runtime gate + Codex handoff
-  - depends: 3
-  - risk: MED
-  - isolation: sequential
-  - owns/allows: EnemyVisual boss branch, `gate:m11-boss-foundation`, docs handoff
-  - verifier: `npm run gate:m11-boss-foundation && npm run verify`
+  - owns/allows: `gate:m11-boss-visual`, package script, M11 docs/state/REPOMAP
+  - verifier: `npm run gate:m11-boss-foundation && npm run gate:m11-boss-visual && npm run gate:m10-perf-baseline && npm run verify`
 
 ## Decisions
 
-- Technical ID: `boss.veilbound-sepulchre` / runtime `enemy.boss.sepulchre.1`
-- Two phases max; 3–4 attacks; reuse FollowCameraRig and enemy contact authority
-- Codex later owns visual/arena/VFX/UI polish
+- Display identity remains **The Veilbound Sepulchre**, a failed funerary containment warden.
+- Boss root consumes existing enemy animation/action/health snapshots; children render only.
+- Phase two opens the reliquary frame and exposes a veil core; HP ratio remains sole authority.
+- Arena render shell and visible light fixtures remain presentation; current zone bounds/colliders are unchanged.
+- Existing M10 camera stays unchanged.
 
 ## Escalation
 
+- Any required gameplay-authority change stops the batch for review.
 - Same failure 3× → stuck report and escalate.

@@ -4,6 +4,7 @@ import { resolvePlayerOutgoingHitConfirm } from '../render/playerCombatFeedback'
 import {
   equippedCharmLabel,
   equippedWeaponLabel,
+  isBossThreat,
   resolveGameplayInteractionPrompt,
   resolveEquipmentBar,
   resolveNearestThreat,
@@ -31,7 +32,7 @@ function ZonePresentation({ zone }: { readonly zone: ReturnType<typeof resolveZo
         {expanded ? <span>Ruined ossuary · veil passage</span> : null}
       </header>
       <aside className={`gameplay-hud__objective${expanded ? ' is-expanded' : ' is-compact'}`} aria-label="Current objective" data-objective-presentation={expanded ? 'expanded' : 'compact'}>
-        <span>Rite I / III</span><strong>{zone.title}</strong>
+        <span>Current rite</span><strong>{expanded ? 'Objective' : zone.objective}</strong>
         {expanded ? <p>{zone.objective}</p> : null}
       </aside>
     </>
@@ -81,6 +82,8 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
     ? 0
     : Math.max(0, 1 - snapshot.defense.guardImpact / Math.max(1, snapshot.defense.guardImpactThreshold))
   const power = Math.max(snapshot.resolvedAttackDamage.light, snapshot.resolvedAttackDamage.heavy)
+  const bossThreat = threat !== null && isBossThreat(threat.definitionId)
+  const bossPhase = bossThreat && threat !== null && threatRatio <= 0.5 ? 2 : 1
 
   return (
     <div
@@ -88,13 +91,13 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
       aria-label="Gameplay HUD"
       data-product-hud="1"
     >
-      <ZonePresentation key={snapshot.world.currentZoneId ?? 'between'} zone={zone} />
+      {bossThreat ? null : <ZonePresentation key={snapshot.world.currentZoneId ?? 'between'} zone={zone} />}
 
       {threat !== null ? (
-        <section className="gameplay-hud__threat" aria-label="Nearest threat">
+        <section className={`gameplay-hud__threat${bossThreat ? ' gameplay-hud__threat--boss' : ''}`} aria-label={bossThreat ? 'Boss threat' : 'Nearest threat'}>
           <div className="gameplay-hud__threat-heading">
             <strong>{threatTitle(threat.definitionId)}</strong>
-            <span>{threatSubtitle(threat.definitionId)}</span>
+            <span>{threatSubtitle(threat.definitionId)}{bossThreat ? ` · PHASE ${bossPhase}` : ''}</span>
           </div>
           <div
             className="gameplay-hud__threat-track"
@@ -113,10 +116,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
 
       <section className="gameplay-hud__status" aria-label="Player status">
         <div className="gameplay-hud__identity">
-          <div>
-            <strong>Oathward</strong>
-            <span>The held line · Veilbound Warden</span>
-          </div>
+          <div><strong>WARDEN</strong></div>
           <div className="gameplay-hud__identity-gear"><span>{weapon}</span><small>{charm ?? 'No charm'}</small></div>
         </div>
 
@@ -153,22 +153,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
           </div>
         </div>
 
-        <div className="gameplay-hud__stats">
-          <div>
-            <span>Power</span>
-            <strong>{power}</strong>
-          </div>
-          <div>
-            <span>Guard</span>
-            <strong>
-              {snapshot.defense.guardImpact}/{snapshot.defense.guardImpactThreshold}
-            </strong>
-          </div>
-          <div>
-            <span>Echoes</span>
-            <strong>{snapshot.echoes.carried}</strong>
-          </div>
-        </div>
+        <div className="gameplay-hud__status-line"><span>Power {power}</span><span>Guard {snapshot.defense.guardImpact}/{snapshot.defense.guardImpactThreshold}</span></div>
       </section>
 
       <div className="gameplay-hud__center">

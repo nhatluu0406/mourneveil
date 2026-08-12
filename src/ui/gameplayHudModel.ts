@@ -97,13 +97,17 @@ export function resolveNearestThreat(
 }
 
 export function threatTitle(definitionId: string): string {
-  if (definitionId.includes('boss')) return 'VEILBOUND SEPULCHRE'
+  if (definitionId.includes('boss')) return 'THE VEILBOUND SEPULCHRE'
   return definitionId.includes('brute') ? 'OSSUARY BULWARK' : 'VEIL-RIVEN STALKER'
 }
 
 export function threatSubtitle(definitionId: string): string {
-  if (definitionId.includes('boss')) return 'TECHNICAL BOSS · PHASE THREAT'
+  if (definitionId.includes('boss')) return 'THE LAST OSSUARY WARDEN'
   return definitionId.includes('brute') ? 'THE IRON DEAD · UNYIELDING' : 'THE UNBURIED · HUNTING'
+}
+
+export function isBossThreat(definitionId: string): boolean {
+  return definitionId.includes('boss')
 }
 
 export function resolveGameplayInteractionPrompt(

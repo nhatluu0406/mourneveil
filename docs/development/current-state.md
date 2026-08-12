@@ -3,11 +3,11 @@
 - Updated: 2026-08-12
 - Accepted release pending tag: **M10 Visual Production & Identity** → `v0.10.0-visual-production-identity`
 - Prior accepted: `v0.9.0-combat-depth` (M9)
-- Active task: `m11-boss-vertical-slice` (Macro-batch 1 — gameplay foundation)
+- Active task: `m11-boss-vertical-slice` (Macro-batch 2 — visual production complete locally)
 
 ## Status
 
-**M10 PRODUCT OWNER ACCEPTED / CLOSED** after hygiene + verification. M11 boss vertical slice initialized (technical boss only; Codex owns later art/arena/VFX/UI).
+**M10 PRODUCT OWNER ACCEPTED / CLOSED.** M11 now has its authoritative gameplay foundation plus a project-authored Sepulchre boss, readable final arena, boss-specific effects, and compact combat HUD. M11 remains active and untagged pending Product Owner visual review.
 
 ## What exists
 
@@ -23,4 +23,4 @@
 
 ## Next executable work
 
-CODEX Macro-batch 2: boss visual, arena dressing, lighting/VFX, boss UI presentation — see `docs/art/m11-boss-visual-handoff.md`.
+Product Owner visual review of M11 Macro-batch 2 evidence, then scope only remaining boss-slice blockers; do not start M12.

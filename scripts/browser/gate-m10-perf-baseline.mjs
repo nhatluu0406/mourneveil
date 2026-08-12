@@ -11,20 +11,21 @@ const fail = (message) => {
 }
 
 /**
- * Current-route M10 production ceilings (post consolidation MB6).
- * Measured idle ~296 draw / 129 geo / 382 objects / 228 meshes — headroom for final art.
+ * Connected-route production ceilings after the M11 final-arena visual slice.
+ * Repeated arena modules remain instanced; the object/mesh allowance covers the
+ * authored boss rig, fixtures, and VFX while draw/program limits stay bounded.
  */
 const PRODUCTION = Object.freeze({
-  maxDrawCalls: 320,
+  maxDrawCalls: 340,
   maxTriangles: 80_000,
-  maxGeometries: 160,
+  maxGeometries: 180,
   maxTextures: 16,
   maxPrograms: 14,
   maxPixelRatio: 1.6,
   maxDrawingBufferPixels: 1440 * 900 * 1.6 * 1.6,
-  maxSceneObjects: 420,
-  maxMeshes: 250,
-  maxLights: 11,
+  maxSceneObjects: 540,
+  maxMeshes: 330,
+  maxLights: 12,
 })
 
 function evaluateProduction(stats) {

@@ -81,6 +81,15 @@ Threat HUD uses nearest living enemy:
 
 Codex may restyle boss bar; do not change authoritative fields without Cursor coordination.
 
+## Macro-batch 2 implementation
+
+- Default presentation is the modular project-authored **Veilbound Sepulchre** renderer under `src/render/boss/`; the M8 proof-rig language is not reused.
+- The existing action/phase/facing/health snapshots drive the pose, phase-two opening, contact cues, hit response, and defeat. Rendering owns no combat transition.
+- `zone.final-arena` now projects an instanced dark-mid seal floor, bronze/veil containment rings, perimeter reliquaries, burial screens, banners, candelabra, hanging lanterns, and two actual arena light pools. Collision and encounter bounds are unchanged.
+- HUD hierarchy is boss HP/name first during the encounter; location/objective panels yield, while player survival and equipment remain compact.
+- A gameplay-contract audit found that even-length attack durations made the original modulo selector alternate slash/crush forever. Three stable player-distance fixtures (3.1 m, 2.05 m, 2.30 m) proved range gating, then a 1.75 m fixture proved lunge starvation. The narrow deterministic successor rule now makes lunge reachable without changing attack timing, damage, contact, or phase authority.
+- `npm run gate:m11-boss-visual` captures the full phase/attack/defeat sequence at 1440×900 and a 1280×720 combat frame; `KEEP_ARTIFACTS=1` retains review evidence.
+
 ## Save
 
 Persist only `defeatedBossIds` (plus existing world flags). Do not persist attack phase/camera.
