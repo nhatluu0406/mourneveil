@@ -474,7 +474,7 @@ body {
 .gameplay-hud__status {
   bottom: 1.35rem;
   left: 1.55rem;
-  width: min(25rem, 28vw);
+  width: min(20rem, 24vw);
   padding: 0.9rem 1.05rem 0.82rem;
   border-top: 1px solid rgb(171 159 126 / 34%);
   border-right: 1px solid rgb(171 159 126 / 22%);
@@ -850,4 +850,155 @@ body {
   .gameplay-hud__stats > div:nth-child(2) {
     display: none;
   }
+}
+
+/* M10 playable HUD: persistent content first; controls remain secondary. */
+.gameplay-hud__location,
+.gameplay-hud__objective {
+  transition: width 260ms ease, padding 260ms ease, opacity 260ms ease;
+}
+
+.gameplay-hud__location.is-compact {
+  width: auto;
+  padding: 0.2rem 0.8rem 0.35rem;
+  border-bottom-color: rgb(181 153 105 / 10%);
+}
+
+.gameplay-hud__location.is-compact p { font-size: 0.56rem; opacity: 0.7; }
+.gameplay-hud__location.is-compact h1 { margin-top: 0.08rem; font-size: 1.08rem; }
+
+.gameplay-hud__objective.is-compact {
+  width: auto;
+  padding: 0.35rem 0.75rem 0.42rem;
+  opacity: 0.72;
+}
+
+.gameplay-hud__objective.is-compact > span { display: none; }
+.gameplay-hud__objective.is-compact strong { margin: 0; font-size: 0.75rem; }
+
+.gameplay-hud__center {
+  width: min(46rem, 56vw);
+  gap: 0.34rem;
+}
+
+.gameplay-hud__prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.42rem 0.72rem;
+  border-color: rgb(132 205 202 / 45%);
+}
+
+.gameplay-hud__prompt kbd,
+.gameplay-hud__equipment-slot kbd,
+.gameplay-hud__control-hints kbd {
+  min-width: 1.7rem;
+  padding: 0.08rem 0.28rem;
+  border: 1px solid rgb(196 170 120 / 34%);
+  background: rgb(255 255 255 / 5%);
+  color: #dbc38f;
+  font: 700 0.56rem var(--ui-body);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.gameplay-hud__equipment-bar {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0.22rem;
+  list-style: none;
+  border: 1px solid rgb(192 166 112 / 28%);
+  background: linear-gradient(180deg, rgb(10 13 14 / 92%), rgb(3 6 8 / 96%));
+  box-shadow: 0 0.9rem 2.2rem rgb(0 0 0 / 52%);
+}
+
+.gameplay-hud__equipment-slot {
+  position: relative;
+  display: grid;
+  min-height: 4.6rem;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.5rem;
+  overflow: hidden;
+  border-right: 1px solid rgb(255 255 255 / 8%);
+  background: radial-gradient(circle at 22% 50%, rgb(89 139 136 / 12%), transparent 48%);
+}
+
+.gameplay-hud__equipment-slot:last-child { border-right: 0; }
+.gameplay-hud__equipment-slot.is-empty { opacity: 0.62; }
+.gameplay-hud__equipment-slot.is-equipped::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.14rem;
+  content: '';
+  background: linear-gradient(90deg, #557f7d, #9adbd4, transparent 78%);
+}
+
+.gameplay-hud__item-glyph {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border: 1px solid rgb(174 154 111 / 24%);
+  background: radial-gradient(circle, rgb(99 145 141 / 18%), rgb(0 0 0 / 22%) 70%);
+}
+
+.gameplay-hud__item-glyph svg {
+  width: 2.45rem;
+  height: 2.45rem;
+  overflow: visible;
+  fill: rgb(0 0 0 / 12%);
+  stroke: #c8b98e;
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 0.35rem rgb(99 190 188 / 25%));
+}
+
+.gameplay-hud__item-glyph--flask svg { stroke: #83c4c5; }
+.gameplay-hud__item-glyph--echo svg { stroke: #80d3d8; }
+.gameplay-hud__item-glyph--charm svg { stroke: #9dc6a8; }
+
+.gameplay-hud__item-copy { min-width: 0; }
+.gameplay-hud__item-copy strong,
+.gameplay-hud__item-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gameplay-hud__item-copy strong { color: #e8dfcf; font: 550 0.78rem var(--ui-display); }
+.gameplay-hud__item-copy small { margin-top: 0.18rem; color: rgb(193 190 179 / 55%); font-size: 0.58rem; }
+.gameplay-hud__equipment-slot > kbd { position: absolute; right: 0.36rem; bottom: 0.3rem; }
+
+.gameplay-hud__control-hints {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+  color: rgb(209 204 192 / 55%);
+  font-size: 0.58rem;
+  list-style: none;
+  text-transform: uppercase;
+}
+
+.gameplay-hud__control-hints li { display: flex; align-items: center; gap: 0.28rem; }
+.gameplay-hud__stats > div:last-child { display: none; }
+.gameplay-hud__stats { grid-template-columns: repeat(2, 1fr); }
+
+@media (max-width: 1400px) {
+  .gameplay-hud__center { width: min(46rem, calc(100vw - 25rem)); }
+  .gameplay-hud__equipment-slot { grid-template-columns: 2.8rem minmax(0, 1fr); }
+  .gameplay-hud__item-glyph { width: 2.6rem; height: 2.8rem; }
+  .gameplay-hud__item-glyph svg { width: 2rem; height: 2rem; }
+}
+
+@media (max-width: 1120px) {
+  .gameplay-hud__equipment-slot { min-height: 3.9rem; grid-template-columns: 2.3rem minmax(0, 1fr); padding-inline: 0.3rem; }
+  .gameplay-hud__item-glyph { width: 2.2rem; height: 2.6rem; }
+  .gameplay-hud__item-glyph svg { width: 1.75rem; height: 1.75rem; }
+  .gameplay-hud__item-copy small { display: none; }
+}
+
+@media (max-width: 900px) {
+  .gameplay-hud__equipment-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gameplay-hud__equipment-slot:nth-child(2) { border-right: 0; }
+  .gameplay-hud__control-hints span { display: none; }
 }

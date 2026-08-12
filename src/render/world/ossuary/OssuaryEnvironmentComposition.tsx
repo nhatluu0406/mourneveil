@@ -6,8 +6,6 @@ export function OssuaryEnvironmentComposition() {
   return (
     <group userData={{ productionAssetId: 'world.kit.ossuary-hero' }} dispose={null}>
       <WorldObjectComposer placements={OSSUARY_ROUTE_PLACEMENTS} />
-      {/* Corridor → combat warm practical; monolith practical lives on the landmark (9-light ceiling). */}
-      <pointLight position={[-8.1, 2.5, 1.7]} intensity={1.7} distance={6.4} decay={2} color="#e18a4d" />
     </group>
   )
 }

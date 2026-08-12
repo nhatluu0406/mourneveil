@@ -6,6 +6,7 @@ export const MOURNEVEIL_PALETTE = Object.freeze({
   environment: Object.freeze({
     floor: '#101719',
     floorSlab: '#182224',
+    ashStone: '#242326',
     wall: '#1a2425',
     blocker: '#332f2a',
     masonry: '#253031',

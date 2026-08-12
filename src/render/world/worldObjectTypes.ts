@@ -1,6 +1,11 @@
 /** Presentation-only world object contracts. Gameplay authority stays in world/simulation. */
 
-export type OssuaryRouteArea = 'refuge' | 'corridor' | 'first-combat'
+export type OssuaryRouteArea =
+  | 'refuge'
+  | 'corridor'
+  | 'first-combat'
+  | 'mixed-court'
+  | 'ash-walk'
 
 export type WorldObjectFamily =
   | 'architecture'
@@ -13,6 +18,7 @@ export type OssuaryMaterialKey =
   | 'darkStone'
   | 'recessStone'
   | 'floorSlab'
+  | 'ashStone'
   | 'bone'
   | 'bronze'
   | 'verdigris'
@@ -23,6 +29,7 @@ export type OssuaryMaterialKey =
 
 export type OssuaryObjectId =
   | 'ossuary.floor.slab'
+  | 'ossuary.floor.ash-slab'
   | 'ossuary.floor.inlay'
   | 'ossuary.wall.bay'
   | 'ossuary.wall.break'
@@ -41,6 +48,10 @@ export type OssuaryObjectId =
   | 'ossuary.banner'
   | 'ossuary.root.cluster'
   | 'ossuary.wisp'
+  | 'ossuary.light.wall-sconce'
+  | 'ossuary.light.brazier'
+  | 'ossuary.light.veil-lamp'
+  | 'ossuary.light.candle-cluster'
   | 'ossuary.landmark.veil-monolith'
   | 'ossuary.landmark.reliquary-plinth'
   | 'ossuary.corridor.bell'

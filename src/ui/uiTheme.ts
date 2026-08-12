@@ -20,11 +20,8 @@ export const UI_COLORS = Object.freeze({
   flask: '#5f9eab',
 })
 
-export const UI_COMMANDS = Object.freeze([
-  { id: 'attack', label: 'Attack', binding: 'LMB' },
+export const UI_COMPACT_HINTS = Object.freeze([
   { id: 'guard', label: 'Guard', binding: 'RMB' },
   { id: 'dodge', label: 'Dodge', binding: 'Space' },
-  { id: 'flask', label: 'Flask', binding: 'E' },
-  { id: 'interact', label: 'Interact', binding: 'F' },
   { id: 'inventory', label: 'Inventory', binding: 'I' },
 ] as const)

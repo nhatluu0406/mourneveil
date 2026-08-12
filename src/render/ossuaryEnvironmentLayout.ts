@@ -14,7 +14,7 @@ import { OSSUARY_ROUTE_PLACEMENTS } from './world/ossuary/routePlacements'
 
 /** @deprecated Prefer filtering OSSUARY_ROUTE_PLACEMENTS by objectId. */
 export const OSSUARY_FLOOR_SLABS = Object.freeze(
-  OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.slab').map((entry) =>
+  OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.slab' || entry.objectId === 'ossuary.floor.ash-slab').map((entry) =>
     Object.freeze({
       id: entry.instanceId,
       area: entry.area,

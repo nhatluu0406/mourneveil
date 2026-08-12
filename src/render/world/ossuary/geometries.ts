@@ -69,6 +69,7 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   Partial<Record<OssuaryObjectId, BufferGeometry>>
 > = Object.freeze({
   'ossuary.floor.slab': FLOOR_SLAB,
+  'ossuary.floor.ash-slab': FLOOR_SLAB,
   'ossuary.floor.inlay': FLOOR_INLAY,
   'ossuary.wall.bay': WALL_BAY,
   'ossuary.wall.break': WALL_BREAK,

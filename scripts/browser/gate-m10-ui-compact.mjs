@@ -43,7 +43,7 @@ await runOwnedBrowserGate({
     const ui = await page.evaluate(() => {
       const status = document.querySelector('.gameplay-hud__status')
       const center = document.querySelector('.gameplay-hud__center')
-      const flasks = document.querySelector('.gameplay-hud__flasks')
+      const equipment = document.querySelector('.gameplay-hud__equipment-bar')
       const location = document.querySelector('.gameplay-hud__location')
       const objective = document.querySelector('.gameplay-hud__objective')
       const threat = document.querySelector('.gameplay-hud__threat')
@@ -75,9 +75,9 @@ await runOwnedBrowserGate({
       }
       return {
         health: document.querySelector('.gameplay-hud__hp-text')?.textContent ?? null,
-        flaskVisible: flasks !== null && getComputedStyle(flasks).display !== 'none',
-        flaskCount: document.querySelectorAll('.gameplay-hud__flask').length,
-        commandCount: document.querySelectorAll('.gameplay-hud__command').length,
+        equipmentVisible: equipment !== null && getComputedStyle(equipment).display !== 'none',
+        equipmentCount: document.querySelectorAll('.gameplay-hud__equipment-slot').length,
+        controlHintCount: document.querySelectorAll('.gameplay-hud__control-hints li').length,
         status: rect(status),
         center: rect(center),
         bodyOverflowX: document.documentElement.scrollWidth > window.innerWidth + 2,
@@ -93,10 +93,10 @@ await runOwnedBrowserGate({
     ui.health && /\d+\/\d+/.test(ui.health)
       ? pass(`compact HUD health readable (${ui.health})`)
       : fail(`compact HUD health missing: ${ui.health}`)
-    ui.flaskVisible && ui.flaskCount > 0
-      ? pass('compact HUD keeps flask charges visible')
-      : fail('compact HUD hid flask charges')
-    ui.commandCount === 6 ? pass('compact action dock present') : fail(`action dock count=${ui.commandCount}`)
+    ui.equipmentVisible && ui.equipmentCount === 4
+      ? pass('compact HUD keeps four content slots visible')
+      : fail(`compact equipment slots=${ui.equipmentCount}`)
+    ui.controlHintCount === 3 ? pass('compact secondary hints present') : fail(`control hints=${ui.controlHintCount}`)
     !ui.bodyOverflowX ? pass('no horizontal document overflow') : fail('horizontal overflow at 1280x720')
     !ui.hintVisible ? pass('product presentation has no F3 hint') : fail('F3 hint visible')
     !ui.panelOverlap ? pass('HUD panels do not overlap') : fail('HUD panels overlap at 1280x720')

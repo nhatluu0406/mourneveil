@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { GameRuntime } from '../game/runtime/GameRuntime'
 import {
   equippedWeaponLabel,
+  resolveEquipmentBar,
   resolveGameplayInteractionPrompt,
   resolveNearestThreat,
   resolveZoneHudCopy,
@@ -61,5 +62,18 @@ describe('cinematic HUD projection helpers', () => {
   it('projects equipment labels from inventory snapshot', () => {
     const runtime = new GameRuntime()
     expect(equippedWeaponLabel(runtime.snapshot())).toBe('Unarmed')
+  })
+
+  it('projects canonical equipment and resources instead of a control legend', () => {
+    const runtime = new GameRuntime()
+    const slots = resolveEquipmentBar(runtime.snapshot())
+    expect(slots.map((slot) => slot.id)).toEqual(['weapon', 'charm', 'flask', 'echoes'])
+    expect(slots.find((slot) => slot.id === 'flask')).toMatchObject({
+      label: 'Ashen Flask',
+      detail: '3 / 3 charges',
+      binding: 'E',
+    })
+    expect(slots.find((slot) => slot.id === 'weapon')?.binding).toBe('LMB')
+    expect(slots.every((slot) => !['Dodge', 'Interact', 'Inventory'].includes(slot.label))).toBe(true)
   })
 })

@@ -20,6 +20,17 @@ export interface ZoneHudCopy {
   readonly objective: string
 }
 
+export type EquipmentBarIcon = 'oathblade' | 'charm' | 'flask' | 'echo'
+
+export interface EquipmentBarSlot {
+  readonly id: 'weapon' | 'charm' | 'flask' | 'echoes'
+  readonly label: string
+  readonly detail: string
+  readonly binding: 'LMB' | 'E' | null
+  readonly icon: EquipmentBarIcon
+  readonly equipped: boolean
+}
+
 const ZONE_COPY: Readonly<Record<MourneveilZoneId, ZoneHudCopy>> = Object.freeze({
   'zone.arrival': {
     eyebrow: 'The Mourneveil · Rite I',
@@ -134,4 +145,44 @@ export function equippedCharmLabel(snapshot: GameRuntimeSnapshot): string | null
   const id = snapshot.equipment.charmItemId
   if (id === null) return null
   return getItemDefinition(id)?.displayName ?? 'Charm'
+}
+
+/** Content-first HUD projection. Every value comes from canonical runtime state. */
+export function resolveEquipmentBar(snapshot: GameRuntimeSnapshot): readonly EquipmentBarSlot[] {
+  const weapon = equippedWeaponLabel(snapshot)
+  const charm = equippedCharmLabel(snapshot)
+  return Object.freeze([
+    Object.freeze({
+      id: 'weapon' as const,
+      label: weapon,
+      detail: snapshot.equipment.weaponItemId === null ? 'Weapon slot empty' : `Power ${Math.max(snapshot.resolvedAttackDamage.light, snapshot.resolvedAttackDamage.heavy)}`,
+      binding: 'LMB' as const,
+      icon: 'oathblade' as const,
+      equipped: snapshot.equipment.weaponItemId !== null,
+    }),
+    Object.freeze({
+      id: 'charm' as const,
+      label: charm ?? 'Empty Charm Socket',
+      detail: charm === null ? 'No charm equipped' : `Vitality ${snapshot.playerHealth.health.maximum}`,
+      binding: null,
+      icon: 'charm' as const,
+      equipped: charm !== null,
+    }),
+    Object.freeze({
+      id: 'flask' as const,
+      label: 'Ashen Flask',
+      detail: `${snapshot.flask.currentCharges} / ${snapshot.flask.maximumCharges} charges`,
+      binding: 'E' as const,
+      icon: 'flask' as const,
+      equipped: snapshot.flask.currentCharges > 0,
+    }),
+    Object.freeze({
+      id: 'echoes' as const,
+      label: 'Veil Residue',
+      detail: `${snapshot.echoes.carried} Echoes`,
+      binding: null,
+      icon: 'echo' as const,
+      equipped: snapshot.echoes.carried > 0,
+    }),
+  ])
 }

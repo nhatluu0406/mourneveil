@@ -4,14 +4,14 @@ const OUT = 'tmp-m10-hero-visual'
 const PORT = 4197
 const baselineOnly = process.argv.includes('--baseline')
 const PRODUCTION_VISUAL_BUDGET = Object.freeze({
-  drawCalls: 280,
-  triangles: 75_000,
-  geometries: 150,
+  drawCalls: 380,
+  triangles: 100_000,
+  geometries: 220,
   textures: 16,
-  programs: 12,
-  sceneObjectCount: 400,
-  meshCount: 240,
-  lightCount: 9,
+  programs: 20,
+  sceneObjectCount: 650,
+  meshCount: 380,
+  lightCount: 11,
   jsHeapUsedBytes: 160_000_000,
 })
 const failures = []
@@ -39,8 +39,9 @@ async function assertProductHud(page) {
     return {
       hudPresent: hud !== null,
       healthText: document.querySelector('.gameplay-hud__hp-text')?.textContent ?? null,
-      flaskCount: document.querySelectorAll('.gameplay-hud__flask').length,
-      commands: document.querySelectorAll('.gameplay-hud__command').length,
+      equipmentSlots: document.querySelectorAll('.gameplay-hud__equipment-slot').length,
+      controlHints: document.querySelectorAll('.gameplay-hud__control-hints li').length,
+      flaskDetail: document.querySelector('[data-slot-id="flask"] .gameplay-hud__item-copy small')?.textContent ?? null,
       devHintVisible: hint !== null && getComputedStyle(hint).display !== 'none',
       developmentPanelOpen: panel !== null && !panel.hasAttribute('hidden') && getComputedStyle(panel).display !== 'none',
     }
@@ -49,8 +50,9 @@ async function assertProductHud(page) {
   state.healthText && /\d+\/\d+/.test(state.healthText)
     ? pass(`HUD health bound (${state.healthText})`)
     : fail(`HUD health unbound: ${state.healthText}`)
-  state.flaskCount > 0 ? pass(`HUD flasks present (${state.flaskCount})`) : fail('HUD flasks missing')
-  state.commands === 6 ? pass('HUD action dock present') : fail(`HUD action dock count=${state.commands}`)
+  state.equipmentSlots === 4 ? pass('content-first equipment bar present') : fail(`equipment slot count=${state.equipmentSlots}`)
+  state.controlHints === 3 ? pass('controls reduced to compact secondary hints') : fail(`control hint count=${state.controlHints}`)
+  state.flaskDetail?.includes('/') && state.flaskDetail.endsWith('charges') ? pass(`flask state projected (${state.flaskDetail})`) : fail(`flask state missing: ${state.flaskDetail}`)
   !state.devHintVisible ? pass('dev hint absent from product presentation') : fail('dev hint visible on product screen')
 }
 
@@ -226,10 +228,51 @@ await runOwnedBrowserGate({
 
       await page.evaluate(() => {
         const gate = window.__MOURNEVEIL_GATE__
+        gate.setPlayerPosition({ x: 1.1, y: 0.82, z: -4.15 })
+        gate.setPlayerFacing({ x: 0.35, z: -0.94 })
+        gate.advance(2)
+      })
+      await capture(page, '09-mixed-court-wide')
+
+      await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.setPlayerPosition({ x: 6.3, y: 0.82, z: -4.1 })
+        gate.setPlayerFacing({ x: 1, z: 0 })
+        gate.advance(2)
+      })
+      await capture(page, '10-ash-walk-transition')
+
+      await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.resetMeleeFixture()
+        gate.restorePlayer()
+        gate.defeatEnemy('enemy.skirmisher.1')
+        const loot = gate.snapshot().lootPickup
+        if (loot.position !== null) {
+          gate.setPlayerPosition(loot.position)
+          gate.advance(2)
+          gate.equipItem('item.weapon.oathblade')
+        }
         gate.setPlayerPosition({ x: -5.5, y: 0.82, z: 0 })
         gate.setPlayerFacing({ x: 0, z: 1 })
+        gate.advance(2)
       })
-      await capture(page, '09-product-ui')
+      await capture(page, '11-player-item-bar')
+
+      const itemUi = await page.evaluate(() => ({
+        weapon: document.querySelector('[data-slot-id="weapon"] .gameplay-hud__item-copy strong')?.textContent ?? null,
+        interaction: document.querySelector('.gameplay-hud__prompt')?.textContent ?? null,
+        expanded: document.querySelector('.gameplay-hud__location')?.getAttribute('data-zone-presentation'),
+      }))
+      itemUi.weapon === 'Oathblade' ? pass('Oathblade item identity projected') : fail(`weapon slot=${itemUi.weapon}`)
+      itemUi.interaction?.includes('Rest') ? pass('checkpoint interaction is contextual') : fail(`interaction prompt=${itemUi.interaction}`)
+      itemUi.expanded === 'expanded' ? pass('zone-entry title expanded') : fail(`zone entry state=${itemUi.expanded}`)
+      await capture(page, '12-interaction-zone-entry')
+
+      await settle(page, 3_500)
+      const compact = await page.evaluate(() => document.querySelector('.gameplay-hud__location')?.getAttribute('data-zone-presentation'))
+      compact === 'compact' ? pass('zone title collapsed for normal play') : fail(`zone compact state=${compact}`)
+      await capture(page, '13-normal-compact-title')
 
       await page.keyboard.press('KeyI')
       await settle(page, 400)
@@ -237,7 +280,7 @@ await runOwnedBrowserGate({
         () => document.querySelector('.inventory-overlay, .inventory-panel') !== null,
       )
       inventoryOpen ? pass('inventory panel opened') : fail('inventory panel missing after I')
-      await capture(page, '10-inventory-open')
+      await capture(page, '14-inventory-open')
       await page.keyboard.press('KeyI')
     }
 

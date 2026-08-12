@@ -1,18 +1,41 @@
+import { useEffect, useState } from 'react'
 import type { GameRuntimeSnapshot } from '../game/runtime/GameRuntime'
 import { resolvePlayerOutgoingHitConfirm } from '../render/playerCombatFeedback'
 import {
   equippedCharmLabel,
   equippedWeaponLabel,
   resolveGameplayInteractionPrompt,
+  resolveEquipmentBar,
   resolveNearestThreat,
   resolveZoneHudCopy,
   threatSubtitle,
   threatTitle,
 } from './gameplayHudModel'
-import { UI_COMMANDS } from './uiTheme'
+import { UI_COMPACT_HINTS } from './uiTheme'
+import { ItemGlyph } from './ItemGlyph'
 
 interface GameplayHudProps {
   readonly snapshot: GameRuntimeSnapshot
+}
+
+function ZonePresentation({ zone }: { readonly zone: ReturnType<typeof resolveZoneHudCopy> }) {
+  const [expanded, setExpanded] = useState(true)
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setExpanded(false), 3200)
+    return () => window.clearTimeout(timeout)
+  }, [])
+  return (
+    <>
+      <header className={`gameplay-hud__location${expanded ? ' is-expanded' : ' is-compact'}`} aria-label="Current location" data-zone-presentation={expanded ? 'expanded' : 'compact'}>
+        <p>{zone.eyebrow}</p><h1>{zone.title}</h1>
+        {expanded ? <span>Ruined ossuary · veil passage</span> : null}
+      </header>
+      <aside className={`gameplay-hud__objective${expanded ? ' is-expanded' : ' is-compact'}`} aria-label="Current objective" data-objective-presentation={expanded ? 'expanded' : 'compact'}>
+        <span>Rite I / III</span><strong>{zone.title}</strong>
+        {expanded ? <p>{zone.objective}</p> : null}
+      </aside>
+    </>
+  )
 }
 
 export function GameplayHud({ snapshot }: GameplayHudProps) {
@@ -22,6 +45,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
   const weapon = equippedWeaponLabel(snapshot)
   const charm = equippedCharmLabel(snapshot)
   const zone = resolveZoneHudCopy(snapshot.world.currentZoneId)
+  const equipmentBar = resolveEquipmentBar(snapshot)
   const damagedRecently =
     snapshot.incomingContact.lastHit !== null &&
     snapshot.incomingContact.lastHit.outcome === 'damaged' &&
@@ -64,11 +88,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
       aria-label="Gameplay HUD"
       data-product-hud="1"
     >
-      <header className="gameplay-hud__location" aria-label="Current location">
-        <p>{zone.eyebrow}</p>
-        <h1>{zone.title}</h1>
-        <span>Interconnected ossuary · local vertical slice</span>
-      </header>
+      <ZonePresentation key={snapshot.world.currentZoneId ?? 'between'} zone={zone} />
 
       {threat !== null ? (
         <section className="gameplay-hud__threat" aria-label="Nearest threat">
@@ -91,22 +111,13 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
         </section>
       ) : null}
 
-      <aside className="gameplay-hud__objective" aria-label="Current objective">
-        <span>Rite I / III</span>
-        <strong>{zone.title}</strong>
-        <p>{zone.objective}</p>
-      </aside>
-
       <section className="gameplay-hud__status" aria-label="Player status">
         <div className="gameplay-hud__identity">
           <div>
             <strong>Oathward</strong>
             <span>The held line · Veilbound Warden</span>
           </div>
-          <div className="gameplay-hud__identity-gear">
-            <span>{weapon}</span>
-            <small>{charm ?? 'No charm'}</small>
-          </div>
+          <div className="gameplay-hud__identity-gear"><span>{weapon}</span><small>{charm ?? 'No charm'}</small></div>
         </div>
 
         <div
@@ -160,16 +171,8 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
         </div>
       </section>
 
-      <aside className="gameplay-hud__resource" aria-label="Echoes">
-        <span className="gameplay-hud__resource-glyph">◇</span>
-        <div>
-          <strong>{snapshot.echoes.carried}</strong>
-          <small>Echoes · Veil residue</small>
-        </div>
-      </aside>
-
       <div className="gameplay-hud__center">
-        {prompt !== null ? <div className="gameplay-hud__prompt">{prompt}</div> : null}
+        {prompt !== null ? <div className="gameplay-hud__prompt"><kbd>{prompt.split(' — ')[0]}</kbd><strong>{prompt.split(' — ')[1]}</strong></div> : null}
         {guardFeedback !== null ? (
           <div
             className={`gameplay-hud__guard-feedback${snapshot.defense.guardBroken ? ' is-broken' : ''}`}
@@ -185,25 +188,18 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
         ) : null}
         {!health.alive ? <div className="gameplay-hud__death">Fallen</div> : null}
 
-        <ul className="gameplay-hud__commands" aria-label="Controls">
-          {UI_COMMANDS.map((command, index) => (
-            <li key={command.id} className={`gameplay-hud__command gameplay-hud__command--${command.id}`}>
-              <span className="gameplay-hud__command-index">{index + 1}</span>
-              <kbd>{command.binding}</kbd>
-              <strong>{command.label}</strong>
+        <ul className="gameplay-hud__equipment-bar" aria-label="Equipped items and resources">
+          {equipmentBar.map((slot) => (
+            <li key={slot.id} className={`gameplay-hud__equipment-slot${slot.equipped ? ' is-equipped' : ' is-empty'}`} data-slot-id={slot.id}>
+              <span className={`gameplay-hud__item-glyph gameplay-hud__item-glyph--${slot.icon}`}><ItemGlyph icon={slot.icon} /></span>
+              <span className="gameplay-hud__item-copy"><strong>{slot.label}</strong><small>{slot.detail}</small></span>
+              {slot.binding === null ? null : <kbd>{slot.binding}</kbd>}
             </li>
           ))}
         </ul>
-      </div>
-
-      <div className="gameplay-hud__flasks" aria-label="Flask charges">
-        {Array.from({ length: snapshot.flask.maximumCharges }, (_, index) => (
-          <span
-            key={index}
-            className={`gameplay-hud__flask${index < snapshot.flask.currentCharges ? ' is-filled' : ''}`}
-            title="Flask"
-          />
-        ))}
+        <ul className="gameplay-hud__control-hints" aria-label="Control hints">
+          {UI_COMPACT_HINTS.map((hint) => <li key={hint.id}><kbd>{hint.binding}</kbd><span>{hint.label}</span></li>)}
+        </ul>
       </div>
     </div>
   )

@@ -5,7 +5,7 @@ import { groupPlacementsByObjectId, resolveWorldObjectDefinition } from '../worl
 describe('ossuary route placements', () => {
   it('covers each authored route area with reusable object types', () => {
     expect(new Set(OSSUARY_ROUTE_PLACEMENTS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat']),
+      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk']),
     )
     expect(
       OSSUARY_ROUTE_PLACEMENTS.some((entry) => entry.objectId === 'ossuary.floor.slab'),
@@ -47,9 +47,23 @@ describe('ossuary route placements', () => {
     expect(OSSUARY_LANDMARKS.map((entry) => entry.id)).toEqual([
       'landmark.refuge-reliquary-crown',
       'landmark.combat-veil-monolith',
+      'landmark.mixed-funeral-brazier',
+      'landmark.ash-veil-lamp',
     ])
     for (const position of Object.values(OSSUARY_ROUTE_CAPTURE_POINTS)) {
       expect([position.x, position.y, position.z].every(Number.isFinite)).toBe(true)
     }
+  })
+
+  it('separates visible practical fixtures from sparse actual light owners', () => {
+    const practicals = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId.startsWith('ossuary.light.'))
+    expect(new Set(practicals.map((entry) => entry.objectId))).toEqual(new Set([
+      'ossuary.light.wall-sconce',
+      'ossuary.light.brazier',
+      'ossuary.light.veil-lamp',
+      'ossuary.light.candle-cluster',
+    ]))
+    expect(practicals.filter((entry) => entry.variant === 'actual-light')).toHaveLength(5)
+    expect(practicals.length).toBeGreaterThan(5)
   })
 })

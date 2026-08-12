@@ -16,8 +16,14 @@
 
 A deterministic 1440×900 checkpoint/early-combat composition must show a production-candidate Warden, skirmisher, shrine, architecture, dressing, lighting, feedback, and HUD that read as one scene. Render meshes remain non-authoritative; accepted world and actor colliders stay explicit proxies.
 
-Initial 1440×900 hero-scene ceilings, measured after the first integrated pass: **280 draw calls, 75k triangles, 150 geometries, 16 textures, 12 programs, 400 objects, 240 meshes, 9 lights, 160 MB reported JS heap**. These are guardrails rather than optimization targets; the gate remains DPR-capped and checks resource lifetime separately.
+M10.5 1440×900 playable-presentation evidence: **356 draw calls, 47,144 triangles, 193 geometries, 3 textures, 12 programs, 473 objects, 283 meshes, 10 lights, ~86–92 MB reported JS heap**. Current evidence-backed guardrails are **380 draw calls, 100k triangles, 220 geometries, 16 textures, 20 programs, 650 objects, 380 meshes, 11 lights, 160 MB heap**. They are regression alarms rather than optimization targets; the gate remains DPR-capped and verifies stable resource counts across repeated combat.
 
 ## Ossuary route composition
 
 The refuge, connecting rib corridor, and Outer Watch use one reusable shell over unchanged simple physics proxies: irregular funeral slabs and verdigris thresholds underfoot; buttress-separated wall bays with recessed bronze-crowned tomb niches; sparse sarcophagi, markers, candles, cloth, roots, and masonry at path edges; iron bars for authoritative gates. The refuge reliquary crown and rear veil-cracked watch monolith are the two orientation anchors. Warm refuge/corridor practicals yield to a cooler, wider combat focus; clutter stays off the central melee footprint.
+
+## Playable practical-light and late-route pass
+
+Visible funeral sconces, floor braziers, veil lamps, and candle clusters now explain light pools. Fixtures and photometric sources are separate: twelve authored fixtures share geometry/material language while only five own point lights; the full scene uses ten lights, with the cool moon key as the only shadow-casting light. Mixed Court is a broad warm processional space around a raised funeral brazier; Ash Walk begins with sparse cyan guidance, ash-dark slabs, broken arches, and a sealed-gate silhouette. All remain presentation shells over unchanged authored collider proxies.
+
+The permanent HUD is content-first: weapon, charm, Ashen Flask, and Echo state project canonical runtime facts with project-authored glyphs. LMB/E appear as secondary badges, guard/dodge/inventory use a compact hint row, and interaction remains contextual. Zone/objective cards expand briefly on entry then collapse through presentation-only state.

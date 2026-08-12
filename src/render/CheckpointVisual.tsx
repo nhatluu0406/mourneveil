@@ -110,8 +110,8 @@ export function CheckpointVisual({ runtime }: { readonly runtime: GameRuntime })
       </mesh>
       <pointLight
         position={[0, 2.2, 0]}
-        intensity={1.7}
-        distance={7}
+        intensity={5.5}
+        distance={8.5}
         decay={2}
         color={MOURNEVEIL_PALETTE.checkpoint.active}
       />

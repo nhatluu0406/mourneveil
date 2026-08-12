@@ -58,7 +58,7 @@ export const PRODUCTION_VISUAL_ASSETS = Object.freeze([
   },
   {
     id: 'world.kit.ossuary-hero',
-    sourcePath: 'src/render/world/ossuary/OssuaryEnvironmentComposition.tsx',
+    sourcePath: 'src/render/world/ossuary/',
     runtimeOwner: 'OssuaryEnvironmentComposition',
     units: 'meters',
     upAxis: 'Y',

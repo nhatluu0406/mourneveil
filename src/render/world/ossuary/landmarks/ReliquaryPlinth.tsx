@@ -18,13 +18,16 @@ export function ReliquaryPlinth({ placement }: { readonly placement: WorldObject
   const stone = getOssuaryMaterial('darkStone')
   const bone = getOssuaryMaterial('bone')
   const bronze = getOssuaryMaterial('bronze')
+  const dressingForSolidId = placement.instanceId.startsWith('dressing.')
+    ? placement.instanceId.slice('dressing.'.length)
+    : undefined
 
   return (
     <group
       position={[...placement.position]}
       rotation={[...placement.rotation]}
       scale={[...scale]}
-      userData={{ dressingForSolidId: 'blocker.first-combat', instanceId: placement.instanceId }}
+      userData={{ dressingForSolidId, instanceId: placement.instanceId }}
     >
       <mesh geometry={PLINTH} material={stone} position={[0, 0.8, 0]} castShadow receiveShadow />
       <mesh geometry={CAP} material={bone} position={[0, 1.66, 0]} scale={[0.7, 0.42, 0.7]} castShadow />

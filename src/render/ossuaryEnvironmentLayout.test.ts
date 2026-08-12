@@ -9,10 +9,10 @@ import {
 describe('ossuary environment route layout', () => {
   it('covers each authored route area with reusable floor and wall rhythm', () => {
     expect(new Set(OSSUARY_FLOOR_SLABS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat']),
+      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk']),
     )
     expect(new Set(OSSUARY_WALL_BAYS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat']),
+      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court']),
     )
   })
 
@@ -29,9 +29,11 @@ describe('ossuary environment route layout', () => {
     expect(OSSUARY_LANDMARKS.map((entry) => entry.id)).toEqual([
       'landmark.refuge-reliquary-crown',
       'landmark.combat-veil-monolith',
+      'landmark.mixed-funeral-brazier',
+      'landmark.ash-veil-lamp',
     ])
     expect(new Set(OSSUARY_LANDMARKS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'first-combat']),
+      new Set(['refuge', 'first-combat', 'mixed-court', 'ash-walk']),
     )
   })
 

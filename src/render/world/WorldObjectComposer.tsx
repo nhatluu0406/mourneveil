@@ -11,6 +11,7 @@ import { CorridorBell } from './ossuary/landmarks/CorridorBell'
 import { CombatVeilMonolith } from './ossuary/landmarks/CombatVeilMonolith'
 import { ReliquaryPlinth } from './ossuary/landmarks/ReliquaryPlinth'
 import { VeilWispMotion } from './ossuary/dressing/VeilWispMotion'
+import { PracticalLightFixture } from './ossuary/lighting/PracticalLightFixture'
 
 function InstancedObjectGroup({
   objectId,
@@ -55,6 +56,11 @@ function InstancedObjectGroup({
 
 function UniqueObject({ placement }: { readonly placement: WorldObjectPlacement }) {
   switch (placement.objectId) {
+    case 'ossuary.light.wall-sconce':
+    case 'ossuary.light.brazier':
+    case 'ossuary.light.veil-lamp':
+    case 'ossuary.light.candle-cluster':
+      return <PracticalLightFixture placement={placement} />
     case 'ossuary.landmark.veil-monolith':
       return <CombatVeilMonolith placement={placement} />
     case 'ossuary.landmark.reliquary-plinth':
