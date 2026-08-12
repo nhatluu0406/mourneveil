@@ -34,13 +34,15 @@ export function FollowCameraRig({
   useFrame((_, deltaSeconds) => {
     const snapshot = runtime.snapshot()
     const playerPosition = snapshot.player.position
+    const facing = snapshot.player.facing
     const previous =
-      poseRef.current ?? createInitialFollowCameraPose(playerPosition)
+      poseRef.current ?? createInitialFollowCameraPose(playerPosition, facing)
     const next = stepFollowCamera(
       previous,
       playerPosition,
       deltaSeconds,
       FOLLOW_DAMPING,
+      facing,
     )
     poseRef.current = next
 

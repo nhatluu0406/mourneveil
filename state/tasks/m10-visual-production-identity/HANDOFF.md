@@ -5,91 +5,67 @@ Task: m10-visual-production-identity
 
 ## Status
 
-ACTIVE — M10 macro-batch 5 playable presentation PASS; M10 remains open and untagged.
+ACTIVE — M10 macro-batch 6 render consolidation + composition hardening PASS; M10 remains open and untagged.
 
 ## Locked decisions
 
 - Identity remains “ruined gothic ossuary under veil-light”; ADR-0002 remains the world-object authoring law.
+- Optimization consolidates presentation; does not strip practical lights, Mixed Court/Ash Walk, or equipment HUD.
 - Cinematic HUD is presentation-only; combat/resource numbers bind to `GameRuntimeSnapshot`.
-- Product visual gates must not assume the pre-cinematic HUD or a persistent F3 hint.
 - `connectedLevelCollision.ts` remains gameplay geometry authority.
 
-## Macro-batch 5
+## Macro-batch 6
 
-### Practical lighting and route
+### Performance audit (confirmed)
 
-- Added ADR-0002 fixture types: wall funeral sconce, plinth brazier, veil lamp, candle cluster.
-- Twelve visible fixtures project five actual fixture-owned point lights; minor fixtures are emissive-only. Scene total is 10 lights; only the cool directional key casts shadows.
-- Removed three generic Scene lights and the detached corridor point light. Refuge/corridor/Outer Watch/Mixed Court/Ash Walk now use visible warm/cool sources and dark transitions.
-- Extended declarative floor, wall, niche, arch, marker, rubble, root, blocker-dressing, and landmark placements through Mixed Court and the Ash Walk transition. Collider authority and gameplay layout are unchanged.
-
-### Product HUD
-
-- Replaced six control-first slots with four canonical content slots: weapon, charm, Ashen Flask, Echoes.
-- Added project-authored inline SVG glyphs. LMB/E are small item badges; RMB/Space/I are compact secondary hints; F/R remains contextual.
-- Zone/objective cards expand for 3.2 seconds after presentation mount/zone change, then collapse; nearest-threat projection remains proximity-contextual.
-- 1440×900 and 1280×720 screenshot gates verify content semantics, contextual Rest, expanded/compact title states, and non-overlap.
-
-### Measured result
-
-| Metric | MB4 | MB5 |
+| Metric | MB5 | MB6 |
 | --- | ---: | ---: |
-| Draw calls | 256 | 356 |
-| Triangles | 36,024 | 47,144 |
-| Geometries | 130 | 193 |
+| Draw calls | 356 | ~294–307 (route) |
+| Triangles | 47,144 | ~23–24k |
+| Geometries | 193 | ~129–137 |
 | Textures | 3 | 3 |
-| Programs | 11 | 12 |
-| Objects | 300 | 473 |
-| Meshes | 190 | 283 |
-| Lights | 9 | 10 |
-| Heap | ~81–86 MB | ~86–92 MB |
+| Programs | 12 | 12–13 |
+| Objects | 473 | 382 |
+| Meshes | 283 | 228 |
+| Lights | 10 | 10 |
+| Heap | ~86–92 MB | ~86–92 MB |
 
-Repeated combat geo/texture/mesh delta: 0/0/0. Growth is intentional late-route composition and fixture geometry; repeated slabs/rubble remain instanced and shared materials remain bounded.
+Top fragmentation sources ranked before fix:
+1. Unique `PracticalLightFixture` trees allocating per-mount geometries/materials (~80+ meshes)
+2. ConnectedLevelVisual floor + zone overlays + RoundedBox walls/blockers double-drawing under ossuary shell
+3. Unique landmarks with inline JSX geometries
+4. Instanced dressing already efficient (~one draw/type)
 
-## Macro-batch 4
+Gate findings: `gate:m9-perf-baseline` measured the full mounted route but used loose sanity ceilings (450/400). MB5 `gate:m10-hero-visual` had silently raised product budgets to 380/220/650/380.
 
-### Integration
+### Consolidation
 
-- Visual-pass commit: `d7aa44b` (`feat(render): apply M10 cinematic presentation pass`) on top of `0d41a7f`
-- Fixed unused HUD import blocking lint/typecheck
-- Extracted HUD projection helpers (`resolveZoneHudCopy`, `resolveNearestThreat`, equipment labels) with focused tests
-- Removed persistent `F3 — Development Details` hint; F3 still toggles `DevelopmentPanel` in DEV
-- Responsive CSS: right-aligned action dock ≤1400px; collapse decorative objective/resource ≤1366px; never hide flasks
-- Soft ACES readability tune (exposure 1.22, fill-heavy ambient/hemi, softer shadows) without flattening mood
-- Expanded `gate:m10-hero-visual` product captures (incl. guard-break, product UI, inventory)
-- Added `gate:m10-ui-compact` at 1280×720
+- Shared/merged practical-fixture geometries + shared flame/glow materials; glow only on actual-light owners
+- Skip floor/zone-plane proxy meshes; skip dressed blocker/landmark proxy meshes (collider retained) — D-005 partially mitigated
+- RoundedBox → box for remaining wall proxies
+- Landmark geos module-cached
+- Facing look-ahead + mild closer follow offset; fog extended; cheap ash-stone perimeter silhouettes (camera-near SE + distant)
+- UI audit: zone presentation already keyed; no measurable HUD thrash — no HUD redesign
 
-### Performance (cinematic vs modular MB3)
+### Budgets / gates
 
-| Metric | MB3 | MB4 |
-| --- | --- | --- |
-| Draw calls | 220 | 256 |
-| Triangles | 35,059 | 36,024 |
-| Geometries | 104 | 130 |
-| Programs | 9 | 11 |
-| Objects | 268 | 300 |
-| Meshes | 159 | 190 |
-| Lights | 9 | 9 |
-| Heap | ~81–91 MB | ~81–86 MB |
+- Added `gate:m10-perf-baseline` (refuge + Mixed Court + Ash Walk + combat growth)
+- Production ceilings (evidence): 320 draw / 80k tris / 160 geo / 420 objects / 250 meshes / 14 programs / 11 lights
+- Measured headroom for final Codex art: ~15–25 draw calls, ~20–30 geometries, ~30–40 meshes
 
-Within M10 ceilings. Combat geo/tex/mesh Δ = 0. No feature strip for micro-regressions.
+### Camera / composition
 
-### Architecture follow-up candidates (do not auto-refactor)
-
-- Player/enemy/Oathblade palettes → small immutable presentation presets
-- Zone HUD copy already data-driven in `gameplayHudModel.ts`
-- Fixture/local light ownership is placement-driven; global moon/fill remains Scene-owned
-- D-005 ConnectedLevelVisual proxy co-ownership unchanged
+Root cause of dead-black: high-oblique frustum looking past authored geometry into fog/void, plus camera-near SE margins without dressing. Improved via look-ahead, closer framing, and perimeter silhouettes; some corner void remains intentional darkness and is acceptable vs stripping mood.
 
 ## Verification
 
-- `npm run verify`: lint/typecheck/351 tests/assets/build PASS
-- Hero visual + compact UI + M8 stabilization + M9 combat/guard/hit-reaction/telegraph/perf + lifecycle PASS
-- No tmp-m* leftovers after normal cleanup runs
+- `npm run verify`: lint/typecheck/357 tests/assets/build PASS
+- M9 combat/guard/hit-reaction/telegraph/perf + M10 perf/hero/UI + lifecycle PASS
+- M8 stabilization: all gameplay asserts PASS; `portReusable=false` when user Vite holds default 4173 (not killed)
 - No push; no M10 tag
 
 ## Next session starts with
 
-1. One combined M10 production-finish batch: complete Ash Walk/sealed arena, lift surface richness, refine actor materials, and establish whole-route screenshot coherence.
-2. Then Product Owner visual acceptance review; do not schedule another tiny polish-only macro-batch.
-3. Recommended agent: **Codex** for authored visual production.
+1. **ONE final Codex visual-production macro-batch**: complete Ash Walk/sealed arena shell, lift surface richness / actor materials, establish whole-route screenshot coherence within MB6 ceilings.
+2. Product Owner visual acceptance; then M10 close/tag only after acceptance.
+3. Safe to add: denser authored dressing that stays instanced/shared; avoid unique multi-mesh fixtures and new light objects without pooling.

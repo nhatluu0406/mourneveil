@@ -1,10 +1,8 @@
-import { RoundedBox } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
 import { Object3D, type InstancedMesh, type MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
-import { MOURNEVEIL_CONNECTED_LEVEL } from '../game/world/connectedLevel'
 import {
   CONNECTED_LEVEL_LANDMARKS,
   activeConnectedLevelColliders,
@@ -16,13 +14,24 @@ import { forEachOcclusionMaterial, registerOcclusionMaterial } from './occlusion
 import { OssuaryEnvironmentKit } from './OssuaryEnvironmentKit'
 
 const COLORS = {
-  floor: MOURNEVEIL_PALETTE.environment.floor,
   wall: MOURNEVEIL_PALETTE.environment.wall,
   blocker: MOURNEVEIL_PALETTE.environment.blocker,
-  checkpoint: MOURNEVEIL_PALETTE.checkpoint.stone,
   'shortcut-gate': MOURNEVEIL_PALETTE.shortcut.closed,
   'final-gate': MOURNEVEIL_PALETTE.finalGate.sealed,
 } as const
+
+/** Blockers/landmarks dressed by ADR-0002 production shells — collider only. */
+const DRESSED_PROXY_IDS = Object.freeze(
+  new Set([
+    'blocker.first-combat',
+    'blocker.mixed.west',
+    'blocker.mixed.east',
+    'blocker.approach',
+    'landmark.watch-column',
+    'landmark.court-obelisk',
+    'landmark.approach-cairn',
+  ]),
+)
 
 const FADE_OPACITY = 0.22
 const FADE_LERP = 10
@@ -90,12 +99,15 @@ function SolidVisual({ collider, color }: { readonly collider: ConnectedLevelBox
   const materialRef = useRef<MeshStandardMaterial>(null)
   const isFloor = collider.kind === 'floor'
   const isGate = collider.kind === 'shortcut-gate' || collider.kind === 'final-gate'
+  const isCheckpoint = collider.kind === 'checkpoint'
+  const isDressedBlocker = DRESSED_PROXY_IDS.has(collider.id)
+  const showProxyMesh = !isFloor && !isCheckpoint && !isDressedBlocker
 
   useEffect(() => {
     const material = materialRef.current
-    if (material === null || isFloor) return
+    if (material === null || !showProxyMesh || isGate) return
     return registerOcclusionMaterial({ id: collider.id, material, baseOpacity: 1 })
-  }, [collider.id, isFloor])
+  }, [collider.id, isGate, showProxyMesh])
 
   const halfExtents: [number, number, number] = [
     collider.size[0] / 2,
@@ -106,22 +118,11 @@ function SolidVisual({ collider, color }: { readonly collider: ConnectedLevelBox
   return (
     <RigidBody type="fixed" colliders={false} position={collider.position}>
       <CuboidCollider args={halfExtents} />
-      {collider.kind === 'checkpoint' ? null : isFloor ? (
-        <mesh receiveShadow userData={{ solidId: collider.id }}>
-          <boxGeometry args={collider.size} />
-          <meshStandardMaterial ref={materialRef} color={color} roughness={0.98} metalness={0.01} />
-        </mesh>
-      ) : isGate ? (
+      {!showProxyMesh ? null : isGate ? (
         <FuneraryGateVisual collider={collider} materialRef={materialRef} />
       ) : (
-        <RoundedBox
-          args={[collider.size[0], collider.size[1], collider.size[2]]}
-          radius={0.07}
-          smoothness={2}
-          castShadow
-          receiveShadow
-          userData={{ solidId: collider.id }}
-        >
+        <mesh castShadow receiveShadow userData={{ solidId: collider.id }}>
+          <boxGeometry args={collider.size} />
           <meshStandardMaterial
             ref={materialRef}
             color={color}
@@ -131,7 +132,7 @@ function SolidVisual({ collider, color }: { readonly collider: ConnectedLevelBox
             opacity={1}
             depthWrite
           />
-        </RoundedBox>
+        </mesh>
       )}
     </RigidBody>
   )
@@ -186,35 +187,14 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
         <SolidVisual
           key={collider.id}
           collider={collider}
-          color={collider.color ?? (landmarkIds.has(collider.id) ? COLORS.blocker : COLORS[collider.kind])}
+          color={
+            collider.color ??
+            (landmarkIds.has(collider.id)
+              ? COLORS.blocker
+              : COLORS[collider.kind as keyof typeof COLORS] ?? COLORS.wall)
+          }
         />
       ))}
-
-      {MOURNEVEIL_CONNECTED_LEVEL.zones.map((zone) => {
-        const width = zone.bounds.maximumX - zone.bounds.minimumX
-        const depth = zone.bounds.maximumZ - zone.bounds.minimumZ
-        return (
-          <mesh
-            key={zone.id}
-            receiveShadow
-            position={[
-              (zone.bounds.minimumX + zone.bounds.maximumX) / 2,
-              0.012,
-              (zone.bounds.minimumZ + zone.bounds.maximumZ) / 2,
-            ]}
-          >
-            <boxGeometry args={[width, 0.02, depth]} />
-            <meshStandardMaterial
-              color={MOURNEVEIL_PALETTE.environment.floor}
-              roughness={0.94}
-              metalness={0.01}
-              polygonOffset
-              polygonOffsetFactor={-1}
-              polygonOffsetUnits={-1}
-            />
-          </mesh>
-        )
-      })}
 
       <OssuaryEnvironmentKit />
     </>

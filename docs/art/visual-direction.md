@@ -16,7 +16,7 @@
 
 A deterministic 1440×900 checkpoint/early-combat composition must show a production-candidate Warden, skirmisher, shrine, architecture, dressing, lighting, feedback, and HUD that read as one scene. Render meshes remain non-authoritative; accepted world and actor colliders stay explicit proxies.
 
-M10.5 1440×900 playable-presentation evidence: **356 draw calls, 47,144 triangles, 193 geometries, 3 textures, 12 programs, 473 objects, 283 meshes, 10 lights, ~86–92 MB reported JS heap**. Current evidence-backed guardrails are **380 draw calls, 100k triangles, 220 geometries, 16 textures, 20 programs, 650 objects, 380 meshes, 11 lights, 160 MB heap**. They are regression alarms rather than optimization targets; the gate remains DPR-capped and verifies stable resource counts across repeated combat.
+M10.6 1440×900 consolidation evidence: **~294–307 draw calls across route, ~23–24k triangles, ~129–137 geometries, 3 textures, 12–13 programs, 382 objects, 228 meshes, 10 lights, ~86–92 MB reported JS heap** (down from MB5 356/47k/193/473/283). Evidence-backed guardrails are **320 draw calls, 80k triangles, 160 geometries, 16 textures, 14 programs, 420 objects, 250 meshes, 11 lights, 160 MB heap**. `gate:m10-perf-baseline` samples refuge, Mixed Court, and Ash Walk on the current production route; ceilings are regression alarms with headroom for one final Codex art pass.
 
 ## Ossuary route composition
 

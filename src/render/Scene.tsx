@@ -62,7 +62,7 @@ export function Scene({
   return (
     <>
       <color attach="background" args={[MOURNEVEIL_PALETTE.background]} />
-      <fog attach="fog" args={['#0c1519', 24, 56]} />
+      <fog attach="fog" args={['#10181c', 30, 70]} />
       <ambientLight intensity={0.5} color="#879ea1" />
       <hemisphereLight args={['#a8c0c2', '#2d211b', 0.66]} />
       <directionalLight

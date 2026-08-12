@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   FOLLOW_CAMERA_OFFSET,
+  FOLLOW_LOOK_AHEAD_METERS,
   computeDesiredCameraPosition,
   computeFollowLookAt,
   createInitialFollowCameraPose,
@@ -22,6 +23,13 @@ describe('followCamera', () => {
       y: lookAt.y + FOLLOW_CAMERA_OFFSET.y,
       z: lookAt.z + FOLLOW_CAMERA_OFFSET.z,
     })
+  })
+
+  it('biases the look target along facing for progression-side framing', () => {
+    const player = { x: 0, y: 0.82, z: 0 }
+    const lookAt = computeFollowLookAt(player, { x: 0, z: 1 })
+    expect(lookAt.x).toBeCloseTo(0, 8)
+    expect(lookAt.z).toBeCloseTo(FOLLOW_LOOK_AHEAD_METERS, 8)
   })
 
   it('damps toward the target without overshooting on typical frame deltas', () => {

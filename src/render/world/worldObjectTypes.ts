@@ -6,6 +6,7 @@ export type OssuaryRouteArea =
   | 'first-combat'
   | 'mixed-court'
   | 'ash-walk'
+  | 'perimeter'
 
 export type WorldObjectFamily =
   | 'architecture'
@@ -48,6 +49,8 @@ export type OssuaryObjectId =
   | 'ossuary.banner'
   | 'ossuary.root.cluster'
   | 'ossuary.wisp'
+  | 'ossuary.silhouette.mass'
+  | 'ossuary.silhouette.column'
   | 'ossuary.light.wall-sconce'
   | 'ossuary.light.brazier'
   | 'ossuary.light.veil-lamp'

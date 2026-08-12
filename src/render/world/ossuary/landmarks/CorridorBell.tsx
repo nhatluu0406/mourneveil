@@ -1,6 +1,10 @@
+import { CylinderGeometry, TorusGeometry } from 'three'
 import { getOssuaryMaterial } from '../materials'
 import { resolveWorldObjectDefinition } from '../../worldObjectRegistry'
 import { resolvePlacementScale, type WorldObjectPlacement } from '../../worldObjectTypes'
+
+const BELL_BODY = new CylinderGeometry(0.16, 0.28, 0.44, 8)
+const BELL_RING = new TorusGeometry(0.17, 0.045, 6, 18)
 
 export function CorridorBell({ placement }: { readonly placement: WorldObjectPlacement }) {
   const definition = resolveWorldObjectDefinition(placement.objectId)
@@ -15,14 +19,8 @@ export function CorridorBell({ placement }: { readonly placement: WorldObjectPla
       scale={[...scale]}
       userData={{ instanceId: placement.instanceId }}
     >
-      <mesh castShadow>
-        <cylinderGeometry args={[0.16, 0.28, 0.44, 8]} />
-        <primitive attach="material" object={bronze} />
-      </mesh>
-      <mesh position={[0, -0.28, 0]} castShadow>
-        <torusGeometry args={[0.17, 0.045, 6, 18]} />
-        <primitive attach="material" object={bone} />
-      </mesh>
+      <mesh geometry={BELL_BODY} material={bronze} castShadow />
+      <mesh geometry={BELL_RING} material={bone} position={[0, -0.28, 0]} castShadow />
     </group>
   )
 }

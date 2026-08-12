@@ -186,6 +186,50 @@ const ASH_WALK_TRANSITION: readonly WorldObjectPlacement[] = Object.freeze([
 ])
 
 /**
+ * Cheap non-interactive distant masses outside the walkable route.
+ * Fill dead-black camera margins without gameplay colliders or shadow casters.
+ * SE placements target the high-oblique camera-near screen corners.
+ */
+const PERIMETER_SILHOUETTES: readonly WorldObjectPlacement[] = Object.freeze([
+  place('silhouette.refuge.north', 'ossuary.silhouette.mass', 'perimeter', [-5.4, 1.55, 4.85], [0, 0.08, 0], [1.35, 1.1, 1]),
+  place('silhouette.refuge.south', 'ossuary.silhouette.mass', 'perimeter', [-5.1, 1.4, -4.7], [0, -0.06, 0], [1.2, 1, 1]),
+  place('silhouette.refuge.se', 'ossuary.silhouette.mass', 'perimeter', [-1.6, 1.55, 3.55], [0, -0.4, 0], [1.55, 1.2, 1.1]),
+  place('silhouette.refuge.se.low', 'ossuary.silhouette.mass', 'perimeter', [-2.4, 1.25, -2.85], [0, 0.35, 0], [1.2, 0.95, 1]),
+  place('silhouette.watch.west', 'ossuary.silhouette.mass', 'perimeter', [-14.2, 1.7, 2.4], [0, Math.PI / 2, 0], [1.55, 1.25, 1]),
+  place('silhouette.watch.se', 'ossuary.silhouette.mass', 'perimeter', [-6.4, 1.6, 6.35], [0, -0.55, 0], [1.7, 1.25, 1.15]),
+  place('silhouette.court.south', 'ossuary.silhouette.mass', 'perimeter', [1.2, 1.55, -9.4], ZERO_ROTATION, [1.8, 1.15, 1]),
+  place('silhouette.court.se', 'ossuary.silhouette.mass', 'perimeter', [5.35, 1.5, -1.15], [0, -0.7, 0], [1.55, 1.2, 1.1]),
+  place('silhouette.ash.east', 'ossuary.silhouette.mass', 'perimeter', [12.4, 1.65, -4.1], [0, Math.PI / 2, 0], [1.45, 1.2, 1]),
+  place('silhouette.ash.north', 'ossuary.silhouette.mass', 'perimeter', [7.4, 1.5, -9.1], ZERO_ROTATION, [1.25, 1.05, 1]),
+  place('silhouette.ash.se', 'ossuary.silhouette.mass', 'perimeter', [10.6, 1.55, -0.85], [0, -0.5, 0], [1.5, 1.15, 1.1]),
+  ...[-1.6, 0.2, 2.0, 3.8].map((z, index) =>
+    place(
+      `silhouette.column.watch.${index}`,
+      'ossuary.silhouette.column',
+      'perimeter',
+      [-13.35, 1.7, z],
+      ZERO_ROTATION,
+      [0.9 + (index % 2) * 0.12, 0.95 + (index % 3) * 0.08, 0.9],
+    ),
+  ),
+  ...[5.2, 7.1, 9.0].map((x, index) =>
+    place(
+      `silhouette.column.ash.${index}`,
+      'ossuary.silhouette.column',
+      'perimeter',
+      [x, 1.65, -8.55],
+      ZERO_ROTATION,
+      [0.85, 0.9 + index * 0.08, 0.85],
+    ),
+  ),
+  place('silhouette.column.refuge.se.0', 'ossuary.silhouette.column', 'perimeter', [-0.85, 1.55, 2.4], ZERO_ROTATION, [1.05, 1.15, 1.05]),
+  place('silhouette.column.refuge.se.1', 'ossuary.silhouette.column', 'perimeter', [-1.35, 1.45, -1.8], ZERO_ROTATION, [0.95, 1.05, 0.95]),
+  place('silhouette.arch.court', 'ossuary.arch.full', 'perimeter', [1.1, 1.85, -10.2], [0, 0.12, 0], [1.6, 1.35, 1.2]),
+  place('silhouette.arch.ash', 'ossuary.arch.full', 'perimeter', [11.6, 1.7, -4], [0, Math.PI / 2, 0.05], [1.35, 1.15, 1.1]),
+  place('silhouette.arch.refuge.se', 'ossuary.arch.full', 'perimeter', [-0.4, 1.75, 4.2], [0, -0.85, 0], [1.25, 1.15, 1.1]),
+])
+
+/**
  * Declarative hero-route composition: WHAT exists WHERE.
  * Object modules own HOW each type renders.
  */
@@ -196,6 +240,7 @@ export const OSSUARY_ROUTE_PLACEMENTS: readonly WorldObjectPlacement[] = Object.
   ...MIXED_COURT_SHELL,
   ...ASH_WALK_TRANSITION,
   ...LATE_ROUTE_PRACTICALS,
+  ...PERIMETER_SILHOUETTES,
 
   place('inlay.refuge.west', 'ossuary.floor.inlay', 'refuge', [-6.95, 0.072, 0], [0, 0.06, 0], [1.5, 1, 1]),
   place('inlay.refuge.east', 'ossuary.floor.inlay', 'refuge', [-4.55, 0.072, 0], [0, -0.06, 0], [1.5, 1, 1]),

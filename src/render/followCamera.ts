@@ -2,10 +2,16 @@ import type { Vector3Value } from '../game/character/playerMotor'
 
 /** Fixed high-oblique offset from the follow look target (presentation-only). */
 export const FOLLOW_CAMERA_OFFSET: Vector3Value = Object.freeze({
-  x: 8.5,
-  y: 10.5,
-  z: 8.5,
+  x: 7.35,
+  y: 9.05,
+  z: 7.35,
 })
+
+/**
+ * Meters of look-target bias along player facing. Favors the progression side of
+ * the frame without introducing lock-on or per-room camera rails.
+ */
+export const FOLLOW_LOOK_AHEAD_METERS = 1.15
 
 /**
  * Exponential follow rate (higher = snappier). Restored to the first
@@ -20,18 +26,33 @@ export interface FollowCameraPose {
   readonly lookAt: Vector3Value
 }
 
+export interface CameraFacingHint {
+  readonly x: number
+  readonly z: number
+}
+
 export interface CameraDiagnostic {
   readonly mode: typeof FOLLOW_CAMERA_MODE
   readonly followLookAt: Vector3Value
   readonly cameraPosition: Vector3Value
 }
 
-/** Look slightly below capsule center so the body fills the framing. */
-export function computeFollowLookAt(playerPosition: Vector3Value): Vector3Value {
+/**
+ * Look slightly below capsule center, with optional facing look-ahead so
+ * traversable space ahead of the player claims more of the gameplay frame.
+ */
+export function computeFollowLookAt(
+  playerPosition: Vector3Value,
+  facing: CameraFacingHint | null = null,
+  lookAheadMeters: number = FOLLOW_LOOK_AHEAD_METERS,
+): Vector3Value {
+  const length =
+    facing === null ? 0 : Math.hypot(facing.x, facing.z)
+  const scale = length > 1e-6 ? lookAheadMeters / length : 0
   return {
-    x: playerPosition.x,
+    x: playerPosition.x + (facing === null ? 0 : facing.x * scale),
     y: playerPosition.y - 0.15,
-    z: playerPosition.z,
+    z: playerPosition.z + (facing === null ? 0 : facing.z * scale),
   }
 }
 
@@ -82,10 +103,11 @@ export function stepFollowCamera(
   playerPosition: Vector3Value,
   deltaSeconds: number,
   damping: number = FOLLOW_DAMPING,
+  facing: CameraFacingHint | null = null,
 ): FollowCameraPose {
   const lookAt = dampVector3(
     current.lookAt,
-    computeFollowLookAt(playerPosition),
+    computeFollowLookAt(playerPosition, facing),
     damping,
     deltaSeconds,
   )
@@ -98,8 +120,9 @@ export function stepFollowCamera(
 
 export function createInitialFollowCameraPose(
   playerPosition: Vector3Value,
+  facing: CameraFacingHint | null = null,
 ): FollowCameraPose {
-  const lookAt = computeFollowLookAt(playerPosition)
+  const lookAt = computeFollowLookAt(playerPosition, facing)
   return {
     lookAt,
     position: computeDesiredCameraPosition(lookAt),

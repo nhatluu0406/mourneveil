@@ -5,7 +5,7 @@ import { groupPlacementsByObjectId, resolveWorldObjectDefinition } from '../worl
 describe('ossuary route placements', () => {
   it('covers each authored route area with reusable object types', () => {
     expect(new Set(OSSUARY_ROUTE_PLACEMENTS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk']),
+      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk', 'perimeter']),
     )
     expect(
       OSSUARY_ROUTE_PLACEMENTS.some((entry) => entry.objectId === 'ossuary.floor.slab'),
@@ -65,5 +65,14 @@ describe('ossuary route placements', () => {
     ]))
     expect(practicals.filter((entry) => entry.variant === 'actual-light')).toHaveLength(5)
     expect(practicals.length).toBeGreaterThan(5)
+  })
+
+  it('keeps perimeter silhouettes outside the walkable route and non-colliding by construction', () => {
+    const silhouettes = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'perimeter')
+    expect(silhouettes.length).toBeGreaterThan(8)
+    expect(silhouettes.every((entry) => entry.objectId.startsWith('ossuary.'))).toBe(true)
+    expect(
+      silhouettes.some((entry) => entry.objectId === 'ossuary.silhouette.mass'),
+    ).toBe(true)
   })
 })

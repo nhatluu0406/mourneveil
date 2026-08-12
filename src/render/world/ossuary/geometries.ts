@@ -63,6 +63,8 @@ const CANDLE_FLAME = new OctahedronGeometry(0.045, 0)
 const BANNER = new BoxGeometry(0.5, 0.84, 0.025)
 const ROOT = new TorusGeometry(0.46, 0.035, 5, 16, Math.PI * 1.35)
 const WISP = new OctahedronGeometry(0.065, 0)
+const SILHOUETTE_MASS = new BoxGeometry(2.4, 3.2, 0.55)
+const SILHOUETTE_COLUMN = new CylinderGeometry(0.22, 0.28, 3.4, 6)
 
 /** Shared geometries for instanced ossuary object types. Unique landmarks own local meshes. */
 export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
@@ -88,6 +90,8 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   'ossuary.banner': BANNER,
   'ossuary.root.cluster': ROOT,
   'ossuary.wisp': WISP,
+  'ossuary.silhouette.mass': SILHOUETTE_MASS,
+  'ossuary.silhouette.column': SILHOUETTE_COLUMN,
 })
 
 export function getOssuaryObjectGeometry(objectId: OssuaryObjectId): BufferGeometry {
