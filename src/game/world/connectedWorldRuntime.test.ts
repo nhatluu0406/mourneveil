@@ -64,6 +64,7 @@ describe('connected world contract', () => {
     expect(world.snapshot()).toMatchObject({
       openedShortcutIds: ['connection.shortcut-checkpoint-mixed'],
       finalGateReached: true,
+      defeatedBossIds: [],
     })
   })
 })

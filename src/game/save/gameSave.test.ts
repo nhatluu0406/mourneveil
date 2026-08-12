@@ -12,7 +12,7 @@ describe('versioned local save', () => {
   it('creates a default V2 save without transient combat fields', () => {
     const save = createDefaultSaveV2()
     expect(save.version).toBe(2)
-    expect(save.world).toEqual({ openedShortcutIds: [], finalGateReached: false })
+    expect(save.world).toEqual({ openedShortcutIds: [], finalGateReached: false, defeatedBossIds: [] })
     expect(save).not.toHaveProperty('combat')
     expect(save).not.toHaveProperty('defense')
     expect(save).not.toHaveProperty('camera')
@@ -62,7 +62,7 @@ describe('versioned local save', () => {
       equipment: { weaponItemId: 'item.weapon.oathblade' },
       combat: { phase: 'idle' },
       playerHealth: { lifeState: 'alive' },
-      world: { openedShortcutIds: [], finalGateReached: false },
+      world: { openedShortcutIds: [], finalGateReached: false, defeatedBossIds: [] },
     })
     expect(restored.resolvedAttackDamage()).toEqual({ light: 28, heavy: 47 })
     expect(restored.snapshot().enemies.every((enemy) => enemy.alive)).toBe(true)
@@ -85,6 +85,7 @@ describe('versioned local save', () => {
       world: {
         openedShortcutIds: ['connection.shortcut-checkpoint-mixed'],
         finalGateReached: true,
+        defeatedBossIds: [],
       },
     })
     const loaded = service.load()
@@ -95,6 +96,7 @@ describe('versioned local save', () => {
         world: {
           openedShortcutIds: ['connection.shortcut-checkpoint-mixed'],
           finalGateReached: true,
+          defeatedBossIds: [],
         },
       },
     })
@@ -111,7 +113,7 @@ describe('versioned local save', () => {
     expect(migrateAndValidateSave({ version: 1, flaskCharges: 'nope' }).ok).toBe(true)
     expect(migrateAndValidateSave({ version: 2, world: { openedShortcutIds: [3] } })).toMatchObject({
       ok: true,
-      save: { world: { openedShortcutIds: [], finalGateReached: false } },
+      save: { world: { openedShortcutIds: [], finalGateReached: false, defeatedBossIds: [] } },
     })
     const service = new GameSaveService(new MemorySaveStorage())
     service.save({ not: 'a save' } as unknown as SaveFileV2)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FIXED_STEP_SECONDS } from '../core/fixedStepClock'
-import { BRUTE_ROLE, SKIRMISHER_ROLE } from '../enemies/enemyRoles'
+import { BOSS_ROLE, BRUTE_ROLE, SKIRMISHER_ROLE } from '../enemies/enemyRoles'
 import type { CharacterCollisionResolver } from './playerMotor'
 import { GameRuntime } from '../runtime/GameRuntime'
 
@@ -77,6 +77,7 @@ describe('player checkpoint and respawn integration', () => {
       BRUTE_ROLE.definition.maximumHealth,
       SKIRMISHER_ROLE.definition.maximumHealth,
       SKIRMISHER_ROLE.definition.maximumHealth,
+      BOSS_ROLE.definition.maximumHealth,
     ])
     expect(runtime.snapshot().incomingContact).toMatchObject({
       totalHitCount: 0,

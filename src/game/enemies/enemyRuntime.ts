@@ -75,6 +75,7 @@ export class EnemyRuntime {
   private interruptMeterQuietSteps = 0
   private hitReactionImmunityRemainingSteps = 0
   private lastReactionExecutionId: number | null = null
+  private previousAttackId: CombatActionId | null = null
 
   constructor(
     readonly definition: EnemyDefinition,
@@ -137,12 +138,17 @@ export class EnemyRuntime {
     assertUnitFacing(facing)
     const result = this.actions.request({ type: 'start-action', actionId })
     if (result.accepted) {
+      this.previousAttackId = actionId
       this.attackExecutionFacing = { ...facing }
       this.facing = { ...this.attackExecutionFacing }
       this.velocity = { x: 0, y: 0, z: 0 }
       this.transition('attack')
     }
     return result
+  }
+
+  lastAttackId(): CombatActionId | null {
+    return this.previousAttackId
   }
 
   advanceAction(): void {
@@ -259,6 +265,7 @@ export class EnemyRuntime {
     this.interruptMeterQuietSteps = 0
     this.hitReactionImmunityRemainingSteps = 0
     this.lastReactionExecutionId = null
+    this.previousAttackId = null
     this.health = createCombatHealth(this.definition.maximumHealth)
     this.actions.reset()
   }

@@ -65,9 +65,11 @@ import {
 } from '../encounters/grayboxEncounter'
 import {
   M5_ENCOUNTERS,
+  FINAL_GATE_PREREQUISITE_ENCOUNTER_IDS,
   connectedEnemyPlacementByRuntimeId,
   createConnectedLevelEnemyRuntimes,
 } from '../encounters/connectedLevelEncounters'
+import { BOSS_TECHNICAL_ID } from '../enemies/bossKit'
 import {
   EncounterActivationRuntime,
   type EncounterActivationSnapshot,
@@ -269,6 +271,7 @@ export class GameRuntime {
       world: {
         openedShortcutIds: this.worldRuntime.snapshot().openedShortcutIds,
         finalGateReached: this.worldRuntime.snapshot().finalGateReached,
+        defeatedBossIds: this.worldRuntime.snapshot().defeatedBossIds,
       },
     }
   }
@@ -338,6 +341,7 @@ export class GameRuntime {
       enemy.reset(placement?.spawnPosition ?? enemy.snapshot().position)
       this.enemyContactRuntimeFor(enemy.id).reset()
       this.enemyNavigationStates.delete(enemy.id)
+      this.reapplyPersistentBossDefeat(enemy)
     }
     this.encounterActivationRuntime.reset()
     this.echoRewardedEnemyIds.clear()
@@ -490,6 +494,7 @@ export class GameRuntime {
       enemy.reset(placement?.spawnPosition ?? enemy.snapshot().position)
       this.enemyContactRuntimeFor(enemy.id).reset()
       this.enemyNavigationStates.delete(enemy.id)
+      this.reapplyPersistentBossDefeat(enemy)
     }
     this.encounterActivationRuntime.reset()
     this.echoRewardedEnemyIds.clear()
@@ -813,6 +818,7 @@ export class GameRuntime {
           {
             targetAlive: playerAlive,
             navigationTarget,
+            simulationStep: nextStepCount,
             onDirectPursuitBlocked: () => {
               this.ensureEnemyNavigationRoute(enemyRuntime.id)
             },
@@ -1052,6 +1058,11 @@ export class GameRuntime {
       const snapshot = enemy.snapshot()
       if (snapshot.alive || this.echoRewardedEnemyIds.has(enemy.id)) continue
       this.echoRewardedEnemyIds.add(enemy.id)
+      if (enemy.definition.role === 'boss') {
+        if (this.worldRuntime.markBossDefeated(BOSS_TECHNICAL_ID)) {
+          this.markPersistentChange()
+        }
+      }
       const reward = enemy.definition.echoReward
       if (reward > 0) {
         this.echoesRuntime.add(reward)
@@ -1060,11 +1071,19 @@ export class GameRuntime {
     }
   }
 
+  private reapplyPersistentBossDefeat(enemy: EnemyRuntime): void {
+    if (enemy.definition.role !== 'boss') return
+    if (!this.worldRuntime.isBossDefeated(BOSS_TECHNICAL_ID)) return
+    enemy.applyDamage(enemy.snapshot().health.current)
+  }
+
   private updateFinalGateProgress(): void {
     const enemies = this.enemyRuntimes.map((enemy) => enemy.snapshot())
-    const prerequisitesComplete = M5_ENCOUNTERS.every(
-      (encounter) => createEncounterSnapshot(encounter.id, encounter.enemyIds, enemies).phase === 'complete',
-    )
+    const prerequisitesComplete = FINAL_GATE_PREREQUISITE_ENCOUNTER_IDS.every((encounterId) => {
+      const encounter = M5_ENCOUNTERS.find((entry) => entry.id === encounterId)
+      if (encounter === undefined) return false
+      return createEncounterSnapshot(encounter.id, encounter.enemyIds, enemies).phase === 'complete'
+    })
     const result = this.worldRuntime.tryReachFinalGate(
       this.playerState.position,
       prerequisitesComplete,

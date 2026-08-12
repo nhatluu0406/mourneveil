@@ -5,16 +5,20 @@ Task: m11-boss-vertical-slice
 
 ## Status
 
-ACTIVE — Macro-batch 1 (gameplay foundation). Not complete. Not tagged.
+ACTIVE — Macro-batch 1 (gameplay foundation) complete locally. **M11 not closed / not tagged.**
 
-## Goal
+## Delivered (MB1)
 
-Technical boss encounter `boss.veilbound-sepulchre` in `zone.final-arena` reusing combat/AI/world/save/UI foundations. Temporary presentation only.
+- Technical boss `boss.veilbound-sepulchre` / `enemy.boss.sepulchre.1`
+- 2 phases (HP ≤ 50%), 4 attacks, deterministic `selectBossAttack`
+- Arena encounter on `zone.final-arena`; save `defeatedBossIds`
+- Temporary TECHNICAL boss presentation; gate `gate:m11-boss-foundation` PASS
+- Codex handoff: `docs/art/m11-boss-visual-handoff.md`
 
-## Codex owns next
+## Next batch
 
-Boss visual, arena visual, lighting, VFX, boss UI polish.
+**CODEX — boss visual + arena + VFX/UI presentation** using the handoff hooks. Cursor remains owner of gameplay authority.
 
-## Non-goals
+## Non-goals still hold
 
-M12; M11 completion/tag; polished art; behavior trees; lock-on; posture system.
+M12; M11 tag/completion; polished art in this batch.

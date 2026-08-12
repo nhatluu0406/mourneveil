@@ -23,4 +23,4 @@
 
 ## Next executable work
 
-M11 Macro-batch 1: boss contract, arena encounter, deterministic attacks/phases, technical gate — then Codex visual/arena/VFX/UI presentation.
+CODEX Macro-batch 2: boss visual, arena dressing, lighting/VFX, boss UI presentation — see `docs/art/m11-boss-visual-handoff.md`.

@@ -16,25 +16,25 @@ Ship one complete technical boss encounter vertical slice that reuses existing c
 
 ## Steps
 
-- [ ] 1. M10 hygiene close + tag `v0.10.0-visual-production-identity`
+- [x] 1. M10 hygiene close + tag `v0.10.0-visual-production-identity`
   - depends: —
   - risk: MED
   - isolation: sequential
   - owns/allows: tmp cleanup, docs, debt, PLAN transition, tag
   - verifier: `npm run verify && npm run gate:lifecycle && git tag -l v0.10.0-visual-production-identity`
-- [ ] 2. Boss contract + role/kit/phase/AI policy (pure modules + tests)
+- [x] 2. Boss contract + role/kit/phase/AI policy (pure modules + tests)
   - depends: 1
   - risk: HIGH
   - isolation: sequential
   - owns/allows: `src/game/enemies/boss*`, enemyRoles/hitReaction extensions
   - verifier: `npx vitest run src/game/enemies`
-- [ ] 3. Arena encounter wiring + save defeated flag + UI threat titles
+- [x] 3. Arena encounter wiring + save defeated flag + UI threat titles
   - depends: 2
   - risk: HIGH
   - isolation: sequential
   - owns/allows: encounters, connectedLevel, save, GameRuntime, GameplayHud model
   - verifier: `npx vitest run src/game/encounters src/game/save src/ui`
-- [ ] 4. Temporary boss presentation + technical runtime gate + Codex handoff
+- [x] 4. Temporary boss presentation + technical runtime gate + Codex handoff
   - depends: 3
   - risk: MED
   - isolation: sequential

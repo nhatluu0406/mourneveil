@@ -1,12 +1,16 @@
 import type { CharacterCollisionResolver, PlayerFacingDirection, Vector3Value } from '../character/playerMotor'
 import { PLAYER_GRAVITY, PLAYER_MAX_FALL_SPEED } from '../character/playerMotor'
+import type { CombatActionId } from '../combat/combatAction'
 import type { ActiveCombatContactShape } from '../combat/combatContact'
+import { bossAttackByActionId } from './bossKit'
+import { selectBossAttack } from './bossPolicy'
 import { EnemyRuntime, type EnemyRuntimeSnapshot } from './enemyRuntime'
 import {
   createEnemyRuntimeFromRole,
   meleeRoleByActionId,
   meleeRoleByDefinitionId,
   SKIRMISHER_ROLE,
+  type EnemyMeleeContactShape,
   type EnemyMeleeRoleSpec,
 } from './enemyRoles'
 
@@ -40,6 +44,8 @@ export function advanceMeleeEnemy(
     readonly navigationTarget?: Vector3Value | null
     /** Called when direct pursuit toward the player is locally blocked. */
     readonly onDirectPursuitBlocked?: () => void
+    /** Simulation step for deterministic boss attack selection. */
+    readonly simulationStep?: number
   } = {},
 ): void {
   let enemy = runtime.snapshot()
@@ -50,7 +56,7 @@ export function advanceMeleeEnemy(
   enemy = runtime.snapshot()
   if (!enemy.alive || enemy.state === 'hitReaction') return
 
-  const attackId = runtime.definition.attackActionIds[0]
+  const attackId = resolveMeleeAttackId(runtime, playerPosition, options.simulationStep ?? 0)
   const targetAlive = options.targetAlive ?? true
   if (!targetAlive) {
     // Keep committed action clocks advancing so recovery cannot freeze, then
@@ -179,7 +185,11 @@ export function createEnemyAttackSpatialSnapshot(
   if (role === null) {
     return { executionFacing: null, contactEnabled: false, activeContactShape: null }
   }
-  const actionMatches = enemy.action.actionId === role.attack.id
+  const attackProfile = resolveAttackProfile(enemy.action.actionId, role)
+  if (attackProfile === null) {
+    return { executionFacing: null, contactEnabled: false, activeContactShape: null }
+  }
+  const actionMatches = enemy.action.actionId === attackProfile.actionId
   const executionFacing = actionMatches && enemy.attackExecutionFacing !== null
     ? { ...enemy.attackExecutionFacing }
     : null
@@ -187,38 +197,90 @@ export function createEnemyAttackSpatialSnapshot(
     actionMatches &&
     enemy.alive &&
     enemy.action.contact.enabled &&
-    enemy.action.contact.windowId === role.contact.windowId
+    enemy.action.contact.windowId === attackProfile.contact.windowId
   return {
     executionFacing,
     contactEnabled,
     activeContactShape:
       contactEnabled && executionFacing !== null
         ? {
-            id: role.contact.id,
+            id: attackProfile.contact.id,
             kind: 'sphere',
-            actionId: role.attack.id,
-            windowId: role.contact.windowId,
+            actionId: attackProfile.actionId,
+            windowId: attackProfile.contact.windowId,
             center: {
-              x: enemy.position.x + executionFacing.x * role.contact.forwardOffset,
+              x: enemy.position.x + executionFacing.x * attackProfile.contact.forwardOffset,
               y: enemy.position.y,
-              z: enemy.position.z + executionFacing.z * role.contact.forwardOffset,
+              z: enemy.position.z + executionFacing.z * attackProfile.contact.forwardOffset,
             },
-            radius: role.contact.radius,
+            radius: attackProfile.contact.radius,
           }
         : null,
   }
 }
 
 export function enemyAttackDamage(enemy: EnemyRuntimeSnapshot): number {
-  return resolveRoleForEnemy(enemy)?.damage ?? 0
+  const role = resolveRoleForEnemy(enemy)
+  if (role === null) return 0
+  return resolveAttackProfile(enemy.action.actionId, role)?.damage ?? 0
 }
 
 export function enemyAttackGuardImpact(enemy: EnemyRuntimeSnapshot): number {
-  return resolveRoleForEnemy(enemy)?.guardImpact ?? 0
+  const role = resolveRoleForEnemy(enemy)
+  if (role === null) return 0
+  return resolveAttackProfile(enemy.action.actionId, role)?.guardImpact ?? 0
 }
 
 export function horizontalDistance(a: Vector3Value, b: Vector3Value): number {
   return Math.hypot(a.x - b.x, a.z - b.z)
+}
+
+function resolveMeleeAttackId(
+  runtime: EnemyRuntime,
+  playerPosition: Vector3Value,
+  simulationStep: number,
+): CombatActionId {
+  if (runtime.definition.role !== 'boss') {
+    return runtime.definition.attackActionIds[0]!
+  }
+  const snapshot = runtime.snapshot()
+  return selectBossAttack({
+    healthCurrent: snapshot.health.current,
+    healthMaximum: snapshot.health.maximum,
+    playerDistance: horizontalDistance(snapshot.position, playerPosition),
+    previousAttackId: runtime.lastAttackId(),
+    simulationStep,
+  }).actionId
+}
+
+interface ResolvedAttackProfile {
+  readonly actionId: CombatActionId
+  readonly damage: number
+  readonly guardImpact: number
+  readonly contact: EnemyMeleeContactShape
+}
+
+function resolveAttackProfile(
+  actionId: CombatActionId | null,
+  role: EnemyMeleeRoleSpec,
+): ResolvedAttackProfile | null {
+  if (actionId === null) return null
+  const bossAttack = bossAttackByActionId(actionId)
+  if (bossAttack !== null) {
+    return {
+      actionId: bossAttack.attack.id,
+      damage: bossAttack.damage,
+      guardImpact: bossAttack.guardImpact,
+      contact: bossAttack.contact,
+    }
+  }
+  if (actionId !== role.attack.id) return null
+  return {
+    actionId: role.attack.id,
+    damage: role.damage,
+    guardImpact: role.guardImpact,
+    contact: role.contact,
+  }
 }
 
 function resolveRoleForEnemy(enemy: EnemyRuntimeSnapshot): EnemyMeleeRoleSpec | null {

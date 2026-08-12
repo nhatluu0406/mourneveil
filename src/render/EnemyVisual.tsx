@@ -122,30 +122,38 @@ function ProceduralEnemyVisual({
     facing.rotation.y = localNegativeZFacingYaw(animation.facing)
     const damping = Math.max(1, 1 / Math.max(animation.transition.blendSeconds, 0.001))
     const isBrute = role.role === 'brute'
-    body.scale.x = MathUtils.damp(body.scale.x, isBrute ? 1.15 : 0.88, damping, deltaSeconds)
+    const isBoss = role.role === 'boss'
+    const largeBody = isBrute || isBoss
+    body.scale.x = MathUtils.damp(body.scale.x, largeBody ? (isBoss ? 1.45 : 1.15) : 0.88, damping, deltaSeconds)
     body.scale.y = MathUtils.damp(
       body.scale.y,
-      (isBrute ? 1.05 : 0.98) * proceduralPose.bodyScaleY,
+      (largeBody ? (isBoss ? 1.35 : 1.05) : 0.98) * proceduralPose.bodyScaleY,
       damping,
       deltaSeconds,
     )
-    body.scale.z = MathUtils.damp(body.scale.z, isBrute ? 1.12 : 0.9, damping, deltaSeconds)
+    body.scale.z = MathUtils.damp(body.scale.z, largeBody ? (isBoss ? 1.4 : 1.12) : 0.9, damping, deltaSeconds)
     body.rotation.x = MathUtils.damp(body.rotation.x, proceduralPose.bodyPitch, damping, deltaSeconds)
     body.rotation.z = MathUtils.damp(body.rotation.z, proceduralPose.bodyRoll, damping, deltaSeconds)
     body.position.y = MathUtils.damp(body.position.y, proceduralPose.bodyOffsetY, damping, deltaSeconds)
     weapon.rotation.x = MathUtils.damp(
       weapon.rotation.x,
-      (isBrute ? 0 : 0.55) + proceduralPose.weaponPitch,
+      (largeBody ? 0 : 0.55) + proceduralPose.weaponPitch,
       damping,
       deltaSeconds,
     )
     weapon.rotation.y = MathUtils.damp(
       weapon.rotation.y,
-      (isBrute ? 0 : 0.1) + proceduralPose.weaponYaw,
+      (largeBody ? 0 : 0.1) + proceduralPose.weaponYaw,
       damping,
       deltaSeconds,
     )
-    material.color.set(isBrute ? MOURNEVEIL_PALETTE.brute.body : MOURNEVEIL_PALETTE.skirmisher.body)
+    material.color.set(
+      isBoss
+        ? role.presentation.primaryColor
+        : isBrute
+          ? MOURNEVEIL_PALETTE.brute.body
+          : MOURNEVEIL_PALETTE.skirmisher.body,
+    )
     material.color.offsetHSL(0, -0.05, -STATE_MIX[enemy.state] * 0.28)
     const damagedFlash = animation.mode !== 'defeated' && animation.hitReactionToken !== null
     if (damagedFlash) {
@@ -187,16 +195,23 @@ function ProceduralEnemyVisual({
   const role = enemy === null ? null : meleeRoleByDefinitionId(enemy.definitionId)
   if (role === null) return null
   const isBrute = role.role === 'brute'
+  const isBoss = role.role === 'boss'
+  const largeBody = isBrute || isBoss
 
   return (
     <group
       ref={facingRef}
       userData={{
-        productionAssetId: isBrute ? 'enemy.brute.ossuary-bulwark' : 'enemy.skirmisher.veil-riven',
+        productionAssetId: isBoss
+          ? 'enemy.boss.veilbound-sepulchre.technical'
+          : isBrute
+            ? 'enemy.brute.ossuary-bulwark'
+            : 'enemy.skirmisher.veil-riven',
+        technicalBossPresentation: isBoss,
       }}
     >
       <group ref={bodyRef}>
-        {isBrute ? (
+        {largeBody ? (
           <>
             <mesh castShadow receiveShadow position={[0, -0.05, 0]}>
               <primitive attach="geometry" object={BRUTE_TORSO} />

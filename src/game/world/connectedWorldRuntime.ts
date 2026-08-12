@@ -10,6 +10,7 @@ import {
 export interface ConnectedWorldFlags {
   readonly openedShortcutIds: readonly MourneveilConnectionId[]
   readonly finalGateReached: boolean
+  readonly defeatedBossIds: readonly string[]
 }
 
 export interface ConnectedWorldSnapshot extends ConnectedWorldFlags {
@@ -29,6 +30,7 @@ export class ConnectedWorldRuntime {
   private currentZoneId: MourneveilZoneId | null
   private readonly openedShortcutIds = new Set<MourneveilConnectionId>()
   private finalGateReached = false
+  private readonly defeatedBossIds = new Set<string>()
 
   constructor(readonly definition: ConnectedLevelDefinition = MOURNEVEIL_CONNECTED_LEVEL) {
     validateConnectedLevelDefinition(definition)
@@ -82,8 +84,24 @@ export class ConnectedWorldRuntime {
     return { accepted: true, changed }
   }
 
-  restore(flags: { readonly openedShortcutIds: readonly string[]; readonly finalGateReached: boolean }): void {
+  markBossDefeated(bossTechnicalId: string): boolean {
+    if (bossTechnicalId.trim().length === 0) return false
+    const changed = !this.defeatedBossIds.has(bossTechnicalId)
+    this.defeatedBossIds.add(bossTechnicalId)
+    return changed
+  }
+
+  isBossDefeated(bossTechnicalId: string): boolean {
+    return this.defeatedBossIds.has(bossTechnicalId)
+  }
+
+  restore(flags: {
+    readonly openedShortcutIds: readonly string[]
+    readonly finalGateReached: boolean
+    readonly defeatedBossIds?: readonly string[]
+  }): void {
     this.openedShortcutIds.clear()
+    this.defeatedBossIds.clear()
     const shortcutIds = new Set(
       this.definition.connections
         .filter((connection) => connection.kind === 'shortcut')
@@ -95,6 +113,11 @@ export class ConnectedWorldRuntime {
       }
     }
     this.finalGateReached = flags.finalGateReached
+    for (const id of flags.defeatedBossIds ?? []) {
+      if (typeof id === 'string' && id.trim().length > 0) {
+        this.defeatedBossIds.add(id)
+      }
+    }
   }
 
   snapshot(): ConnectedWorldSnapshot {
@@ -103,6 +126,7 @@ export class ConnectedWorldRuntime {
       currentZoneId: this.currentZoneId,
       openedShortcutIds: [...this.openedShortcutIds].sort(),
       finalGateReached: this.finalGateReached,
+      defeatedBossIds: [...this.defeatedBossIds].sort(),
     }
   }
 }

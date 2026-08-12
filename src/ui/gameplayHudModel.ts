@@ -97,10 +97,12 @@ export function resolveNearestThreat(
 }
 
 export function threatTitle(definitionId: string): string {
+  if (definitionId.includes('boss')) return 'VEILBOUND SEPULCHRE'
   return definitionId.includes('brute') ? 'OSSUARY BULWARK' : 'VEIL-RIVEN STALKER'
 }
 
 export function threatSubtitle(definitionId: string): string {
+  if (definitionId.includes('boss')) return 'TECHNICAL BOSS · PHASE THREAT'
   return definitionId.includes('brute') ? 'THE IRON DEAD · UNYIELDING' : 'THE UNBURIED · HUNTING'
 }
 

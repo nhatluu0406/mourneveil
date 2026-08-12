@@ -42,6 +42,7 @@ export interface SaveFileV1 {
 export interface SaveWorldV2 {
   readonly openedShortcutIds: readonly string[]
   readonly finalGateReached: boolean
+  readonly defeatedBossIds: readonly string[]
 }
 
 export interface SaveFileV2 {
@@ -98,6 +99,7 @@ export function createDefaultSaveV2(): SaveFileV2 {
     world: {
       openedShortcutIds: [],
       finalGateReached: false,
+      defeatedBossIds: [],
     },
   }
 }

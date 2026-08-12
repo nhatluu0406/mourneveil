@@ -2,6 +2,11 @@ import type { PlayerFacingDirection, Vector3Value } from '../character/playerMot
 import type { ItemId } from '../items/itemDefinition'
 import type { MourneveilZoneId } from '../world/connectedLevel'
 import {
+  BOSS_ENCOUNTER_ID,
+  BOSS_RUNTIME_ID,
+} from '../enemies/bossKit'
+import {
+  BOSS_ROLE,
   BRUTE_ROLE,
   SKIRMISHER_ROLE,
   createEnemyRuntimeFromRole,
@@ -13,13 +18,21 @@ export const M5_ENCOUNTER_IDS = [
   'encounter.m5.introduction',
   'encounter.m5.mixed',
   'encounter.m5.pressure',
+  BOSS_ENCOUNTER_ID,
 ] as const
 export type M5EncounterId = (typeof M5_ENCOUNTER_IDS)[number]
+
+/** Gate open prerequisites exclude the arena boss (boss lives behind the gate). */
+export const FINAL_GATE_PREREQUISITE_ENCOUNTER_IDS = [
+  'encounter.m5.introduction',
+  'encounter.m5.mixed',
+  'encounter.m5.pressure',
+] as const satisfies readonly M5EncounterId[]
 
 export interface ConnectedEnemyPlacement {
   readonly runtimeId: string
   readonly encounterId: M5EncounterId
-  readonly role: 'skirmisher' | 'brute'
+  readonly role: 'skirmisher' | 'brute' | 'boss'
   readonly spawnPosition: Vector3Value
   readonly initialFacing: PlayerFacingDirection
   readonly lootItemId: ItemId | null
@@ -39,12 +52,15 @@ export const M5_ENEMY_PLACEMENTS: readonly ConnectedEnemyPlacement[] = Object.fr
   definePlacement('enemy.skirmisher.introduction', 'encounter.m5.introduction', 'skirmisher', -10.2, 3.1, 1, 0, null),
   // Pressure: final-approach sentry near the ash-walk cairn, before the sealed gate.
   definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7.6, -3.4, -1, 0, null),
+  // M11 technical boss in sealed arena (gameplay foundation; Codex owns art later).
+  definePlacement(BOSS_RUNTIME_ID, BOSS_ENCOUNTER_ID, 'boss', 13, -4, -1, 0, null),
 ])
 
 export const M5_ENCOUNTERS: readonly ConnectedEncounterDefinition[] = Object.freeze([
   defineEncounter('encounter.m5.introduction', 'zone.first-combat', ['enemy.skirmisher.introduction']),
   defineEncounter('encounter.m5.mixed', 'zone.mixed-combat', ['enemy.skirmisher.1', 'enemy.brute.1']),
   defineEncounter('encounter.m5.pressure', 'zone.final-approach', ['enemy.skirmisher.pressure']),
+  defineEncounter(BOSS_ENCOUNTER_ID, 'zone.final-arena', [BOSS_RUNTIME_ID]),
 ])
 
 export function validateConnectedEncounterPlacements(
@@ -90,6 +106,7 @@ export function createConnectedLevelEnemyRuntimes(): EnemyRuntime[] {
 }
 
 function roleForPlacement(placement: ConnectedEnemyPlacement): EnemyMeleeRoleSpec {
+  if (placement.role === 'boss') return BOSS_ROLE
   return placement.role === 'brute' ? BRUTE_ROLE : SKIRMISHER_ROLE
 }
 

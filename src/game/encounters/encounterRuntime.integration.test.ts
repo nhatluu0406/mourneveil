@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { GameRuntime } from '../runtime/GameRuntime'
-import { BRUTE_ROLE, SKIRMISHER_ROLE } from '../enemies/enemyRoles'
+import { BOSS_ROLE, BRUTE_ROLE, SKIRMISHER_ROLE } from '../enemies/enemyRoles'
 import { createGrayboxEncounterSnapshot } from './grayboxEncounter'
 
 describe('player runtime graybox encounter projection', () => {
@@ -21,6 +21,7 @@ describe('player runtime graybox encounter projection', () => {
       BRUTE_ROLE.definition.maximumHealth,
       SKIRMISHER_ROLE.definition.maximumHealth,
       SKIRMISHER_ROLE.definition.maximumHealth,
+      BOSS_ROLE.definition.maximumHealth,
     ])
   })
 

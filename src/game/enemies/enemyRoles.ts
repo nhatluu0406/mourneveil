@@ -1,6 +1,12 @@
 import type { CombatActionDefinition, CombatActionId } from '../combat/combatAction'
 import type { PlayerFacingDirection, Vector3Value } from '../character/playerMotor'
 import { defineCombatAction } from '../combat/combatAction'
+import {
+  BOSS_ATTACK_KIT,
+  BOSS_DEFINITION_ID,
+  BOSS_RUNTIME_ID,
+  BOSS_SLASH,
+} from './bossKit'
 import { defineEnemy, type EnemyDefinition, type EnemyRole } from './enemyDefinition'
 import { EnemyRuntime } from './enemyRuntime'
 
@@ -169,21 +175,74 @@ export const BRUTE_ROLE: EnemyMeleeRoleSpec = Object.freeze({
   }),
 })
 
+export const BOSS_ROLE: EnemyMeleeRoleSpec = Object.freeze({
+  runtimeId: BOSS_RUNTIME_ID,
+  role: 'boss',
+  definition: defineEnemy({
+    id: BOSS_DEFINITION_ID,
+    role: 'boss',
+    tags: ['grounded', 'melee', 'boss'],
+    body: { radius: 0.72, halfHeight: 0.85 },
+    hurtbox: {
+      id: 'hurtbox',
+      kind: 'sphere',
+      offset: { x: 0, y: 0, z: 0 },
+      radius: 0.9,
+    },
+    maximumHealth: 420,
+    movementSpeed: 1.55,
+    perceptionRange: 8,
+    stoppingRange: 1.85,
+    attackRange: 2.35,
+    attackActionIds: BOSS_ATTACK_KIT.map((entry) => entry.attack.id),
+    echoReward: 200,
+  }),
+  attack: BOSS_SLASH,
+  damage: BOSS_ATTACK_KIT[0]!.damage,
+  guardImpact: BOSS_ATTACK_KIT[0]!.guardImpact,
+  contact: BOSS_ATTACK_KIT[0]!.contact,
+  spawnPosition: Object.freeze({ x: 13, y: 0.82, z: -4 }),
+  initialFacing: Object.freeze({ x: -1, z: 0 }),
+  presentation: Object.freeze({
+    primaryColor: '#5c3d55',
+    telegraphColor: '#e8a0ff',
+    contactColor: '#ff4d6d',
+    bodyScale: 1.55,
+    animation: Object.freeze({
+      idleAmplitude: 0.008,
+      locomotionCadence: 0.08,
+      attackAnticipation: 0.72,
+      attackSwing: 1.05,
+      recoveryWeight: 0.62,
+      hitRecoil: 0.08,
+    }),
+  }),
+})
+
 export const GRAYBOX_ENEMY_ROLES: readonly EnemyMeleeRoleSpec[] = Object.freeze([
   SKIRMISHER_ROLE,
   BRUTE_ROLE,
 ])
 
-const PROFILES_BY_ACTION = new Map<CombatActionId, EnemyMeleeRoleSpec>(
-  GRAYBOX_ENEMY_ROLES.map((role) => [role.attack.id, role]),
-)
+export const CONNECTED_ENEMY_ROLES: readonly EnemyMeleeRoleSpec[] = Object.freeze([
+  ...GRAYBOX_ENEMY_ROLES,
+  BOSS_ROLE,
+])
+
+const PROFILES_BY_ACTION = new Map<CombatActionId, EnemyMeleeRoleSpec>()
+for (const role of CONNECTED_ENEMY_ROLES) {
+  PROFILES_BY_ACTION.set(role.attack.id, role)
+}
+for (const entry of BOSS_ATTACK_KIT) {
+  PROFILES_BY_ACTION.set(entry.attack.id, BOSS_ROLE)
+}
 
 const SPECS_BY_RUNTIME_ID = new Map<string, EnemyMeleeRoleSpec>(
-  GRAYBOX_ENEMY_ROLES.map((role) => [role.runtimeId, role]),
+  CONNECTED_ENEMY_ROLES.map((role) => [role.runtimeId, role]),
 )
 
 const SPECS_BY_DEFINITION_ID = new Map<string, EnemyMeleeRoleSpec>(
-  GRAYBOX_ENEMY_ROLES.map((role) => [role.definition.id, role]),
+  CONNECTED_ENEMY_ROLES.map((role) => [role.definition.id, role]),
 )
 
 export function meleeRoleByActionId(actionId: CombatActionId | null): EnemyMeleeRoleSpec | null {
@@ -205,13 +264,9 @@ export function createEnemyRuntimeFromRole(
   spawnPosition: Vector3Value = role.spawnPosition,
   initialFacing: PlayerFacingDirection = role.initialFacing,
 ): EnemyRuntime {
-  return new EnemyRuntime(
-    role.definition,
-    runtimeId,
-    spawnPosition,
-    [role.attack],
-    initialFacing,
-  )
+  const attacks =
+    role.role === 'boss' ? BOSS_ATTACK_KIT.map((entry) => entry.attack) : [role.attack]
+  return new EnemyRuntime(role.definition, runtimeId, spawnPosition, attacks, initialFacing)
 }
 
 export function createGrayboxEnemyRuntimes(): EnemyRuntime[] {

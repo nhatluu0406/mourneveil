@@ -3,7 +3,7 @@ import type { Vector3Value } from '../character/playerMotor'
 import { assertPositiveFinite } from '../combat/combatHealth'
 
 export type EnemyDefinitionId = string
-export type EnemyRole = 'skirmisher' | 'brute'
+export type EnemyRole = 'skirmisher' | 'brute' | 'boss'
 
 export interface EnemyBodyDefinition {
   readonly radius: number

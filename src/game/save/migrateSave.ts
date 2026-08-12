@@ -57,6 +57,7 @@ export function migrateV1ToV2(save: SaveFileV1): SaveFileV2 {
     world: {
       openedShortcutIds: [],
       finalGateReached: false,
+      defeatedBossIds: [],
     },
   }
 }
@@ -107,9 +108,13 @@ function asWorld(value: unknown, fallback: SaveFileV2['world']): SaveFileV2['wor
   const openedShortcutIds = Array.isArray(record.openedShortcutIds)
     ? [...new Set(record.openedShortcutIds.filter((id): id is string => typeof id === 'string'))]
     : []
+  const defeatedBossIds = Array.isArray(record.defeatedBossIds)
+    ? [...new Set(record.defeatedBossIds.filter((id): id is string => typeof id === 'string'))]
+    : []
   return {
     openedShortcutIds,
     finalGateReached: Boolean(record.finalGateReached),
+    defeatedBossIds,
   }
 }
 

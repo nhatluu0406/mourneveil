@@ -93,7 +93,7 @@ export const MOURNEVEIL_CONNECTED_LEVEL: ConnectedLevelDefinition = Object.freez
     ], '#3c3131', { encounterId: 'encounter.m5.pressure', label: 'Ash Walk' }),
     defineZone('zone.final-arena', [10, 16, -8, 0], [
       'connection.gate-final-arena',
-    ], '#332a35', { label: 'Sealed Arena' }),
+    ], '#332a35', { encounterId: 'encounter.m11.boss', label: 'Sealed Arena' }),
   ]),
   connections: Object.freeze([
     defineConnection('connection.arrival-first-combat', 'open', 'zone.arrival', 'zone.first-combat', -11, 5),

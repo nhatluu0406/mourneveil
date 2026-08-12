@@ -269,7 +269,7 @@ describe('M3 enemy framework verification', () => {
     }
 
     expect(skirmisherAttacks + bruteAttacks).toBeGreaterThanOrEqual(1)
-    expect(runtime.snapshot().enemies).toHaveLength(4)
+    expect(runtime.snapshot().enemies).toHaveLength(5)
     expect(runtime.snapshot().enemies.every((enemy) => enemy.id.length > 0)).toBe(true)
   })
 })

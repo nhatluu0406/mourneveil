@@ -21,6 +21,8 @@ export const PLAYER_ATTACK_INTERRUPT_IMPACT = Object.freeze({
 export const ENEMY_INTERRUPT_THRESHOLD: Readonly<Record<EnemyRole, number>> = Object.freeze({
   skirmisher: 1,
   brute: 2,
+  /** Light never interrupts; heavy accumulates — needs three heavies without quiet reset. */
+  boss: 3,
 })
 
 export function interruptImpactForPlayerAction(actionId: CombatActionId): number {
