@@ -89,4 +89,51 @@ describe('bossPolicy', () => {
     }
     expect(new Set(selected)).toEqual(new Set(['slash', 'crush', 'lunge']))
   })
+
+  it('reaches every phase-1 kit attack via successor cycling alone', () => {
+    // Mid-range pool is alphabetically crush → lunge → slash. Successor ignores render timing.
+    let previousAttackId: ReturnType<typeof selectBossAttack>['actionId'] | null = null
+    const selected = new Set<string>()
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      const next = selectBossAttack({
+        healthCurrent: 420,
+        healthMaximum: 420,
+        playerDistance: 1.75,
+        previousAttackId,
+        simulationStep: 999, // must not matter once a prior attack exists
+      })
+      selected.add(next.kind)
+      previousAttackId = next.actionId
+    }
+    expect(selected).toEqual(new Set(['crush', 'lunge', 'slash']))
+  })
+
+  it('reaches every phase-2 kit attack including slam via successor cycling', () => {
+    let previousAttackId: ReturnType<typeof selectBossAttack>['actionId'] | null = null
+    const selected = new Set<string>()
+    for (let cycle = 0; cycle < 4; cycle += 1) {
+      const next = selectBossAttack({
+        healthCurrent: 100,
+        healthMaximum: 420,
+        playerDistance: 1.7,
+        previousAttackId,
+        simulationStep: 0,
+      })
+      selected.add(next.kind)
+      previousAttackId = next.actionId
+    }
+    expect(selected).toEqual(new Set(['crush', 'lunge', 'slash', 'slam']))
+  })
+
+  it('keeps selection independent of render-frame timing', () => {
+    const base = {
+      healthCurrent: 420,
+      healthMaximum: 420,
+      playerDistance: 1.75,
+      previousAttackId: BOSS_SLASH.id,
+    }
+    expect(selectBossAttack({ ...base, simulationStep: 0 })).toEqual(
+      selectBossAttack({ ...base, simulationStep: 1_000_001 }),
+    )
+  })
 })

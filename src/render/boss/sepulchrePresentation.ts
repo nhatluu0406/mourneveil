@@ -16,6 +16,8 @@ export interface SepulchrePresentation {
   readonly attack: SepulchreAttackKind
   readonly phaseTwo: boolean
   readonly committed: boolean
+  /** Startup telegraph only — never implies damage outside the active window. */
+  readonly startupCue: SepulchreAttackKind
   readonly bodyPitch: number
   readonly bodyOffsetZ: number
   readonly weaponPitch: number
@@ -82,10 +84,14 @@ export function resolveSepulchrePresentation(
     }
   }
 
+  const startupCue =
+    committed && input.phase === 'startup' && attack !== null ? attack : null
+
   return {
     attack,
     phaseTwo,
     committed,
+    startupCue,
     bodyPitch: input.alive ? bodyPitch : -0.9,
     bodyOffsetZ,
     weaponPitch,

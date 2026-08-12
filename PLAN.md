@@ -1,55 +1,56 @@
-# PLAN: M11 Boss Vertical Slice — Macro-batch 2 (Visual Production)
+# PLAN: M11 Boss Vertical Slice — Final Hardening + Closure Readiness
 <!-- Live M11 graph only. -->
 
-Input: M11 MB1 gameplay foundation at `67a3d43` | Stack: `STACK.md`
+Input: MB2 ending HEAD `3f7bd1f` (PO visual direction ACCEPTED) | Stack: `STACK.md`
 Task slug: `m11-boss-vertical-slice`
+Agent: Cursor only
 
 ## Goal
 
-Produce one screenshot-worthy Veilbound Sepulchre encounter: unique project-authored boss, readable authored arena, boss-specific presentation, and a calmer combat HUD. Gameplay authority remains unchanged.
+Technical integration hardening, boss-room performance audit/consolidation, camera/occlusion regression, canonical Node/npm verification, and M11 closure readiness. No M12. No speculative art pass.
 
 ## Non-goals
 
-- M11 closure/tag; M12; boss gameplay, phase, attack, contact, damage, save, or camera redesign
-- Third-party assets; generalized particles, animation graphs, lighting managers, or UI frameworks
-- Broad route/actor polish outside the final arena
+- M11 tag/push; M12 implementation
+- Boss art redesign; HUD redesign; second camera system
+- Returning blindly to M10 budgets; triangle chasing
+- Broad route polish outside boss room
 
 ## Steps
 
-- [x] 1. Boss visual contract and modular production candidate
+- [x] 1. Boss gameplay contract + attack reachability proof
   - depends: —
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `src/render/boss/**`, boss branch in `EnemyVisual`, production visual ledger, focused pure presentation tests
-  - verifier: `npx vitest run src/render/boss src/content/assets/productionVisualLedger.test.ts`
-- [x] 2. Funeral prop family and Veilbound Sepulchre arena
+  - owns/allows: `src/game/enemies/bossPolicy*`, focused pure tests; no authority redesign
+  - verifier: `npx vitest run src/game/enemies/bossPolicy.test.ts src/game/enemies/bossFoundation.test.ts`
+- [x] 2. Presentation sync + readability/camera/HUD technical audit
   - depends: 1
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: ADR-0002 object types/registry/geometries/materials/placements, arena-only unique render modules
-  - verifier: `npx vitest run src/render/world src/render/ossuaryEnvironmentLayout.test.ts`
-- [x] 3. Boss VFX and combat-HUD hierarchy
-  - depends: 1, 2
-  - risk: MEDIUM
+  - owns/allows: boss VFX/presentation projection, HUD reads, smallest technical readability fix only if defect proven
+  - verifier: `npx vitest run src/render/boss src/ui && npm run gate:m11-boss-visual`
+- [x] 3. Boss-room performance audit, consolidation, soak, budgets
+  - depends: 2
+  - risk: HIGH
   - isolation: sequential
-  - owns/allows: boss presentation/VFX projection, `GameplayHud`, HUD model/styles; authoritative snapshot reads only
-  - verifier: `npx vitest run src/render src/ui`
-- [x] 4. Deterministic visual acceptance and full regression gate
+  - owns/allows: shared geometry/materials/conditional cue mounts; gate ceilings with safety margin; soak proof
+  - verifier: `npm run gate:m11-boss-visual && npm run gate:m10-perf-baseline`
+- [x] 4. Canonical full M11 closure gate + docs
   - depends: 1, 2, 3
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `gate:m11-boss-visual`, package script, M11 docs/state/REPOMAP
-  - verifier: `npm run gate:m11-boss-foundation && npm run gate:m11-boss-visual && npm run gate:m10-perf-baseline && npm run verify`
+  - owns/allows: HANDOFF, DEBT (evidence-only), current-state, PLAN tick
+  - verifier: focused tests + M11/M10/M9 gates + lifecycle + assets + `npm run verify` + LeanLoop doctor/sync/git_guard
 
 ## Decisions
 
-- Display identity remains **The Veilbound Sepulchre**, a failed funerary containment warden.
-- Boss root consumes existing enemy animation/action/health snapshots; children render only.
-- Phase two opens the reliquary frame and exposes a veil core; HP ratio remains sole authority.
-- Arena render shell and visible light fixtures remain presentation; current zone bounds/colliders are unchanged.
-- Existing M10 camera stays unchanged.
+- Product Owner ACCEPTED MB2 visual direction; no further broad art pass in M11.
+- Canonical verification requires Node 22.x and npm 10.9.x (verified on 22.22.1 / 10.9.2).
+- ~350 boss draw calls are largely justified (full route + fixtures + boss); consolidation targeted mesh/object/material waste.
+- Report `M11 READY FOR PRODUCT OWNER ACCEPTANCE — FINAL` when all acceptance criteria are green.
 
 ## Escalation
 
-- Any required gameplay-authority change stops the batch for review.
 - Same failure 3× → stuck report and escalate.
+- Any required gameplay-authority redesign stops for review.

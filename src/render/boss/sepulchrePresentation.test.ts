@@ -43,4 +43,58 @@ describe('Sepulchre presentation projection', () => {
     expect(pose.bodyPitch).toBeLessThan(-0.5)
     expect(input).toEqual({ ...base, alive: false, healthCurrent: 0 })
   })
+
+  it('shows startup telegraphs only during startup and clears elsewhere', () => {
+    for (const kind of ['slash', 'crush', 'lunge', 'slam'] as const) {
+      const startup = resolveSepulchrePresentation({
+        ...base,
+        actionId: `enemy.boss.${kind}`,
+        phase: 'startup',
+        phaseProgress: 0.4,
+      })
+      expect(startup.startupCue).toBe(kind)
+      expect(startup.impactAccent).toBe(0)
+
+      const active = resolveSepulchrePresentation({
+        ...base,
+        actionId: `enemy.boss.${kind}`,
+        phase: 'active',
+        phaseProgress: 0.5,
+      })
+      expect(active.startupCue).toBeNull()
+      expect(active.impactAccent).toBe(1)
+
+      const recovery = resolveSepulchrePresentation({
+        ...base,
+        actionId: `enemy.boss.${kind}`,
+        phase: 'recovery',
+        phaseProgress: 0.2,
+      })
+      expect(recovery.startupCue).toBeNull()
+      expect(recovery.impactAccent).toBe(0)
+    }
+  })
+
+  it('clears attack cues on idle, interrupt-style idle, and defeat', () => {
+    const interrupted = resolveSepulchrePresentation({
+      ...base,
+      actionId: null,
+      phase: 'idle',
+      phaseProgress: 0,
+      hitReacting: true,
+    })
+    expect(interrupted.startupCue).toBeNull()
+    expect(interrupted.committed).toBe(false)
+
+    const defeated = resolveSepulchrePresentation({
+      ...base,
+      alive: false,
+      healthCurrent: 0,
+      actionId: 'enemy.boss.slash',
+      phase: 'startup',
+      phaseProgress: 0.5,
+    })
+    expect(defeated.startupCue).toBeNull()
+    expect(defeated.defeated).toBe(true)
+  })
 })

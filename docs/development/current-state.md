@@ -3,15 +3,16 @@
 - Updated: 2026-08-12
 - Accepted release pending tag: **M10 Visual Production & Identity** → `v0.10.0-visual-production-identity`
 - Prior accepted: `v0.9.0-combat-depth` (M9)
-- Active task: `m11-boss-vertical-slice` (Macro-batch 2 — visual production complete locally)
+- Active task: `m11-boss-vertical-slice` (final hardening complete; awaiting Product Owner FINAL acceptance)
 
 ## Status
 
-**M10 PRODUCT OWNER ACCEPTED / CLOSED.** M11 now has its authoritative gameplay foundation plus a project-authored Sepulchre boss, readable final arena, boss-specific effects, and compact combat HUD. M11 remains active and untagged pending Product Owner visual review.
+**M10 PRODUCT OWNER ACCEPTED / CLOSED.** M11 boss gameplay + MB2 visuals + final hardening are complete under canonical Node 22 / npm 10.9. M11 remains active and untagged pending Product Owner FINAL acceptance. Do not start M12.
 
 ## What exists
 
 - Connected RPG loop through M9 combat depth and M10 visual production identity
+- Veilbound Sepulchre boss encounter (4 attacks, 2 phases, persistence, boss presentation/HUD)
 - Camera follow damping + camera-near architecture occlusion readability
 - Gate-owned `tmp-m*` cleanup (`KEEP_ARTIFACTS=1` opt-in keep)
 
@@ -23,4 +24,4 @@
 
 ## Next executable work
 
-Product Owner visual review of M11 Macro-batch 2 evidence, then scope only remaining boss-slice blockers; do not start M12.
+Product Owner FINAL acceptance of M11; do not start M12; do not self-tag unless authorized.

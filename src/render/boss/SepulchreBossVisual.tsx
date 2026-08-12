@@ -1,13 +1,26 @@
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { MathUtils, type Group, type Mesh } from 'three'
 import type { GameRuntime } from '../../game/runtime/GameRuntime'
 import { projectEnemyAnimation } from '../animation/enemyAnimationProjection'
 import { createEnemyAttackPresentationSnapshot, localNegativeZFacingYaw } from '../enemyAttackPresentation'
 import { SepulchreBody } from './SepulchreBody'
-import { SepulchreCrushCue, SepulchreDefeatCue, SepulchreLungeCue, SepulchrePhaseCue, SepulchreSlamCue, SepulchreSlashCue } from './SepulchreBossVfx'
+import {
+  SepulchreCrushCue,
+  SepulchreDefeatCue,
+  SepulchreLungeCue,
+  SepulchrePhaseCue,
+  SepulchreSlamCue,
+  SepulchreSlashCue,
+} from './SepulchreBossVfx'
 import { SepulchreWeapon } from './SepulchreWeapon'
-import { resolveSepulchrePresentation } from './sepulchrePresentation'
+import { resolveSepulchrePresentation, type SepulchreAttackKind } from './sepulchrePresentation'
+
+interface BossCueMount {
+  readonly startup: SepulchreAttackKind
+  readonly phasePulse: boolean
+  readonly defeatPulse: boolean
+}
 
 export function SepulchreBossVisual({ runtime, enemyId }: { readonly runtime: GameRuntime; readonly enemyId: string }) {
   const facingRef = useRef<Group>(null)
@@ -26,6 +39,11 @@ export function SepulchreBossVisual({ runtime, enemyId }: { readonly runtime: Ga
   const phasePulse = useRef(0)
   const defeatSeen = useRef(false)
   const defeatPulse = useRef(0)
+  const [cues, setCues] = useState<BossCueMount>({
+    startup: null,
+    phasePulse: false,
+    defeatPulse: false,
+  })
 
   useFrame((_state, delta) => {
     const snapshot = runtime.snapshot()
@@ -66,13 +84,12 @@ export function SepulchreBossVisual({ runtime, enemyId }: { readonly runtime: Ga
     core.scale.setScalar(MathUtils.damp(core.scale.x, 0.35 + presentation.coreExposure * 0.9, 9, delta))
     core.rotation.y += delta * (presentation.phaseTwo ? 2.3 : 0.7)
 
-    const cueVisible = presentation.committed && enemy.action.phase === 'startup'
-    slashRef.current!.visible = cueVisible && presentation.attack === 'slash'
-    crushRef.current!.visible = cueVisible && presentation.attack === 'crush'
-    lungeRef.current!.visible = cueVisible && presentation.attack === 'lunge'
-    slamRef.current!.visible = cueVisible && presentation.attack === 'slam'
-    const cueScale = 0.84 + attackPresentation.phaseProgress * 0.18
-    for (const cue of [slashRef.current, crushRef.current, lungeRef.current, slamRef.current]) cue?.scale.setScalar(cueScale)
+    // Encounter reset / HP restore must clear one-shot presentation latches.
+    if (!presentation.phaseTwo) phaseTwoSeen.current = false
+    if (enemy.alive) {
+      defeatSeen.current = false
+      defeatPulse.current = 0
+    }
 
     if (presentation.phaseTwo && !phaseTwoSeen.current) {
       phaseTwoSeen.current = true
@@ -80,32 +97,55 @@ export function SepulchreBossVisual({ runtime, enemyId }: { readonly runtime: Ga
     }
     phasePulse.current = Math.max(0, phasePulse.current - delta / 2.2)
     if (phaseRef.current !== null) {
-      phaseRef.current.visible = phasePulse.current > 0
       phaseRef.current.rotation.y += delta * 0.8
       phaseRef.current.scale.setScalar(0.75 + (1 - phasePulse.current) * 1.45)
     }
+
     if (presentation.defeated && !defeatSeen.current) {
       defeatSeen.current = true
       defeatPulse.current = 1
     }
     defeatPulse.current = Math.max(0, defeatPulse.current - delta / 2.4)
     if (defeatRef.current !== null) {
-      defeatRef.current.visible = defeatPulse.current > 0
       defeatRef.current.rotation.y += delta * 0.25
       defeatRef.current.scale.setScalar(0.8 + (1 - defeatPulse.current) * 1.6)
     }
+
+    const cueScale = 0.84 + attackPresentation.phaseProgress * 0.18
+    for (const cue of [slashRef.current, crushRef.current, lungeRef.current, slamRef.current]) {
+      cue?.scale.setScalar(cueScale)
+    }
+
+    const nextMount: BossCueMount = {
+      startup: presentation.startupCue,
+      phasePulse: phasePulse.current > 0,
+      defeatPulse: defeatPulse.current > 0,
+    }
+    setCues((prev) =>
+      prev.startup === nextMount.startup &&
+      prev.phasePulse === nextMount.phasePulse &&
+      prev.defeatPulse === nextMount.defeatPulse
+        ? prev
+        : nextMount,
+    )
   })
 
   return (
-    <group ref={facingRef} userData={{ productionAssetId: 'enemy.boss.veilbound-sepulchre', bossPresentation: 'production-candidate' }}>
+    <group
+      ref={facingRef}
+      userData={{
+        productionAssetId: 'enemy.boss.veilbound-sepulchre',
+        bossPresentation: 'production-candidate',
+      }}
+    >
       <SepulchreBody ref={bodyRef} leftPlateRef={leftPlateRef} rightPlateRef={rightPlateRef} coreRef={coreRef} />
       <SepulchreWeapon ref={weaponRef} />
-      <SepulchreSlashCue ref={slashRef} />
-      <SepulchreCrushCue ref={crushRef} />
-      <SepulchreLungeCue ref={lungeRef} />
-      <SepulchreSlamCue ref={slamRef} />
-      <SepulchrePhaseCue ref={phaseRef} />
-      <SepulchreDefeatCue ref={defeatRef} />
+      {cues.startup === 'slash' ? <SepulchreSlashCue ref={slashRef} /> : null}
+      {cues.startup === 'crush' ? <SepulchreCrushCue ref={crushRef} /> : null}
+      {cues.startup === 'lunge' ? <SepulchreLungeCue ref={lungeRef} /> : null}
+      {cues.startup === 'slam' ? <SepulchreSlamCue ref={slamRef} /> : null}
+      {cues.phasePulse ? <SepulchrePhaseCue ref={phaseRef} /> : null}
+      {cues.defeatPulse ? <SepulchreDefeatCue ref={defeatRef} /> : null}
     </group>
   )
 }
