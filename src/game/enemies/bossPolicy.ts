@@ -33,14 +33,14 @@ export function selectBossAttack(input: BossAttackSelectionInput): BossAttackSel
       input.playerDistance <= entry.preferredMaxDistance,
   )
   const pool = inRange.length > 0 ? inRange : candidates
-  const withoutRepeat =
-    input.previousAttackId === null
-      ? pool
-      : pool.filter((entry) => entry.attack.id !== input.previousAttackId)
-  const finalPool = withoutRepeat.length > 0 ? withoutRepeat : pool
-  // Stable pick: rotate by simulation step among sorted kinds for determinism.
-  const ordered = [...finalPool].sort((left, right) => left.kind.localeCompare(right.kind))
-  const index = ((input.simulationStep % ordered.length) + ordered.length) % ordered.length
+  const ordered = [...pool].sort((left, right) => left.kind.localeCompare(right.kind))
+  const previousIndex = ordered.findIndex((entry) => entry.attack.id === input.previousAttackId)
+  // Prefer a stable next candidate after the accepted prior attack. Using only
+  // simulationStep modulo the pool starved lunge when every action duration was even.
+  const index =
+    previousIndex >= 0 && ordered.length > 1
+      ? (previousIndex + 1) % ordered.length
+      : ((input.simulationStep % ordered.length) + ordered.length) % ordered.length
   const chosen = ordered[index]!
   return {
     actionId: chosen.attack.id,

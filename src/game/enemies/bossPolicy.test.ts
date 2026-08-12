@@ -72,4 +72,21 @@ describe('bossPolicy', () => {
     })
     expect(phase2.phase).toBe(2)
   })
+
+  it('does not starve a distance-valid attack across even-duration cycles', () => {
+    let previousAttackId: ReturnType<typeof selectBossAttack>['actionId'] | null = null
+    const selected = []
+    for (const simulationStep of [0, 60, 156, 228, 324, 396]) {
+      const next = selectBossAttack({
+        healthCurrent: 200,
+        healthMaximum: 200,
+        playerDistance: 1.75,
+        previousAttackId,
+        simulationStep,
+      })
+      selected.push(next.kind)
+      previousAttackId = next.actionId
+    }
+    expect(new Set(selected)).toEqual(new Set(['slash', 'crush', 'lunge']))
+  })
 })
