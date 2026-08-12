@@ -16,8 +16,8 @@ This is a directional product roadmap, not an immutable feature contract. Milest
 | **M8** | Production Asset Pipeline — **PRODUCT OWNER ACCEPTED** (`v0.8.0-production-asset-pipeline`) |
 | **M9** | Combat Depth — **PRODUCT OWNER ACCEPTED** (`v0.9.0-combat-depth`) |
 | **M10** | Visual Production & Identity — **PRODUCT OWNER ACCEPTED** (`v0.10.0-visual-production-identity`) |
-| **M11** | Boss Vertical Slice — **ACTIVE** |
-| **M12** | Vertical Slice Alpha acceptance |
+| **M11** | Boss Vertical Slice — **PRODUCT OWNER ACCEPTED** (`v0.11.0-boss-vertical-slice`) |
+| **M12** | Vertical Slice Alpha acceptance — **ACTIVE** |
 
 Directional version targets: `v0.7` animated combat / production-slice progression; `v0.8` vertical-slice alpha.
 
@@ -53,6 +53,7 @@ Versions describe product maturity; milestones describe development work. One ve
 - `v0.8` — production asset pipeline (`v0.8.0-production-asset-pipeline`)
 - `v0.9` — combat depth (`v0.9.0-combat-depth`)
 - `v0.10` — visual production identity (`v0.10.0-visual-production-identity`)
+- `v0.11` — boss vertical slice (`v0.11.0-boss-vertical-slice`)
 - later pre-1.0 versions — vertical-slice alpha and content-beta acceptance trains
 - `v1.0` — first production release
 
