@@ -1,5 +1,11 @@
 # M10 Visual Direction
 
+## M14 item and connected-surface language
+
+M14 gives all eight stable items a distinct funerary glyph. Equipped weapons project three compact silhouettes without changing contact authority: Oathblade is balanced bronze oath-steel, Gravebrand broad grave-iron, and Veil Thorn a narrow hooked spectral blade. Bound acquisition uses contained bronze fragments; Reliquary uses pale veil/old-gold unfolding and calmer luminous chrome.
+
+Every authored route room now sits on a readable dark foundation beneath irregular slabs. Broken edges and pit rims precede void; ledges, plaques, bronze braces, and instanced processional markers connect wall, floor, burial object, and source-light rhythm. Global exposure and the 12-light count remain unchanged. The warmed M14 art envelope is **360 draw calls, 80k triangles, 210 geometries, 16 textures, 14 programs, 550 objects, 330 meshes, 12 lights, and 160 MB heap**; measured evidence was **358 / 33,911 / 197 / 3 / 13 / 540 / 323 / 12 / ~86 MB**, with zero pickup/equip resource growth.
+
 **Identity:** ruined gothic ossuary under veil-light. Mourneveil uses compact heroic and predatory silhouettes against ancient funerary architecture; it does not reproduce any proprietary game design.
 
 ## Visual language

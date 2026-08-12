@@ -26,7 +26,7 @@ This register holds only known cross-milestone limitations that were consciously
 
 - Status: OPEN
 - Observed: M1; still emitted by the M8 production build
-- Limitation: Vite reports the main minified JavaScript chunk at about 3.55 MB, above its 500 kB advisory threshold.
+- Limitation: Vite reports the main minified JavaScript chunk at about 3.69 MB (1.24 MB gzip), above its 500 kB advisory threshold.
 - Why deferred: The local vertical slice builds and runs correctly; measured loading/performance work is scheduled for later maturity rather than speculative code splitting now.
 - Revisit trigger: Performance profiling shows load/runtime impact, or Release Quality packaging/performance work begins.
 - Relevant: `vite.config.ts`, application/render dependency boundaries

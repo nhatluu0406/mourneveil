@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (56L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (54L)
+- PLAN.md (50L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (70L)
+- package.json (71L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -174,7 +174,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - 0002-modular-world-objects.md (42L)
   - **docs/art/** (2 files)
     - m11-boss-visual-handoff.md (95L)
-    - visual-direction.md (43L)
+    - visual-direction.md (49L)
   - **docs/development/** (5 files)
     - agent-routing.md (38L)
     - current-state.md (20L)
@@ -199,7 +199,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (50 files)
+  - **scripts/browser/** (51 files)
     - README.md (18L)
     - gate-m10-camera-occlusion-repro.mjs (101L)
     - gate-m10-camera-stability.mjs (194L)
@@ -212,7 +212,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m12-alpha-slice.mjs (222L)
     - gate-m12-build-choice.mjs (161L)
     - gate-m13-active-skills.mjs (306L)
-    - ... +38 more
+    - ... +39 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main

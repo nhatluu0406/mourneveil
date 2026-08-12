@@ -1,54 +1,50 @@
-# PLAN: M14 Itemization & Loot Depth — Macro-batch 2
+# PLAN: M14 Itemization & Loot Depth — Macro-batch 3
 <!-- Live M14 graph only. -->
 
-Input: Product Owner M14 MB2 loot ecosystem + pacing + UX brief | Stack: `STACK.md`
+Input: Product Owner M14 MB3 art-production brief | Stack: `STACK.md`
 Task slug: `m14-itemization-loot-depth`
-Agent: Cursor only
+Agent: Codex only
 
 ## Goal
 
-Make the authored 8-item ecosystem discoverable and meaningful on the existing playable-alpha route: loot arc, proven weapon/charm tradeoffs, skill/flask composition, functional acquisition/compare/equip UX, save safety — without art polish or M15.
+Deliver one obvious art-only uplift across item identity, equipped weapons, loot feedback, connected floor/void language, practical-light rhythm, and ossuary architecture while preserving all M14 gameplay authority.
 
 ## Non-goals
 
-- New weapon movesets, affixes, procedural rolls, rarity explosion
-- Auto-equip unless already product law
-- Codex art (icons, models, VFX, floors, lighting)
-- Closing/tagging M14
-- M15+
+- Item modifiers, loot order/tables, duplicate rules, equipment rules, skills, combat, save, progression, boss or encounter authority
+- Ninth item, procedural loot, new gameplay regions, global exposure solution
+- M14 closure/tag, M15, push
 
 ## Steps
 
-- [x] 1. Authored first-run loot arc (≥6/8 discoverable) + encounter-clear grants + boss Reliquary close
+- [x] 1. Item and equipment identity
   - depends: —
-  - risk: HIGH
+  - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `src/game/items/loot*.ts`, encounters, GameRuntime spawn/acquire, STACK loot law
-  - verifier: focused loot-table/journey unit tests
-- [x] 2. Composition safety (CD floor/ceiling, flask, skill matrix, equip-during-combat rule) + compare/acquisition UX + threat priority
+  - owns/allows: item glyph projection, player weapon presentation, pickup/equip presentation, acquisition toast styling, focused tests
+  - verifier: focused item/weapon/presentation tests + M14 itemization gate
+- [x] 2. Connected ossuary floor, void, illumination, and architecture pass
   - depends: 1
-  - risk: HIGH
+  - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: itemDefinition/comparison, combat cooldown resolver, GameRuntime equip, UI HUD/inventory, save validation
-  - verifier: focused composition/flask/equip/save tests + HUD threat tests
-- [x] 3. Gates + regressions + art handoff + docs/state
+  - owns/allows: ADR-0002 definitions/placements/geometries/materials/lights, visual-only route composition, focused tests
+  - verifier: route placement tests + camera/occlusion/performance gates + screenshot review
+- [x] 3. Art evidence, full regressions, and durable handoff
   - depends: 2
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `gate:m14-itemization`, `gate:m14-loot-journey`, package.json, HANDOFF/PLAN/current-state/REPOMAP/art handoff
-  - verifier: both M14 gates + M13/M12/M11/lifecycle + `npm run verify`
+  - owns/allows: M14 art gate, package script, visual direction, active HANDOFF/current-state/REPOMAP
+  - verifier: M14/M13/M12 gates + assets/lifecycle + `npm run verify` + LeanLoop checks
 
 ## Locked decisions
 
-- First-run exposes 7 of 8 via authored encounter + clear grants; Mourning Phial is replay/alternate.
-- No Math.random loot; deterministic first-unowned / authored placement only.
-- Cooldown steps clamp to floor 60 / ceiling 360 after equipment delta (base > 0).
-- Equipment swap blocked while player combat action is non-idle (or dead); idle OK.
-- RITE COMPLETE dominates terminal HUD; threat chrome suppressed after slice complete.
-- Boss/rite first reward = Ash Circlet (Reliquary); Mourning Phial is late/alternate sustain.
-- Codex owns one large subsequent art batch from `docs/development/m14-codex-art-handoff.md`.
+- All eight item IDs and all gameplay/save/runtime contracts are immutable for this batch.
+- Equipped weapon visual derives from the existing equipped item snapshot; render geometry never changes reach/contact.
+- World additions are presentation shells over unchanged physics/world authority.
+- Visible fixtures may multiply through shared/instanced assets; actual light count stays bounded and evidence-driven.
+- M14 remains active; Cursor owns final hardening, systems fixes, acceptance, and closure.
 
 ## Escalation
 
+- Any required gameplay/save/loot authority change → stop and report to Cursor.
 - Same failure 3× → stuck report + stop.
-- Need for 9th item or procedural loot → stop for review.
