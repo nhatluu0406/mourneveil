@@ -4,6 +4,11 @@ import {
   PLAYER_HEAVY_ATTACK_ID,
   PLAYER_LIGHT_ATTACK_ID,
 } from '../../game/combat/playerAttackActions'
+import {
+  SKILL_OATH_CLEAVE_ID,
+  SKILL_VEIL_STEP_ID,
+  SKILL_WARD_PULSE_ID,
+} from '../../game/skills/skillDefinition'
 import type { GameRuntimeSnapshot } from '../../game/runtime/GameRuntime'
 import {
   projectAnimationPresentation,
@@ -16,7 +21,7 @@ const HIT_REACTION_STEPS = 12
 
 type PlayerAnimationSource = Pick<
   GameRuntimeSnapshot,
-  'simulation' | 'player' | 'combat' | 'attack' | 'defense' | 'playerHealth' | 'incomingContact'
+  'simulation' | 'player' | 'combat' | 'attack' | 'defense' | 'playerHealth' | 'incomingContact' | 'skills'
 >
 
 export function projectPlayerAnimation(
@@ -30,7 +35,9 @@ export function projectPlayerAnimation(
     committedFacing:
       snapshot.combat.actionId === PLAYER_DODGE_ACTION_ID
         ? snapshot.defense.dodgeDirection
-        : snapshot.attack.executionFacing,
+        : snapshot.combat.actionId === SKILL_VEIL_STEP_ID
+          ? snapshot.skills.repositionDirection
+          : snapshot.attack.executionFacing,
     combat: snapshot.combat,
     committedMode: playerCommittedMode(snapshot.combat.actionId),
     guarding: snapshot.defense.guarding,
@@ -43,10 +50,13 @@ function playerCommittedMode(actionId: string | null): CommittedAnimationMode | 
     case PLAYER_LIGHT_ATTACK_ID:
       return 'light-attack'
     case PLAYER_HEAVY_ATTACK_ID:
+    case SKILL_OATH_CLEAVE_ID:
       return 'heavy-attack'
     case PLAYER_DODGE_ACTION_ID:
+    case SKILL_VEIL_STEP_ID:
       return 'dodge'
     case PLAYER_FLASK_ACTION_ID:
+    case SKILL_WARD_PULSE_ID:
       return 'heal'
     default:
       return null

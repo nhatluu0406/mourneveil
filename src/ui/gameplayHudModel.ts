@@ -6,6 +6,11 @@ import {
 } from '../game/world/connectedLevel'
 import { BOSS_TECHNICAL_ID } from '../game/enemies/bossKit'
 import { getItemDefinition } from '../game/items/itemDefinition'
+import {
+  getSkillDefinition,
+  SKILL_INPUT_BINDING_LABEL,
+  type SkillId,
+} from '../game/skills/skillDefinition'
 
 export type GameplayInteractionPrompt =
   | 'F — Rest'
@@ -29,6 +34,16 @@ export interface EquipmentBarSlot {
   readonly detail: string
   readonly binding: 'LMB' | 'E' | null
   readonly icon: EquipmentBarIcon
+  readonly equipped: boolean
+}
+
+export interface SkillHudSlot {
+  readonly skillId: SkillId | null
+  readonly label: string
+  readonly detail: string
+  readonly binding: typeof SKILL_INPUT_BINDING_LABEL
+  readonly ready: boolean
+  readonly cooldownRatio: number
   readonly equipped: boolean
 }
 
@@ -277,4 +292,26 @@ export function resolveEquipmentBar(snapshot: GameRuntimeSnapshot): readonly Equ
       equipped: snapshot.echoes.carried > 0,
     }),
   ])
+}
+
+/** Compact adjacent skill slot projection — cooldown is simulation-owned. */
+export function resolveSkillHudSlot(snapshot: GameRuntimeSnapshot): SkillHudSlot {
+  const skills = snapshot.skills
+  const definition =
+    skills.equippedSkillId === null ? null : getSkillDefinition(skills.equippedSkillId)
+  return Object.freeze({
+    skillId: skills.equippedSkillId,
+    label: definition?.displayName ?? 'No Oath Bound',
+    detail: skills.ready
+      ? 'Ready'
+      : skills.cooldownRemainingSteps > 0
+        ? `Cooldown ${skills.cooldownRemainingSteps}`
+        : skills.actionPhase !== 'idle'
+          ? 'Active'
+          : 'Unavailable',
+    binding: SKILL_INPUT_BINDING_LABEL,
+    ready: skills.ready,
+    cooldownRatio: skills.cooldownRatio,
+    equipped: skills.equippedSkillId !== null,
+  })
 }

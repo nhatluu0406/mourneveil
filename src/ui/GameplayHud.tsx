@@ -10,6 +10,7 @@ import {
   resolveProgressionToast,
   resolveGameplayInteractionPrompt,
   resolveEquipmentBar,
+  resolveSkillHudSlot,
   resolveNearestThreat,
   resolveZoneHudCopy,
   threatSubtitle,
@@ -18,6 +19,7 @@ import {
 import { UI_COMPACT_HINTS } from './uiTheme'
 import { ItemGlyph } from './ItemGlyph'
 import { ProgressionGlyph } from './ProgressionGlyph'
+import { SkillGlyph } from './SkillGlyph'
 
 interface GameplayHudProps {
   readonly snapshot: GameRuntimeSnapshot
@@ -58,6 +60,7 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
   const sliceComplete = isVerticalSliceComplete(snapshot)
   const zone = resolveZoneHudCopy(snapshot.world.currentZoneId, snapshot)
   const equipmentBar = resolveEquipmentBar(snapshot)
+  const skillSlot = resolveSkillHudSlot(snapshot)
   const acquisition = resolveAcquisitionToast(snapshot)
   const progressionToast = resolveProgressionToast(snapshot)
   const [toastStep, setToastStep] = useState<number | null>(null)
@@ -247,15 +250,38 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
         ) : null}
         {!health.alive ? <div className="gameplay-hud__death">Fallen</div> : null}
 
-        <ul className="gameplay-hud__equipment-bar" aria-label="Equipped items and resources">
-          {equipmentBar.map((slot) => (
-            <li key={slot.id} className={`gameplay-hud__equipment-slot${slot.equipped ? ' is-equipped' : ' is-empty'}`} data-slot-id={slot.id}>
-              <span className={`gameplay-hud__item-glyph gameplay-hud__item-glyph--${slot.icon}`}><ItemGlyph icon={slot.icon} /></span>
-              <span className="gameplay-hud__item-copy"><strong>{slot.label}</strong><small>{slot.detail}</small></span>
-              {slot.binding === null ? null : <kbd>{slot.binding}</kbd>}
-            </li>
-          ))}
-        </ul>
+        <div className="gameplay-hud__loadout-row">
+          <ul className="gameplay-hud__equipment-bar" aria-label="Equipped items and resources">
+            {equipmentBar.map((slot) => (
+              <li key={slot.id} className={`gameplay-hud__equipment-slot${slot.equipped ? ' is-equipped' : ' is-empty'}`} data-slot-id={slot.id}>
+                <span className={`gameplay-hud__item-glyph gameplay-hud__item-glyph--${slot.icon}`}><ItemGlyph icon={slot.icon} /></span>
+                <span className="gameplay-hud__item-copy"><strong>{slot.label}</strong><small>{slot.detail}</small></span>
+                {slot.binding === null ? null : <kbd>{slot.binding}</kbd>}
+              </li>
+            ))}
+          </ul>
+          <div
+            className={`gameplay-hud__skill-slot${skillSlot.ready ? ' is-ready' : ' is-cooling'}${skillSlot.equipped ? '' : ' is-empty'}`}
+            data-skill-slot="1"
+            data-skill-id={skillSlot.skillId ?? 'none'}
+            data-skill-ready={skillSlot.ready ? '1' : '0'}
+            aria-label="Equipped active skill"
+          >
+            <span className="gameplay-hud__skill-glyph">
+              <SkillGlyph id={skillSlot.skillId ?? 'empty'} />
+              <span
+                className="gameplay-hud__skill-cooldown"
+                style={{ transform: `scaleY(${skillSlot.cooldownRatio})` }}
+                aria-hidden="true"
+              />
+            </span>
+            <span className="gameplay-hud__item-copy">
+              <strong>{skillSlot.label}</strong>
+              <small>{skillSlot.detail}</small>
+            </span>
+            <kbd>{skillSlot.binding}</kbd>
+          </div>
+        </div>
         <ul className="gameplay-hud__control-hints" aria-label="Control hints">
           {UI_COMPACT_HINTS.map((hint) => <li key={hint.id}><kbd>{hint.binding}</kbd><span>{hint.label}</span></li>)}
         </ul>

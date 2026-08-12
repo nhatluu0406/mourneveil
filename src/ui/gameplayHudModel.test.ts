@@ -3,6 +3,7 @@ import { GameRuntime } from '../game/runtime/GameRuntime'
 import {
   equippedWeaponLabel,
   resolveEquipmentBar,
+  resolveSkillHudSlot,
   resolveGameplayInteractionPrompt,
   resolveNearestThreat,
   resolveZoneHudCopy,
@@ -75,6 +76,19 @@ describe('cinematic HUD projection helpers', () => {
     })
     expect(slots.find((slot) => slot.id === 'weapon')?.binding).toBe('LMB')
     expect(slots.every((slot) => !['Dodge', 'Interact', 'Inventory'].includes(slot.label))).toBe(true)
+  })
+
+  it('projects equipped skill HUD slot with Q binding and ready state', () => {
+    const runtime = new GameRuntime()
+    const slot = resolveSkillHudSlot(runtime.snapshot())
+    expect(slot).toMatchObject({
+      skillId: 'skill.veil-step',
+      label: 'Veil Step',
+      binding: 'Q',
+      ready: true,
+      cooldownRatio: 0,
+      equipped: true,
+    })
   })
 
   it('projects distinct authored charm identities from canonical equipment state', () => {

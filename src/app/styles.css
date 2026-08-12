@@ -886,66 +886,125 @@ body {
 }
 
 /* M13 progression/build presentation: authoritative facts, funerary icon language. */
-.inventory-panel--build { width: min(64rem, calc(100vw - 3rem)); max-height: min(48rem, calc(100% - 3rem)); }
-.progression-summary { display: grid; grid-template-columns: 8rem minmax(15rem, 1fr) 8rem; align-items: stretch; gap: 0.65rem; padding: 0.7rem; border-block: 1px solid rgb(181 151 101 / 24%); background: radial-gradient(circle at 50% 120%, rgb(89 156 151 / 11%), transparent 58%); }
+.inventory-panel--build {
+  display: flex;
+  flex-direction: column;
+  width: min(64rem, calc(100vw - 3rem));
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+  padding: 0.85rem 1rem 0.9rem;
+}
+.inventory-panel--build .inventory-panel__header { margin-bottom: 0.35rem; }
+.inventory-panel--build h2 { font-size: 1.35rem; }
+.inventory-panel__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 0;
+  overflow: hidden;
+}
+.progression-summary { display: grid; grid-template-columns: 7rem minmax(12rem, 1fr) 7rem; align-items: stretch; gap: 0.45rem; padding: 0.45rem 0.55rem; border-block: 1px solid rgb(181 151 101 / 24%); background: radial-gradient(circle at 50% 120%, rgb(89 156 151 / 11%), transparent 58%); }
 .progression-summary__level,
-.progression-summary__points { display: grid; grid-template-columns: 2.2rem 1fr; align-items: center; padding: 0.45rem 0.55rem; border: 1px solid rgb(181 151 101 / 20%); background: rgb(0 0 0 / 20%); }
+.progression-summary__points { display: grid; grid-template-columns: 2rem 1fr; align-items: center; padding: 0.3rem 0.4rem; border: 1px solid rgb(181 151 101 / 20%); background: rgb(0 0 0 / 20%); }
 .progression-summary svg,
 .progression-attribute svg,
 .inventory-item-glyph svg,
 .gameplay-hud__level svg,
-.gameplay-hud__progression-toast svg { fill: rgb(0 0 0 / 10%); stroke: currentColor; stroke-width: 1.7; }
+.gameplay-hud__progression-toast svg,
+.gameplay-hud__skill-glyph svg { fill: rgb(0 0 0 / 10%); stroke: currentColor; stroke-width: 1.7; }
 .progression-summary__level svg,
-.progression-summary__points svg { width: 1.9rem; height: 1.9rem; grid-row: span 2; color: #a9d4cd; }
+.progression-summary__points svg { width: 1.55rem; height: 1.55rem; grid-row: span 2; color: #a9d4cd; }
 .progression-summary__level span,
-.progression-summary__points span { color: rgb(205 198 181 / 52%); font-size: 0.57rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.progression-summary__points span { color: rgb(205 198 181 / 52%); font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .progression-summary__level strong,
-.progression-summary__points strong { color: #eee4d1; font: 600 1.25rem var(--ui-display); }
+.progression-summary__points strong { color: #eee4d1; font: 600 1.05rem var(--ui-display); }
 .progression-summary__points.has-points { border-color: rgb(207 167 87 / 62%); box-shadow: inset 0 0 1.2rem rgb(166 104 41 / 14%); }
 .progression-summary__points.has-points svg { color: #d7a95b; }
-.progression-summary__xp { display: grid; align-content: center; gap: 0.45rem; }
-.progression-summary__xp > div:first-child { display: flex; justify-content: space-between; color: rgb(207 202 188 / 62%); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.progression-summary__xp { display: grid; align-content: center; gap: 0.3rem; }
+.progression-summary__xp > div:first-child { display: flex; justify-content: space-between; color: rgb(207 202 188 / 62%); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .progression-summary__xp strong { color: #d7c28e; }
-.progression-summary__track { height: 0.34rem; overflow: hidden; border: 1px solid rgb(141 191 186 / 24%); background: rgb(0 0 0 / 42%); }
+.progression-summary__track { height: 0.28rem; overflow: hidden; border: 1px solid rgb(141 191 186 / 24%); background: rgb(0 0 0 / 42%); }
 .progression-summary__track span { display: block; height: 100%; background: linear-gradient(90deg, #4d7f7b, #9cded5 60%, #d3af67); box-shadow: 0 0 0.7rem rgb(109 210 199 / 36%); }
-.inventory-panel__columns { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(16rem, 0.75fr); gap: 0.9rem; }
-.progression-attribute { position: relative; display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) 2rem 2rem; align-items: center; gap: 0.55rem; min-height: 4.7rem; margin-bottom: 0.45rem; padding: 0.5rem 0.6rem; overflow: hidden; border: 1px solid rgb(255 255 255 / 8%); background: linear-gradient(100deg, rgb(22 21 20 / 86%), rgb(5 9 10 / 75%)); }
+.inventory-panel__columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(17rem, 0.85fr); gap: 0.65rem; min-height: 0; }
+.inventory-panel__side { display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; }
+.progression-attribute { position: relative; display: grid; grid-template-columns: 2.8rem minmax(0, 1fr) 1.7rem 1.7rem; align-items: center; gap: 0.4rem; min-height: 3.4rem; margin-bottom: 0.3rem; padding: 0.35rem 0.45rem; overflow: hidden; border: 1px solid rgb(255 255 255 / 8%); background: linear-gradient(100deg, rgb(22 21 20 / 86%), rgb(5 9 10 / 75%)); }
 .progression-attribute::before { position: absolute; inset: 0 auto 0 0; width: 0.2rem; content: ''; background: currentColor; box-shadow: 0 0 1rem currentColor; }
 .progression-attribute--vitality { color: #c76d5d; }
 .progression-attribute--resolve { color: #9fc6b7; }
 .progression-attribute--might { color: #c99b57; }
-.progression-attribute__glyph { display: grid; width: 3rem; height: 3rem; place-items: center; border: 1px solid currentColor; background: rgb(0 0 0 / 24%); }
-.progression-attribute__glyph svg { width: 2.25rem; height: 2.25rem; }
+.progression-attribute__glyph { display: grid; width: 2.4rem; height: 2.4rem; place-items: center; border: 1px solid currentColor; background: rgb(0 0 0 / 24%); }
+.progression-attribute__glyph svg { width: 1.7rem; height: 1.7rem; }
 .progression-attribute__copy { min-width: 0; }
-.progression-attribute__copy > span { display: block; overflow: hidden; color: rgb(218 211 197 / 44%); font-size: 0.52rem; letter-spacing: 0.08em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
-.progression-attribute__copy strong { display: block; color: #eee4d3; font: 600 1rem var(--ui-display); letter-spacing: 0.05em; }
-.progression-attribute__copy small { color: currentColor; font-size: 0.61rem; }
-.progression-attribute__rank { color: #eee4d3; font: 600 1.2rem var(--ui-display); text-align: center; }
-.progression-attribute button { width: 1.9rem; height: 1.9rem; padding: 0; border-color: currentColor; color: currentColor; font-size: 1.1rem; }
+.progression-attribute__copy > span { display: block; overflow: hidden; color: rgb(218 211 197 / 44%); font-size: 0.48rem; letter-spacing: 0.08em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.progression-attribute__copy strong { display: block; color: #eee4d3; font: 600 0.9rem var(--ui-display); letter-spacing: 0.05em; }
+.progression-attribute__copy small { color: currentColor; font-size: 0.55rem; }
+.progression-attribute__rank { color: #eee4d3; font: 600 1.05rem var(--ui-display); text-align: center; }
+.progression-attribute button { width: 1.6rem; height: 1.6rem; padding: 0; border-color: currentColor; color: currentColor; font-size: 1rem; }
 .progression-attribute button:disabled { cursor: not-allowed; opacity: 0.22; }
-.progression-resolved { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.6rem; padding: 0.55rem 0.7rem; border-top: 1px solid rgb(181 151 101 / 24%); color: rgb(213 204 187 / 55%); font-size: 0.6rem; text-transform: uppercase; }
+.progression-resolved { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.5rem; padding: 0.4rem 0.55rem; border-top: 1px solid rgb(181 151 101 / 24%); color: rgb(213 204 187 / 55%); font-size: 0.55rem; text-transform: uppercase; }
 .progression-resolved strong { color: #e0d5c1; }
 .progression-resolved small { grid-column: 1 / -1; color: #b99d69; text-align: right; }
 .inventory-equipped-card,
-.inventory-item-card { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr) auto; align-items: center; gap: 0.55rem; margin-bottom: 0.45rem; padding: 0.5rem; border: 1px solid rgb(255 255 255 / 8%); background: rgb(0 0 0 / 18%); }
-.inventory-equipped-card.is-equipped { border-color: rgb(181 151 101 / 32%); background: radial-gradient(circle at 10% 50%, rgb(152 118 60 / 10%), transparent 58%); }
-.inventory-item-glyph { display: grid; width: 3rem; height: 3rem; place-items: center; color: #c5b279; border: 1px solid rgb(187 159 105 / 25%); background: radial-gradient(circle, rgb(73 122 117 / 14%), transparent 68%); }
-.inventory-item-glyph svg { width: 2.25rem; height: 2.25rem; }
+.inventory-item-card,
+.inventory-skill-card { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem; padding: 0.35rem 0.4rem; border: 1px solid rgb(255 255 255 / 8%); background: rgb(0 0 0 / 18%); }
+.inventory-equipped-card.is-equipped,
+.inventory-skill-card.is-equipped { border-color: rgb(181 151 101 / 32%); background: radial-gradient(circle at 10% 50%, rgb(152 118 60 / 10%), transparent 58%); }
+.inventory-item-glyph { display: grid; width: 2.35rem; height: 2.35rem; place-items: center; color: #c5b279; border: 1px solid rgb(187 159 105 / 25%); background: radial-gradient(circle, rgb(73 122 117 / 14%), transparent 68%); }
+.inventory-item-glyph svg { width: 1.7rem; height: 1.7rem; }
 .inventory-item-card--vitality-charm .inventory-item-glyph { color: #c76d5d; }
 .inventory-item-card--ward-seal .inventory-item-glyph { color: #9fc6b7; }
 .inventory-equipped-card > div > span,
-.inventory-item-card__copy > span { display: block; color: rgb(207 200 184 / 42%); font-size: 0.52rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.inventory-item-card__copy > span,
+.inventory-skill-card > div > span,
+.inventory-skills__equipped > div > span { display: block; color: rgb(207 200 184 / 42%); font-size: 0.48rem; letter-spacing: 0.1em; text-transform: uppercase; }
 .inventory-equipped-card > div > strong,
-.inventory-item-card__copy > strong { display: block; color: #e9dfcd; font: 550 0.82rem var(--ui-display); }
+.inventory-item-card__copy > strong,
+.inventory-skill-card > div > strong,
+.inventory-skills__equipped > div > strong { display: block; color: #e9dfcd; font: 550 0.76rem var(--ui-display); }
 .inventory-equipped-card small,
-.inventory-item-card__copy small { display: block; color: rgb(207 196 175 / 58%); font-size: 0.59rem; }
-.inventory-owned ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
+.inventory-item-card__copy small,
+.inventory-skill-card > div > small,
+.inventory-skills__equipped > div > small { display: block; color: rgb(207 196 175 / 58%); font-size: 0.54rem; }
+.inventory-skills h3 { display: flex; align-items: center; gap: 0.45rem; }
+.inventory-skills h3 kbd { padding: 0.08rem 0.28rem; color: #d7c28e; border: 1px solid rgb(181 151 101 / 35%); font-size: 0.58rem; }
+.inventory-skills__equipped { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 0.4rem; align-items: center; margin-bottom: 0.35rem; padding: 0.35rem 0.4rem; border: 1px solid rgb(141 191 186 / 24%); background: rgb(0 0 0 / 22%); }
+.inventory-skills ul { display: grid; gap: 0.28rem; margin: 0; padding: 0; list-style: none; }
+.inventory-skill-card.is-locked { opacity: 0.55; }
+.inventory-skill-card button:disabled { cursor: not-allowed; opacity: 0.35; }
+.inventory-owned { min-height: 0; overflow: hidden; }
+.inventory-owned ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem; }
 .inventory-item-card { margin: 0; }
 .inventory-item-card.is-equipped::after { align-self: start; content: 'BOUND'; color: #a9cfc5; font-size: 0.48rem; letter-spacing: 0.12em; }
 .inventory-item-card__comparison { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.3rem; }
 .inventory-item-card__comparison em { padding: 0.08rem 0.28rem; font-size: 0.54rem; font-style: normal; }
 .inventory-item-card__comparison .is-gain { color: #96c7a8; background: rgb(75 131 93 / 14%); }
 .inventory-item-card__comparison .is-loss { color: #d17b69; background: rgb(145 67 54 / 14%); }
+.gameplay-hud__loadout-row { display: flex; align-items: stretch; gap: 0.45rem; width: min(46rem, calc(100vw - 2rem)); }
+.gameplay-hud__loadout-row .gameplay-hud__equipment-bar { width: auto; flex: 1 1 auto; }
+.gameplay-hud__skill-slot {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 9.5rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid rgb(141 191 186 / 28%);
+  background: rgb(0 0 0 / 42%);
+}
+.gameplay-hud__skill-slot.is-ready { border-color: rgb(154 214 204 / 48%); }
+.gameplay-hud__skill-slot.is-cooling { border-color: rgb(181 151 101 / 28%); }
+.gameplay-hud__skill-glyph { position: relative; display: grid; width: 2.1rem; height: 2.3rem; place-items: center; overflow: hidden; color: #9ed0c7; border: 1px solid rgb(141 191 186 / 30%); }
+.gameplay-hud__skill-glyph svg { width: 1.55rem; height: 1.55rem; }
+.gameplay-hud__skill-cooldown {
+  position: absolute;
+  inset: auto 0 0;
+  height: 100%;
+  transform-origin: bottom;
+  background: rgb(0 0 0 / 55%);
+  pointer-events: none;
+}
 .gameplay-hud__level { display: grid; grid-template-columns: 1.45rem auto auto; align-items: center; gap: 0.22rem; color: #a9d4cd; }
 .gameplay-hud__level svg { width: 1.35rem; height: 1.35rem; }
 .gameplay-hud__level span { color: rgb(218 210 194 / 52%); font-size: 0.48rem; letter-spacing: 0.08em; }
@@ -960,10 +1019,35 @@ body {
 .gameplay-hud__item-glyph--ward-seal svg { stroke: #9fc6b7; }
 
 @media (max-width: 900px) {
-  .inventory-panel--build { width: calc(100vw - 1rem); max-height: calc(100% - 1rem); padding: 0.75rem; }
+  .inventory-panel--build { width: calc(100vw - 1rem); max-height: calc(100vh - 1rem); padding: 0.65rem; }
   .progression-summary { grid-template-columns: 5rem minmax(8rem, 1fr) 5rem; }
   .inventory-panel__columns,
   .inventory-owned ul { grid-template-columns: 1fr; }
+}
+
+/* Compact height / 1280×720: themed internal scroll on owned relics only. */
+@media (max-height: 760px), (max-width: 1280px) {
+  .inventory-owned {
+    max-height: 7.5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 0.2rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(141 191 186 / 35%) rgb(0 0 0 / 25%);
+  }
+  .inventory-owned::-webkit-scrollbar { width: 0.35rem; }
+  .inventory-owned::-webkit-scrollbar-track { background: rgb(0 0 0 / 25%); }
+  .inventory-owned::-webkit-scrollbar-thumb {
+    border-radius: 0.2rem;
+    background: linear-gradient(180deg, rgb(109 168 162 / 45%), rgb(181 151 101 / 40%));
+  }
+}
+
+@media (min-width: 1281px) and (min-height: 861px) {
+  .inventory-panel--build,
+  .inventory-owned {
+    overflow: hidden;
+  }
 }
 
 @media (max-width: 720px) {
