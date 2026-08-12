@@ -1,7 +1,8 @@
 import {
+  ZERO_ITEM_MODIFIERS,
   getItemDefinition,
   requireItemDefinition,
-  ZERO_ITEM_MODIFIERS,
+  sumItemModifiers,
   type EquipSlot,
   type ItemGameplayModifiers,
   type ItemId,
@@ -72,13 +73,7 @@ export class PlayerEquipmentRuntime {
       this.charmItemId === null
         ? ZERO_ITEM_MODIFIERS
         : requireItemDefinition(this.charmItemId).modifiers
-    return {
-      lightDamageBonus: weapon.lightDamageBonus + charm.lightDamageBonus,
-      heavyDamageBonus: weapon.heavyDamageBonus + charm.heavyDamageBonus,
-      maxHealthBonus: weapon.maxHealthBonus + charm.maxHealthBonus,
-      guardImpactThresholdBonus:
-        weapon.guardImpactThresholdBonus + charm.guardImpactThresholdBonus,
-    }
+    return sumItemModifiers(weapon, charm)
   }
 
   snapshot(): EquipmentSnapshot {

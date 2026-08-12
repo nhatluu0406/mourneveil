@@ -166,8 +166,13 @@ await runOwnedBrowserGate({
       for (let step = 0; step < 20; step += 1) g.advance(1)
       g.defeatEnemy('enemy.boss.sepulchre.1')
       for (let step = 0; step < 12; step += 1) g.advance(1)
+      const loot = g.snapshot().lootPickup
+      if (loot.active && loot.position) {
+        g.setPlayerPosition(loot.position)
+        for (let step = 0; step < 10; step += 1) g.advance(1)
+      }
     })
-    await soak(page, 400)
+    await soak(page, 900)
     state = await page.evaluate(() => window.__MOURNEVEIL_GATE__.snapshot())
     const hud = await page.evaluate(() => ({
       sliceComplete: document.querySelector('[data-slice-complete="1"]') !== null,

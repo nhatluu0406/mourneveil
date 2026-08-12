@@ -115,7 +115,11 @@ import {
   type EchoesSnapshot,
 } from '../character/playerCurrency'
 import type { EquipSlot, ItemId } from '../items/itemDefinition'
-import { getItemDefinition } from '../items/itemDefinition'
+import {
+  effectiveActiveSkillCooldownSteps,
+  getItemDefinition,
+  requireItemDefinition,
+} from '../items/itemDefinition'
 import {
   PlayerInventoryRuntime,
   type InventorySnapshot,
@@ -130,6 +134,11 @@ import {
   LootPickupRuntime,
   type LootPickupSnapshot,
 } from '../items/lootPickup'
+import { resolveLootTable } from '../items/lootTables'
+import {
+  compareItemToEquipped,
+  type ItemComparisonView,
+} from '../items/itemComparison'
 import {
   createDefaultSaveV4,
   type SaveFileV4,
@@ -142,6 +151,7 @@ import {
 import { resolvePlayerCombatStats } from '../character/playerStatResolution'
 import {
   getSkillDefinition,
+  isSkillId,
   skillCombatActions,
   SKILL_OATH_CLEAVE_ID,
   SKILL_WARD_PULSE,
@@ -171,6 +181,14 @@ import {
 export const SKIRMISHER_LOOT_ITEM_ID = 'item.weapon.oathblade' as const
 export const BRUTE_LOOT_ITEM_ID = 'item.charm.vitality' as const
 export const PRESSURE_LOOT_ITEM_ID = 'item.charm.ward-seal' as const
+export const BOSS_LOOT_ITEM_ID = 'item.charm.ash-circlet' as const
+
+export interface LootAcquisitionCue {
+  readonly kind: 'item' | 'echoes'
+  readonly itemId: ItemId | null
+  readonly echoesGained: number
+  readonly simulationStep: number
+}
 
 export interface GameRuntimeSnapshot {
   readonly simulation: SimulationTimeSnapshot
@@ -198,10 +216,7 @@ export interface GameRuntimeSnapshot {
   readonly equipment: EquipmentSnapshot
   readonly lootPickup: LootPickupSnapshot
   /** Presentation-only last acquisition cue; not persisted. */
-  readonly lastLootAcquisition: {
-    readonly itemId: ItemId
-    readonly simulationStep: number
-  } | null
+  readonly lastLootAcquisition: LootAcquisitionCue | null
   /** Presentation-only progression feedback; not persisted. */
   readonly lastProgressionFeedback: {
     readonly experienceGained: number
@@ -277,13 +292,24 @@ export class GameRuntime {
   private attackExecutionFacing: PlayerFacingDirection | null = null
   private movementOverride: PlayerMovementIntent | null = null
   private persistHandler: (() => void) | null = null
-  private lastLootAcquisition: { itemId: ItemId; simulationStep: number } | null = null
+  private lastLootAcquisition: LootAcquisitionCue | null = null
   private lastProgressionFeedback: {
     experienceGained: number
     levelsGained: number
     pointsGained: number
     simulationStep: number
   } | null = null
+
+  constructor() {
+    this.combatRuntime.setCooldownStepResolver((actionId, baseSteps) => {
+      if (!isSkillId(actionId)) return baseSteps
+      return effectiveActiveSkillCooldownSteps(
+        baseSteps,
+        this.equipmentRuntime.resolvedModifiers(),
+      )
+    })
+    this.syncResolvedCombatStats()
+  }
 
   setPersistHandler(handler: (() => void) | null): void {
     this.persistHandler = handler
@@ -597,6 +623,20 @@ export class GameRuntime {
     this.spawnLootForDefeatedEnemies()
   }
 
+  /** Development/gate: grant an authored item once without world pickup. */
+  debugGrantItem(itemId: ItemId): void {
+    requireItemDefinition(itemId)
+    if (!this.inventoryRuntime.has(itemId)) {
+      this.inventoryRuntime.add(itemId)
+      this.markPersistentChange()
+    }
+  }
+
+  /** Development/gate: run acquisition policy (unique duplicate → Echoes). */
+  debugAcquireItem(itemId: ItemId): void {
+    this.acquireAuthoredItem(itemId, this.clock.snapshot().stepCount)
+  }
+
   /** Development/gate helper: place the living player at an authored graybox position. */
   debugSetPlayerPosition(position: { readonly x: number; readonly y: number; readonly z: number }): void {
     if (!this.playerHealthRuntime.snapshot().health.alive) return
@@ -637,6 +677,12 @@ export class GameRuntime {
       this.markPersistentChange()
     }
     return result
+  }
+
+  /** Canonical equipped-vs-candidate comparison for UI/gates. */
+  compareItem(itemId: ItemId): ItemComparisonView | null {
+    const equipment = this.equipmentRuntime.snapshot()
+    return compareItemToEquipped(itemId, equipment.weaponItemId, equipment.charmItemId)
   }
 
   allocateProgression(attribute: string): AllocateProgressionResult {
@@ -893,12 +939,7 @@ export class GameRuntime {
         }
         const loot = this.lootPickupRuntime.tryPickup(this.playerState.position, true)
         if (loot.accepted) {
-          this.inventoryRuntime.add(loot.itemId)
-          this.lastLootAcquisition = {
-            itemId: loot.itemId,
-            simulationStep: nextStepCount,
-          }
-          this.markPersistentChange()
+          this.acquireAuthoredItem(loot.itemId, nextStepCount)
         }
       }
       const localObstacles = this.localObstacleFootprints()
@@ -1210,12 +1251,14 @@ export class GameRuntime {
   }
 
   private syncResolvedCombatStats(): void {
+    const equipment = this.equipmentRuntime.resolvedModifiers()
     const resolved = resolvePlayerCombatStats(
       this.progressionRuntime.durable().allocation,
-      this.equipmentRuntime.resolvedModifiers(),
+      equipment,
     )
     this.playerHealthRuntime.setMaximumHealthBonus(resolved.maximumHealthBonus)
     this.defenseRuntime.setGuardImpactThreshold(resolved.guardImpactThreshold)
+    this.flaskRuntime.setHealBonus(equipment.flaskHealBonus)
   }
 
   private resolvedProgressionContributions(): GameRuntimeSnapshot['resolvedProgressionContributions'] {
@@ -1231,21 +1274,62 @@ export class GameRuntime {
     }
   }
 
+  private ownedItemIdSet(): Set<ItemId> {
+    return new Set(this.inventoryRuntime.snapshot().entries.map((entry) => entry.itemId))
+  }
+
+  private acquireAuthoredItem(itemId: ItemId, simulationStep: number): void {
+    const definition = requireItemDefinition(itemId)
+    if (definition.unique && this.inventoryRuntime.has(itemId)) {
+      this.echoesRuntime.add(definition.duplicateEchoReward)
+      this.lastLootAcquisition = {
+        kind: 'echoes',
+        itemId,
+        echoesGained: definition.duplicateEchoReward,
+        simulationStep,
+      }
+    } else {
+      this.inventoryRuntime.add(itemId)
+      this.lastLootAcquisition = {
+        kind: 'item',
+        itemId,
+        echoesGained: 0,
+        simulationStep,
+      }
+    }
+    this.markPersistentChange()
+  }
+
   private spawnLootForDefeatedEnemies(): void {
+    const owned = this.ownedItemIdSet()
     for (const enemy of this.enemyRuntimes) {
       const snapshot = enemy.snapshot()
       if (snapshot.alive) continue
-      const itemId = connectedEnemyPlacementByRuntimeId(enemy.id)?.lootItemId ?? null
-      if (itemId === null) continue
+      const tableId = connectedEnemyPlacementByRuntimeId(enemy.id)?.lootTableId ?? null
+      if (tableId === null) continue
+      const resolution = resolveLootTable(tableId, owned)
+      if (resolution.kind === 'echoes') {
+        if (!this.lootPickupRuntime.rememberEnemySpawn(enemy.id)) continue
+        this.echoesRuntime.add(resolution.amount)
+        this.lastLootAcquisition = {
+          kind: 'echoes',
+          itemId: null,
+          echoesGained: resolution.amount,
+          simulationStep: this.clock.snapshot().stepCount,
+        }
+        this.markPersistentChange()
+        continue
+      }
       this.lootInstanceCounter += 1
       if (
         this.lootPickupRuntime.spawnFromEnemy(
           enemy.id,
-          itemId,
+          resolution.itemId,
           snapshot.position,
           `loot.${enemy.id}.${this.lootInstanceCounter}`,
         )
       ) {
+        owned.add(resolution.itemId)
         this.markPersistentChange()
       }
     }

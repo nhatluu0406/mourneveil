@@ -67,7 +67,7 @@ describe('loot inventory and equipment', () => {
       { itemId: SKIRMISHER_LOOT_ITEM_ID, quantity: 1 },
     ])
 
-    expect(runtime.equipItem('item.weapon.practice-edge')).toEqual({
+    expect(runtime.equipItem('item.weapon.veil-thorn')).toEqual({
       accepted: false,
       reason: 'not-owned',
     })

@@ -54,12 +54,12 @@ export class PlayerHealthRuntime {
   }
 
   /**
-   * Charm/equipment max-health bonus. Current health clamps into the new maximum;
-   * dead actors stay dead until an explicit restore/respawn.
+   * Charm/equipment max-health bonus (may be negative for authored tradeoffs).
+   * Current health clamps into the new maximum; dead actors stay dead until restore/respawn.
    */
   setMaximumHealthBonus(bonus: number): void {
-    if (!Number.isInteger(bonus) || bonus < 0) {
-      throw new RangeError('Maximum health bonus must be a non-negative integer')
+    if (!Number.isInteger(bonus)) {
+      throw new RangeError('Maximum health bonus must be an integer')
     }
     this.maximumHealthBonus = bonus
     const maximum = this.resolvedMaximumHealth()
@@ -80,7 +80,7 @@ export class PlayerHealthRuntime {
   }
 
   resolvedMaximumHealth(): number {
-    return this.baseMaximumHealth + this.maximumHealthBonus
+    return Math.max(1, this.baseMaximumHealth + this.maximumHealthBonus)
   }
 
   snapshot(): PlayerHealthSnapshot {

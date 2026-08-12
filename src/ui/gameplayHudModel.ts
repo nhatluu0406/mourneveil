@@ -129,6 +129,20 @@ export function resolveAcquisitionToast(
 ): AcquisitionToastCopy | null {
   const acquisition = snapshot.lastLootAcquisition
   if (acquisition === null) return null
+  if (acquisition.kind === 'echoes') {
+    const name =
+      acquisition.itemId === null
+        ? null
+        : getItemDefinition(acquisition.itemId)?.displayName ?? null
+    return {
+      title: name === null ? `Echoes +${acquisition.echoesGained}` : `Duplicate ${name}`,
+      detail:
+        name === null
+          ? 'Authored loot pool already claimed'
+          : `Already owned · +${acquisition.echoesGained} Echoes`,
+    }
+  }
+  if (acquisition.itemId === null) return null
   const definition = getItemDefinition(acquisition.itemId)
   if (definition === null) return null
   const equipped =

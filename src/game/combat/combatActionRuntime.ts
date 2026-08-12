@@ -71,11 +71,17 @@ const IDLE_SNAPSHOT: CombatActionSnapshot = Object.freeze({
   contact: Object.freeze({ enabled: false, actionId: null, windowId: null }),
 })
 
+export type CombatCooldownStepResolver = (
+  actionId: CombatActionId,
+  baseCooldownSteps: number,
+) => number
+
 export class CombatActionRuntime {
   private readonly definitions = new Map<CombatActionId, CombatActionDefinition>()
   private readonly cooldowns = new Map<CombatActionId, number>()
   private activeAction: ActiveActionState | null = null
   private nextExecutionId = 1
+  private cooldownStepResolver: CombatCooldownStepResolver | null = null
 
   constructor(definitions: readonly CombatActionDefinition[]) {
     for (const sourceDefinition of definitions) {
@@ -85,6 +91,11 @@ export class CombatActionRuntime {
       }
       this.definitions.set(definition.id, definition)
     }
+  }
+
+  /** Optional composition hook (equipment skill-CD modifiers). Null restores authored base. */
+  setCooldownStepResolver(resolver: CombatCooldownStepResolver | null): void {
+    this.cooldownStepResolver = resolver
   }
 
   request(
@@ -209,7 +220,9 @@ export class CombatActionRuntime {
 
   private completeAction(action: ActiveActionState): void {
     if (action.definition.cooldownSteps > 0) {
-      this.cooldowns.set(action.definition.id, action.definition.cooldownSteps)
+      const base = action.definition.cooldownSteps
+      const resolved = this.cooldownStepResolver?.(action.definition.id, base) ?? base
+      this.cooldowns.set(action.definition.id, Math.max(0, resolved))
     }
     this.activeAction = null
   }

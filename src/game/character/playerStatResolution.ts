@@ -67,11 +67,14 @@ export function resolvePlayerCombatStats(
     guardFromProgression + equipment.guardImpactThresholdBonus
 
   return {
-    maximumHealth: PLAYER_MAXIMUM_HEALTH + maximumHealthBonus,
+    maximumHealth: Math.max(1, PLAYER_MAXIMUM_HEALTH + maximumHealthBonus),
     maximumHealthBonus,
-    guardImpactThreshold: PLAYER_GUARD_IMPACT_THRESHOLD + guardImpactThresholdBonus,
-    lightDamage: PLAYER_LIGHT_ATTACK.damage + lightDamageBonus,
-    heavyDamage: PLAYER_HEAVY_ATTACK.damage + heavyDamageBonus,
+    guardImpactThreshold: Math.max(
+      1,
+      PLAYER_GUARD_IMPACT_THRESHOLD + guardImpactThresholdBonus,
+    ),
+    lightDamage: Math.max(1, PLAYER_LIGHT_ATTACK.damage + lightDamageBonus),
+    heavyDamage: Math.max(1, PLAYER_HEAVY_ATTACK.damage + heavyDamageBonus),
     lightDamageBonus,
     heavyDamageBonus,
     guardImpactThresholdBonus,

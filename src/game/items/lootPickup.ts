@@ -50,6 +50,12 @@ export class LootPickupRuntime {
     return true
   }
 
+  rememberEnemySpawn(enemyId: string): boolean {
+    if (this.spawnedFromEnemyIds.has(enemyId)) return false
+    this.spawnedFromEnemyIds.add(enemyId)
+    return true
+  }
+
   tryPickup(playerPosition: Vector3Value, playerAlive: boolean): LootPickupResult {
     if (!playerAlive) return { accepted: false, reason: 'actor-dead' }
     if (!this.active || this.itemId === null || this.instanceId === null || this.position === null) {

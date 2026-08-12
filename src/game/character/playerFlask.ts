@@ -43,6 +43,7 @@ export class PlayerFlaskRuntime {
   private pendingExecutionId: number | null = null
   private appliedExecutionId: number | null = null
   private lastRestoredHealth = 0
+  private healBonus = 0
 
   validateUse(health: CombatHealthState): { readonly allowed: true } | {
     readonly allowed: false
@@ -76,11 +77,19 @@ export class PlayerFlaskRuntime {
 
     this.currentCharges -= 1
     this.appliedExecutionId = combat.executionId
-    return PLAYER_FLASK_DEFINITION.healAmount
+    return Math.max(0, PLAYER_FLASK_DEFINITION.healAmount + this.healBonus)
   }
 
   recordRestoration(restoredHealth: number): void {
     this.lastRestoredHealth = restoredHealth
+  }
+
+  /** Equipment composition hook; does not persist. */
+  setHealBonus(bonus: number): void {
+    if (!Number.isInteger(bonus)) {
+      throw new RangeError('Flask heal bonus must be an integer')
+    }
+    this.healBonus = bonus
   }
 
   refill(): void {
@@ -103,7 +112,7 @@ export class PlayerFlaskRuntime {
     return {
       maximumCharges: PLAYER_FLASK_DEFINITION.maximumCharges,
       currentCharges: this.currentCharges,
-      healAmount: PLAYER_FLASK_DEFINITION.healAmount,
+      healAmount: Math.max(0, PLAYER_FLASK_DEFINITION.healAmount + this.healBonus),
       pendingExecutionId: this.pendingExecutionId,
       lastRestoredHealth: this.lastRestoredHealth,
     }

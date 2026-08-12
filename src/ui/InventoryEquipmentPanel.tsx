@@ -1,5 +1,6 @@
 import type { GameRuntime, GameRuntimeSnapshot } from '../game/runtime/GameRuntime'
-import { getItemDefinition, type EquipSlot, type ItemDefinition, type ItemId } from '../game/items/itemDefinition'
+import { getItemDefinition, type EquipSlot, type ItemId } from '../game/items/itemDefinition'
+import { formatModifierSummary } from '../game/items/itemComparison'
 import type { ProgressionAttributeId } from '../game/character/playerProgression'
 import {
   SKILL_DEFINITIONS,
@@ -29,30 +30,11 @@ function itemLabel(itemId: ItemId | null): string {
 }
 
 function itemIcon(itemId: ItemId): 'oathblade' | 'vitality-charm' | 'ward-seal' | 'charm' | 'echo' {
-  if (itemId === 'item.weapon.oathblade' || itemId === 'item.weapon.practice-edge') return 'oathblade'
+  if (itemId.startsWith('item.weapon.')) return 'oathblade'
   if (itemId === 'item.charm.vitality') return 'vitality-charm'
   if (itemId === 'item.charm.ward-seal') return 'ward-seal'
   if (getItemDefinition(itemId)?.slot === 'charm') return 'charm'
   return 'echo'
-}
-
-function modifierLines(definition: ItemDefinition): readonly string[] {
-  const lines: string[] = []
-  if (definition.modifiers.maxHealthBonus !== 0) lines.push(`${definition.modifiers.maxHealthBonus > 0 ? '+' : ''}${definition.modifiers.maxHealthBonus} Max HP`)
-  if (definition.modifiers.guardImpactThresholdBonus !== 0) lines.push(`${definition.modifiers.guardImpactThresholdBonus > 0 ? '+' : ''}${definition.modifiers.guardImpactThresholdBonus} Guard Threshold`)
-  if (definition.modifiers.lightDamageBonus !== 0 || definition.modifiers.heavyDamageBonus !== 0) lines.push(`+${definition.modifiers.lightDamageBonus} Light · +${definition.modifiers.heavyDamageBonus} Heavy`)
-  return lines.length > 0 ? lines : ['No combat modifier']
-}
-
-function comparisonLines(candidate: ItemDefinition, equipped: ItemDefinition | null): readonly { readonly text: string; readonly gain: boolean }[] {
-  if (candidate.slot !== 'charm') return []
-  const current = equipped?.modifiers
-  const hp = candidate.modifiers.maxHealthBonus - (current?.maxHealthBonus ?? 0)
-  const guard = candidate.modifiers.guardImpactThresholdBonus - (current?.guardImpactThresholdBonus ?? 0)
-  return [
-    hp === 0 ? null : { text: `${hp > 0 ? '+' : ''}${hp} Max HP`, gain: hp > 0 },
-    guard === 0 ? null : { text: `${guard > 0 ? '+' : ''}${guard} Guard Threshold`, gain: guard > 0 },
-  ].filter((line): line is { text: string; gain: boolean } => line !== null)
 }
 
 export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: InventoryEquipmentPanelProps) {
@@ -61,7 +43,6 @@ export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: In
 
   const xpTotal = progression.experienceIntoLevel + (progression.experienceToNextLevel ?? 0)
   const xpRatio = progression.atMaxLevel ? 1 : xpTotal <= 0 ? 0 : progression.experienceIntoLevel / xpTotal
-  const equippedCharm = equipment.charmItemId === null ? null : getItemDefinition(equipment.charmItemId)
   const contribution = snapshot.resolvedProgressionContributions
   const effectCopy: Readonly<Record<ProgressionAttributeId, string>> = {
     vitality: `+${contribution.maxHealth} Max HP from allocation`,
@@ -114,7 +95,7 @@ export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: In
                   const itemId = slot === 'weapon' ? equipment.weaponItemId : equipment.charmItemId
                   return <div key={slot} className={`inventory-equipped-card${itemId === null ? '' : ' is-equipped'}`}>
                     <span className="inventory-item-glyph">{itemId === null ? <span>—</span> : <ItemGlyph icon={itemIcon(itemId)}/>}</span>
-                    <div><span>{slot}</span><strong>{itemLabel(itemId)}</strong>{itemId === null ? <small>Socket unbound</small> : modifierLines(getItemDefinition(itemId)!).map((line) => <small key={line}>{line}</small>)}</div>
+                    <div><span>{slot}</span><strong>{itemLabel(itemId)}</strong>{itemId === null ? <small>Socket unbound</small> : formatModifierSummary(getItemDefinition(itemId)!.modifiers).map((line) => <small key={line}>{line}</small>)}</div>
                     {itemId === null ? null : <button type="button" onClick={() => unequip(slot)}>Unbind</button>}
                   </div>
                 })}
@@ -160,10 +141,16 @@ export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: In
                 const definition = getItemDefinition(entry.itemId)
                 if (definition === null) return null
                 const equipped = equipment.weaponItemId === entry.itemId || equipment.charmItemId === entry.itemId
-                const comparisons = comparisonLines(definition, equippedCharm)
-                return <li key={entry.itemId} className={`inventory-item-card inventory-item-card--${itemIcon(entry.itemId)}${equipped ? ' is-equipped' : ''}`} data-item-id={entry.itemId}>
+                const comparison = runtime.compareItem(entry.itemId)
+                const comparisonRows = comparison === null
+                  ? []
+                  : [
+                      ...comparison.gains.map((gain) => ({ text: `${gain.delta > 0 ? '+' : ''}${gain.delta} ${gain.label}`, gain: true })),
+                      ...comparison.losses.map((loss) => ({ text: `${loss.delta} ${loss.label}`, gain: false })),
+                    ]
+                return <li key={entry.itemId} className={`inventory-item-card inventory-item-card--${itemIcon(entry.itemId)}${equipped ? ' is-equipped' : ''}`} data-item-id={entry.itemId} data-item-slot={definition.slot ?? 'none'} data-item-rarity={definition.rarity}>
                   <span className="inventory-item-glyph"><ItemGlyph icon={itemIcon(entry.itemId)}/></span>
-                  <div className="inventory-item-card__copy"><span>{definition.slot ?? definition.type}</span><strong>{definition.displayName} {entry.quantity > 1 ? `×${entry.quantity}` : ''}</strong>{modifierLines(definition).map((line) => <small key={line}>{line}</small>)}{comparisons.length > 0 ? <div className="inventory-item-card__comparison">{comparisons.map((line) => <em key={line.text} className={line.gain ? 'is-gain' : 'is-loss'}>{line.text}</em>)}</div> : null}</div>
+                  <div className="inventory-item-card__copy"><span>{definition.slot ?? definition.type} · {definition.rarity}</span><strong>{definition.displayName} {entry.quantity > 1 ? `×${entry.quantity}` : ''}</strong>{formatModifierSummary(definition.modifiers).map((line) => <small key={line}>{line}</small>)}{comparisonRows.length > 0 && !equipped ? <div className="inventory-item-card__comparison" data-item-comparison="1">{comparisonRows.map((line) => <em key={line.text} className={line.gain ? 'is-gain' : 'is-loss'}>{line.text}</em>)}</div> : null}</div>
                   {definition.slot === null ? null : <button type="button" disabled={equipped} onClick={() => equip(entry.itemId)}>{equipped ? 'Bound' : 'Equip'}</button>}
                 </li>
               })}</ul>

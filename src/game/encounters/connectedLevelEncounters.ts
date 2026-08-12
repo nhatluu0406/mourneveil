@@ -1,5 +1,5 @@
 import type { PlayerFacingDirection, Vector3Value } from '../character/playerMotor'
-import type { ItemId } from '../items/itemDefinition'
+import type { LootTableId } from '../items/lootTables'
 import type { MourneveilZoneId } from '../world/connectedLevel'
 import {
   BOSS_ENCOUNTER_ID,
@@ -35,7 +35,8 @@ export interface ConnectedEnemyPlacement {
   readonly role: 'skirmisher' | 'brute' | 'boss'
   readonly spawnPosition: Vector3Value
   readonly initialFacing: PlayerFacingDirection
-  readonly lootItemId: ItemId | null
+  /** Authored loot table; null means no drop from this placement. */
+  readonly lootTableId: LootTableId | null
 }
 
 export interface ConnectedEncounterDefinition {
@@ -46,14 +47,14 @@ export interface ConnectedEncounterDefinition {
 
 export const M5_ENEMY_PLACEMENTS: readonly ConnectedEnemyPlacement[] = Object.freeze([
   // Mixed court: skirmisher holds the near approach; brute anchors the south pocket.
-  definePlacement('enemy.skirmisher.1', 'encounter.m5.mixed', 'skirmisher', 1.4, -2.6, -1, 0, 'item.weapon.oathblade'),
-  definePlacement('enemy.brute.1', 'encounter.m5.mixed', 'brute', 2.6, -5.4, -1, 0, 'item.charm.vitality'),
+  definePlacement('enemy.skirmisher.1', 'encounter.m5.mixed', 'skirmisher', 1.4, -2.6, -1, 0, 'loot.skirmisher-early'),
+  definePlacement('enemy.brute.1', 'encounter.m5.mixed', 'brute', 2.6, -5.4, -1, 0, 'loot.brute-middle'),
   // Introduction: stand-off just inside Outer Watch so arrival crossing feels intentional.
   definePlacement('enemy.skirmisher.introduction', 'encounter.m5.introduction', 'skirmisher', -10.2, 3.1, 1, 0, null),
   // Pressure: final-approach sentry near the ash-walk cairn, before the sealed gate.
-  definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7.6, -3.4, -1, 0, 'item.charm.ward-seal'),
+  definePlacement('enemy.skirmisher.pressure', 'encounter.m5.pressure', 'skirmisher', 7.6, -3.4, -1, 0, 'loot.pressure'),
   // M11 technical boss in sealed arena (gameplay foundation; Codex owns art later).
-  definePlacement(BOSS_RUNTIME_ID, BOSS_ENCOUNTER_ID, 'boss', 13, -4, -1, 0, null),
+  definePlacement(BOSS_RUNTIME_ID, BOSS_ENCOUNTER_ID, 'boss', 13, -4, -1, 0, 'loot.boss-rite'),
 ])
 
 export const M5_ENCOUNTERS: readonly ConnectedEncounterDefinition[] = Object.freeze([
@@ -118,7 +119,7 @@ function definePlacement(
   z: number,
   facingX: number,
   facingZ: number,
-  lootItemId: ItemId | null,
+  lootTableId: LootTableId | null,
 ): ConnectedEnemyPlacement {
   return Object.freeze({
     runtimeId,
@@ -126,7 +127,7 @@ function definePlacement(
     role,
     spawnPosition: Object.freeze({ x, y: 0.82, z }),
     initialFacing: Object.freeze({ x: facingX, z: facingZ }),
-    lootItemId,
+    lootTableId,
   })
 }
 

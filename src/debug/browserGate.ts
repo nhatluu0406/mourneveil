@@ -29,6 +29,8 @@ declare global {
       setPlayerFacing: (facing: { x: number; z: number }) => void
       restorePlayer: () => void
       resetMeleeFixture: () => void
+      grantItem: (itemId: string) => void
+      acquireItem: (itemId: string) => void
       requestAttack: (
         aimDirection: { x: number; z: number },
         attack?: 'light' | 'heavy',
@@ -40,6 +42,7 @@ declare global {
       setMovementOverride: (movement: PlayerMovementIntent | null) => void
       equipItem: (itemId: string) => unknown
       unequipSlot: (slot: 'weapon' | 'charm') => unknown
+      compareItem: (itemId: string) => unknown
       allocateProgression: (attribute: string) => unknown
       equipSkill: (skillId: string) => unknown
       useSkill: () => unknown
@@ -84,6 +87,12 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     resetMeleeFixture: () => {
       runtime.resetMeleeFixture()
     },
+    grantItem: (itemId) => {
+      runtime.debugGrantItem(itemId)
+    },
+    acquireItem: (itemId) => {
+      runtime.debugAcquireItem(itemId)
+    },
     requestAttack: (aimDirection: { x: number; z: number }, attack: 'light' | 'heavy' = 'light') =>
       runtime.requestPlayerAttack({
         type: 'player-attack',
@@ -101,6 +110,7 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     },
     equipItem: (itemId) => runtime.equipItem(itemId),
     unequipSlot: (slot) => runtime.unequipSlot(slot),
+    compareItem: (itemId) => runtime.compareItem(itemId),
     allocateProgression: (attribute) => runtime.allocateProgression(attribute),
     equipSkill: (skillId) => runtime.equipSkill(skillId),
     useSkill: () =>

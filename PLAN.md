@@ -1,49 +1,54 @@
-# PLAN: M13 Character Progression & Build Identity — Macro-batch 4
-<!-- Live M13 graph only. -->
+# PLAN: M14 Itemization & Loot Depth — Macro-batch 1
+<!-- Live M14 graph only. -->
 
-Input: Product Owner M13 MB4 presentation brief | Stack: `STACK.md`
-Task slug: `m13-character-progression-build-identity`
-Agent: Codex only
+Input: Product Owner M14 MB1 systems brief | Stack: `STACK.md`
+Task slug: `m14-itemization-loot-depth`
+Agent: Cursor only
 
 ## Goal
 
-Make active skills and progression visibly native to Mourneveil, eliminate native inventory scrolling at 1440×900, and materially improve the Refuge–Court hero frames without changing gameplay authority.
+Turn the small equipment set into a meaningful authored loot ecosystem that strengthens build identity and exploration, without a procedural ARPG loot-generator framework.
 
 ## Non-goals
 
-- Skill timing, damage, cooldown, movement, guard, unlock, progression, or SaveFileV4 changes
-- New region, gameplay system, external assets, third-party icons, controller, M14
-- New render authority, per-activation resources, or broad world/camera refactor
+- Helmet/chest/gloves/boots/rings/amulet/belt slots
+- Random affixes, procedural stat rolls, legendary frameworks
+- New weapon movesets / per-weapon combat runtimes
+- Salvage/crafting
+- Codex art/lighting/floor coverage (record handoff only)
+- M15+
 
 ## Steps
 
-- [x] 1. Reproduce and fix Oath & Armory overflow contract
+- [x] 1. Equipment + modifier + definition contract (~8 authored items)
   - depends: —
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/ui/**`, `src/app/styles.css`, M13 visual gate
-  - verifier: focused UI tests + 1440×900 no-scroll assertions + 1280×720 single-owned-scroller assertion
-- [x] 2. Add skill identity and actor presentation
+  - owns/allows: `src/game/items/**`, `src/game/character/playerStatResolution.ts`, flask/skill cooldown composition hooks
+  - verifier: focused item/modifier/stat unit tests
+- [x] 2. Loot tables, duplicate→Echo policy, acquisition/equip/compare, save restore
   - depends: 1
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: presentation-only skill glyph/VFX/pose modules, `PlayerVisual`, restrained enemy materials
-  - verifier: focused skill presentation/animation tests + `gate:m13-active-skills` + M13 visual captures
-- [x] 3. Uplift Refuge–Court world art and complete integration
+  - owns/allows: `src/game/items/loot*.ts`, encounters placements, `GameRuntime` pickup path, UI comparison plumbing, SaveFileV4 (no bump unless required)
+  - verifier: focused inventory/equipment/save tests + comparison pure tests
+- [x] 3. `gate:m14-itemization` + alpha regressions + docs/state
   - depends: 2
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: ADR-0002 world types/registry/placements/shared materials, gates, docs/state
-  - verifier: route/world tests + M13 visual gate + M10 performance/resource soak + requested regressions + `npm run verify`
+  - owns/allows: `scripts/browser/gate-m14-*.mjs`, `package.json`, STACK/PLAN/HANDOFF/current-state/REPOMAP as needed
+  - verifier: `gate:m14-itemization` + M13 skill/progression + M12 alpha + boss + lifecycle + `npm run verify`
 
 ## Locked decisions
 
-- All skill movement/contact/effect/timing remains simulation-owned; animation, VFX, icons, HUD, and environment are projections only.
-- 1440×900 has no page, panel, or native owned scrollbar; 1280×720 may scroll only the relic inventory region.
-- Skill vocabulary: Veil Step torn rupture; Oath Cleave bronze oath-force; Ward Pulse angular containment facets.
-- Visible fixtures outnumber actual lights; shared geometry/materials and conditional VFX must avoid activation-time resource growth.
+- Slots: weapon + charm only (no third slot in MB1).
+- Rarity vocabulary: Common / Bound / Reliquary (authored only; no random affixes).
+- Duplicate unique item → Echo reward (no salvage).
+- Prefer SaveFileV4; bump only if persistence shape cannot hold acquired IDs + equipped slots.
+- Combat consumes resolved modifiers; UI must not recompute gameplay authority.
+- Codex owns later icon/weapon-attachment/loot-VFX polish from exposed art hooks.
 
 ## Escalation
 
 - Same failure 3× → stuck report + stop.
-- Any need to redesign skill/progression/save/combat authority → stop for review.
+- Any need for full ARPG loot engine or new movesets → stop for review.

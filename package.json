@@ -33,6 +33,7 @@
     "gate:m13-progression-visual": "node scripts/browser/gate-m13-progression-visual.mjs",
     "gate:m13-visual": "node scripts/browser/gate-m13-progression-visual.mjs",
     "gate:m13-active-skills": "node scripts/browser/gate-m13-active-skills.mjs",
+    "gate:m14-itemization": "node scripts/browser/gate-m14-itemization.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

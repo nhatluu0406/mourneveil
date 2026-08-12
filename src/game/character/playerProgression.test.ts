@@ -69,6 +69,7 @@ describe('player progression XP/level', () => {
 describe('player stat resolution', () => {
   it('composes base + progression + equipment without double application', () => {
     const equipment = {
+      ...ZERO_ITEM_MODIFIERS,
       lightDamageBonus: 8,
       heavyDamageBonus: 12,
       maxHealthBonus: 20,
