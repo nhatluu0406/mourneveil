@@ -3,11 +3,11 @@
 - Updated: 2026-08-12
 - Accepted: **M12 Vertical Slice Alpha** → `v0.12.0-vertical-slice-alpha` (`ab1b270`)
 - Prior: `v0.11.0-boss-vertical-slice` (M11)
-- Active task: `m13-character-progression-build-identity` (MB3 complete locally)
+- Active task: `m13-character-progression-build-identity` (MB4 complete locally)
 
 ## Status
 
-**M12 CLOSED.** **M13 MB3 complete locally** — build identity is playable: one equipped active skill (Veil Step / Oath Cleave / Ward Pulse), Q activation, authoritative cooldown, SaveFileV4 loadout persistence, HUD skill slot, and Oath & Armory without a dominant native scrollbar at 1440×900. Do not start M14.
+**M12 CLOSED.** **M13 MB4 complete locally** — build identity is playable and presented: three distinct active-skill motifs/poses, authoritative cooldown projection, responsive Oath & Armory with measured no-scroll fit at 1440×900, and a brighter, richer Refuge–Court route. M13 is ready for final hardening; do not start M14.
 
 ## What exists
 
@@ -25,4 +25,4 @@
 
 ## Next executable work
 
-CODEX large presentation pass: skill icons/VFX/pose, cooldown visuals, progression UI polish, route world art — using the stable skill snapshot hooks in the active HANDOFF.
+Cursor final hardening: Product Owner visual review plus one full M13 acceptance pass; no new mechanics.

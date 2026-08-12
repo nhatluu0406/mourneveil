@@ -29,7 +29,7 @@ Make active skills and progression visibly native to Mourneveil, eliminate nativ
   - isolation: sequential
   - owns/allows: presentation-only skill glyph/VFX/pose modules, `PlayerVisual`, restrained enemy materials
   - verifier: focused skill presentation/animation tests + `gate:m13-active-skills` + M13 visual captures
-- [ ] 3. Uplift Refuge–Court world art and complete integration
+- [x] 3. Uplift Refuge–Court world art and complete integration
   - depends: 2
   - risk: MEDIUM
   - isolation: sequential
