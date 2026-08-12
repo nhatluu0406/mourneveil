@@ -4,13 +4,13 @@ const OUT = 'tmp-m10-hero-visual'
 const PORT = 4197
 const baselineOnly = process.argv.includes('--baseline')
 const PRODUCTION_VISUAL_BUDGET = Object.freeze({
-  drawCalls: 380,
-  triangles: 100_000,
-  geometries: 220,
+  drawCalls: 320,
+  triangles: 80_000,
+  geometries: 160,
   textures: 16,
-  programs: 20,
-  sceneObjectCount: 650,
-  meshCount: 380,
+  programs: 14,
+  sceneObjectCount: 420,
+  meshCount: 250,
   lightCount: 11,
   jsHeapUsedBytes: 160_000_000,
 })
