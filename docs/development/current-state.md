@@ -1,13 +1,13 @@
 # Current State
 
 - Updated: 2026-08-12
-- Accepted: **M11 Boss Vertical Slice** → `v0.11.0-boss-vertical-slice` (`19abed3`)
-- Prior: `v0.10.0-visual-production-identity` (M10), `v0.9.0-combat-depth` (M9)
-- Active task: `m12-vertical-slice-alpha-acceptance` (MB2 complete; awaiting PO acceptance)
+- Accepted: **M12 Vertical Slice Alpha** → `v0.12.0-vertical-slice-alpha`
+- Prior: `v0.11.0-boss-vertical-slice` (M11), `v0.10.0-visual-production-identity` (M10)
+- Active task: `m13-character-progression-build-identity` (Macro-batch 1 — progression foundation)
 
 ## Status
 
-**M11 CLOSED.** M12 Vertical Slice Alpha acceptance MB1+MB2 complete locally (build choice + endpoint/loot clarity + `gate:m12-alpha-slice`). M12 remains untagged pending Product Owner acceptance. Do not start M13.
+**M12 CLOSED.** Fresh-start-to-boss vertical slice accepted. Active work is M13 Character Progression & Build Identity — durable XP/level, Vitality/Resolve/Might allocation, equipment composition, save persistence. Do not start M14.
 
 ## What exists
 
@@ -24,4 +24,4 @@
 
 ## Next executable work
 
-Product Owner M12 acceptance. Post-M12 feature map lives in the MB2 report (progression/skills/items/NPC/world remain M13+).
+M13 Macro-batch 1: progression foundation (stats resolver, XP/level, allocation, save V3, `gate:m13-progression`). Active skills deferred unless foundation stays small.

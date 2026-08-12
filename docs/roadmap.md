@@ -17,11 +17,15 @@ This is a directional product roadmap, not an immutable feature contract. Milest
 | **M9** | Combat Depth — **PRODUCT OWNER ACCEPTED** (`v0.9.0-combat-depth`) |
 | **M10** | Visual Production & Identity — **PRODUCT OWNER ACCEPTED** (`v0.10.0-visual-production-identity`) |
 | **M11** | Boss Vertical Slice — **PRODUCT OWNER ACCEPTED** (`v0.11.0-boss-vertical-slice`) |
-| **M12** | Vertical Slice Alpha acceptance — **ACTIVE** |
+| **M12** | Vertical Slice Alpha acceptance — **PRODUCT OWNER ACCEPTED** (`v0.12.0-vertical-slice-alpha`) |
 
-Directional version targets: `v0.7` animated combat / production-slice progression; `v0.8` vertical-slice alpha.
+Directional version targets: `v0.7` animated combat / production-slice progression; `v0.8` vertical-slice alpha (`v0.12.0-vertical-slice-alpha`).
 
 ## Playable Alpha — approximately M13–M20
+
+| Milestone | Focus |
+| --- | --- |
+| **M13** | Character Progression & Build Identity — **ACTIVE** |
 
 - Deeper itemization, stats, progression, and player build identity
 - Larger enemy roster and encounter systems
