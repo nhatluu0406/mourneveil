@@ -1,9 +1,9 @@
 # Current State
 
 - Updated: 2026-08-12
-- Accepted release: **`v0.8.0-production-asset-pipeline`** (M8)
-- Active task: `m9-combat-depth`
-- Status: **M9 READY FOR PRODUCT OWNER ACCEPTANCE — FINAL** (stabilization green; not closed/tagged).
+- Accepted release: **`v0.9.0-combat-depth`** (M9)
+- Active task: none during the verified milestone-transition commit
+- Status: **M9 PRODUCT OWNER ACCEPTED / CLOSED**.
 
 ## What exists
 
@@ -21,4 +21,4 @@
 
 ## Next executable work
 
-Await Product Owner acceptance of M9. Do not start M10 or self-close/tag without authorization.
+Initialize the separately authorized M10 — Visual Production & Identity task after the M9 closure tag.

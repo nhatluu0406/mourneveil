@@ -1,13 +1,13 @@
 # HANDOFF
 
-Updated: 2026-08-12 by Cursor
+Updated: 2026-08-12 by Codex
 Task: m9-combat-depth
 
 ## Status
 
-ACTIVE — M9 final stabilization PASS. Effect cue, tmp hygiene, and perf baseline complete.
+**CLOSED — PRODUCT OWNER ACCEPTED.**
 
-**M9 READY FOR PRODUCT OWNER ACCEPTANCE — FINAL** (not closed/tagged).
+M9 final stabilization and closure verification passed. Closure tag: `v0.9.0-combat-depth`.
 
 ## Prior batches
 
@@ -63,4 +63,4 @@ Gate: `npm run gate:m9-perf-baseline`.
 
 ## Next
 
-Product Owner acceptance / optional close+tag of M9. Do not start M10 without authorization.
+M10 — Visual Production & Identity is Product Owner authorized. This M9 record remains closed historical state.

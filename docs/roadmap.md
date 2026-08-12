@@ -14,8 +14,8 @@ This is a directional product roadmap, not an immutable feature contract. Milest
 | --- | --- |
 | **M7** | Animation & Character Feel — **PRODUCT OWNER ACCEPTED** (`v0.7.0-animation-foundation`) |
 | **M8** | Production Asset Pipeline — **PRODUCT OWNER ACCEPTED** (`v0.8.0-production-asset-pipeline`) |
-| **M9** | Combat Depth — **ACTIVE** |
-| **M10** | Ranged / Magic |
+| **M9** | Combat Depth — **PRODUCT OWNER ACCEPTED** (`v0.9.0-combat-depth`) |
+| **M10** | Visual Production & Identity — **NEXT (Product Owner reprioritization; replaces prior Ranged / Magic slot)** |
 | **M11** | Boss Vertical Slice |
 | **M12** | Vertical Slice Alpha acceptance |
 
