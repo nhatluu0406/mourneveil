@@ -3,23 +3,23 @@
 - Updated: 2026-08-12
 - Accepted release: **`v0.9.0-combat-depth`** (M9)
 - Active task: `m10-visual-production-identity`
-- Status: **M10 ACTIVE — macro-batch 3 modular world-object architecture + readability recovery verified**; M9 remains Product Owner accepted/closed; M10 untagged.
+- Status: **M10 ACTIVE — modular content architecture is established; a direct cinematic presentation elevation pass is implemented and awaits full installed-repo runtime verification.**
 
 ## What exists
 
-- Connected-level RPG loop + presentation foundation + M7/M8 animation/assets
-- M9 combat depth: guard impact/break, enemy interrupt, telegraph/punish, player attack commitment, hit confirm
-- M10 hero slice: Veilbound Warden/Oathblade, veil-riven skirmisher, secondary brute pass, data-driven ossuary object composition (ADR-0002), shared material presets, declarative refuge → corridor → Outer Watch placements, readability lighting/value structure
-- Debug contact volumes are opt-in (`?debugContacts=1`); normal play uses authored veil-impact cues
-- Gate-owned `tmp-m*` cleanup (`KEEP_ARTIFACTS=1` opt-in keep)
-- Measured 1440×900 hero baseline and production visual ceilings; DPR capped at 1.5
+- Connected-level RPG loop + M7/M8 animation/assets + M9 combat depth
+- ADR-0002 modular world-object composition: immutable definitions, declarative placements, shared materials/geometries, explicit simulation/render authority split
+- M10 hero assets: Veilbound Warden/Oathblade, veil-riven skirmisher, brute pass, ossuary refuge/corridor/Outer Watch kit
+- Direct presentation pass: cinematic HUD hierarchy, ACES tone mapping, localized warm/cyan light language, unified dark floor base, actor/weapon detail accents, narrower checkpoint rune treatment, layered veil combat cues
+- Debug contact volumes remain opt-in (`?debugContacts=1`)
 
 ## Highest-value limitations
 
-- Mixed court, ash walk, final approach/arena, and distant perimeter architecture remain below the new refuge/Outer Watch production-candidate standard
-- No posture/poise/knockback by design
-- Bundle size advisory (D-004); GPU VRAM not exposed by browser tooling
+- Full deterministic screenshot/runtime verification of the direct pass still needs the installed repository because the uploaded archive contains no `node_modules`/`.git`
+- Mixed court, ash walk, final approach/arena, and distant perimeter remain below hero-route visual quality
+- Surface richness is still largely geometry/material-color driven; future authored textures/details should be measured against existing render budgets
+- Bundle advisory D-004 remains; GPU VRAM remains unavailable through current browser diagnostics
 
 ## Next executable work
 
-Prioritize mixed-court/final-approach environment expansion on the modular placement contract; do not start M11 or tag M10.
+Run full verify + M10 hero visual gate on the modified source, review screenshots, then continue visual production (surface richness and broader environment dressing) before adding new systems.

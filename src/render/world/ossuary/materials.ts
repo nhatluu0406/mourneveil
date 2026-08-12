@@ -11,22 +11,26 @@ export const OSSUARY_MATERIALS: Readonly<Record<OssuaryMaterialKey, MeshStandard
     darkStone: new MeshStandardMaterial({
       color: MOURNEVEIL_PALETTE.environment.masonry,
       roughness: 0.86,
-      metalness: 0.03,
+      metalness: 0.04,
+      flatShading: true,
     }),
     recessStone: new MeshStandardMaterial({
       color: MOURNEVEIL_PALETTE.environment.recess,
       roughness: 0.96,
       metalness: 0,
+      flatShading: true,
     }),
     floorSlab: new MeshStandardMaterial({
       color: MOURNEVEIL_PALETTE.environment.floorSlab,
       roughness: 0.9,
       metalness: 0.02,
+      flatShading: true,
     }),
     bone: new MeshStandardMaterial({
       color: MOURNEVEIL_PALETTE.environment.bone,
       roughness: 0.72,
       metalness: 0.02,
+      flatShading: true,
     }),
     bronze: new MeshStandardMaterial({
       color: MOURNEVEIL_PALETTE.environment.bronze,

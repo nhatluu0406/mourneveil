@@ -1,4 +1,5 @@
 import { Canvas } from '@react-three/fiber'
+import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from 'three'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { DevelopmentPanel } from '../debug/DevelopmentPanel'
 import { installDevelopmentBrowserGate } from '../debug/browserGate'
@@ -12,7 +13,7 @@ import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useGameRuntime } from './useGameRuntime'
 
 /** Cap retina DPR so a simple graybox scene does not allocate 2× drawing buffers by default. */
-const RENDERER_DPR: [number, number] = [1, 1.5]
+const RENDERER_DPR: [number, number] = [1, 1.35]
 
 export function App() {
   const [rendererReady, setRendererReady] = useState(false)
@@ -89,7 +90,10 @@ export function App() {
             </div>
           }
           onCreated={({ camera, gl }) => {
-            gl.toneMappingExposure = 1.45
+            gl.outputColorSpace = SRGBColorSpace
+            gl.toneMapping = ACESFilmicToneMapping
+            gl.toneMappingExposure = 1.12
+            gl.shadowMap.type = PCFSoftShadowMap
             setRendererReady(true)
             attachGameplayInput(
               gl.domElement,

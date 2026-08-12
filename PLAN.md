@@ -1,67 +1,42 @@
-# PLAN: M10 Macro-Batch 3 — Modular Content Architecture + Readability Recovery
+# PLAN: M10 Macro-Batch 4 — Cinematic Presentation Elevation
 <!-- Live M10 graph only. -->
 
-Input: Product Owner M10 macro-batch 3 | Stack: `STACK.md` | Contract: `docs/art/visual-direction.md`
+Input: Product Owner direct visual-review pass | Stack: `STACK.md` | Contract: `docs/art/visual-direction.md`
 Task slug: `m10-visual-production-identity`
 
 ## Goal
 
-Replace monolithic ossuary kit authoring with data-driven modular world-object composition, and recover refuge → corridor → first-combat readability without flattening dark-fantasy mood or regressing M10.2 performance/gameplay gates.
+Raise the current modular M10 slice toward the dark-fantasy ARPG presentation bar using original Mourneveil design: stronger screen composition, cinematic value structure, richer actor silhouettes, subtler checkpoint/VFX language, and a full-screen HUD hierarchy without changing gameplay authority.
 
 ## Non-goals
 
-- M11; M10 closure/tag; push; class-heavy inheritance OOP / ECS / DI / plugin registries
-- Gameplay/collider/encounter/navigation/save authority changes
-- Mixed court / ash walk / final approach expansion
-- Texture spam; generalized batching/material frameworks
-- Full actor combat/runtime rewrite
+- Copying Vesperfall/Diablo proprietary assets, UI layouts, names, or exact motifs
+- Gameplay/combat/save/physics authority changes
+- Class-heavy OOP rewrite, ECS, renderer rewrite, post-processing framework
+- M10 closure/tag or M11
 
 ## Steps
 
-- [x] 1. Introduce narrow WorldObject definition/placement contracts, immutable registry resolution, and focused pure tests
-  - depends: —
-  - risk: MEDIUM
-  - isolation: sequential
-  - owns/allows: `src/render/world/**` contracts/registry/tests; PLAN/CHECKPOINT
-  - verifier: `npm run test -- src/render/world`
-- [x] 2. Extract shared ossuary material presets and split reusable object-type modules (architecture/burial/metal/dressing/landmarks)
-  - depends: 1
-  - risk: HIGH
-  - isolation: sequential
-  - owns/allows: `src/render/world/ossuary/**`, material presets; migrate kit usage
-  - verifier: `npm run test -- src/render && npm run lint && npm run typecheck`
-- [x] 3. Convert hero route to declarative placements + thin composition renderer; remove duplicate monolithic kit logic
-  - depends: 2
-  - risk: HIGH
-  - isolation: sequential
-  - owns/allows: route placement data, `OssuaryEnvironmentKit` thin entry, ledger path updates
-  - verifier: `npm run test -- src/render src/content/assets`
-- [x] 4. Readability recovery: lighting/fog/material value structure for refuge/corridor/combat; actor palette only if needed
-  - depends: 3
-  - risk: HIGH
-  - isolation: sequential
-  - owns/allows: `Scene.tsx`, palette/materials, optional minimal actor contrast; no simulation edits
-  - verifier: `KEEP_ARTIFACTS=1 npm run gate:m10-hero-visual`
-- [x] 5. Architecture ADR, debt/current-state/HANDOFF, full gates and repository verify
-  - depends: 4
-  - risk: HIGH
-  - isolation: sequential
-  - owns/allows: ADR/docs/task state; performance + gameplay gates
-  - verifier: `npm run verify && npm run gate:m9-perf-baseline && npm run gate:lifecycle && python3 scripts/leanloop/doctor.py --strict`
-
-## Parallel groups
-
-- None; Product Owner requires Cursor-only single-writer execution.
+- [x] 1. Verify modular M10 render/content boundaries and identify the highest-impact visual gap
+  - Result: architecture is maintainable after ADR-0002; primary gap is presentation quality/value hierarchy rather than missing OOP.
+- [x] 2. Recompose HUD into a full-screen ARPG information hierarchy
+  - Result: location, threat, objective, player status, resource, prompts, and action dock are spatially separated while preserving existing HUD accessibility hooks.
+- [x] 3. Establish cinematic color/tone/light treatment
+  - Result: ACES tone mapping, softer DPR ceiling, dark neutral world palette, localized cyan/warm light pools, unified zone floor treatment.
+- [x] 4. Refine hero/enemy/weapon presentation and checkpoint/VFX language
+  - Result: Oathblade detail pass, Warden/Skirmisher/Brute silhouette accents, narrowed checkpoint rune treatment, layered veil hit/guard cues.
+- [ ] 5. Run repository-native visual/gameplay/performance gates in a fully installed working tree and inspect deterministic M10 screenshots
+  - Blocked in uploaded archive: `.git` and `node_modules` are not included; network dependency install is unavailable in this sandbox.
 
 ## Decisions
 
-- 2026-08-12 | Data-driven modular object composition (immutable definitions + placements + typed registry), not class inheritance OOP.
-- 2026-08-12 | Render object definitions remain presentation-only; collision/interaction stay world/simulation-owned and link by stable IDs only.
-- 2026-08-12 | Instancing stays placement-group-by-definition; no generalized batching engine.
-- 2026-08-12 | Actor visuals audited; extract only if they share the environment monolith problem (Oathblade reusable module max).
-- 2026-08-12 | Readability uses fill-heavy lighting (higher ambient/hemi, softer key shadows, exposure 1.45) plus lifted material/zone floor values; 9-light ceiling retained.
+- 2026-08-12 | Visual reference is a quality target only. Mourneveil keeps original naming, motifs, UI composition details, and authored assets.
+- 2026-08-12 | Keep ADR-0002 composition architecture; do not introduce class inheritance solely to appear more object-oriented.
+- 2026-08-12 | Replace flat zone-color blocks with a continuous dark floor value structure; authored floor objects provide local identity.
+- 2026-08-12 | Use ACES + local practical lights rather than globally high exposure/ambient fill.
+- 2026-08-12 | HUD remains presentation-only and derives all combat/resource values from the existing runtime snapshot.
 
 ## Escalation
 
-- Stop if readability requires collider/gameplay changes or renderer ceilings cannot be met without weakening modularity.
-- Same failure 3× → persist stuck report and escalate.
+- If full repo verification exposes a gameplay/render regression, fix that regression before further art expansion.
+- If screenshots remain materially below the target after this pass, next work should be authored surface/environment detail, not new combat systems.

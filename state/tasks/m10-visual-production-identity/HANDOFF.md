@@ -69,3 +69,40 @@ Instancing preserved. Combat geo/tex/mesh Δ = 0.
 
 1. Expand mixed-court/final-approach environment using the modular placement contract
 2. Optional: further actor body module split only if screenshot blast radius demands it
+
+## Direct Product-Owner Visual Elevation Pass — 2026-08-12
+
+A direct source pass was performed from the uploaded project archive after comparing the current M10 frame with the supplied dark-fantasy ARPG reference.
+
+### Verified architecture conclusion
+
+- ADR-0002 is the correct direction: immutable reusable definitions + declarative placements + presentation/runtime authority split.
+- A class-inheritance OOP rewrite is **not** recommended. The current maintainability problem was already addressed by the modular world-object contract; remaining quality gap is primarily art direction, screen hierarchy, and authored detail.
+
+### Source changes
+
+- Full-screen HUD hierarchy: location card, nearest-threat health bar, zone objective, Oathward status card, Echo resource plaque, prompt/feedback layer, and six-cell command dock.
+- Original Mourneveil presentation only; no proprietary reference assets or exact UI copies.
+- ACES filmic tone mapping, soft shadows, DPR cap 1.35, darker neutral palette, lower global fill and stronger local warm/cyan practical pools.
+- Unified zone base-floor presentation to remove large colored rectangular region blocks.
+- Oathblade detail/inlay/guard/pommel pass; additional Warden, Skirmisher, and Brute silhouette/material accents.
+- Checkpoint ground cue reduced from a large bright disc to narrower runic rings/spokes.
+- Combat veil VFX changed toward layered arcs/shards instead of generic single-ring geometry.
+- Inventory overlay/panel received a matching funerary presentation pass.
+
+### Verification available in uploaded archive
+
+- Parsed all 196 non-declaration TypeScript/TSX files through the TypeScript transpiler: no syntactic diagnostics.
+- Parsed `src/app/styles.css` with PostCSS: PASS.
+- A static compositional mock was generated from the supplied current screenshot to validate the intended HUD/value hierarchy before source changes were finalized.
+
+### Verification unavailable here
+
+The uploaded archive intentionally/incidentally contains no `.git` directory and no `node_modules`. Network package installation is unavailable in this sandbox, so `npm run verify`, Playwright gates, renderer metrics, and an actual rebuilt gameplay screenshot must be run when the modified files are restored to the fully installed repository.
+
+### Next session starts with
+
+1. Copy/apply this direct pass into the real working tree if the uploaded archive is not itself the working copy.
+2. `npm run verify` plus `KEEP_ARTIFACTS=1 npm run gate:m10-hero-visual`.
+3. Product Owner reviews refuge/combat screenshots.
+4. Only after that, resume Cursor/Codex; prioritize surface richness, wider-zone dressing, and authored VFX/asset detail over new gameplay mechanics.

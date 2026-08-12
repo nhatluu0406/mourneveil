@@ -204,7 +204,14 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
             ]}
           >
             <boxGeometry args={[width, 0.02, depth]} />
-            <meshStandardMaterial color={zone.presentation.floorColor} roughness={0.97} />
+            <meshStandardMaterial
+              color={MOURNEVEIL_PALETTE.environment.floor}
+              roughness={0.94}
+              metalness={0.01}
+              polygonOffset
+              polygonOffsetFactor={-1}
+              polygonOffsetUnits={-1}
+            />
           </mesh>
         )
       })}

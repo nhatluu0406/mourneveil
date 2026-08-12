@@ -191,10 +191,18 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
           <primitive attach="geometry" object={WARDEN_TORSO} />
           <meshStandardMaterial
             ref={torsoMaterialRef}
-            color="#46534f"
-            roughness={0.62}
-            metalness={0.42}
+            color="#394743"
+            roughness={0.56}
+            metalness={0.46}
           />
+        </mesh>
+        <mesh castShadow position={[0, -0.14, -0.17]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.225, 0.026, 6, 20, Math.PI]} />
+          <meshStandardMaterial color="#76563b" roughness={0.4} metalness={0.68} />
+        </mesh>
+        <mesh position={[0, 0.11, -0.176]} rotation={[Math.PI / 4, 0, 0]}>
+          <octahedronGeometry args={[0.07, 0]} />
+          <meshStandardMaterial color="#9bd7d7" emissive="#2d777b" emissiveIntensity={0.55} roughness={0.3} metalness={0.32} />
         </mesh>
         <mesh castShadow position={[0, -0.03, -0.17]} rotation={[0.06, 0, 0]}>
           <primitive attach="geometry" object={WARDEN_TABARD} />
@@ -218,16 +226,20 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
         </mesh>
         <mesh castShadow position={[0, 0.51, 0.01]}>
           <cylinderGeometry args={[0.145, 0.19, 0.26, 7]} />
-          <meshStandardMaterial color="#171d1d" roughness={0.9} metalness={0.08} />
+          <meshStandardMaterial color="#12191a" roughness={0.86} metalness={0.12} />
         </mesh>
-        <mesh castShadow position={[0, 0.51, -0.145]} rotation={[Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.125, 7]} />
+        <mesh castShadow position={[0, 0.54, -0.14]} rotation={[Math.PI / 2, 0, 0]} scale={[0.9, 1.2, 1]}>
+          <octahedronGeometry args={[0.14, 0]} />
           <meshStandardMaterial
             ref={cloakMaterialRef}
-            color="#a9a694"
-            roughness={0.54}
-            metalness={0.35}
+            color="#9f9b8b"
+            roughness={0.48}
+            metalness={0.42}
           />
+        </mesh>
+        <mesh position={[0, 0.535, -0.255]}>
+          <boxGeometry args={[0.09, 0.024, 0.02]} />
+          <meshStandardMaterial color="#8ee1e2" emissive="#27787d" emissiveIntensity={0.82} roughness={0.2} />
         </mesh>
         <mesh castShadow position={[0, 0.02, 0.19]} rotation={[Math.PI / 2 - 0.12, 0, Math.PI]}>
           <primitive attach="geometry" object={WARDEN_CLOAK} />

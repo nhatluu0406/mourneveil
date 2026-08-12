@@ -85,10 +85,20 @@ export function CheckpointVisual({ runtime }: { readonly runtime: GameRuntime })
           ))}
         </group>
       ))}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
-        <ringGeometry args={[0.72, 1.42, 40]} />
-        <meshStandardMaterial ref={ringRef} roughness={0.5} metalness={0.2} transparent opacity={0.72} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.036, 0]} receiveShadow>
+        <ringGeometry args={[1.02, 1.09, 48]} />
+        <meshStandardMaterial ref={ringRef} roughness={0.46} metalness={0.28} transparent opacity={0.62} />
       </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, Math.PI / 6]} position={[0, 0.039, 0]} receiveShadow>
+        <ringGeometry args={[0.67, 0.705, 40, 1, 0.2, Math.PI * 1.65]} />
+        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.verdigris} emissive={MOURNEVEIL_PALETTE.checkpoint.glowInactive} emissiveIntensity={0.18} roughness={0.42} metalness={0.48} transparent opacity={0.58} />
+      </mesh>
+      {[0, Math.PI / 2, Math.PI, Math.PI * 1.5].map((angle) => (
+        <mesh key={`rune:${angle}`} position={[Math.sin(angle) * 0.88, 0.042, Math.cos(angle) * 0.88]} rotation={[-Math.PI / 2, angle, 0]}>
+          <boxGeometry args={[0.035, 0.2, 0.012]} />
+          <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.bronze} emissive={MOURNEVEIL_PALETTE.checkpoint.glowInactive} emissiveIntensity={0.12} roughness={0.4} metalness={0.62} />
+        </mesh>
+      ))}
       <mesh position={[0, 2.48, 0]} rotation={[0, Math.PI / 4, 0]}>
         <octahedronGeometry args={[0.2, 0]} />
         <meshStandardMaterial
@@ -100,8 +110,9 @@ export function CheckpointVisual({ runtime }: { readonly runtime: GameRuntime })
       </mesh>
       <pointLight
         position={[0, 2.2, 0]}
-        intensity={1.15}
-        distance={8}
+        intensity={1.7}
+        distance={7}
+        decay={2}
         color={MOURNEVEIL_PALETTE.checkpoint.active}
       />
     </group>

@@ -21,9 +21,9 @@ function updateCue(
   const cue = resolveCombatVfxPresentation(event, simulationStep)
   group.visible = cue.visible
   if (!cue.visible || event === null) return
-  group.position.set(event.contactPosition.x, event.contactPosition.y + 0.08, event.contactPosition.z)
-  group.scale.setScalar(0.5 + cue.progress * 1.35)
-  group.rotation.y = cue.progress * 1.4
+  group.position.set(event.contactPosition.x, event.contactPosition.y + 0.14, event.contactPosition.z)
+  group.scale.setScalar(0.52 + cue.progress * 1.18)
+  group.rotation.y = cue.progress * 1.9
   material.color.set(cue.color)
   material.opacity = MathUtils.clamp((1 - cue.progress) * cue.intensity, 0, 1)
 }
@@ -49,21 +49,38 @@ export function VeilCombatVfx({ runtime }: { readonly runtime: GameRuntime }) {
   return (
     <>
       <group ref={outgoingGroup} visible={false} userData={{ effect: 'veil-outgoing-hit' }}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.28, 0.035, 6, 24, Math.PI * 1.55]} />
+        <mesh rotation={[-Math.PI / 2, 0, -0.45]}>
+          <torusGeometry args={[0.3, 0.026, 5, 28, Math.PI * 1.12]} />
           <meshBasicMaterial ref={outgoingMaterial} transparent depthWrite={false} />
         </mesh>
-        {[0, 1, 2].map((index) => (
-          <mesh key={index} position={[Math.cos(index * 2.1) * 0.28, 0.12 + index * 0.05, Math.sin(index * 2.1) * 0.28]} rotation={[0, index * 2.1, 0]}>
-            <coneGeometry args={[0.045, 0.26, 4]} />
-            <meshBasicMaterial color="#f2d18d" transparent opacity={0.72} depthWrite={false} />
+        <mesh rotation={[-Math.PI / 2, 0, Math.PI * 0.72]} scale={[0.72, 0.72, 0.72]}>
+          <torusGeometry args={[0.32, 0.018, 5, 24, Math.PI * 0.78]} />
+          <meshBasicMaterial color="#86dedb" transparent opacity={0.52} depthWrite={false} />
+        </mesh>
+        {[0, 1, 2, 3].map((index) => (
+          <mesh
+            key={index}
+            position={[
+              Math.cos(index * 1.63 + 0.35) * 0.31,
+              0.09 + (index % 2) * 0.08,
+              Math.sin(index * 1.63 + 0.35) * 0.31,
+            ]}
+            rotation={[0.2, index * 1.63, index % 2 === 0 ? 0.25 : -0.22]}
+          >
+            <coneGeometry args={[0.035, 0.2 + index * 0.018, 4]} />
+            <meshBasicMaterial color={index < 2 ? '#e6bd73' : '#8ce0d8'} transparent opacity={0.66} depthWrite={false} />
           </mesh>
         ))}
       </group>
+
       <group ref={incomingGroup} visible={false} userData={{ effect: 'veil-defense-impact' }}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.2, 0.36, 24]} />
-          <meshBasicMaterial ref={incomingMaterial} transparent depthWrite={false} side={2} />
+        <mesh rotation={[-Math.PI / 2, 0, -0.25]}>
+          <torusGeometry args={[0.28, 0.032, 6, 28, Math.PI * 1.45]} />
+          <meshBasicMaterial ref={incomingMaterial} transparent depthWrite={false} />
+        </mesh>
+        <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, Math.PI * 0.5]} scale={[0.72, 0.72, 0.72]}>
+          <ringGeometry args={[0.22, 0.27, 20, 1, 0, Math.PI * 1.25]} />
+          <meshBasicMaterial color="#9ad9dc" transparent opacity={0.34} depthWrite={false} side={2} />
         </mesh>
       </group>
     </>

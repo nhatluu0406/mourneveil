@@ -200,7 +200,15 @@ function ProceduralEnemyVisual({
           <>
             <mesh castShadow receiveShadow position={[0, -0.05, 0]}>
               <primitive attach="geometry" object={BRUTE_TORSO} />
-              <meshStandardMaterial ref={materialRef} roughness={0.92} metalness={0.05} />
+              <meshStandardMaterial ref={materialRef} roughness={0.82} metalness={0.12} />
+            </mesh>
+            <mesh castShadow position={[0, 0.04, -0.29]} rotation={[0.08, 0, 0]}>
+              <boxGeometry args={[0.48, 0.5, 0.08]} />
+              <meshStandardMaterial color="#3a2c29" roughness={0.48} metalness={0.54} />
+            </mesh>
+            <mesh position={[0, 0.07, -0.34]} rotation={[Math.PI / 4, 0, 0]}>
+              <octahedronGeometry args={[0.09, 0]} />
+              <meshStandardMaterial color="#d28b55" emissive="#7c301e" emissiveIntensity={0.44} roughness={0.3} metalness={0.34} />
             </mesh>
             <mesh castShadow position={[0, 0.43, 0.04]} scale={[1.5, 0.7, 1]}>
               <dodecahedronGeometry args={[0.38, 0]} />
@@ -216,7 +224,15 @@ function ProceduralEnemyVisual({
             </mesh>
             <mesh castShadow position={[0, 0.72, 0]}>
               <cylinderGeometry args={[0.17, 0.24, 0.32, 6]} />
-              <meshStandardMaterial color="#2b2525" roughness={0.74} metalness={0.24} />
+              <meshStandardMaterial color="#211b1b" roughness={0.72} metalness={0.26} />
+            </mesh>
+            <mesh castShadow position={[-0.14, 0.88, 0.01]} rotation={[0.05, 0, -0.48]}>
+              <coneGeometry args={[0.075, 0.25, 5]} />
+              <meshStandardMaterial color="#6e5540" roughness={0.48} metalness={0.46} />
+            </mesh>
+            <mesh castShadow position={[0.14, 0.88, 0.01]} rotation={[0.05, 0, 0.48]}>
+              <coneGeometry args={[0.075, 0.25, 5]} />
+              <meshStandardMaterial color="#6e5540" roughness={0.48} metalness={0.46} />
             </mesh>
             <mesh ref={weaponRef} castShadow position={[0.42, 0.05, -0.55]}>
               <cylinderGeometry args={[0.15, 0.11, 0.9, 7]} />
@@ -231,7 +247,15 @@ function ProceduralEnemyVisual({
           <>
             <mesh castShadow receiveShadow position={[0, 0, 0]} rotation={[0.08, 0, 0]}>
               <primitive attach="geometry" object={SKIRMISHER_TORSO} />
-              <meshStandardMaterial ref={materialRef} roughness={0.8} metalness={0.14} />
+              <meshStandardMaterial ref={materialRef} roughness={0.72} metalness={0.18} />
+            </mesh>
+            <mesh castShadow position={[0, 0.08, 0.18]} rotation={[0.36, 0, Math.PI]} scale={[0.6, 1, 1]}>
+              <coneGeometry args={[0.32, 0.62, 5, 1, true]} />
+              <meshStandardMaterial color="#172723" roughness={0.94} side={2} />
+            </mesh>
+            <mesh castShadow position={[-0.22, 0.27, -0.02]} rotation={[0, 0, -0.3]}>
+              <coneGeometry args={[0.11, 0.25, 5]} />
+              <meshStandardMaterial color="#4a6155" roughness={0.56} metalness={0.42} />
             </mesh>
             <mesh castShadow position={[0, 0.47, 0.01]} rotation={[0.08, 0, 0]}>
               <coneGeometry args={[0.18, 0.34, 6]} />
@@ -239,7 +263,11 @@ function ProceduralEnemyVisual({
             </mesh>
             <mesh castShadow position={[0, 0.47, -0.14]} rotation={[Math.PI / 2, 0, 0]}>
               <circleGeometry args={[0.11, 5]} />
-              <meshStandardMaterial color="#b2c4a8" emissive="#456c54" emissiveIntensity={0.32} roughness={0.55} />
+              <meshStandardMaterial color="#a8b59c" emissive="#355f50" emissiveIntensity={0.4} roughness={0.48} metalness={0.22} />
+            </mesh>
+            <mesh position={[0, 0.475, -0.255]}>
+              <boxGeometry args={[0.08, 0.018, 0.014]} />
+              <meshStandardMaterial color="#79e0b0" emissive="#267c58" emissiveIntensity={0.9} roughness={0.18} />
             </mesh>
             <mesh castShadow position={[-0.21, 0.16, 0]} rotation={[0.2, 0, 0.52]}>
               <primitive attach="geometry" object={SKIRMISHER_LIMB} />
@@ -261,9 +289,13 @@ function ProceduralEnemyVisual({
               <primitive attach="geometry" object={SKIRMISHER_BLADE} />
               <meshStandardMaterial
                 color={MOURNEVEIL_PALETTE.skirmisher.blade}
-                roughness={0.32}
-                metalness={0.45}
+                roughness={0.28}
+                metalness={0.58}
               />
+            </mesh>
+            <mesh castShadow position={[0.2, 0.045, -0.32]} rotation={[0.55, 0.1, Math.PI / 2]}>
+              <cylinderGeometry args={[0.025, 0.04, 0.18, 6]} />
+              <meshStandardMaterial color="#73563a" roughness={0.38} metalness={0.62} />
             </mesh>
           </>
         )}

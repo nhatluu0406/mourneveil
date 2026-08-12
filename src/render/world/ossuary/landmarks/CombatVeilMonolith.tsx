@@ -36,7 +36,7 @@ export function CombatVeilMonolith({ placement }: { readonly placement: WorldObj
         <boxGeometry args={[0.035, 0.62, 0.11]} />
         <primitive attach="material" object={veil} />
       </mesh>
-      <pointLight position={[0, 2.35, 0]} intensity={0.95} distance={6.2} color="#8aeadf" />
+      <pointLight position={[0, 2.35, 0]} intensity={1.15} distance={5.4} decay={2} color="#8aeadf" />
     </group>
   )
 }
