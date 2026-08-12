@@ -15,11 +15,13 @@ describe('createDevelopmentDiagnostic', () => {
         checkpointKeyHeld: false,
         respawnKeyHeld: false,
         flaskKeyHeld: false,
+        skillKeyHeld: false,
         pendingAttack: false,
         pendingDodge: false,
         pendingCheckpointInteraction: false,
         pendingRespawn: false,
         pendingFlaskUse: false,
+        pendingSkillUse: false,
       },
     }
 

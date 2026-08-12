@@ -7,6 +7,7 @@ import type {
   PlayerWorldInteractionRequest,
 } from '../../input/playerRecoveryIntent'
 import type { PlayerFlaskUseRequest } from '../../input/playerFlaskIntent'
+import type { PlayerSkillUseRequest } from '../../input/playerSkillIntent'
 import type {
   CombatActionRequest,
   CombatResourceValidator,
@@ -130,8 +131,8 @@ import {
   type LootPickupSnapshot,
 } from '../items/lootPickup'
 import {
-  createDefaultSaveV3,
-  type SaveFileV3,
+  createDefaultSaveV4,
+  type SaveFileV4,
 } from '../save/saveSchema'
 import {
   PlayerProgressionRuntime,
@@ -139,6 +140,17 @@ import {
   type ProgressionSnapshot,
 } from '../character/playerProgression'
 import { resolvePlayerCombatStats } from '../character/playerStatResolution'
+import {
+  getSkillDefinition,
+  skillCombatActions,
+  SKILL_OATH_CLEAVE_ID,
+  SKILL_WARD_PULSE,
+} from '../skills/skillDefinition'
+import {
+  PlayerSkillRuntime,
+  type EquipSkillResult,
+  type PlayerSkillSnapshot,
+} from '../skills/playerSkills'
 import {
   ConnectedWorldRuntime,
   type ConnectedWorldSnapshot,
@@ -211,6 +223,8 @@ export interface GameRuntimeSnapshot {
     readonly lightDamage: number
     readonly heavyDamage: number
   }
+  /** Active skill loadout + cooldown presentation hooks for UI/Codex. */
+  readonly skills: PlayerSkillSnapshot
 }
 
 export interface GameRuntimeAdvance extends GameRuntimeSnapshot {
@@ -226,9 +240,11 @@ export class GameRuntime {
       ...PLAYER_ATTACK_DEFINITIONS.map((definition) => definition.action),
       PLAYER_DODGE_ACTION,
       PLAYER_FLASK_DEFINITION.action,
+      ...skillCombatActions(),
     ],
   )
   private readonly defenseRuntime = new PlayerDefenseRuntime()
+  private readonly skillRuntime = new PlayerSkillRuntime()
   private readonly contactRuntime = new CombatContactRuntime()
   private readonly enemyContactRuntimes = new Map<string, CombatContactRuntime>()
   private readonly trainingTargetRuntime = new TrainingTargetRuntime()
@@ -273,7 +289,7 @@ export class GameRuntime {
     this.persistHandler = handler
   }
 
-  captureSave(): SaveFileV3 {
+  captureSave(): SaveFileV4 {
     const checkpoint = this.checkpointRuntime.snapshot()
     const flask = this.flaskRuntime.snapshot()
     const echoes = this.echoesRuntime.snapshot()
@@ -282,7 +298,7 @@ export class GameRuntime {
     const loot = this.lootPickupRuntime.snapshot()
     const progression = this.progressionRuntime.durable()
     return {
-      version: 3,
+      version: 4,
       activeCheckpointId: checkpoint.currentCheckpointId,
       checkpointActivated: checkpoint.activated,
       flaskCharges: flask.currentCharges,
@@ -316,13 +332,16 @@ export class GameRuntime {
         unspentPoints: progression.unspentPoints,
         allocation: { ...progression.allocation },
       },
+      skills: {
+        equippedSkillId: this.skillRuntime.durableEquippedSkillId(),
+      },
     }
   }
 
   /**
    * Restores persistent facts only. Encounter enemies reset; transient combat/input cleared.
    */
-  applySave(save: SaveFileV3 = createDefaultSaveV3()): void {
+  applySave(save: SaveFileV4 = createDefaultSaveV4()): void {
     this.resetPlayerActionState()
     this.checkpointRuntime.restore(
       save.checkpointActivated,
@@ -359,6 +378,8 @@ export class GameRuntime {
         : null
     this.equipmentRuntime.restore(weapon, charm)
     this.progressionRuntime.restore(save.progression)
+    this.skillRuntime.syncLevel(this.progressionRuntime.durable().level)
+    this.skillRuntime.restoreEquipped(save.skills.equippedSkillId)
     this.lastProgressionFeedback = null
     this.syncResolvedCombatStats()
     this.playerHealthRuntime.restoreToMaximum()
@@ -621,8 +642,73 @@ export class GameRuntime {
   allocateProgression(attribute: string): AllocateProgressionResult {
     const result = this.progressionRuntime.allocate(attribute)
     if (result.accepted) {
+      this.skillRuntime.syncLevel(result.state.level)
       this.syncResolvedCombatStats()
       this.markPersistentChange()
+    }
+    return result
+  }
+
+  equipSkill(skillId: string): EquipSkillResult {
+    const result = this.skillRuntime.equip(skillId, {
+      alive: this.playerHealthRuntime.snapshot().health.alive,
+      combatIdle: this.combatRuntime.snapshot().phase === 'idle',
+    })
+    if (result.accepted) this.markPersistentChange()
+    return result
+  }
+
+  requestPlayerSkillUse(
+    request: PlayerSkillUseRequest,
+    movementIntent: PlayerMovementIntent,
+  ): CombatActionStartResult {
+    void request
+    const equippedId = this.skillRuntime.durableEquippedSkillId()
+    const gate = this.skillRuntime.activationGate({
+      alive: this.playerHealthRuntime.snapshot().health.alive,
+      combatIdle: this.combatRuntime.snapshot().phase === 'idle',
+      canStartAction: this.defenseRuntime.canStartAction(),
+      cooldownRemaining:
+        equippedId === null ? 0 : this.combatRuntime.cooldownRemainingSteps(equippedId),
+    })
+    if (!gate.allowed) {
+      const reason =
+        gate.reason === 'actor-defeated'
+          ? 'actor-defeated'
+          : gate.reason === 'guard-active'
+            ? 'guard-active'
+            : gate.reason === 'cooldown-active'
+              ? 'cooldown-active'
+              : gate.reason === 'combat-busy'
+                ? 'action-in-progress'
+                : 'unknown-action'
+      return { accepted: false, actionId: gate.actionId, reason }
+    }
+
+    const definition = gate.definition
+    const direction =
+      definition.effect.kind === 'reposition'
+        ? this.skillRuntime.sampleRepositionDirection(
+            movementIntent,
+            this.playerState.facing,
+          )
+        : null
+    const result = this.requestCombatAction({
+      type: 'start-action',
+      actionId: definition.action.id,
+    })
+    this.skillRuntime.acceptActivation(result, direction)
+    if (result.accepted) {
+      if (definition.id === SKILL_OATH_CLEAVE_ID) {
+        const facing = { ...this.playerState.facing }
+        this.attackExecutionFacing = facing
+        this.playerState = { ...this.playerState, facing }
+      } else if (direction !== null) {
+        this.attackExecutionFacing = null
+        this.playerState = { ...this.playerState, facing: { ...direction } }
+      } else {
+        this.attackExecutionFacing = null
+      }
     }
     return result
   }
@@ -739,6 +825,17 @@ export class GameRuntime {
         this.attackExecutionFacing = null
       }
       this.defenseRuntime.advanceFixedStep(combat)
+      this.skillRuntime.advanceFixedStep(combat)
+      if (this.skillRuntime.consumeWardPulseApplication(combat)) {
+        const effect = SKILL_WARD_PULSE.effect
+        if (effect.kind === 'guard-relief') {
+          this.defenseRuntime.applyWardPulse({
+            clearImpact: effect.clearImpact,
+            temporaryThresholdBonus: effect.temporaryThresholdBonus,
+            temporaryDurationSteps: effect.temporaryDurationSteps,
+          })
+        }
+      }
       const flaskHealAmount = this.flaskRuntime.advanceFixedStep(combat)
       if (flaskHealAmount !== null) {
         const restoration = this.playerHealthRuntime.restore(flaskHealAmount)
@@ -747,11 +844,22 @@ export class GameRuntime {
       }
       if (playerAlive && this.collisionResolver !== null) {
         const defense = this.defenseRuntime.snapshot(combat)
+        const skills = this.skillRuntime.snapshot(combat, {
+          remainingSteps: (actionId) => this.combatRuntime.cooldownRemainingSteps(actionId),
+        })
         if (defense.dodgeDirection !== null) {
           this.playerState = stepPlayerDodgeMotor(
             this.playerState,
             defense.dodgeDirection,
             defense.dodgeMovementActive ? PLAYER_DODGE_SPEED : 0,
+            fixedStepSeconds,
+            this.collisionResolver,
+          )
+        } else if (skills.repositionDirection !== null) {
+          this.playerState = stepPlayerDodgeMotor(
+            this.playerState,
+            skills.repositionDirection,
+            skills.repositionMovementActive ? skills.repositionSpeed : 0,
             fixedStepSeconds,
             this.collisionResolver,
           )
@@ -1036,6 +1144,9 @@ export class GameRuntime {
       encounterActivation: this.encounterActivationRuntime.snapshot(),
       resolvedAttackDamage: this.resolvedAttackDamage(),
       resolvedProgressionContributions: this.resolvedProgressionContributions(),
+      skills: this.skillRuntime.snapshot(combat, {
+        remainingSteps: (actionId) => this.combatRuntime.cooldownRemainingSteps(actionId),
+      }),
     }
   }
 
@@ -1086,10 +1197,16 @@ export class GameRuntime {
   private resolvedDamageForAction(actionId: string | null): number | undefined {
     if (actionId === null) return undefined
     const attack = playerAttackForActionId(actionId)
-    if (attack === null) return undefined
     const damage = this.resolvedAttackDamage()
-    if (attack.kind === 'light') return damage.light
-    return damage.heavy
+    if (attack !== null) {
+      if (attack.kind === 'light') return damage.light
+      return damage.heavy
+    }
+    const skill = getSkillDefinition(actionId)
+    if (skill?.effect.kind === 'empowered-melee') {
+      return damage.heavy + skill.effect.damageBonus
+    }
+    return undefined
   }
 
   private syncResolvedCombatStats(): void {
@@ -1171,6 +1288,7 @@ export class GameRuntime {
             experienceGained += granted.experienceGained
             levelsGained += granted.levelsGained
             pointsGained += granted.pointsGained
+            this.skillRuntime.syncLevel(granted.state.level)
             this.markPersistentChange()
           }
         }
@@ -1230,6 +1348,7 @@ export class GameRuntime {
     this.defenseRuntime.reset()
     this.contactRuntime.reset()
     this.flaskRuntime.cancelCommittedUse()
+    this.skillRuntime.resetTransient()
     this.attackExecutionFacing = null
   }
 }

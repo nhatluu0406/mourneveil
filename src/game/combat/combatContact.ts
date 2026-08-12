@@ -5,6 +5,7 @@ import {
   playerAttackForActionId,
   type PlayerAttackSpatialSnapshot,
 } from './playerAttackActions'
+import { getSkillDefinition } from '../skills/skillDefinition'
 import type {
   CombatHurtboxId,
   CombatTargetId,
@@ -116,8 +117,12 @@ export class CombatContactRuntime {
 
   resolvePlayerContact(request: ResolvePlayerContactRequest): readonly CombatHitEvent[] {
     const shape = request.attack.activeContactShape
-    const action = playerAttackForActionId(request.combat.actionId)
-    if (action === null) return []
+    const attack = playerAttackForActionId(request.combat.actionId)
+    const skill =
+      request.combat.actionId === null ? null : getSkillDefinition(request.combat.actionId)
+    const skillMelee = skill?.effect.kind === 'empowered-melee' ? skill.effect : null
+    if (attack === null && skillMelee === null) return []
+    const authoredDamage = attack?.damage ?? 0
     return this.resolveContact({
       attackerId: 'player',
       combat: request.combat,
@@ -125,7 +130,7 @@ export class CombatContactRuntime {
       simulationStep: request.simulationStep,
       targets: request.targets,
       query: request.query,
-      damage: request.damageOverride ?? action.damage,
+      damage: request.damageOverride ?? authoredDamage,
       attackOrigin: request.attackOrigin,
       occlusionQuery: request.occlusionQuery,
     })

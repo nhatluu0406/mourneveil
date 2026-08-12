@@ -96,22 +96,26 @@ describe('BrowserAttackInput', () => {
     expect(input.consumeDodgeRequest()).toEqual({ type: 'player-dodge' })
   })
 
-  it('maps E, F, and R to semantic flask, world-interaction, and respawn edges', () => {
+  it('maps E, F, R, and Q to flask, world-interaction, respawn, and skill edges', () => {
     const { input, windowTarget } = createInput()
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyE' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyQ' })
     expect(input.consumeFlaskUseRequest()).toEqual({ type: 'player-flask-use' })
     expect(input.consumeWorldInteractionRequest()).toEqual({
       type: 'player-world-interaction',
     })
     expect(input.consumeRespawnRequest()).toEqual({ type: 'player-respawn' })
+    expect(input.consumeSkillUseRequest()).toEqual({ type: 'player-skill-use' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyE' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyF' })
     dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyR' })
+    dispatchEventWithProperties(windowTarget, 'keydown', { code: 'KeyQ' })
     expect(input.consumeFlaskUseRequest()).toBeNull()
     expect(input.consumeWorldInteractionRequest()).toBeNull()
     expect(input.consumeRespawnRequest()).toBeNull()
+    expect(input.consumeSkillUseRequest()).toBeNull()
   })
 
   it('holds RMB guard, suppresses surface context menu, and releases cleanly', () => {
@@ -142,11 +146,13 @@ describe('BrowserAttackInput', () => {
       checkpointKeyHeld: false,
       respawnKeyHeld: false,
       flaskKeyHeld: false,
+      skillKeyHeld: false,
       pendingAttack: false,
       pendingDodge: false,
       pendingCheckpointInteraction: false,
       pendingRespawn: false,
       pendingFlaskUse: false,
+      pendingSkillUse: false,
     })
 
     dispatchEventWithProperties(surface, 'pointerleave', { buttons: 0 })

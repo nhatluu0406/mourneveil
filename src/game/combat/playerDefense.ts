@@ -58,6 +58,8 @@ export class PlayerDefenseRuntime {
   private guardImpactResetDelaySteps = 0
   private guardBreakRemainingSteps = 0
   private guardImpactThreshold = PLAYER_GUARD_IMPACT_THRESHOLD
+  private wardThresholdBonus = 0
+  private wardThresholdRemainingSteps = 0
 
   setGuardIntent(held: boolean): void {
     this.guardIntentHeld = this.guardBreakRemainingSteps === 0 && held
@@ -68,6 +70,23 @@ export class PlayerDefenseRuntime {
     this.guardImpactThreshold = Math.max(1, Math.floor(threshold))
   }
 
+  /** Authoritative Ward Pulse relief — clears pressure and grants a brief threshold bonus. */
+  applyWardPulse(options: {
+    readonly clearImpact: boolean
+    readonly temporaryThresholdBonus: number
+    readonly temporaryDurationSteps: number
+  }): void {
+    if (options.clearImpact) {
+      this.guardImpact = 0
+      this.guardImpactResetDelaySteps = 0
+    }
+    this.wardThresholdBonus = Math.max(0, Math.floor(options.temporaryThresholdBonus))
+    this.wardThresholdRemainingSteps = Math.max(
+      0,
+      Math.floor(options.temporaryDurationSteps),
+    )
+  }
+
   reset(): void {
     this.guardIntentHeld = false
     this.guarding = false
@@ -76,6 +95,8 @@ export class PlayerDefenseRuntime {
     this.guardImpactResetDelaySteps = 0
     this.guardBreakRemainingSteps = 0
     this.guardImpactThreshold = PLAYER_GUARD_IMPACT_THRESHOLD
+    this.wardThresholdBonus = 0
+    this.wardThresholdRemainingSteps = 0
   }
 
   canStartAction(): boolean {
@@ -105,6 +126,10 @@ export class PlayerDefenseRuntime {
   }
 
   advanceFixedStep(combat: CombatActionSnapshot): void {
+    if (this.wardThresholdRemainingSteps > 0) {
+      this.wardThresholdRemainingSteps -= 1
+      if (this.wardThresholdRemainingSteps === 0) this.wardThresholdBonus = 0
+    }
     if (this.guardBreakRemainingSteps > 0) {
       this.guardBreakRemainingSteps -= 1
       this.guardIntentHeld = false
@@ -140,12 +165,13 @@ export class PlayerDefenseRuntime {
     )
     if (outcome !== 'guarded') return outcome
 
+    const threshold = this.effectiveGuardImpactThreshold()
     this.guardImpact = Math.min(
-      this.guardImpactThreshold,
+      threshold,
       this.guardImpact + Math.max(0, impact),
     )
     this.guardImpactResetDelaySteps = PLAYER_GUARD_IMPACT_RESET_DELAY_STEPS
-    if (this.guardImpact < this.guardImpactThreshold) return 'guarded'
+    if (this.guardImpact < threshold) return 'guarded'
 
     this.guardIntentHeld = false
     this.guarding = false
@@ -171,10 +197,14 @@ export class PlayerDefenseRuntime {
       dodgeMovementActive: activeDodge !== null && combat.phase === 'active',
       invulnerable: activeDodge !== null && combat.phase === 'active',
       guardImpact: this.guardImpact,
-      guardImpactThreshold: this.guardImpactThreshold,
+      guardImpactThreshold: this.effectiveGuardImpactThreshold(),
       guardBroken: this.guardBreakRemainingSteps > 0,
       guardBreakRemainingSteps: this.guardBreakRemainingSteps,
     }
+  }
+
+  private effectiveGuardImpactThreshold(): number {
+    return this.guardImpactThreshold + this.wardThresholdBonus
   }
 }
 

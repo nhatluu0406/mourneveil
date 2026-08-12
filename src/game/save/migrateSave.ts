@@ -2,24 +2,30 @@ import {
   SAVE_VERSION_V1,
   SAVE_VERSION_V2,
   SAVE_VERSION_V3,
+  SAVE_VERSION_V4,
   createDefaultSaveV1,
   createDefaultSaveV2,
   createDefaultSaveV3,
+  createDefaultSaveV4,
   createDefaultProgressionSave,
+  createDefaultSkillsSave,
   type SaveFileV1,
   type SaveFileV2,
   type SaveFileV3,
+  type SaveFileV4,
   type SaveLoadResult,
   type SaveProgressionV3,
+  type SaveSkillsV4,
 } from './saveSchema'
 import {
   PLAYER_MAX_LEVEL,
   PLAYER_MIN_LEVEL,
   restoreProgressionState,
 } from '../character/playerProgression'
+import { isSkillId, skillUnlockedAtLevel } from '../skills/skillDefinition'
 
 /**
- * Migration entry point. V1/V2 migrate forward; unknown versions reject safely.
+ * Migration entry point. V1–V3 migrate forward; unknown versions reject safely.
  */
 export function migrateAndValidateSave(raw: unknown): SaveLoadResult {
   if (raw === null || raw === undefined) {
@@ -35,7 +41,8 @@ export function migrateAndValidateSave(raw: unknown): SaveLoadResult {
   if (
     record.version !== SAVE_VERSION_V1 &&
     record.version !== SAVE_VERSION_V2 &&
-    record.version !== SAVE_VERSION_V3
+    record.version !== SAVE_VERSION_V3 &&
+    record.version !== SAVE_VERSION_V4
   ) {
     return { ok: false, reason: 'unsupported-version' }
   }
@@ -43,20 +50,27 @@ export function migrateAndValidateSave(raw: unknown): SaveLoadResult {
     if (record.version === SAVE_VERSION_V1) {
       return {
         ok: true,
-        save: migrateV2ToV3(migrateV1ToV2(validateSaveV1(record))),
+        save: migrateV3ToV4(migrateV2ToV3(migrateV1ToV2(validateSaveV1(record)))),
         migratedFromVersion: SAVE_VERSION_V1,
       }
     }
     if (record.version === SAVE_VERSION_V2) {
       return {
         ok: true,
-        save: migrateV2ToV3(validateSaveV2(record)),
+        save: migrateV3ToV4(migrateV2ToV3(validateSaveV2(record))),
         migratedFromVersion: SAVE_VERSION_V2,
+      }
+    }
+    if (record.version === SAVE_VERSION_V3) {
+      return {
+        ok: true,
+        save: migrateV3ToV4(validateSaveV3(record)),
+        migratedFromVersion: SAVE_VERSION_V3,
       }
     }
     return {
       ok: true,
-      save: validateSaveV3(record),
+      save: validateSaveV4(record),
       migratedFromVersion: null,
     }
   } catch {
@@ -88,6 +102,28 @@ export function migrateV2ToV3(save: SaveFileV2): SaveFileV3 {
     ...save,
     version: SAVE_VERSION_V3,
     progression: createDefaultProgressionSave(),
+  }
+}
+
+export function migrateV3ToV4(save: SaveFileV3): SaveFileV4 {
+  return {
+    ...save,
+    version: SAVE_VERSION_V4,
+    skills: createDefaultSkillsSave(),
+  }
+}
+
+function validateSaveV4(record: Record<string, unknown>): SaveFileV4 {
+  const defaults = createDefaultSaveV4()
+  const common = validateCommonSave(record)
+  const progression = asProgression(record.progression)
+  return {
+    version: SAVE_VERSION_V4,
+    ...common,
+    lootPickup: asLootV2(record.lootPickup),
+    world: asWorld(record.world, defaults.world),
+    progression,
+    skills: asSkills(record.skills, progression.level),
   }
 }
 
@@ -168,6 +204,20 @@ function asProgression(value: unknown): SaveProgressionV3 {
     unspentPoints: restored.unspentPoints,
     allocation: restored.allocation,
   }
+}
+
+function asSkills(value: unknown, level: number): SaveSkillsV4 {
+  const defaults = createDefaultSkillsSave()
+  if (value === null || typeof value !== 'object') return defaults
+  const record = value as Record<string, unknown>
+  if (record.equippedSkillId === null) return { equippedSkillId: null }
+  if (typeof record.equippedSkillId !== 'string' || !isSkillId(record.equippedSkillId)) {
+    return defaults
+  }
+  if (!skillUnlockedAtLevel(record.equippedSkillId, level)) {
+    return defaults
+  }
+  return { equippedSkillId: record.equippedSkillId }
 }
 
 function asLevel(value: unknown, fallback: number): number {

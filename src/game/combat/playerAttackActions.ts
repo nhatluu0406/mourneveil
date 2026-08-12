@@ -11,6 +11,7 @@ import {
   type CombatContactWindowId,
 } from './combatAction'
 import type { CombatActionSnapshot } from './combatActionRuntime'
+import { getSkillDefinition } from '../skills/skillDefinition'
 
 export const PLAYER_LIGHT_ATTACK_ID = 'player.attack.light' as const
 export const PLAYER_HEAVY_ATTACK_ID = 'player.attack.heavy' as const
@@ -199,8 +200,12 @@ export function createPlayerAttackSpatialSnapshot(
   executionFacing: PlayerFacingDirection | null,
 ): PlayerAttackSpatialSnapshot {
   const attack = playerAttackForActionId(combat.actionId)
+  const skill = combat.actionId === null ? null : getSkillDefinition(combat.actionId)
+  const skillContact =
+    skill?.effect.kind === 'empowered-melee' ? skill.effect.contactShape : null
+  const contactDefinition = attack?.contactShape ?? skillContact
   const movementConstrained = combat.phase !== 'idle'
-  if (attack === null || executionFacing === null) {
+  if (contactDefinition === null || executionFacing === null) {
     return {
       movementConstrained,
       executionFacing: null,
@@ -212,14 +217,14 @@ export function createPlayerAttackSpatialSnapshot(
   const facing = { ...executionFacing }
   const contactIsActive =
     combat.contact.enabled &&
-    combat.contact.windowId === attack.contactShape.windowId
+    combat.contact.windowId === contactDefinition.windowId
   return {
     movementConstrained,
     executionFacing: facing,
-    contactShapeId: attack.contactShape.id,
+    contactShapeId: contactDefinition.id,
     activeContactShape: contactIsActive
       ? transformPlayerAttackContactShape(
-          attack.contactShape,
+          contactDefinition,
           playerPosition,
           facing,
         )

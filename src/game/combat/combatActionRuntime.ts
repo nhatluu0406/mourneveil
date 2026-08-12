@@ -171,6 +171,10 @@ export class CombatActionRuntime {
     this.nextExecutionId = 1
   }
 
+  cooldownRemainingSteps(actionId: CombatActionId): number {
+    return this.cooldowns.get(actionId) ?? 0
+  }
+
   snapshot(): CombatActionSnapshot {
     const action = this.activeAction
     if (action === null) {

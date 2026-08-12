@@ -141,6 +141,7 @@ export function useGameRuntime(): GameRuntimeIntegration {
       const worldInteractionRequest =
         combatInput?.consumeWorldInteractionRequest() ?? null
       const flaskRequest = combatInput?.consumeFlaskUseRequest() ?? null
+      const skillRequest = combatInput?.consumeSkillUseRequest() ?? null
       if (worldInteractionRequest !== null) {
         runtime.requestWorldInteraction(worldInteractionRequest)
       }
@@ -153,6 +154,9 @@ export function useGameRuntime(): GameRuntimeIntegration {
       }
       if (flaskRequest !== null) {
         runtime.requestPlayerFlaskUse(flaskRequest)
+      }
+      if (skillRequest !== null) {
+        runtime.requestPlayerSkillUse(skillRequest, composed.intent)
       }
       const snapshot = runtime.advanceFrame(
         frameDeltaSeconds,
@@ -200,10 +204,12 @@ function neutralCombatInputSnapshot(): CombatInputSnapshot {
     checkpointKeyHeld: false,
     respawnKeyHeld: false,
     flaskKeyHeld: false,
+    skillKeyHeld: false,
     pendingAttack: false,
     pendingDodge: false,
     pendingCheckpointInteraction: false,
     pendingRespawn: false,
     pendingFlaskUse: false,
+    pendingSkillUse: false,
   }
 }

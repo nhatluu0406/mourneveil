@@ -3,8 +3,9 @@ import {
   SAVE_STORAGE_KEY,
   LEGACY_SAVE_STORAGE_KEY_V1,
   LEGACY_SAVE_STORAGE_KEY_V2,
-  createDefaultSaveV3,
-  type SaveFileV3,
+  LEGACY_SAVE_STORAGE_KEY_V3,
+  createDefaultSaveV4,
+  type SaveFileV4,
   type SaveLoadResult,
 } from './saveSchema'
 
@@ -19,6 +20,7 @@ export class LocalStorageSaveStorage implements SaveStorage {
     private readonly storage: Storage,
     private readonly key: string = SAVE_STORAGE_KEY,
     private readonly legacyKeys: readonly string[] = [
+      LEGACY_SAVE_STORAGE_KEY_V3,
       LEGACY_SAVE_STORAGE_KEY_V2,
       LEGACY_SAVE_STORAGE_KEY_V1,
     ],
@@ -80,7 +82,7 @@ export class MemorySaveStorage implements SaveStorage {
 export class GameSaveService {
   constructor(private readonly storage: SaveStorage) {}
 
-  save(save: SaveFileV3): void {
+  save(save: SaveFileV4): void {
     this.storage.writeRaw(JSON.stringify(save))
   }
 
@@ -94,9 +96,9 @@ export class GameSaveService {
     }
   }
 
-  loadOrDefault(): SaveFileV3 {
+  loadOrDefault(): SaveFileV4 {
     const result = this.load()
-    return result.ok ? result.save : createDefaultSaveV3()
+    return result.ok ? result.save : createDefaultSaveV4()
   }
 
   clear(): void {

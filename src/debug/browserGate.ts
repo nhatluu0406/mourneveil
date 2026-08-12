@@ -1,5 +1,6 @@
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { PLAYER_FLASK_USE_REQUEST } from '../input/playerFlaskIntent'
+import { PLAYER_SKILL_USE_REQUEST } from '../input/playerSkillIntent'
 import type { PlayerMovementIntent } from '../input/playerMovementIntent'
 import {
   PLAYER_CHECKPOINT_INTERACTION_REQUEST,
@@ -40,6 +41,8 @@ declare global {
       equipItem: (itemId: string) => unknown
       unequipSlot: (slot: 'weapon' | 'charm') => unknown
       allocateProgression: (attribute: string) => unknown
+      equipSkill: (skillId: string) => unknown
+      useSkill: () => unknown
       rendererStats: () => unknown
       cameraDiagnostic: () => unknown
       occludedPlacementIds: () => unknown
@@ -99,6 +102,12 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     equipItem: (itemId) => runtime.equipItem(itemId),
     unequipSlot: (slot) => runtime.unequipSlot(slot),
     allocateProgression: (attribute) => runtime.allocateProgression(attribute),
+    equipSkill: (skillId) => runtime.equipSkill(skillId),
+    useSkill: () =>
+      runtime.requestPlayerSkillUse(PLAYER_SKILL_USE_REQUEST, {
+        horizontal: 0,
+        forward: 0,
+      }),
     rendererStats: () => readRendererStats(),
     cameraDiagnostic: () => readCameraDiagnostic(),
     occludedPlacementIds: () => readOccludedPlacementIds(),

@@ -11,6 +11,7 @@ import {
   type PlayerWorldInteractionRequest,
 } from './playerRecoveryIntent'
 import { PLAYER_FLASK_USE_REQUEST, type PlayerFlaskUseRequest } from './playerFlaskIntent'
+import { PLAYER_SKILL_USE_REQUEST, type PlayerSkillUseRequest } from './playerSkillIntent'
 
 const PRIMARY_MOUSE_BUTTON = 0
 const SECONDARY_MOUSE_BUTTON = 2
@@ -18,6 +19,7 @@ const DODGE_CODE = 'Space'
 const CHECKPOINT_INTERACTION_CODE = 'KeyF'
 const RESPAWN_CODE = 'KeyR'
 const FLASK_CODE = 'KeyE'
+const SKILL_CODE = 'KeyQ'
 
 export type AimDirectionResolver = (
   clientX: number,
@@ -31,11 +33,13 @@ export interface CombatInputSnapshot {
   readonly checkpointKeyHeld: boolean
   readonly respawnKeyHeld: boolean
   readonly flaskKeyHeld: boolean
+  readonly skillKeyHeld: boolean
   readonly pendingAttack: boolean
   readonly pendingDodge: boolean
   readonly pendingCheckpointInteraction: boolean
   readonly pendingRespawn: boolean
   readonly pendingFlaskUse: boolean
+  readonly pendingSkillUse: boolean
 }
 
 export class BrowserAttackInput {
@@ -45,11 +49,13 @@ export class BrowserAttackInput {
   private checkpointKeyHeld = false
   private respawnKeyHeld = false
   private flaskKeyHeld = false
+  private skillKeyHeld = false
   private pendingAttack: PlayerAttackRequest | null = null
   private pendingDodge: PlayerDodgeRequest | null = null
   private pendingCheckpointInteraction: PlayerWorldInteractionRequest | null = null
   private pendingRespawn: PlayerRespawnRequest | null = null
   private pendingFlaskUse: PlayerFlaskUseRequest | null = null
+  private pendingSkillUse: PlayerSkillUseRequest | null = null
   private connected = false
 
   constructor(
@@ -129,6 +135,12 @@ export class BrowserAttackInput {
     return request
   }
 
+  consumeSkillUseRequest(): PlayerSkillUseRequest | null {
+    const request = this.pendingSkillUse
+    this.pendingSkillUse = null
+    return request
+  }
+
   guardHeld(): boolean {
     return this.guardHeldState
   }
@@ -141,11 +153,13 @@ export class BrowserAttackInput {
       checkpointKeyHeld: this.checkpointKeyHeld,
       respawnKeyHeld: this.respawnKeyHeld,
       flaskKeyHeld: this.flaskKeyHeld,
+      skillKeyHeld: this.skillKeyHeld,
       pendingAttack: this.pendingAttack !== null,
       pendingDodge: this.pendingDodge !== null,
       pendingCheckpointInteraction: this.pendingCheckpointInteraction !== null,
       pendingRespawn: this.pendingRespawn !== null,
       pendingFlaskUse: this.pendingFlaskUse !== null,
+      pendingSkillUse: this.pendingSkillUse !== null,
     }
   }
 
@@ -156,11 +170,13 @@ export class BrowserAttackInput {
     this.checkpointKeyHeld = false
     this.respawnKeyHeld = false
     this.flaskKeyHeld = false
+    this.skillKeyHeld = false
     this.pendingAttack = null
     this.pendingDodge = null
     this.pendingCheckpointInteraction = null
     this.pendingRespawn = null
     this.pendingFlaskUse = null
+    this.pendingSkillUse = null
   }
 
   private readonly handlePointerDown = (event: PointerEvent): void => {
@@ -234,6 +250,10 @@ export class BrowserAttackInput {
       event.preventDefault()
       this.flaskKeyHeld = true
       this.pendingFlaskUse = PLAYER_FLASK_USE_REQUEST
+    } else if (event.code === SKILL_CODE && !this.skillKeyHeld) {
+      event.preventDefault()
+      this.skillKeyHeld = true
+      this.pendingSkillUse = PLAYER_SKILL_USE_REQUEST
     }
   }
 
@@ -242,6 +262,7 @@ export class BrowserAttackInput {
     if (event.code === CHECKPOINT_INTERACTION_CODE) this.checkpointKeyHeld = false
     if (event.code === RESPAWN_CODE) this.respawnKeyHeld = false
     if (event.code === FLASK_CODE) this.flaskKeyHeld = false
+    if (event.code === SKILL_CODE) this.skillKeyHeld = false
   }
 
   private readonly handleFocusLoss = (): void => {

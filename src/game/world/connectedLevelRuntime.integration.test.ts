@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { GameRuntime } from '../runtime/GameRuntime'
-import { createDefaultSaveV3 } from '../save/saveSchema'
+import { createDefaultSaveV4 } from '../save/saveSchema'
 import { horizontalFootprintOverlapsSolid } from '../../physics/connectedLevelCollision'
 import { PLAYER_CAPSULE_RADIUS } from '../../physics/playerCollisionConfig'
 import { CONNECTED_LEVEL_CHECKPOINT_DEFINITION } from './checkpoint'
@@ -18,12 +18,12 @@ describe('complete connected-level runtime initialization', () => {
 
   it('loads a default save at arrival and an activated save at the canonical checkpoint', () => {
     const fresh = new GameRuntime()
-    fresh.applySave(createDefaultSaveV3())
+    fresh.applySave(createDefaultSaveV4())
     expect(fresh.snapshot().player.position).toEqual(MOURNEVEIL_CONNECTED_LEVEL.entryPosition)
 
     const rested = new GameRuntime()
     rested.applySave({
-      ...createDefaultSaveV3(),
+      ...createDefaultSaveV4(),
       checkpointActivated: true,
       activeCheckpointId: 'checkpoint.m5.refuge',
     })
