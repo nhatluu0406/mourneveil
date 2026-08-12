@@ -1,6 +1,9 @@
 import type { GameRuntimeSnapshot } from '../game/runtime/GameRuntime'
 import { CONNECTED_LEVEL_CHECKPOINT_DEFINITION } from '../game/world/checkpoint'
-import { MOURNEVEIL_CONNECTED_LEVEL } from '../game/world/connectedLevel'
+import {
+  MOURNEVEIL_CONNECTED_LEVEL,
+  type MourneveilZoneId,
+} from '../game/world/connectedLevel'
 import { getItemDefinition } from '../game/items/itemDefinition'
 
 export type GameplayInteractionPrompt =
@@ -9,11 +12,85 @@ export type GameplayInteractionPrompt =
   | 'R — Respawn'
   | null
 
+export const THREAT_PRESENTATION_RANGE = 7.5
+
+export interface ZoneHudCopy {
+  readonly eyebrow: string
+  readonly title: string
+  readonly objective: string
+}
+
+const ZONE_COPY: Readonly<Record<MourneveilZoneId, ZoneHudCopy>> = Object.freeze({
+  'zone.arrival': {
+    eyebrow: 'The Mourneveil · Rite I',
+    title: 'Ashen Threshold',
+    objective: 'Cross the dead approach and find the first breach.',
+  },
+  'zone.first-combat': {
+    eyebrow: 'Outer Watch · Rite I',
+    title: 'The Unburied Watch',
+    objective: 'Break the sentries and follow the veil-lit corridor.',
+  },
+  'zone.checkpoint': {
+    eyebrow: 'Refuge · Rite I',
+    title: 'Reliquary of the Veil',
+    objective: 'Rest at the reliquary. The path bends beyond the ossuary ribs.',
+  },
+  'zone.mixed-combat': {
+    eyebrow: 'Sunken Court · Rite I',
+    title: 'Court of Quiet Names',
+    objective: 'Clear the court and open the route toward the final approach.',
+  },
+  'zone.final-approach': {
+    eyebrow: 'Final Approach · Rite I',
+    title: 'Ash Walk',
+    objective: 'Reach the sealed gate and survive the last watch.',
+  },
+  'zone.final-arena': {
+    eyebrow: 'Final Arena · Rite I',
+    title: 'The Veilbound Sepulchre',
+    objective: 'End the rite. Leave no watcher standing.',
+  },
+})
+
 function horizontalDistance(
   left: { readonly x: number; readonly z: number },
   right: { readonly x: number; readonly z: number },
 ): number {
   return Math.hypot(left.x - right.x, left.z - right.z)
+}
+
+export function resolveZoneHudCopy(zoneId: MourneveilZoneId | null): ZoneHudCopy {
+  if (zoneId !== null) return ZONE_COPY[zoneId]
+  return {
+    eyebrow: 'Mourneveil · Rite I',
+    title: 'Between Reliquaries',
+    objective: 'Find the next veil-lit path.',
+  }
+}
+
+export function resolveNearestThreat(
+  snapshot: GameRuntimeSnapshot,
+  range = THREAT_PRESENTATION_RANGE,
+): GameRuntimeSnapshot['enemies'][number] | null {
+  const nearest =
+    snapshot.enemies
+      .filter((enemy) => enemy.alive)
+      .map((enemy) => ({
+        enemy,
+        distance: horizontalDistance(enemy.position, snapshot.player.position),
+      }))
+      .sort((left, right) => left.distance - right.distance)[0] ?? null
+  if (nearest === null || nearest.distance > range) return null
+  return nearest.enemy
+}
+
+export function threatTitle(definitionId: string): string {
+  return definitionId.includes('brute') ? 'OSSUARY BULWARK' : 'VEIL-RIVEN STALKER'
+}
+
+export function threatSubtitle(definitionId: string): string {
+  return definitionId.includes('brute') ? 'THE IRON DEAD · UNYIELDING' : 'THE UNBURIED · HUNTING'
 }
 
 export function resolveGameplayInteractionPrompt(

@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (53L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (67L)
+- PLAN.md (61L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (56L)
+- package.json (57L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -168,7 +168,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - **docs/architecture/** (3 files)
     - animation-presentation.md (14L)
     - asset-pipeline.md (36L)
-    - overview.md (83L)
+    - overview.md (81L)
     - **docs/architecture/decisions/** (2 files)
       - 0001-web-stack.md (46L)
       - 0002-modular-world-objects.md (42L)
@@ -197,9 +197,10 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (36 files)
+  - **scripts/browser/** (37 files)
     - README.md (18L)
-    - gate-m10-hero-visual.mjs (190L)
+    - gate-m10-hero-visual.mjs (263L)
+    - gate-m10-ui-compact.mjs (129L)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
@@ -209,8 +210,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m54-readability.mjs (79L)
     - gate-m55-tuning.mjs (124L)
     - gate-m56-playthrough.mjs (240L)
-    - gate-m561-correctness.mjs (279L)
-    - ... +24 more
+    - ... +25 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -226,7 +226,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (135L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
-    - RenderErrorBoundary.ts
+    - App.tsx (136L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
+    - RenderErrorBoundary.tsx
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

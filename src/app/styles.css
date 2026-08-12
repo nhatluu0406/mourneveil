@@ -330,7 +330,7 @@ body {
 .gameplay-hud__location {
   top: 1.7rem;
   left: 2.05rem;
-  width: min(32rem, 32vw);
+  width: min(28rem, 24vw);
   padding: 0.15rem 1rem 0.8rem;
   border-left: 1px solid rgb(196 147 94 / 58%);
   border-bottom: 1px solid rgb(181 153 105 / 20%);
@@ -361,7 +361,7 @@ body {
 .gameplay-hud__threat {
   top: 2rem;
   left: 50%;
-  width: min(34rem, 38vw);
+  width: min(30rem, 32vw);
   transform: translateX(-50%);
 }
 
@@ -409,7 +409,7 @@ body {
 .gameplay-hud__objective {
   top: 1.65rem;
   right: 2.1rem;
-  width: min(27rem, 28vw);
+  width: min(24rem, 24vw);
   padding: 0.55rem 1rem 0.75rem;
   text-align: right;
   border-top: 1px solid rgb(196 147 94 / 48%);
@@ -746,8 +746,8 @@ body {
 
 .gameplay-hud__flasks {
   position: absolute;
-  bottom: 12.9rem;
-  left: 2rem;
+  bottom: 12.4rem;
+  left: 1.7rem;
   display: flex;
   gap: 0.26rem;
 }
@@ -765,34 +765,89 @@ body {
   box-shadow: 0 0 0.48rem rgb(92 185 192 / 38%);
 }
 
-@media (max-width: 1120px) {
+/* Compact ARPG HUD: hide decorative panels, keep combat-critical vitals/prompts/dock. */
+@media (max-width: 1400px) {
+  .gameplay-hud__center {
+    right: 1.35rem;
+    left: auto;
+    width: min(42rem, calc(100vw - 27rem));
+    transform: none;
+  }
+  .gameplay-hud__status {
+    width: min(22rem, 26vw);
+  }
+}
+
+@media (max-width: 1366px) {
   .gameplay-hud__objective,
   .gameplay-hud__resource {
     display: none;
   }
-  .gameplay-hud__location { width: 40vw; }
-  .gameplay-hud__threat { width: 42vw; }
-  .gameplay-hud__status { width: 31vw; }
-  .gameplay-hud__center { width: 62vw; }
+  .gameplay-hud__location { width: min(24rem, 28vw); }
+  .gameplay-hud__threat { width: min(28rem, 40vw); }
+  .gameplay-hud__location span,
+  .gameplay-hud__threat-heading span,
+  .gameplay-hud__command-index {
+    display: none;
+  }
 }
 
-@media (max-width: 820px) {
-  .gameplay-hud__location,
-  .gameplay-hud__threat { display: none; }
+@media (max-width: 1120px) {
+  .gameplay-hud__location { width: min(22rem, 34vw); }
+  .gameplay-hud__threat { width: min(26rem, 44vw); }
+  .gameplay-hud__status { width: min(20rem, 32vw); }
+  .gameplay-hud__center {
+    width: min(36rem, calc(100vw - 22rem));
+  }
+  .gameplay-hud__commands strong {
+    font-size: 0.64rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .gameplay-hud__location {
+    display: none;
+  }
+  .gameplay-hud__threat {
+    top: 1.1rem;
+    width: min(28rem, 70vw);
+  }
   .gameplay-hud__status {
     left: 0.75rem;
     bottom: 0.75rem;
-    width: min(19rem, 44vw);
+    width: min(18rem, 40vw);
+    padding: 0.7rem 0.8rem;
+  }
+  .gameplay-hud__identity > div:first-child span {
+    display: none;
   }
   .gameplay-hud__center {
     right: 0.75rem;
     bottom: 0.75rem;
     left: auto;
-    width: 50vw;
+    width: min(26rem, calc(100vw - 19rem));
     transform: none;
   }
   .gameplay-hud__commands {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .gameplay-hud__flasks { display: none; }
+  .gameplay-hud__flasks {
+    left: 0.9rem;
+    bottom: 11.4rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .gameplay-hud__threat-heading span {
+    display: none;
+  }
+  .gameplay-hud__status {
+    width: min(16rem, 46vw);
+  }
+  .gameplay-hud__center {
+    width: min(22rem, calc(100vw - 17rem));
+  }
+  .gameplay-hud__stats > div:nth-child(2) {
+    display: none;
+  }
 }

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { GameRuntime } from '../game/runtime/GameRuntime'
-import { resolveGameplayInteractionPrompt } from './gameplayHudModel'
+import {
+  equippedWeaponLabel,
+  resolveGameplayInteractionPrompt,
+  resolveNearestThreat,
+  resolveZoneHudCopy,
+  threatTitle,
+} from './gameplayHudModel'
 
 describe('gameplay HUD interaction prompts', () => {
   it('prompts Rest near the refuge checkpoint while alive', () => {
@@ -20,12 +26,40 @@ describe('gameplay HUD interaction prompts', () => {
   it('prompts Open shortcut from the authored far side while closed', () => {
     const runtime = new GameRuntime()
     runtime.debugSetPlayerPosition({ x: -2.2, y: 0.82, z: -1 })
-    // Force zone projection for unlock side.
     runtime.debugSetPlayerPosition({ x: -2.5, y: 0.82, z: -1.1 })
     for (let step = 0; step < 2; step += 1) {
       runtime.advanceFrame(1 / 60, { horizontal: 0, forward: 0 })
     }
     const prompt = resolveGameplayInteractionPrompt(runtime.snapshot())
     expect(['F — Open shortcut', null]).toContain(prompt)
+  })
+})
+
+describe('cinematic HUD projection helpers', () => {
+  it('binds zone copy from authoritative currentZoneId', () => {
+    const runtime = new GameRuntime()
+    runtime.debugSetPlayerPosition({ x: -5.5, y: 0.82, z: 0 })
+    for (let step = 0; step < 2; step += 1) {
+      runtime.advanceFrame(1 / 60, { horizontal: 0, forward: 0 })
+    }
+    const zoneId = runtime.snapshot().world.currentZoneId
+    expect(zoneId).toBe('zone.checkpoint')
+    expect(resolveZoneHudCopy(zoneId).title).toBe('Reliquary of the Veil')
+  })
+
+  it('shows nearest alive threat only within presentation range', () => {
+    const runtime = new GameRuntime()
+    runtime.debugSetPlayerPosition({ x: -9.15, y: 0.82, z: 2.15 })
+    for (let step = 0; step < 2; step += 1) {
+      runtime.advanceFrame(1 / 60, { horizontal: 0, forward: 0 })
+    }
+    const threat = resolveNearestThreat(runtime.snapshot())
+    expect(threat).not.toBeNull()
+    expect(threatTitle(threat!.definitionId)).toMatch(/STALKER|BULWARK/)
+  })
+
+  it('projects equipment labels from inventory snapshot', () => {
+    const runtime = new GameRuntime()
+    expect(equippedWeaponLabel(runtime.snapshot())).toBe('Unarmed')
   })
 })

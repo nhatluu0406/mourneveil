@@ -31,6 +31,29 @@ async function capture(page, name, settleMilliseconds = 900) {
   await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: false })
 }
 
+async function assertProductHud(page) {
+  const state = await page.evaluate(() => {
+    const hud = document.querySelector('[data-product-hud="1"]')
+    const hint = document.querySelector('.dev-hint')
+    const panel = document.querySelector('.development-panel')
+    return {
+      hudPresent: hud !== null,
+      healthText: document.querySelector('.gameplay-hud__hp-text')?.textContent ?? null,
+      flaskCount: document.querySelectorAll('.gameplay-hud__flask').length,
+      commands: document.querySelectorAll('.gameplay-hud__command').length,
+      devHintVisible: hint !== null && getComputedStyle(hint).display !== 'none',
+      developmentPanelOpen: panel !== null && !panel.hasAttribute('hidden') && getComputedStyle(panel).display !== 'none',
+    }
+  })
+  state.hudPresent ? pass('product HUD mounted') : fail('product HUD missing')
+  state.healthText && /\d+\/\d+/.test(state.healthText)
+    ? pass(`HUD health bound (${state.healthText})`)
+    : fail(`HUD health unbound: ${state.healthText}`)
+  state.flaskCount > 0 ? pass(`HUD flasks present (${state.flaskCount})`) : fail('HUD flasks missing')
+  state.commands === 6 ? pass('HUD action dock present') : fail(`HUD action dock count=${state.commands}`)
+  !state.devHintVisible ? pass('dev hint absent from product presentation') : fail('dev hint visible on product screen')
+}
+
 let cleanupReport = null
 await runOwnedBrowserGate({
   port: PORT,
@@ -76,6 +99,7 @@ await runOwnedBrowserGate({
         ? pass('production visual budgets satisfied')
         : fail(`production visual budgets exceeded: ${exceeded.join(', ')}`)
     }
+    await assertProductHud(page)
     await capture(page, '01-refuge-wide')
 
     if (!baselineOnly) {
@@ -162,10 +186,59 @@ await runOwnedBrowserGate({
         const gate = window.__MOURNEVEIL_GATE__
         gate.resetMeleeFixture()
         gate.restorePlayer()
+        for (const enemy of gate.snapshot().enemies) {
+          if (enemy.id !== 'enemy.skirmisher.introduction') gate.defeatEnemy(enemy.id)
+        }
+        const intro = gate.snapshot().enemies.find((entry) => entry.id === 'enemy.skirmisher.introduction')
+        if (intro === undefined) throw new Error('introduction skirmisher missing')
+        gate.setPlayerPosition({
+          x: intro.position.x,
+          y: 0.82,
+          z: intro.position.z - 0.85,
+        })
+        gate.setPlayerFacing({ x: 0, z: 1 })
+      })
+      {
+        const canvas = page.locator('canvas')
+        await canvas.waitFor({ state: 'visible' })
+        const bounds = await canvas.boundingBox()
+        if (bounds === null) throw new Error('Gameplay canvas has no bounds')
+        await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+        await page.mouse.down({ button: 'right' })
+        const broken = await page.waitForFunction(
+          () => window.__MOURNEVEIL_GATE__.snapshot().defense.guardBroken === true,
+          null,
+          { timeout: 18_000 },
+        ).then(() => true).catch(() => false)
+        broken ? pass('guard-break cue framed') : fail('guard-break not reached')
+        await capture(page, '07-guard-break', 60)
+        await page.mouse.up({ button: 'right' })
+      }
+
+      await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.resetMeleeFixture()
+        gate.restorePlayer()
         gate.setPlayerPosition({ x: -9.45, y: 0.82, z: 1.55 })
         gate.setPlayerFacing({ x: -0.88, z: -0.48 })
       })
-      await capture(page, '07-progression-landmark')
+      await capture(page, '08-progression-landmark')
+
+      await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.setPlayerPosition({ x: -5.5, y: 0.82, z: 0 })
+        gate.setPlayerFacing({ x: 0, z: 1 })
+      })
+      await capture(page, '09-product-ui')
+
+      await page.keyboard.press('KeyI')
+      await settle(page, 400)
+      const inventoryOpen = await page.evaluate(
+        () => document.querySelector('.inventory-overlay, .inventory-panel') !== null,
+      )
+      inventoryOpen ? pass('inventory panel opened') : fail('inventory panel missing after I')
+      await capture(page, '10-inventory-open')
+      await page.keyboard.press('KeyI')
     }
 
     assetErrors.length === 0 ? pass('no runtime asset errors') : fail(assetErrors.join(' | '))

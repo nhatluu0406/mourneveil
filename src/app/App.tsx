@@ -92,7 +92,7 @@ export function App() {
           onCreated={({ camera, gl }) => {
             gl.outputColorSpace = SRGBColorSpace
             gl.toneMapping = ACESFilmicToneMapping
-            gl.toneMappingExposure = 1.12
+            gl.toneMappingExposure = 1.22
             gl.shadowMap.type = PCFSoftShadowMap
             setRendererReady(true)
             attachGameplayInput(
@@ -130,9 +130,6 @@ export function App() {
           onRestorePlayerForDevelopment={() => runtime.restorePlayerForDevelopment()}
           onResetMeleeFixture={() => runtime.resetMeleeFixture()}
         />
-      ) : null}
-      {import.meta.env.DEV && !devDetailsVisible ? (
-        <p className="dev-hint">F3 — Development Details</p>
       ) : null}
     </main>
   )
