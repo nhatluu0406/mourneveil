@@ -58,7 +58,8 @@ describe('production asset validation', () => {
       validateProductionAssetManifest({ schemaVersion: 1, assets: [validAsset, validGlbAsset] })
         .assets,
     ).toHaveLength(2)
-    expect(ASSET_BUDGETS.maxBytesPerAsset).toBe(262144)
+    expect(ASSET_BUDGETS.maxBytesPerAsset).toBe(2 * 1024 * 1024)
+    expect(ASSET_BUDGETS.maxTotalRuntimeBytes).toBe(12 * 1024 * 1024)
   })
 
   it('rejects unsafe runtime references and absent provenance', () => {

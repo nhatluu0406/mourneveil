@@ -16,6 +16,7 @@ import {
 } from './ConnectedLevelVisual'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { RendererStatsPublisher } from './RendererStatsPublisher'
+import { VeilCombatVfx } from './VeilCombatVfx'
 
 interface SceneProps {
   onPhysicsReady: () => void
@@ -42,6 +43,7 @@ function GameWorld({ onPhysicsReady, runtime }: SceneProps) {
       <CheckpointVisual runtime={runtime} />
       <EchoRecoveryVisual runtime={runtime} />
       <LootPickupVisual runtime={runtime} />
+      <VeilCombatVfx runtime={runtime} />
       <CombatContactPhysics runtime={runtime}>
         <PlayerPhysicsBody runtime={runtime} />
         {runtime.enemyIds().map((enemyId) => (
@@ -60,14 +62,14 @@ export function Scene({
   return (
     <>
       <color attach="background" args={[MOURNEVEIL_PALETTE.background]} />
-      <fog attach="fog" args={['#0a0e12', 14, 38]} />
-      <ambientLight intensity={0.22} color="#6d7882" />
-      <hemisphereLight args={['#8a9aa8', '#1a1612', 0.35]} />
+      <fog attach="fog" args={['#080d10', 12, 34]} />
+      <ambientLight intensity={0.24} color="#72898d" />
+      <hemisphereLight args={['#8eabb3', '#18130f', 0.34]} />
       <directionalLight
         castShadow
-        intensity={1.55}
-        position={[10, 18, 4]}
-        color="#f0e2c8"
+        intensity={1.48}
+        position={[8, 16, 6]}
+        color="#a9d2dc"
         shadow-mapSize={[1024, 1024]}
         shadow-camera-far={48}
         shadow-camera-left={-18}
@@ -75,28 +77,16 @@ export function Scene({
         shadow-camera-top={18}
         shadow-camera-bottom={-18}
       />
-      <directionalLight intensity={0.28} position={[-8, 6, -6]} color="#4d6478" />
-      <pointLight
-        position={[-5.5, 2.6, 0]}
-        intensity={1.05}
-        distance={9}
-        color={MOURNEVEIL_PALETTE.checkpoint.active}
-      />
-      <pointLight
-        position={[-14, 2.2, 6]}
-        intensity={0.45}
-        distance={8}
-        color="#c4b08a"
-      />
+      <directionalLight intensity={0.22} position={[-7, 5, -6]} color="#c59a72" />
       <pointLight
         position={[1.2, 2.4, -4]}
-        intensity={0.4}
+        intensity={0.5}
         distance={9}
-        color="#b89a72"
+        color="#b97843"
       />
       <pointLight
         position={[10, 3.1, -4]}
-        intensity={1.15}
+        intensity={0.88}
         distance={11}
         color={MOURNEVEIL_PALETTE.finalGate.open}
       />

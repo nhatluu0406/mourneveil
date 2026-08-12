@@ -20,6 +20,7 @@
     "gate:m9-telegraph-readability": "node scripts/browser/gate-m9-telegraph-readability.mjs",
     "gate:m9-player-combat": "node scripts/browser/gate-m9-player-combat.mjs",
     "gate:m9-perf-baseline": "node scripts/browser/gate-m9-perf-baseline.mjs",
+    "gate:m10-hero-visual": "node scripts/browser/gate-m10-hero-visual.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

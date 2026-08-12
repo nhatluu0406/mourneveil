@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (53L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (31L)
+- PLAN.md (55L)
 - README.md (38L)
 - SETUP.md (44L)
-- STACK.md (81L)
+- STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (55L)
+- package.json (56L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -164,16 +164,18 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
       - **assets/source/world/checkpoint/** (1 files)
         - refuge-shrine.gltf (35L)
 - **docs/** (1 files)
-  - roadmap.md (57L)
+  - roadmap.md (58L)
   - **docs/architecture/** (3 files)
     - animation-presentation.md (14L)
-    - asset-pipeline.md (35L)
+    - asset-pipeline.md (36L)
     - overview.md (79L)
     - **docs/architecture/decisions/** (1 files)
       - 0001-web-stack.md (46L)
+  - **docs/art/** (1 files)
+    - visual-direction.md (18L)
   - **docs/development/** (4 files)
     - agent-routing.md (38L)
-    - current-state.md (24L)
+    - current-state.md (25L)
     - definition-of-done.md (67L)
     - workflow.md (53L)
   - **docs/product/** (2 files)
@@ -190,12 +192,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - **scripts/** (0 files)
   - **scripts/assets/** (5 files)
     - assetPipeline.mjs (261L)
-    - assetPipeline.test.mjs (147L)
+    - assetPipeline.test.mjs (148L)
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (35 files)
+  - **scripts/browser/** (36 files)
     - README.md (18L)
+    - gate-m10-hero-visual.mjs (182L)
     - gate-m4-e2e.mjs (139L)
     - gate-m44-echoes.mjs (131L)
     - gate-m45-loot.mjs (113L)
@@ -206,8 +209,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m55-tuning.mjs (124L)
     - gate-m56-playthrough.mjs (240L)
     - gate-m561-correctness.mjs (279L)
-    - gate-m562-regional-hp.mjs (113L)
-    - ... +23 more
+    - ... +24 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -225,7 +227,5 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - **src/app/** (4 files)
     - App.tsx (134L) -- symbols: App; imports: ../debug/DevelopmentPanel, ../debug/browserGate, ../debug/developmentDiagnostic
     - RenderErrorBoundary.tsx (40L) -- symbols: RenderErrorBoundary
-    - styles.css (457L)
-    - useGameRuntime.ts (209L) -- symbo
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

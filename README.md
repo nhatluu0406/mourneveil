@@ -4,8 +4,8 @@ Mourneveil is a local-first browser-based 3D action RPG vertical slice focused o
 
 ## Status
 
-- Latest Product Owner–accepted tag: **`v0.7.0-animation-foundation`** (M7 Animation Foundation)
-- Active milestone: **M8 Production Asset Pipeline** (`m8-production-asset-pipeline`)
+- Latest Product Owner–accepted tag: **`v0.9.0-combat-depth`** (M9 Combat Depth)
+- Active milestone: **M10 Visual Production & Identity** (`m10-visual-production-identity`)
 
 ## Requirements
 

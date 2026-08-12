@@ -5,6 +5,14 @@ export interface CombatContactCueLayout {
   readonly radius: number
 }
 
+export function shouldShowCombatContactDebug(
+  search: string,
+  development: boolean,
+): boolean {
+  if (!development) return false
+  return new URLSearchParams(search).get('debugContacts') === '1'
+}
+
 /**
  * Ground-safe contact volume presentation layout.
  * Full spheres lose lower arcs to opaque floor depth under the isometric camera.

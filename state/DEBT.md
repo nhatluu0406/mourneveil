@@ -2,16 +2,6 @@
 
 This register holds only known cross-milestone limitations that were consciously deferred and have a concrete revisit trigger. Task history and planned feature scope do not belong here. Remove an entry when its trigger is resolved or the limitation is explicitly retired.
 
-## D-001 — Procedural weapon extreme-pose clipping
-
-- Status: OPEN
-- Observed: M7; accepted tolerance reaffirmed during M8 finalization
-- Limitation: The compact procedural weapon may clip solid geometry in rare extreme animation poses.
-- Why deferred: Ordinary close-wall presentation is acceptable; further constraint machinery is disproportionate for the placeholder.
-- Revisit trigger: A production player/weapon rig or authored weapon asset replaces the procedural actor.
-- Relevant: `src/render/PlayerVisual.tsx`, animation/render authority contract in `STACK.md`
-- Product Owner tolerance: Explicitly accepted for the current placeholder.
-
 ## D-002 — Local enemy navigation scope
 
 - Status: OPEN

@@ -24,12 +24,13 @@ M8 establishes one intentionally small path:
 
 `enemy.skirmisher.proof` remains a project-owned animated GLB proof and development fixture. The default playable skirmisher uses the prior M7 procedural presentation after Product Owner rejection of the proof mesh as playable art.
 
-## Initial budgets
+## Production budgets
 
-Derived from the current slice (refuge shrine ~3.4KB, skirmisher proof GLB ~13KB, preexisting JS bundle ~3.5MB):
+M8 proof fixtures remain tiny (refuge shrine ~3.4KB, skirmisher proof GLB ~13KB) and retain explicit **64 KiB** entry limits. M10 separates those proof limits from bounded production headroom:
 
-- Default per-asset limit: **256 KiB** (`ASSET_BUDGETS.maxBytesPerAsset`), overridable per entry via `maxBytes`.
-- Total committed runtime assets under `public/assets`: **1 MiB**.
-- Current proof entries use a tighter `maxBytes: 65536` so accidental export bloat fails fast.
+- Default production imported-asset limit: **2 MiB** (`ASSET_BUDGETS.maxBytesPerAsset`), overridable downward per entry via `maxBytes`.
+- Total committed runtime assets under `public/assets`: **12 MiB**.
+- Proof entries use `maxBytes: 65536`, so expanding production headroom cannot silently bloat fixtures.
+- Code-native authored visual assemblies use stable IDs and provenance in `src/content/assets/productionVisualLedger.ts`; their runtime cost is bounded by the M10 renderer/performance gate instead of binary byte size.
 
-Compression/transcoding is deferred until a chosen asset exceeds these budgets with measured evidence.
+These are ceilings, not targets. Compression/transcoding remains deferred until a chosen asset or measured load cost demonstrates need.

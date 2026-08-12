@@ -75,5 +75,5 @@ Avoid cross-imports between sibling feature modules. Shared contracts should be 
 - Browser local runtime
 - No backend
 - Deployment remains deferred until local hardening and vertical-slice stability are accepted
-- Primitive/procedural graybox assets
+- Project-authored production presentation over explicit primitive gameplay collider proxies
 - Tests for pure gameplay logic without WebGL where practical

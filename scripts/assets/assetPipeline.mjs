@@ -14,10 +14,10 @@ const ENEMY_ANIMATION_SEMANTICS = [
   'defeated',
 ]
 
-/** Initial M8 budgets from current slice sizes (shrine ~3.4KB, skirmisher proof ~13KB, JS ~3.5MB preexisting). */
+/** M10 production ceiling; proof fixtures keep explicit 64 KiB entry limits. */
 export const ASSET_BUDGETS = Object.freeze({
-  maxBytesPerAsset: 256 * 1024,
-  maxTotalRuntimeBytes: 1024 * 1024,
+  maxBytesPerAsset: 2 * 1024 * 1024,
+  maxTotalRuntimeBytes: 12 * 1024 * 1024,
 })
 
 export function validateProductionAssetManifest(value) {

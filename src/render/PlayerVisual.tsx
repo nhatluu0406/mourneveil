@@ -15,17 +15,30 @@ import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { projectPlayerAnimation } from './animation/playerAnimationProjection'
 import { resolvePlayerProceduralPose } from './animation/playerProceduralPose'
 import { resolvePlayerOutgoingHitConfirm } from './playerCombatFeedback'
-import { combatContactCueLayout } from './combatContactCueLayout'
+import { combatContactCueLayout, shouldShowCombatContactDebug } from './combatContactCueLayout'
 import { CombatContactVolumeCue } from './CombatContactVolumeCue'
+import {
+  createOathbladeGeometry,
+  createProfilePrismGeometry,
+  createTaperedPrismGeometry,
+} from './productionGeometry'
 
-const PLAYER_PLACEHOLDER_BLADE_LENGTH = 0.56
-const PLAYER_PLACEHOLDER_WEAPON_X = 0.28
+const PLAYER_WEAPON_X = 0.29
+const WARDEN_TORSO = createTaperedPrismGeometry({ bottomWidth: 0.38, topWidth: 0.52, height: 0.58, depth: 0.3 })
+const WARDEN_TABARD = createTaperedPrismGeometry({ bottomWidth: 0.28, topWidth: 0.34, height: 0.52, depth: 0.12 })
+const WARDEN_GREAVE = createTaperedPrismGeometry({ bottomWidth: 0.13, topWidth: 0.19, height: 0.44, depth: 0.18 })
+const WARDEN_ARM = createTaperedPrismGeometry({ bottomWidth: 0.09, topWidth: 0.15, height: 0.42, depth: 0.14 })
+const WARDEN_CLOAK = createProfilePrismGeometry(
+  [[-0.25, 0.28], [-0.34, -0.34], [0, -0.46], [0.34, -0.34], [0.25, 0.28]],
+  0.055,
+)
+const OATHBLADE = createOathbladeGeometry()
 
 export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   const facingGroupRef = useRef<Group>(null)
   const bodyGroupRef = useRef<Group>(null)
   const weaponSweepRef = useRef<Group>(null)
-  const weaponRef = useRef<Mesh>(null)
+  const weaponRef = useRef<Group>(null)
   const weaponMaterialRef = useRef<MeshStandardMaterial>(null)
   const contactShapeRef = useRef<Group>(null)
   const guardMarkerRef = useRef<Mesh>(null)
@@ -94,7 +107,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     weaponMaterial.color.set(pose.color)
 
     const damping = Math.max(1, 1 / Math.max(animation.transition.blendSeconds, 0.001))
-    weapon.position.set(PLAYER_PLACEHOLDER_WEAPON_X, 0.05, pose.weaponForwardOffset)
+    weapon.position.set(PLAYER_WEAPON_X, 0.06, pose.weaponForwardOffset + 0.28)
     bodyGroup.scale.x = MathUtils.damp(bodyGroup.scale.x, proceduralPose.bodyScaleX, damping, deltaSeconds)
     bodyGroup.scale.y = MathUtils.damp(bodyGroup.scale.y, proceduralPose.bodyScaleY, damping, deltaSeconds)
     bodyGroup.scale.z = MathUtils.damp(bodyGroup.scale.z, proceduralPose.bodyScaleZ, damping, deltaSeconds)
@@ -149,7 +162,9 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     }
 
     const activeShape = snapshot.attack.activeContactShape
-    contactShape.visible = import.meta.env.DEV && activeShape !== null
+    contactShape.visible =
+      shouldShowCombatContactDebug(globalThis.location?.search ?? '', import.meta.env.DEV) &&
+      activeShape !== null
     if (activeShape !== null) {
       const cue = combatContactCueLayout(
         activeShape.forwardOffset,
@@ -161,92 +176,92 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   })
 
   return (
-    <group ref={facingGroupRef}>
+    <group ref={facingGroupRef} userData={{ productionAssetId: 'actor.player.veilbound-warden' }}>
       <group ref={bodyGroupRef}>
         <mesh visible={false}>
           <capsuleGeometry
             args={[PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HALF_HEIGHT * 2, 4, 8]}
           />
         </mesh>
-        {/* Lower stance / greaves */}
+        {/* Veilbound Warden: authored tapered armor forms, not collider geometry. */}
         <mesh ref={leftLegRef} castShadow position={[-0.11, -0.42, 0.02]}>
-          <boxGeometry args={[0.16, 0.42, 0.18]} />
-          <meshStandardMaterial color="#4a433a" roughness={0.92} />
+          <primitive attach="geometry" object={WARDEN_GREAVE} />
+          <meshStandardMaterial color="#323a38" roughness={0.7} metalness={0.38} />
         </mesh>
         <mesh ref={rightLegRef} castShadow position={[0.11, -0.42, 0.02]}>
-          <boxGeometry args={[0.16, 0.42, 0.18]} />
-          <meshStandardMaterial color="#4a433a" roughness={0.92} />
+          <primitive attach="geometry" object={WARDEN_GREAVE} />
+          <meshStandardMaterial color="#323a38" roughness={0.7} metalness={0.38} />
         </mesh>
-        {/* Torso / tabard */}
         <mesh ref={torsoRef} castShadow position={[0, 0.02, 0]}>
-          <boxGeometry args={[0.42, 0.55, 0.28]} />
+          <primitive attach="geometry" object={WARDEN_TORSO} />
           <meshStandardMaterial
             ref={torsoMaterialRef}
-            color="#6d5a45"
-            roughness={0.88}
-            metalness={0.04}
+            color="#46534f"
+            roughness={0.62}
+            metalness={0.42}
           />
         </mesh>
-        <mesh castShadow position={[0, 0.08, 0.02]}>
-          <boxGeometry args={[0.34, 0.42, 0.18]} />
-          <meshStandardMaterial color="#3f8f9a" roughness={0.72} metalness={0.08} />
+        <mesh castShadow position={[0, -0.03, -0.17]} rotation={[0.06, 0, 0]}>
+          <primitive attach="geometry" object={WARDEN_TABARD} />
+          <meshStandardMaterial color="#315558" roughness={0.86} metalness={0.04} />
         </mesh>
-        {/* Shoulders */}
-        <mesh castShadow position={[-0.28, 0.28, 0]}>
-          <boxGeometry args={[0.2, 0.16, 0.24]} />
-          <meshStandardMaterial color="#5a4c3d" roughness={0.86} />
+        <mesh castShadow position={[-0.31, 0.29, 0]} scale={[1.25, 0.65, 1]}>
+          <dodecahedronGeometry args={[0.19, 0]} />
+          <meshStandardMaterial color="#46524d" roughness={0.52} metalness={0.5} />
         </mesh>
-        <mesh castShadow position={[0.28, 0.28, 0]}>
-          <boxGeometry args={[0.2, 0.16, 0.24]} />
-          <meshStandardMaterial color="#5a4c3d" roughness={0.86} />
+        <mesh castShadow position={[0.3, 0.29, 0]} rotation={[0, 0, -0.28]}>
+          <coneGeometry args={[0.18, 0.28, 5]} />
+          <meshStandardMaterial color="#6a5540" roughness={0.58} metalness={0.44} />
         </mesh>
-        {/* Arms */}
         <mesh ref={leftArmRef} castShadow position={[-0.34, 0.02, 0]} rotation={[0.15, 0, 0.2]}>
-          <boxGeometry args={[0.1, 0.38, 0.1]} />
-          <meshStandardMaterial color="#5c5044" roughness={0.9} />
+          <primitive attach="geometry" object={WARDEN_ARM} />
+          <meshStandardMaterial color="#39423f" roughness={0.7} metalness={0.28} />
         </mesh>
         <mesh ref={rightArmRef} castShadow position={[0.34, 0.02, 0]} rotation={[0.15, 0, -0.2]}>
-          <boxGeometry args={[0.1, 0.38, 0.1]} />
-          <meshStandardMaterial color="#5c5044" roughness={0.9} />
+          <primitive attach="geometry" object={WARDEN_ARM} />
+          <meshStandardMaterial color="#39423f" roughness={0.7} metalness={0.28} />
         </mesh>
-        {/* Hooded / faceted head */}
-        <mesh castShadow position={[0, 0.48, 0.02]}>
-          <boxGeometry args={[0.26, 0.24, 0.24]} />
-          <meshStandardMaterial color="#c2a07a" roughness={0.78} />
+        <mesh castShadow position={[0, 0.51, 0.01]}>
+          <cylinderGeometry args={[0.145, 0.19, 0.26, 7]} />
+          <meshStandardMaterial color="#171d1d" roughness={0.9} metalness={0.08} />
         </mesh>
-        <mesh castShadow position={[0, 0.58, -0.02]}>
-          <boxGeometry args={[0.3, 0.14, 0.28]} />
+        <mesh castShadow position={[0, 0.51, -0.145]} rotation={[Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.125, 7]} />
           <meshStandardMaterial
             ref={cloakMaterialRef}
-            color="#3d4f52"
-            roughness={0.9}
+            color="#a9a694"
+            roughness={0.54}
+            metalness={0.35}
           />
         </mesh>
-        {/* Cloak mass */}
-        <mesh castShadow position={[0, -0.05, -0.18]} rotation={[0.25, 0, 0]}>
-          <boxGeometry args={[0.48, 0.7, 0.08]} />
-          <meshStandardMaterial color="#2f3a3c" roughness={0.94} />
+        <mesh castShadow position={[0, 0.02, 0.19]} rotation={[Math.PI / 2 - 0.12, 0, Math.PI]}>
+          <primitive attach="geometry" object={WARDEN_CLOAK} />
+          <meshStandardMaterial color="#2b4146" roughness={0.95} side={2} />
         </mesh>
-        {/* Facing wedge */}
-        <mesh castShadow position={[0, 0.15, -0.34]}>
-          <boxGeometry args={[0.14, 0.08, 0.22]} />
-          <meshStandardMaterial color={MOURNEVEIL_PALETTE.player.accent} roughness={0.55} metalness={0.15} />
+        <mesh castShadow position={[0, 0.16, -0.23]} rotation={[Math.PI / 4, 0, 0]}>
+          <octahedronGeometry args={[0.085, 0]} />
+          <meshStandardMaterial color="#bcecf0" emissive="#277d86" emissiveIntensity={0.75} roughness={0.3} />
         </mesh>
       </group>
       <group ref={weaponSweepRef}>
-        <mesh ref={weaponRef} castShadow position={[PLAYER_PLACEHOLDER_WEAPON_X, 0.05, -0.62]}>
-          <boxGeometry args={[0.05, 0.05, PLAYER_PLACEHOLDER_BLADE_LENGTH]} />
-          <meshStandardMaterial
-            ref={weaponMaterialRef}
-            color="#b8a888"
-            roughness={0.35}
-            metalness={0.55}
-          />
-        </mesh>
-        <mesh position={[0.28, 0.05, -0.28]} castShadow>
-          <boxGeometry args={[0.14, 0.04, 0.08]} />
-          <meshStandardMaterial color="#6a5a48" roughness={0.7} metalness={0.25} />
-        </mesh>
+        <group
+          ref={weaponRef}
+          position={[PLAYER_WEAPON_X, 0.06, -0.34]}
+          userData={{ productionAssetId: 'weapon.player.oathblade' }}
+        >
+          <mesh castShadow>
+            <primitive attach="geometry" object={OATHBLADE} />
+            <meshStandardMaterial ref={weaponMaterialRef} color="#bfc4ba" roughness={0.28} metalness={0.72} />
+          </mesh>
+          <mesh castShadow position={[0, 0, 0.06]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.035, 0.055, 0.28, 6]} />
+            <meshStandardMaterial color="#806642" roughness={0.4} metalness={0.68} />
+          </mesh>
+          <mesh castShadow position={[0, 0, 0.18]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.035, 0.045, 0.24, 7]} />
+            <meshStandardMaterial color="#211d1a" roughness={0.92} />
+          </mesh>
+        </group>
       </group>
       <CombatContactVolumeCue
         groupRef={contactShapeRef}
@@ -254,7 +269,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
         opacity={0.32}
       />
       <mesh ref={guardMarkerRef} position={[0, 0.22, -0.36]} visible={false}>
-        <boxGeometry args={[0.5, 0.55, 0.06]} />
+        <torusGeometry args={[0.3, 0.025, 6, 28, Math.PI * 1.25]} />
         <meshStandardMaterial ref={guardMaterialRef} color="#8fc4da" transparent opacity={0.5} />
       </mesh>
     </group>

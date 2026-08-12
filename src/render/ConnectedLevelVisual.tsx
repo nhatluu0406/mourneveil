@@ -1,4 +1,5 @@
 import { useFrame } from '@react-three/fiber'
+import { RoundedBox } from '@react-three/drei'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
 import { useEffect, useRef } from 'react'
 import type { MeshStandardMaterial } from 'three'
@@ -15,6 +16,7 @@ import {
 } from './cameraOcclusion'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { forEachOcclusionMaterial, registerOcclusionMaterial } from './occlusionMaterials'
+import { OssuaryHeroDressing } from './OssuaryHeroDressing'
 
 const COLORS = {
   floor: MOURNEVEIL_PALETTE.environment.floor,
@@ -59,14 +61,33 @@ function SolidVisual({
   return (
     <RigidBody type="fixed" colliders={false} position={collider.position}>
       <CuboidCollider args={halfExtents} />
-      {collider.kind === 'checkpoint' ? null : (
-        <mesh castShadow={!isFloor} receiveShadow userData={{ solidId: collider.id }}>
+      {collider.kind === 'checkpoint' ? null : isFloor ? (
+        <mesh receiveShadow userData={{ solidId: collider.id }}>
           <boxGeometry args={collider.size} />
           <meshStandardMaterial
             ref={materialRef}
             color={color}
-            roughness={isGate ? 0.55 : 0.9}
-            metalness={isGate ? 0.18 : 0.02}
+            roughness={0.96}
+            metalness={0.01}
+            transparent
+            opacity={1}
+            depthWrite
+          />
+        </mesh>
+      ) : (
+        <RoundedBox
+          args={[collider.size[0], collider.size[1], collider.size[2]]}
+          radius={isGate ? 0.06 : 0.08}
+          smoothness={2}
+          castShadow
+          receiveShadow
+          userData={{ solidId: collider.id }}
+        >
+          <meshStandardMaterial
+            ref={materialRef}
+            color={color}
+            roughness={isGate ? 0.55 : 0.84}
+            metalness={isGate ? 0.36 : 0.04}
             emissive={
               collider.kind === 'final-gate'
                 ? MOURNEVEIL_PALETTE.finalGate.emissive
@@ -78,7 +99,7 @@ function SolidVisual({
             opacity={1}
             depthWrite
           />
-        </mesh>
+        </RoundedBox>
       )}
     </RigidBody>
   )
@@ -162,6 +183,8 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
           </group>
         )
       })}
+
+      <OssuaryHeroDressing />
 
       {/*
         Decorative props must read as debris/background — never full-height fake walls.

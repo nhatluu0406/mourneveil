@@ -15,8 +15,20 @@ import {
   requestedEnemyProofAsset,
   resolveEnemyPresentationBackend,
 } from './enemyPresentationBackend'
-import { combatContactCueLayout } from './combatContactCueLayout'
+import { combatContactCueLayout, shouldShowCombatContactDebug } from './combatContactCueLayout'
 import { CombatContactVolumeCue } from './CombatContactVolumeCue'
+import {
+  createProfilePrismGeometry,
+  createTaperedPrismGeometry,
+} from './productionGeometry'
+
+const SKIRMISHER_TORSO = createTaperedPrismGeometry({ bottomWidth: 0.24, topWidth: 0.36, height: 0.7, depth: 0.25 })
+const SKIRMISHER_LIMB = createTaperedPrismGeometry({ bottomWidth: 0.06, topWidth: 0.1, height: 0.45, depth: 0.09 })
+const SKIRMISHER_BLADE = createProfilePrismGeometry(
+  [[-0.035, 0.02], [-0.055, -0.34], [0, -0.68], [0.055, -0.34], [0.035, 0.02]],
+  0.028,
+)
+const BRUTE_TORSO = createTaperedPrismGeometry({ bottomWidth: 0.78, topWidth: 0.62, height: 0.9, depth: 0.52 })
 
 const STATE_MIX = {
   idle: 0,
@@ -160,7 +172,9 @@ function ProceduralEnemyVisual({
     telegraphMaterial.opacity = 0.35 + 0.55 * attackPresentation.phaseAccent
     recovery.visible = attackPresentation.recoveryVisible
     recoveryMaterial.opacity = 0.22 + 0.4 * attackPresentation.phaseAccent
-    contact.visible = import.meta.env.DEV && attackPresentation.contactVisible
+    contact.visible =
+      shouldShowCombatContactDebug(globalThis.location?.search ?? '', import.meta.env.DEV) &&
+      attackPresentation.contactVisible
     if (attackPresentation.contactVisible) {
       const cue = combatContactCueLayout(role.contact.forwardOffset, role.contact.radius)
       contact.position.set(0, cue.localY, -cue.forwardOffset)
@@ -175,32 +189,37 @@ function ProceduralEnemyVisual({
   const isBrute = role.role === 'brute'
 
   return (
-    <group ref={facingRef}>
+    <group
+      ref={facingRef}
+      userData={{
+        productionAssetId: isBrute ? 'enemy.brute.ossuary-bulwark' : 'enemy.skirmisher.veil-riven',
+      }}
+    >
       <group ref={bodyRef}>
         {isBrute ? (
           <>
             <mesh castShadow receiveShadow position={[0, -0.05, 0]}>
-              <boxGeometry args={[0.7, 0.85, 0.48]} />
+              <primitive attach="geometry" object={BRUTE_TORSO} />
               <meshStandardMaterial ref={materialRef} roughness={0.92} metalness={0.05} />
             </mesh>
-            <mesh castShadow position={[0, 0.48, 0.04]}>
-              <boxGeometry args={[0.95, 0.32, 0.42]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.pauldron} roughness={0.9} />
+            <mesh castShadow position={[0, 0.43, 0.04]} scale={[1.5, 0.7, 1]}>
+              <dodecahedronGeometry args={[0.38, 0]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.pauldron} roughness={0.68} metalness={0.28} />
             </mesh>
-            <mesh castShadow position={[-0.48, 0.28, 0]}>
-              <boxGeometry args={[0.28, 0.4, 0.32]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.93} />
+            <mesh castShadow position={[-0.5, 0.27, 0]} rotation={[0, 0, -0.16]}>
+              <cylinderGeometry args={[0.17, 0.22, 0.48, 7]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.82} metalness={0.16} />
             </mesh>
-            <mesh castShadow position={[0.48, 0.28, 0]}>
-              <boxGeometry args={[0.28, 0.4, 0.32]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.93} />
+            <mesh castShadow position={[0.5, 0.27, 0]} rotation={[0, 0, 0.16]}>
+              <cylinderGeometry args={[0.17, 0.22, 0.48, 7]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.brute.accent} roughness={0.82} metalness={0.16} />
             </mesh>
             <mesh castShadow position={[0, 0.72, 0]}>
-              <boxGeometry args={[0.34, 0.28, 0.34]} />
-              <meshStandardMaterial color="#5a3830" roughness={0.88} />
+              <cylinderGeometry args={[0.17, 0.24, 0.32, 6]} />
+              <meshStandardMaterial color="#2b2525" roughness={0.74} metalness={0.24} />
             </mesh>
             <mesh ref={weaponRef} castShadow position={[0.42, 0.05, -0.55]}>
-              <boxGeometry args={[0.18, 0.85, 0.18]} />
+              <cylinderGeometry args={[0.15, 0.11, 0.9, 7]} />
               <meshStandardMaterial
                 color={MOURNEVEIL_PALETTE.brute.weapon}
                 roughness={0.55}
@@ -211,23 +230,35 @@ function ProceduralEnemyVisual({
         ) : (
           <>
             <mesh castShadow receiveShadow position={[0, 0, 0]} rotation={[0.08, 0, 0]}>
-              <boxGeometry args={[0.28, 0.62, 0.22]} />
-              <meshStandardMaterial ref={materialRef} roughness={0.78} metalness={0.04} />
+              <primitive attach="geometry" object={SKIRMISHER_TORSO} />
+              <meshStandardMaterial ref={materialRef} roughness={0.8} metalness={0.14} />
             </mesh>
-            <mesh castShadow position={[0, 0.42, 0.02]}>
-              <boxGeometry args={[0.22, 0.2, 0.2]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.skirmisher.accent} roughness={0.7} />
+            <mesh castShadow position={[0, 0.47, 0.01]} rotation={[0.08, 0, 0]}>
+              <coneGeometry args={[0.18, 0.34, 6]} />
+              <meshStandardMaterial color="#17251f" roughness={0.72} metalness={0.2} />
             </mesh>
-            <mesh castShadow position={[-0.2, 0.18, 0]} rotation={[0.2, 0, 0.45]}>
-              <boxGeometry args={[0.08, 0.4, 0.08]} />
-              <meshStandardMaterial color="#4a6a58" roughness={0.8} />
+            <mesh castShadow position={[0, 0.47, -0.14]} rotation={[Math.PI / 2, 0, 0]}>
+              <circleGeometry args={[0.11, 5]} />
+              <meshStandardMaterial color="#b2c4a8" emissive="#456c54" emissiveIntensity={0.32} roughness={0.55} />
             </mesh>
-            <mesh castShadow position={[0.2, 0.18, 0]} rotation={[0.2, 0, -0.45]}>
-              <boxGeometry args={[0.08, 0.4, 0.08]} />
-              <meshStandardMaterial color="#4a6a58" roughness={0.8} />
+            <mesh castShadow position={[-0.21, 0.16, 0]} rotation={[0.2, 0, 0.52]}>
+              <primitive attach="geometry" object={SKIRMISHER_LIMB} />
+              <meshStandardMaterial color="#30473c" roughness={0.84} />
+            </mesh>
+            <mesh castShadow position={[0.21, 0.16, 0]} rotation={[0.2, 0, -0.52]}>
+              <primitive attach="geometry" object={SKIRMISHER_LIMB} />
+              <meshStandardMaterial color="#30473c" roughness={0.84} />
+            </mesh>
+            <mesh castShadow position={[-0.16, -0.39, 0.02]} rotation={[0, 0, 0.08]}>
+              <primitive attach="geometry" object={SKIRMISHER_LIMB} />
+              <meshStandardMaterial color="#1f312a" roughness={0.9} />
+            </mesh>
+            <mesh castShadow position={[0.16, -0.39, 0.02]} rotation={[0, 0, -0.08]}>
+              <primitive attach="geometry" object={SKIRMISHER_LIMB} />
+              <meshStandardMaterial color="#1f312a" roughness={0.9} />
             </mesh>
             <mesh ref={weaponRef} castShadow position={[0.2, 0.05, -0.42]} rotation={[0.55, 0.1, 0]}>
-              <boxGeometry args={[0.05, 0.08, 0.62]} />
+              <primitive attach="geometry" object={SKIRMISHER_BLADE} />
               <meshStandardMaterial
                 color={MOURNEVEIL_PALETTE.skirmisher.blade}
                 roughness={0.32}

@@ -1,26 +1,31 @@
 /** Centralized Mourneveil presentation palette — projection only. */
 
 export const MOURNEVEIL_PALETTE = Object.freeze({
-  background: '#0c1014',
-  ambient: '#9aa6b0',
+  background: '#070b0e',
+  ambient: '#81949a',
   environment: Object.freeze({
-    floor: '#161c1a',
-    wall: '#4a5450',
-    blocker: '#6d5c48',
-    masonry: '#3e4642',
-    border: '#2a3230',
+    floor: '#18201e',
+    wall: '#3d4946',
+    blocker: '#5b5748',
+    masonry: '#303936',
+    border: '#222c29',
+    bone: '#a8a38f',
+    bronze: '#6e5838',
+    verdigris: '#3f625b',
+    iron: '#161c1d',
+    cloth: '#342f35',
   }),
   player: Object.freeze({
-    skin: '#d8b48a',
-    cloth: '#c9a06a',
-    accent: '#3f8f9a',
-    metal: '#c4b49a',
+    skin: '#b8a182',
+    cloth: '#26373a',
+    accent: '#69c9d0',
+    metal: '#a9ada3',
   }),
   skirmisher: Object.freeze({
-    body: '#5a8f78',
-    accent: '#9dcfb0',
-    blade: '#c5d4c8',
-    telegraph: '#7dffb0',
+    body: '#426b59',
+    accent: '#94b08e',
+    blade: '#9ca99f',
+    telegraph: '#7cdaa1',
     contact: '#ff6b5c',
   }),
   brute: Object.freeze({
@@ -34,7 +39,7 @@ export const MOURNEVEIL_PALETTE = Object.freeze({
   checkpoint: Object.freeze({
     inactive: '#6a8076',
     active: '#9fe0c4',
-    stone: '#7f9488',
+    stone: '#54635e',
     glowInactive: '#152018',
     glowActive: '#3f7a64',
   }),
@@ -49,9 +54,9 @@ export const MOURNEVEIL_PALETTE = Object.freeze({
     glow: '#8a7030',
   }),
   shortcut: Object.freeze({
-    closed: '#c4893d',
-    open: '#d7a35a',
-    emissive: '#5a3a12',
+    closed: '#59472f',
+    open: '#9d8054',
+    emissive: '#30200f',
   }),
   finalGate: Object.freeze({
     sealed: '#8a4d63',
