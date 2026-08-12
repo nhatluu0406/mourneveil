@@ -70,6 +70,21 @@ export function CheckpointVisual({ runtime }: { readonly runtime: GameRuntime })
         <torusGeometry args={[0.35, 0.055, 7, 32, Math.PI * 1.75]} />
         <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.verdigris} roughness={0.4} metalness={0.65} />
       </mesh>
+      {/* Compact reliquary crown stays inside the existing shrine proxy footprint. */}
+      {[0, Math.PI / 2].map((angle) => (
+        <group key={`crown:${angle}`} rotation={[0, angle, 0]}>
+          <mesh castShadow position={[0, 2.18, 0]}>
+            <torusGeometry args={[0.31, 0.045, 6, 20, Math.PI]} />
+            <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.bone} roughness={0.7} />
+          </mesh>
+          {[-0.31, 0.31].map((x) => (
+            <mesh key={x} castShadow position={[x, 1.9, 0]}>
+              <cylinderGeometry args={[0.035, 0.05, 0.56, 6]} />
+              <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.bronze} roughness={0.44} metalness={0.62} />
+            </mesh>
+          ))}
+        </group>
+      ))}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <ringGeometry args={[0.72, 1.42, 40]} />
         <meshStandardMaterial ref={ringRef} roughness={0.5} metalness={0.2} transparent opacity={0.72} />

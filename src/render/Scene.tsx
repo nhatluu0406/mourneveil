@@ -63,11 +63,11 @@ export function Scene({
     <>
       <color attach="background" args={[MOURNEVEIL_PALETTE.background]} />
       <fog attach="fog" args={['#080d10', 12, 34]} />
-      <ambientLight intensity={0.24} color="#72898d" />
-      <hemisphereLight args={['#8eabb3', '#18130f', 0.34]} />
+      <ambientLight intensity={0.29} color="#72898d" />
+      <hemisphereLight args={['#8eabb3', '#18130f', 0.38]} />
       <directionalLight
         castShadow
-        intensity={1.48}
+        intensity={1.56}
         position={[8, 16, 6]}
         color="#a9d2dc"
         shadow-mapSize={[1024, 1024]}
@@ -79,10 +79,10 @@ export function Scene({
       />
       <directionalLight intensity={0.22} position={[-7, 5, -6]} color="#c59a72" />
       <pointLight
-        position={[1.2, 2.4, -4]}
-        intensity={0.5}
-        distance={9}
-        color="#b97843"
+        position={[-9.7, 3.1, 2.7]}
+        intensity={0.92}
+        distance={8.2}
+        color="#90b9a5"
       />
       <pointLight
         position={[10, 3.1, -4]}

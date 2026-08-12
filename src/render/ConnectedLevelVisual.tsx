@@ -1,8 +1,8 @@
-import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import { CuboidCollider, RigidBody } from '@react-three/rapier'
-import { useEffect, useRef } from 'react'
-import type { MeshStandardMaterial } from 'three'
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
+import { Object3D, type InstancedMesh, type MeshStandardMaterial } from 'three'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
 import { MOURNEVEIL_CONNECTED_LEVEL } from '../game/world/connectedLevel'
 import {
@@ -10,13 +10,10 @@ import {
   activeConnectedLevelColliders,
   type ConnectedLevelBoxCollider,
 } from '../physics/connectedLevelCollision'
-import {
-  aabbFromCenterSize,
-  occludingSolidIds,
-} from './cameraOcclusion'
+import { aabbFromCenterSize, occludingSolidIds } from './cameraOcclusion'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { forEachOcclusionMaterial, registerOcclusionMaterial } from './occlusionMaterials'
-import { OssuaryHeroDressing } from './OssuaryHeroDressing'
+import { OssuaryEnvironmentKit } from './OssuaryEnvironmentKit'
 
 const COLORS = {
   floor: MOURNEVEIL_PALETTE.environment.floor,
@@ -30,13 +27,66 @@ const COLORS = {
 const FADE_OPACITY = 0.22
 const FADE_LERP = 10
 
-function SolidVisual({
+function FuneraryGateVisual({
   collider,
-  color,
+  materialRef,
 }: {
   readonly collider: ConnectedLevelBoxCollider
-  readonly color: string
+  readonly materialRef: RefObject<MeshStandardMaterial | null>
 }) {
+  const meshRef = useRef<InstancedMesh>(null)
+  const isFinal = collider.kind === 'final-gate'
+  const verticalCount = isFinal ? 7 : 5
+  const instanceCount = verticalCount + 2
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current
+    if (mesh === null) return
+    const transform = new Object3D()
+    const span = collider.size[2] * 0.72
+    for (let index = 0; index < verticalCount; index += 1) {
+      const ratio = index / (verticalCount - 1) - 0.5
+      transform.position.set(0, 0, ratio * span)
+      transform.rotation.set(0, 0, 0)
+      transform.scale.set(1, collider.size[1] / 1.32, 1)
+      transform.updateMatrix()
+      mesh.setMatrixAt(index, transform.matrix)
+    }
+    for (let rail = 0; rail < 2; rail += 1) {
+      transform.position.set(0, rail === 0 ? -0.43 : 0.43, 0)
+      transform.rotation.set(Math.PI / 2, 0, 0)
+      transform.scale.set(1, span / 1.32, 1)
+      transform.updateMatrix()
+      mesh.setMatrixAt(verticalCount + rail, transform.matrix)
+    }
+    mesh.instanceMatrix.needsUpdate = true
+  }, [collider.size, verticalCount])
+
+  return (
+    <instancedMesh
+      ref={meshRef}
+      args={[undefined, undefined, instanceCount]}
+      castShadow
+      receiveShadow
+      userData={{ solidId: collider.id }}
+    >
+      <boxGeometry args={[0.16, 1.32, 0.12]} />
+      <meshStandardMaterial
+        ref={materialRef}
+        color={isFinal ? MOURNEVEIL_PALETTE.finalGate.sealed : MOURNEVEIL_PALETTE.environment.iron}
+        emissive={isFinal ? MOURNEVEIL_PALETTE.finalGate.emissive : MOURNEVEIL_PALETTE.shortcut.emissive}
+        emissiveIntensity={isFinal ? 0.34 : 0.12}
+        roughness={0.46}
+        metalness={0.74}
+        transparent
+        opacity={1}
+        depthWrite
+      />
+    </instancedMesh>
+  )
+}
+
+function SolidVisual({ collider, color }: { readonly collider: ConnectedLevelBoxCollider; readonly color: string }) {
   const materialRef = useRef<MeshStandardMaterial>(null)
   const isFloor = collider.kind === 'floor'
   const isGate = collider.kind === 'shortcut-gate' || collider.kind === 'final-gate'
@@ -44,14 +94,9 @@ function SolidVisual({
   useEffect(() => {
     const material = materialRef.current
     if (material === null || isFloor) return
-    return registerOcclusionMaterial({
-      id: collider.id,
-      material,
-      baseOpacity: 1,
-    })
+    return registerOcclusionMaterial({ id: collider.id, material, baseOpacity: 1 })
   }, [collider.id, isFloor])
 
-  // Explicit cuboid half-extents — do not use mesh auto-colliders (scale/AABB drift).
   const halfExtents: [number, number, number] = [
     collider.size[0] / 2,
     collider.size[1] / 2,
@@ -64,20 +109,14 @@ function SolidVisual({
       {collider.kind === 'checkpoint' ? null : isFloor ? (
         <mesh receiveShadow userData={{ solidId: collider.id }}>
           <boxGeometry args={collider.size} />
-          <meshStandardMaterial
-            ref={materialRef}
-            color={color}
-            roughness={0.96}
-            metalness={0.01}
-            transparent
-            opacity={1}
-            depthWrite
-          />
+          <meshStandardMaterial ref={materialRef} color={color} roughness={0.98} metalness={0.01} />
         </mesh>
+      ) : isGate ? (
+        <FuneraryGateVisual collider={collider} materialRef={materialRef} />
       ) : (
         <RoundedBox
           args={[collider.size[0], collider.size[1], collider.size[2]]}
-          radius={isGate ? 0.06 : 0.08}
+          radius={0.07}
           smoothness={2}
           castShadow
           receiveShadow
@@ -86,15 +125,8 @@ function SolidVisual({
           <meshStandardMaterial
             ref={materialRef}
             color={color}
-            roughness={isGate ? 0.55 : 0.84}
-            metalness={isGate ? 0.36 : 0.04}
-            emissive={
-              collider.kind === 'final-gate'
-                ? MOURNEVEIL_PALETTE.finalGate.emissive
-                : collider.kind === 'shortcut-gate'
-                  ? MOURNEVEIL_PALETTE.shortcut.emissive
-                  : '#000000'
-            }
+            roughness={0.9}
+            metalness={0.03}
             transparent
             opacity={1}
             depthWrite
@@ -111,30 +143,29 @@ export function CameraOcclusionFader({ runtime }: { readonly runtime: GameRuntim
 
   useFrame(({ camera }, delta) => {
     const world = runtime.snapshot().world
-    const colliders = activeConnectedLevelColliders({
+    solidsRef.current = activeConnectedLevelColliders({
       shortcutOpen: world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed'),
       finalGateOpen: world.finalGateReached,
     })
-    solidsRef.current = colliders
       .filter((collider) => collider.kind !== 'floor')
-      .map((collider) => ({
-        id: collider.id,
-        box: aabbFromCenterSize(collider.position, collider.size),
-      }))
+      .map((collider) => ({ id: collider.id, box: aabbFromCenterSize(collider.position, collider.size) }))
 
     const player = runtime.snapshot().player.position
-    const focus = { x: player.x, y: player.y + 0.55, z: player.z }
-    const cam = { x: camera.position.x, y: camera.position.y, z: camera.position.z }
-    const occluded = new Set(occludingSolidIds(cam, focus, solidsRef.current))
+    const occluded = new Set(
+      occludingSolidIds(
+        { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+        { x: player.x, y: player.y + 0.55, z: player.z },
+        solidsRef.current,
+      ),
+    )
     const blend = Math.min(1, delta * FADE_LERP)
 
     forEachOcclusionMaterial((id, entry) => {
       const target = occluded.has(id) ? FADE_OPACITY : entry.baseOpacity
-      const material = entry.material
-      material.transparent = true
-      material.opacity += (target - material.opacity) * blend
-      material.depthWrite = material.opacity > 0.85
-      material.needsUpdate = true
+      entry.material.transparent = true
+      entry.material.opacity += (target - entry.material.opacity) * blend
+      entry.material.depthWrite = entry.material.opacity > 0.85
+      entry.material.needsUpdate = true
     })
   })
 
@@ -143,161 +174,42 @@ export function CameraOcclusionFader({ runtime }: { readonly runtime: GameRuntim
 
 export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntime }) {
   const world = runtime.snapshot().world
-  const shortcutOpen = world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed')
-  const finalGateOpen = world.finalGateReached
   const colliders = activeConnectedLevelColliders({
-    shortcutOpen,
-    finalGateOpen,
+    shortcutOpen: world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed'),
+    finalGateOpen: world.finalGateReached,
   })
   const landmarkIds = new Set(CONNECTED_LEVEL_LANDMARKS.map((entry) => entry.id))
 
   return (
     <>
-      {colliders.map((collider) => {
-        const color =
-          collider.color ??
-          (landmarkIds.has(collider.id) ? COLORS.blocker : COLORS[collider.kind])
-        return <SolidVisual key={collider.id} collider={collider} color={color} />
-      })}
+      {colliders.map((collider) => (
+        <SolidVisual
+          key={collider.id}
+          collider={collider}
+          color={collider.color ?? (landmarkIds.has(collider.id) ? COLORS.blocker : COLORS[collider.kind])}
+        />
+      ))}
 
       {MOURNEVEIL_CONNECTED_LEVEL.zones.map((zone) => {
         const width = zone.bounds.maximumX - zone.bounds.minimumX
         const depth = zone.bounds.maximumZ - zone.bounds.minimumZ
-        const cx = (zone.bounds.minimumX + zone.bounds.maximumX) / 2
-        const cz = (zone.bounds.minimumZ + zone.bounds.maximumZ) / 2
         return (
-          <group key={zone.id}>
-            <mesh receiveShadow position={[cx, 0.012, cz]}>
-              <boxGeometry args={[width, 0.02, depth]} />
-              <meshStandardMaterial color={zone.presentation.floorColor} roughness={0.96} />
-            </mesh>
-            {/* Large stone division lines — authored floor treatment, not a debug grid. */}
-            <mesh receiveShadow position={[cx, 0.02, cz]}>
-              <boxGeometry args={[width * 0.98, 0.01, 0.04]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={1} />
-            </mesh>
-            <mesh receiveShadow position={[cx, 0.02, cz]}>
-              <boxGeometry args={[0.04, 0.01, depth * 0.98]} />
-              <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={1} />
-            </mesh>
-          </group>
+          <mesh
+            key={zone.id}
+            receiveShadow
+            position={[
+              (zone.bounds.minimumX + zone.bounds.maximumX) / 2,
+              0.012,
+              (zone.bounds.minimumZ + zone.bounds.maximumZ) / 2,
+            ]}
+          >
+            <boxGeometry args={[width, 0.02, depth]} />
+            <meshStandardMaterial color={zone.presentation.floorColor} roughness={0.97} />
+          </mesh>
         )
       })}
 
-      <OssuaryHeroDressing />
-
-      {/*
-        Decorative props must read as debris/background — never full-height fake walls.
-        Gameplay solids already render via SolidVisual / CONNECTED_LEVEL_COLLIDERS.
-      */}
-      {/* Wall caps sit atop solid dividers (not walkable path blockers). */}
-      <mesh position={[-3, 1.55, 1]} castShadow>
-        <boxGeometry args={[0.55, 0.18, 3.2]} />
-        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.88} />
-      </mesh>
-      <mesh position={[10, 1.55, 0]} castShadow>
-        <boxGeometry args={[0.55, 0.18, 4]} />
-        <meshStandardMaterial color="#52444c" roughness={0.88} />
-      </mesh>
-
-      {/* Arrival rubble near solid post — low silhouette. */}
-      <mesh position={[-12.6, 0.18, 7.5]}>
-        <boxGeometry args={[0.55, 0.28, 0.4]} />
-        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.wall} roughness={0.92} />
-      </mesh>
-      <mesh position={[-12.35, 0.12, 7.85]} rotation={[0, 0.4, 0.15]}>
-        <boxGeometry args={[0.35, 0.18, 0.28]} />
-        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.94} />
-      </mesh>
-
-      {/* Outer watch rubble scrap (was fake wall). */}
-      <mesh position={[-9.2, 0.22, 4.6]}>
-        <boxGeometry args={[1.1, 0.28, 0.45]} />
-        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.masonry} roughness={0.93} />
-      </mesh>
-      <mesh position={[-8.7, 0.16, 4.9]} rotation={[0.2, 0.3, 0]}>
-        <boxGeometry args={[0.45, 0.2, 0.3]} />
-        <meshStandardMaterial color="#4a524c" roughness={0.94} />
-      </mesh>
-
-      {/* Mixed court floor borders — clearly ground dressing. */}
-      <mesh position={[1, 0.08, -1.4]}>
-        <boxGeometry args={[3.2, 0.12, 0.28]} />
-        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={0.95} />
-      </mesh>
-      <mesh position={[1, 0.08, -6.5]}>
-        <boxGeometry args={[3.2, 0.12, 0.28]} />
-        <meshStandardMaterial color={MOURNEVEIL_PALETTE.environment.border} roughness={0.95} />
-      </mesh>
-
-      {/* Ash walk rubble clusters. */}
-      <mesh position={[6.2, 0.2, -6.35]}>
-        <boxGeometry args={[0.7, 0.32, 0.4]} />
-        <meshStandardMaterial color="#4a3a38" roughness={0.93} />
-      </mesh>
-      <mesh position={[8.9, 0.16, -1.55]}>
-        <boxGeometry args={[0.55, 0.24, 0.35]} />
-        <meshStandardMaterial color="#453532" roughness={0.93} />
-      </mesh>
-
-      {/* Arena approach debris — low, not pillars. */}
-      <mesh position={[12.4, 0.18, -6.5]}>
-        <boxGeometry args={[0.5, 0.28, 0.45]} />
-        <meshStandardMaterial color="#3a2c38" roughness={0.9} />
-      </mesh>
-      <mesh position={[12.4, 0.18, -1.5]}>
-        <boxGeometry args={[0.5, 0.28, 0.45]} />
-        <meshStandardMaterial color="#3a2c38" roughness={0.9} />
-      </mesh>
-
-      {/* Shortcut / final-gate language: lintels above solids, floor marks when open — no walk-through towers. */}
-      {!shortcutOpen ? (
-        <mesh position={[-3, 1.6, -1.3]} castShadow>
-          <boxGeometry args={[0.7, 0.22, 1.5]} />
-          <meshStandardMaterial
-            color={MOURNEVEIL_PALETTE.shortcut.closed}
-            emissive={MOURNEVEIL_PALETTE.shortcut.emissive}
-            emissiveIntensity={0.45}
-            roughness={0.5}
-          />
-        </mesh>
-      ) : (
-        <mesh position={[-3, 0.06, -1.3]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.55, 0.9, 20]} />
-          <meshStandardMaterial
-            color={MOURNEVEIL_PALETTE.shortcut.open}
-            emissive={MOURNEVEIL_PALETTE.shortcut.emissive}
-            roughness={0.55}
-          />
-        </mesh>
-      )}
-
-      {!finalGateOpen ? (
-        <>
-          <mesh position={[10, 1.65, -4]} castShadow>
-            <boxGeometry args={[0.85, 0.28, 2.2]} />
-            <meshStandardMaterial
-              color={MOURNEVEIL_PALETTE.finalGate.sealed}
-              emissive={MOURNEVEIL_PALETTE.finalGate.emissive}
-              emissiveIntensity={0.55}
-              roughness={0.48}
-            />
-          </mesh>
-          <mesh position={[10, 2.05, -4]} castShadow>
-            <boxGeometry args={[1.3, 0.2, 0.4]} />
-            <meshStandardMaterial color="#3a2430" roughness={0.7} />
-          </mesh>
-        </>
-      ) : (
-        <mesh position={[10, 0.06, -4]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.7, 1.15, 22]} />
-          <meshStandardMaterial
-            color={MOURNEVEIL_PALETTE.finalGate.open}
-            emissive={MOURNEVEIL_PALETTE.finalGate.emissive}
-            roughness={0.5}
-          />
-        </mesh>
-      )}
+      <OssuaryEnvironmentKit />
     </>
   )
 }

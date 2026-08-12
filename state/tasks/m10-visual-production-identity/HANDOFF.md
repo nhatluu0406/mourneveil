@@ -5,67 +5,52 @@ Task: m10-visual-production-identity
 
 ## Status
 
-ACTIVE — M10 macro-batch 1 hero screenshot slice PASS; M10 remains open for Product Owner visual review and later visual-production work.
+ACTIVE — M10 macro-batch 2 ossuary environment production slice PASS; M10 remains open and untagged.
 
 ## Locked decisions
 
-- Visual identity is “ruined gothic ossuary under veil-light”; project-authored assets only in this batch.
-- Visuals consume M7/M9 state and never alter movement, contact, damage, timing, or physics authority.
-- Default-playable visual acceptance is based on the composed 1440×900 hero view; proof fixtures remain isolated.
-- Code-native production assemblies have stable IDs/provenance in `productionVisualLedger.ts`; imported assets continue through the M8 manifest.
-- Imported production ceilings are 2 MiB/asset and 12 MiB total; proof assets retain explicit 64 KiB limits.
+- Identity remains “ruined gothic ossuary under veil-light”; all new geometry/materials are original project-authored work with no external textures.
+- `connectedLevelCollision.ts` remains the full gameplay geometry authority. The environment kit is a non-blocking visual shell or is anchored over an existing proxy; gates consume authoritative flags but never author them.
+- M10.1 actor, animation, contact, VFX, HUD, asset, and budget contracts remain unchanged.
+- Seven inspected 1440×900 route frames, gameplay gates, and renderer growth are the acceptance boundary.
 
-## M9 closure
+## Environment production slice
 
-- Product Owner acceptance recorded in commit `e7d8204`.
-- Annotated tag `v0.9.0-combat-depth` points to that verified closure commit.
-
-## Production slice
-
-- **Player:** `actor.player.veilbound-warden`; tapered layered armor, hood/mask, asymmetric shoulder, cloak/tabard, cyan charm; existing M7 pose semantics retained.
-- **Weapon:** `weapon.player.oathblade`; authored compact profile, guard/grip, presentation-only length independent from contact reach.
-- **Skirmisher:** `enemy.skirmisher.veil-riven`; lean tapered body, faceted mask, asymmetric limbs, authored blade; rejected M8 proof GLB remains isolated.
-- **Brute:** `enemy.brute.ossuary-bulwark`; secondary silhouette pass with broad tapered mass, faceted armor, heavy weapon; gameplay role unchanged.
-- **World:** `world.kit.ossuary-hero`; bevelled collider-matched solids plus non-blocking radial paving, funerary markers, practicals, metal inlay, instanced rubble, and shrine mantle.
-- **VFX/UI:** opt-in debug contact volumes; production veil hit/guard cues; funerary HUD framing; no new effect framework.
-
-## Visual direction and performance
-
-- Canonical direction: `docs/art/visual-direction.md`.
-- Before: 138 draw calls, 1,704 triangles, 83 geometries, 3 textures, 3 programs, 225 objects, 126 meshes, 9 lights, ~81 MB heap.
-- After: 206 draw calls, 31,959 triangles, 103–105 geometries, 3 textures, 5 programs, 283 objects, 171 meshes, 8 lights, ~72–92 MB heap.
-- M10 ceilings: 280 draw calls, 75k triangles, 150 geometries, 16 textures, 12 programs, 400 objects, 240 meshes, 9 lights, 160 MB heap.
-- Resource soak: geometry/texture/mesh deltas 0/0/0 after repeated combat.
+- **Kit:** irregular funeral slabs/inlays; two wall-bay rhythms; broken wall crowns; shallow buttresses; recessed tomb niches with bronze arches; full rib arches/doorway rhythm; raised thresholds; sarcophagi/funerary slabs; markers; reliquary plinth; instanced rubble/masonry; iron gate bars; candles, cloth, roots, and veil wisps.
+- **Refuge:** shrine crown, radial rest focal, sarcophagi/markers, controlled candles and warm/cyan light retain safe-sacred identity and canonical checkpoint anchors.
+- **Corridor:** paired bone ribs, bell, slanted verdigris thresholds, compressed clutter edges, and warm directional practicals guide toward combat.
+- **Outer Watch:** wider irregular slab field, niche/buttress wall rhythm, open center, rear veil monolith, and collider-matched reliquary plinth distinguish the combat space without navigation clutter.
+- **Landmarks:** `landmark.refuge-reliquary-crown`; `landmark.combat-veil-monolith` on the rear watch-column proxy. The latter was moved after screenshot review so it does not occlude actor combat.
+- **Gates:** closed shortcut/final gate cuboids render as burial bars; their CuboidCollider and simulation-owned open state remain unchanged.
+- **Lighting/atmosphere:** 9-light ceiling retained; cool global key, cyan combat focus, warm corridor/refuge counterpoint, existing fog, and four cheap presentation-only wisps.
 
 ## Runtime evidence
 
-- `gate:m10-hero-visual` captures checkpoint, player/skirmisher, heavy impact, and guard-break frames at 1440×900; `KEEP_ARTIFACTS=1` retains `tmp-m10-hero-visual` for review.
-- Retained frames were inspected: silhouette/material/lighting/VFX/HUD changes are present and materially exceed the prior box proof; scene remains deliberately dark but actors and combat cues read.
-- M8 stabilization proves spawn/rest/respawn, three close-wall Oathblade views, obstacle detour, default skirmisher backend, and unchanged attack damage.
-- In-app browser discovery returned no available browser; repository-owned Playwright gates supplied runtime evidence.
+- `gate:m10-hero-visual` now captures: `01-refuge-wide`, `02-refuge-actor-close`, `03-corridor-composition`, `04-first-combat-composition`, `05-combat-telegraph`, `06-hit-interrupt-cue`, `07-progression-landmark`.
+- `KEEP_ARTIFACTS=1 npm run gate:m10-hero-visual` retains them under `tmp-m10-hero-visual/`; normal runs clean the directory.
+- All seven retained frames were inspected. Wall rhythm, distinct floor treatment, the two landmarks, gate bars, actor separation, telegraph, and hit cues are visible; the combat center remains clear.
 
-## Debt
+## Performance
 
-- D-001 removed after its production player/weapon revisit trigger: tested wall orientations show no glaring long-placeholder penetration.
-- D-002–D-004 remain unchanged.
+- Before (M10.1): 206 draw calls, 31,959 triangles, 103–105 geometries, 3 textures, 5 programs, 283 objects, 171 meshes, 8 lights, ~72–92 MB heap.
+- After: 220 draw calls, 35,059 triangles, 102 geometries, 3 textures, 9 programs, 266 objects, 159 meshes, 9 lights, ~91.7 MB heap at DPR 1.
+- All M10 ceilings pass. Repeated combat deltas: geometries 0, textures 0, meshes 0.
+- Instancing owns slabs, inlays, bays, recesses, buttresses, sarcophagi, rubble, markers, candles, banners, roots, and wisps.
 
 ## Verification
 
-- Focused render/asset/world/enemy/save/character/lifecycle tests: 47 files / 192 tests PASS.
-- Full `npm run verify`: lint, typecheck, 78 files / 333 tests, assets, and production build PASS.
-- Hero, M8 stabilization, all M9 combat/readability, M9 performance, and lifecycle gates PASS.
-- Final artifact audit: no `tmp-m*` directories remain.
-- Final process audit: no gate-owned Vite/Chromium process; ports 4173/4191/4192/4195/4196/4197 reusable. The Codex browser-control runtime process was not gate-owned and was intentionally left untouched.
+- Focused render/real-Rapier collision/checkpoint/navigation: 25 files / 100 tests PASS.
+- Assets import/verify PASS.
+- Hero, M8 stabilization, M9 player combat/guard/hit-reaction/telegraph, M9 performance, and lifecycle gates PASS.
+- Full `npm run verify`: lint, typecheck, 79 files / 337 tests, asset verify, and production build PASS.
+- `git diff --check`, LeanLoop doctor/sync, Git guard, and final process/artifact audit PASS.
 
-## In flight
+## Debt and limits
 
-- None after the atomic M10 macro-batch commit.
-
-## Known traps
-
-- M8 proof skirmisher GLB is not Product Owner-accepted playable art.
-- `KEEP_ARTIFACTS=1` is review-only; final task state must remove retained `tmp-m*` folders.
+- D-002–D-004 remain valid; no new cross-milestone debt.
+- Distant perimeter, mixed court, ash walk, and final arena still use more M5/M10.1 block language; this is active M10 scope, not debt.
+- Texture-free material hierarchy is intentionally retained; authored stone/cloth textures should be introduced only if a measured later screenshot pass earns their runtime cost.
 
 ## Next session starts with
 
-1. Product Owner reviews the retained-on-demand hero frames, then prioritize remaining M10 gaps by screenshot impact.
+1. Rank the mixed-court/final-approach environment, material surface refinement, and distant silhouette work by screenshot impact.

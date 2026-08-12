@@ -58,8 +58,8 @@ export const PRODUCTION_VISUAL_ASSETS = Object.freeze([
   },
   {
     id: 'world.kit.ossuary-hero',
-    sourcePath: 'src/render/OssuaryHeroDressing.tsx',
-    runtimeOwner: 'ConnectedLevelVisual',
+    sourcePath: 'src/render/OssuaryEnvironmentKit.tsx',
+    runtimeOwner: 'OssuaryEnvironmentKit',
     units: 'meters',
     upAxis: 'Y',
     pivot: 'ground-center',

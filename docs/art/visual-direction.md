@@ -16,3 +16,7 @@
 A deterministic 1440×900 checkpoint/early-combat composition must show a production-candidate Warden, skirmisher, shrine, architecture, dressing, lighting, feedback, and HUD that read as one scene. Render meshes remain non-authoritative; accepted world and actor colliders stay explicit proxies.
 
 Initial 1440×900 hero-scene ceilings, measured after the first integrated pass: **280 draw calls, 75k triangles, 150 geometries, 16 textures, 12 programs, 400 objects, 240 meshes, 9 lights, 160 MB reported JS heap**. These are guardrails rather than optimization targets; the gate remains DPR-capped and checks resource lifetime separately.
+
+## Ossuary route composition
+
+The refuge, connecting rib corridor, and Outer Watch use one reusable shell over unchanged simple physics proxies: irregular funeral slabs and verdigris thresholds underfoot; buttress-separated wall bays with recessed bronze-crowned tomb niches; sparse sarcophagi, markers, candles, cloth, roots, and masonry at path edges; iron bars for authoritative gates. The refuge reliquary crown and rear veil-cracked watch monolith are the two orientation anchors. Warm refuge/corridor practicals yield to a cooler, wider combat focus; clutter stays off the central melee footprint.

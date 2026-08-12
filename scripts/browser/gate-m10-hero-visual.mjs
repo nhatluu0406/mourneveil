@@ -31,24 +31,6 @@ async function capture(page, name, settleMilliseconds = 900) {
   await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: false })
 }
 
-async function holdGuard(page) {
-  const canvas = page.locator('canvas')
-  const bounds = await canvas.boundingBox()
-  if (bounds === null) throw new Error('gameplay canvas has no bounds')
-  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
-  await page.mouse.down({ button: 'right' })
-}
-
-async function waitForGuardBreak(page) {
-  const deadline = Date.now() + 12_000
-  while (Date.now() < deadline) {
-    const state = await page.evaluate(() => window.__MOURNEVEIL_GATE__.snapshot())
-    if (state.incomingContact.lastHit?.outcome === 'guard-broken') return state
-    await page.waitForTimeout(40)
-  }
-  throw new Error('guard break not observed in hero fixture')
-}
-
 let cleanupReport = null
 await runOwnedBrowserGate({
   port: PORT,
@@ -94,9 +76,23 @@ await runOwnedBrowserGate({
         ? pass('production visual budgets satisfied')
         : fail(`production visual budgets exceeded: ${exceeded.join(', ')}`)
     }
-    await capture(page, '01-hero-checkpoint')
+    await capture(page, '01-refuge-wide')
 
     if (!baselineOnly) {
+      await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.setPlayerPosition({ x: -6.15, y: 0.82, z: -0.2 })
+        gate.setPlayerFacing({ x: 0.5, z: 0.86 })
+      })
+      await capture(page, '02-refuge-actor-close')
+
+      await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.setPlayerPosition({ x: -7.9, y: 0.82, z: 1.65 })
+        gate.setPlayerFacing({ x: -0.55, z: 0.84 })
+      })
+      await capture(page, '03-corridor-composition')
+
       await page.reload({ waitUntil: 'load' })
       await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
         timeout: 30_000,
@@ -108,18 +104,44 @@ await runOwnedBrowserGate({
           .snapshot()
           .enemies.find((entry) => entry.id === 'enemy.skirmisher.introduction')
         if (intro === undefined) throw new Error('introduction skirmisher missing')
-        gate.setPlayerPosition({
-          x: intro.position.x + 0.8,
-          y: 0.82,
-          z: intro.position.z - 1.1,
-        })
-        gate.setPlayerFacing({ x: -0.59, z: 0.81 })
+        gate.setPlayerPosition({ x: -9.15, y: 0.82, z: 2.15 })
+        gate.setPlayerFacing({ x: -0.74, z: 0.67 })
         gate.advance(2)
       })
-      await capture(page, '02-player-skirmisher')
+      await capture(page, '04-first-combat-composition')
 
       await page.evaluate(() => {
         const gate = window.__MOURNEVEIL_GATE__
+        gate.resetMeleeFixture()
+        for (const enemy of gate.snapshot().enemies) {
+          if (enemy.id !== 'enemy.skirmisher.introduction') gate.defeatEnemy(enemy.id)
+        }
+        gate.setPlayerPosition({ x: -9.05, y: 0.82, z: 3.1 })
+        gate.setPlayerFacing({ x: -1, z: 0 })
+      })
+      await settle(page, 550)
+      const telegraph = await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.resetMeleeFixture()
+        for (const enemy of gate.snapshot().enemies) {
+          if (enemy.id !== 'enemy.skirmisher.introduction') gate.defeatEnemy(enemy.id)
+        }
+        gate.setPlayerPosition({ x: -9.05, y: 0.82, z: 3.1 })
+        gate.setPlayerFacing({ x: -1, z: 0 })
+        for (let step = 0; step < 420; step += 1) {
+          gate.advance(1)
+          const intro = gate.snapshot().enemies.find((enemy) => enemy.id === 'enemy.skirmisher.introduction')
+          if (intro?.action.phase === 'startup') return intro.action.phase
+        }
+        return null
+      })
+      telegraph === 'startup' ? pass('deterministic skirmisher telegraph framed') : fail('skirmisher startup not reached')
+      await capture(page, '05-combat-telegraph', 45)
+
+      await page.evaluate(() => {
+        const gate = window.__MOURNEVEIL_GATE__
+        gate.resetMeleeFixture()
+        gate.restorePlayer()
         const intro = gate
           .snapshot()
           .enemies.find((entry) => entry.id === 'enemy.skirmisher.introduction')
@@ -134,30 +156,16 @@ await runOwnedBrowserGate({
         while (gate.snapshot().combat.phase !== 'active') gate.advance(1)
         gate.advance(1)
       })
-      await capture(page, '03-heavy-impact', 80)
+      await capture(page, '06-hit-interrupt-cue', 80)
 
-      await page.reload({ waitUntil: 'load' })
-      await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
-        timeout: 30_000,
-      })
-      await settle(page, 1_000)
       await page.evaluate(() => {
         const gate = window.__MOURNEVEIL_GATE__
         gate.resetMeleeFixture()
+        gate.restorePlayer()
+        gate.setPlayerPosition({ x: -9.45, y: 0.82, z: 1.55 })
+        gate.setPlayerFacing({ x: -0.88, z: -0.48 })
       })
-      await holdGuard(page)
-      await page.waitForFunction(() => window.__MOURNEVEIL_GATE__.snapshot().defense.guarding)
-      await page.evaluate(() => {
-        const gate = window.__MOURNEVEIL_GATE__
-        for (const enemy of gate.snapshot().enemies) {
-          if (enemy.id !== 'enemy.skirmisher.introduction') gate.defeatEnemy(enemy.id)
-        }
-        gate.setPlayerPosition({ x: -9.05, y: 0.82, z: 3.1 })
-        gate.setPlayerFacing({ x: -1, z: 0 })
-      })
-      await waitForGuardBreak(page)
-      await capture(page, '04-guard-break', 60)
-      await page.mouse.up({ button: 'right' })
+      await capture(page, '07-progression-landmark')
     }
 
     assetErrors.length === 0 ? pass('no runtime asset errors') : fail(assetErrors.join(' | '))

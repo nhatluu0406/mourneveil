@@ -1,55 +1,55 @@
-# PLAN: M10 Visual Production & Identity — Hero Screenshot Pass
+# PLAN: M10 Visual Production & Identity — Ossuary Environment Production Slice
 <!-- Live M10 graph only. -->
 
-Input: Product Owner M10 macro-batch 1 | Stack: `STACK.md` | Contract: `docs/art/visual-direction.md`
+Input: Product Owner M10 macro-batch 2 | Stack: `STACK.md` | Contract: `docs/art/visual-direction.md`
 Task slug: `m10-visual-production-identity`
 
 ## Goal
 
-Replace the checkpoint/early-combat hero view’s graybox read with one coherent project-authored dark-fantasy presentation while preserving all gameplay authority and measured browser performance.
+Turn the playable refuge → traversal corridor → first-combat route into a readable ruined-gothic ossuary environment while retaining simple authoritative colliders and measured runtime performance.
 
 ## Non-goals
 
-- M11; third-party assets; gameplay retuning; collider changes; animation-driven timing; generalized retargeting, particles, material registry, post-processing, or compression; production audio; controller; push/tag M10.
+- M11; M10 closure/tag; gameplay, collider, encounter, navigation, or save changes; actor rebuild; third-party assets/textures; texture-heavy workflow; generalized particles, renderer, batching, or material registry; HUD redesign; push.
 
 ## Steps
 
-- [x] 1. Lock M10 direction, asset acceptance/budget policy, and baseline evidence
+- [x] 1. Baseline and lock the render-only route composition contract
   - depends: —
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `docs/art/visual-direction.md`, asset contract/ledger, visual gate, baseline evidence
-  - verifier: `npm run assets:verify && npm run gate:m10-hero-visual -- --baseline`
-- [x] 2. Build production-candidate Warden + Oathblade and skirmisher projections
+  - owns/allows: M10 visual gate evidence, route composition data/tests, PLAN/CHECKPOINT
+  - verifier: `npm run gate:m10-hero-visual -- --baseline && npm run test -- src/render`
+- [x] 2. Expand the reusable ossuary architecture, burial, metal, and dressing kit
   - depends: 1
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: player/enemy render projection, shared project-authored geometry/material modules, focused render tests
-  - verifier: `npm run test -- src/render && npm run gate:m10-hero-visual`
-- [x] 3. Build hero-area environment, shrine integration, lighting, VFX, and HUD cohesion
+  - owns/allows: `src/render/OssuaryEnvironmentKit.tsx`, shared geometry/palette, ledger and focused tests; no physics authoring
+  - verifier: `npm run test -- src/render && npm run lint && npm run typecheck`
+- [x] 3. Compose refuge, corridor, first-combat space, landmarks, gates, lighting, and atmosphere
   - depends: 2
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: scene/world/checkpoint/VFX/UI projection only; explicit physics proxies unchanged
-  - verifier: `npm run gate:m10-hero-visual && npm run gate:m9-player-combat`
-- [x] 4. Measure production budgets, run gameplay/full gates, and record M10 handoff
+  - owns/allows: connected-level/checkpoint/scene presentation and deterministic hero gate; authoritative colliders unchanged
+  - verifier: `npm run gate:m10-hero-visual && npm run gate:m8-stabilization && npm run gate:m9-player-combat`
+- [x] 4. Measure performance/growth, run full gameplay and repository gates, and record handoff
   - depends: 3
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: asset budgets, performance gate, PLAN/HANDOFF/current-state/REPOMAP/debt evidence
-  - verifier: `npm run verify && npm run gate:m9-perf-baseline && python3 scripts/leanloop/doctor.py --strict`
+  - owns/allows: gate budgets/evidence, visual direction, HANDOFF/CHECKPOINT/current-state/REPOMAP/debt evidence
+  - verifier: `npm run verify && npm run gate:m9-perf-baseline && npm run gate:lifecycle && python3 scripts/leanloop/doctor.py --strict`
 
 ## Parallel groups
 
-- None; Product Owner requires one coding writer and ordered screenshot integration.
+- None; Product Owner requires Codex-only single-writer execution.
 
 ## Decisions
 
-- 2026-08-12 | M10 replaces the prior roadmap’s Ranged / Magic slot by explicit Product Owner reprioritization; accepted M9 history remains unchanged.
-- 2026-08-12 | Visual geometry and animation are presentation-only; existing colliders, contact reach, action timing, and semantic animation state remain authoritative.
-- 2026-08-12 | Quality is accepted at the composed 1440×900 hero view, not by asset-load success alone.
+- 2026-08-12 | Collider-matched cuboids remain gameplay authority; the richer shell is non-blocking projection and may extend around, but never narrow, the readable route.
+- 2026-08-12 | Repeated kit pieces share geometries/material parameters and use instancing where multiplicative; no authored textures unless geometry/material composition fails the visual gate.
+- 2026-08-12 | Visual acceptance is based on seven inspected 1440×900 route frames plus unchanged gameplay gates, not geometry count alone.
 
 ## Escalation
 
-- Stop if the visual pass requires gameplay/collider authority changes or cannot remain inside measured renderer budgets.
+- Stop if route readability requires collider/gameplay changes or renderer ceilings cannot be met without weakening the requested composition.
 - Same failure 3× → persist a stuck report and escalate.
