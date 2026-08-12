@@ -27,6 +27,14 @@ function state(
   }
 }
 
+function skillState(actionId: 'skill.veil-step' | 'skill.oath-cleave' | 'skill.ward-pulse'): AnimationPresentationState {
+  const mode = actionId === 'skill.veil-step' ? 'dodge' : actionId === 'skill.oath-cleave' ? 'heavy-attack' : 'heal'
+  return {
+    ...state(mode, 'startup', 0.75),
+    action: { actionId, executionId: 2, phase: 'startup', normalizedPhaseProgress: 0.75 },
+  }
+}
+
 describe('player procedural pose', () => {
   it('keeps idle restrained and stops locomotion limbs at idle', () => {
     const idle = resolvePlayerProceduralPose(state('idle'), 30)
@@ -59,5 +67,14 @@ describe('player procedural pose', () => {
       bodyScaleY: 0.28,
       bodyRoll: Math.PI / 2.35,
     })
+  })
+
+  it('gives each active skill a distinct deterministic silhouette', () => {
+    const veil = resolvePlayerProceduralPose(skillState('skill.veil-step'), 20)
+    const cleave = resolvePlayerProceduralPose(skillState('skill.oath-cleave'), 20)
+    const ward = resolvePlayerProceduralPose(skillState('skill.ward-pulse'), 20)
+    expect(new Set([veil.torsoPitch, cleave.torsoPitch, ward.torsoPitch]).size).toBe(3)
+    expect(cleave.weaponPitch).toBeLessThan(veil.weaponPitch)
+    expect(ward.leftArmPitch).toBeLessThan(veil.leftArmPitch)
   })
 })

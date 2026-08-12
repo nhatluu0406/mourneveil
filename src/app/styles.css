@@ -204,6 +204,7 @@ body {
     rgb(2 4 5 / 72%);
   backdrop-filter: blur(3px);
   pointer-events: auto;
+  overflow: hidden;
 }
 
 .inventory-panel {
@@ -893,7 +894,9 @@ body {
   max-height: calc(100vh - 2rem);
   overflow: hidden;
   padding: 0.85rem 1rem 0.9rem;
+  scrollbar-width: none;
 }
+.inventory-panel--build::-webkit-scrollbar { display: none; }
 .inventory-panel--build .inventory-panel__header { margin-bottom: 0.35rem; }
 .inventory-panel--build h2 { font-size: 1.35rem; }
 .inventory-panel__body {
@@ -926,7 +929,7 @@ body {
 .progression-summary__xp strong { color: #d7c28e; }
 .progression-summary__track { height: 0.28rem; overflow: hidden; border: 1px solid rgb(141 191 186 / 24%); background: rgb(0 0 0 / 42%); }
 .progression-summary__track span { display: block; height: 100%; background: linear-gradient(90deg, #4d7f7b, #9cded5 60%, #d3af67); box-shadow: 0 0 0.7rem rgb(109 210 199 / 36%); }
-.inventory-panel__columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(17rem, 0.85fr); gap: 0.65rem; min-height: 0; }
+.inventory-panel__columns { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(24rem, 1.08fr); gap: 0.75rem; min-height: 0; }
 .inventory-panel__side { display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; }
 .progression-attribute { position: relative; display: grid; grid-template-columns: 2.8rem minmax(0, 1fr) 1.7rem 1.7rem; align-items: center; gap: 0.4rem; min-height: 3.4rem; margin-bottom: 0.3rem; padding: 0.35rem 0.45rem; overflow: hidden; border: 1px solid rgb(255 255 255 / 8%); background: linear-gradient(100deg, rgb(22 21 20 / 86%), rgb(5 9 10 / 75%)); }
 .progression-attribute::before { position: absolute; inset: 0 auto 0 0; width: 0.2rem; content: ''; background: currentColor; box-shadow: 0 0 1rem currentColor; }
@@ -966,10 +969,18 @@ body {
 .inventory-item-card__copy small,
 .inventory-skill-card > div > small,
 .inventory-skills__equipped > div > small { display: block; color: rgb(207 196 175 / 58%); font-size: 0.54rem; }
-.inventory-skills h3 { display: flex; align-items: center; gap: 0.45rem; }
+.inventory-skills h3 { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.45rem; }
+.inventory-skills h3 small { color: rgb(156 197 190 / 58%); font: 500 0.52rem var(--ui-body); letter-spacing: 0.08em; text-align: right; text-transform: uppercase; }
 .inventory-skills h3 kbd { padding: 0.08rem 0.28rem; color: #d7c28e; border: 1px solid rgb(181 151 101 / 35%); font-size: 0.58rem; }
-.inventory-skills__equipped { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 0.4rem; align-items: center; margin-bottom: 0.35rem; padding: 0.35rem 0.4rem; border: 1px solid rgb(141 191 186 / 24%); background: rgb(0 0 0 / 22%); }
-.inventory-skills ul { display: grid; gap: 0.28rem; margin: 0; padding: 0; list-style: none; }
+.inventory-skills ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.38rem; margin: 0; padding: 0.38rem 0 0; border-top: 1px solid rgb(181 151 101 / 20%); list-style: none; }
+.inventory-skill-card { grid-template-columns: 2.45rem minmax(0, 1fr); grid-template-rows: auto auto; align-content: start; min-height: 6.4rem; margin: 0; border: 0; border-left: 2px solid rgb(255 255 255 / 8%); background: linear-gradient(110deg, rgb(0 0 0 / 24%), transparent 80%); }
+.inventory-skill-card > .inventory-item-glyph { grid-row: 1 / span 2; }
+.inventory-skill-card button { grid-column: 2; justify-self: start; padding: 0.18rem 0.42rem; }
+.inventory-skill-card[data-skill-id="skill.veil-step"] { color: #8ad8d2; }
+.inventory-skill-card[data-skill-id="skill.oath-cleave"] { color: #d7a24f; }
+.inventory-skill-card[data-skill-id="skill.ward-pulse"] { color: #b9cfc3; }
+.inventory-skill-card .inventory-item-glyph { color: currentColor; border-color: currentColor; }
+.inventory-skill-card.is-equipped { border-color: currentColor; background: linear-gradient(110deg, color-mix(in srgb, currentColor 12%, transparent), transparent 75%); }
 .inventory-skill-card.is-locked { opacity: 0.55; }
 .inventory-skill-card button:disabled { cursor: not-allowed; opacity: 0.35; }
 .inventory-owned { min-height: 0; overflow: hidden; }
@@ -997,6 +1008,11 @@ body {
 .gameplay-hud__skill-slot.is-cooling { border-color: rgb(181 151 101 / 28%); }
 .gameplay-hud__skill-glyph { position: relative; display: grid; width: 2.1rem; height: 2.3rem; place-items: center; overflow: hidden; color: #9ed0c7; border: 1px solid rgb(141 191 186 / 30%); }
 .gameplay-hud__skill-glyph svg { width: 1.55rem; height: 1.55rem; }
+.skill-glyph__mass { fill: currentColor; fill-opacity: 0.12; }
+.skill-glyph__accent { fill: currentColor; fill-opacity: 0.42; }
+.skill-glyph--veil-step { color: #83ddd6; }
+.skill-glyph--oath-cleave { color: #dfa751; }
+.skill-glyph--ward-pulse { color: #b8d1c5; }
 .gameplay-hud__skill-cooldown {
   position: absolute;
   inset: auto 0 0;
@@ -1023,10 +1039,17 @@ body {
   .progression-summary { grid-template-columns: 5rem minmax(8rem, 1fr) 5rem; }
   .inventory-panel__columns,
   .inventory-owned ul { grid-template-columns: 1fr; }
+  .inventory-skills ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 /* Compact height / 1280×720: themed internal scroll on owned relics only. */
 @media (max-height: 760px), (max-width: 1280px) {
+  .inventory-panel--build { padding-block: 0.55rem; }
+  .inventory-panel--build .inventory-panel__header { margin-bottom: 0.2rem; }
+  .progression-summary { padding-block: 0.3rem; }
+  .progression-attribute { min-height: 3rem; margin-bottom: 0.2rem; padding-block: 0.25rem; }
+  .inventory-panel__body { gap: 0.35rem; }
+  .inventory-skill-card { min-height: 5.5rem; padding-block: 0.25rem; }
   .inventory-owned {
     max-height: 7.5rem;
     overflow-x: hidden;

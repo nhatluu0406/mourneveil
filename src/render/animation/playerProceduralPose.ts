@@ -1,4 +1,5 @@
 import type { AnimationPresentationState } from './animationPresentation'
+import { SKILL_OATH_CLEAVE_ID, SKILL_VEIL_STEP_ID, SKILL_WARD_PULSE_ID } from '../../game/skills/skillDefinition'
 
 export interface PlayerProceduralPose {
   readonly bodyOffsetX: number
@@ -26,6 +27,21 @@ export function resolvePlayerProceduralPose(
   const breath = Math.sin(simulationStep * 0.028)
   const speed = Math.min(state.locomotionSpeed, PLAYER_MOVE_SPEED_REF)
   const locomotionCycle = simulationStep * (0.09 + speed * 0.022)
+
+  if (state.action?.actionId === SKILL_VEIL_STEP_ID) {
+    const compression = phase === 'startup' ? progress : phase === 'active' ? 1 - progress * 0.35 : 0.65 * (1 - progress)
+    return pose({ bodyOffsetX: -0.12 * compression, bodyOffsetY: -0.08 * compression, bodyScaleX: 0.88, bodyScaleZ: 1.16, torsoPitch: 0.5 * compression, bodyRoll: -0.18 * compression, limbSwing: 0.62, leftArmPitch: 0.5, rightArmPitch: -0.72, weaponPitch: 0.28 })
+  }
+  if (state.action?.actionId === SKILL_OATH_CLEAVE_ID) {
+    const coil = phase === 'startup' ? progress : 0
+    const release = phase === 'active' ? Math.sin(progress * Math.PI) : 0
+    const settle = phase === 'recovery' ? 1 - progress : 0
+    return pose({ bodyOffsetY: -0.06 * coil - 0.08 * release, bodyScaleX: 1 + 0.08 * release, bodyScaleZ: 1.1 - 0.08 * release, torsoPitch: -0.78 * coil + 0.92 * release + 0.28 * settle, bodyRoll: -0.42 * coil + 0.52 * release, leftArmPitch: -0.58 * coil + 0.72 * release, rightArmPitch: -1.62 * coil + 1.82 * release, weaponPitch: -0.95 * coil + 0.88 * release })
+  }
+  if (state.action?.actionId === SKILL_WARD_PULSE_ID) {
+    const brace = phase === 'startup' ? progress : phase === 'active' ? 1 : 1 - progress
+    return pose({ bodyOffsetY: -0.035 * brace, bodyScaleX: 1.08, bodyScaleZ: 1.05, torsoPitch: -0.24 * brace, leftArmPitch: -1.28 * brace, rightArmPitch: -1.05 * brace, weaponPitch: -0.3 * brace })
+  }
 
   switch (state.mode) {
     case 'defeated':

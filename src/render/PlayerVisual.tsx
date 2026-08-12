@@ -19,12 +19,18 @@ import { combatContactCueLayout, shouldShowCombatContactDebug } from './combatCo
 import { CombatContactVolumeCue } from './CombatContactVolumeCue'
 import { createProfilePrismGeometry, createTaperedPrismGeometry } from './productionGeometry'
 import { OathbladeVisual } from './actors/OathbladeVisual'
+import { PlayerSkillVfx } from './PlayerSkillVfx'
 
 const PLAYER_WEAPON_X = 0.29
 const WARDEN_TORSO = createTaperedPrismGeometry({ bottomWidth: 0.38, topWidth: 0.52, height: 0.58, depth: 0.3 })
 const WARDEN_TABARD = createTaperedPrismGeometry({ bottomWidth: 0.28, topWidth: 0.34, height: 0.52, depth: 0.12 })
 const WARDEN_GREAVE = createTaperedPrismGeometry({ bottomWidth: 0.13, topWidth: 0.19, height: 0.44, depth: 0.18 })
 const WARDEN_ARM = createTaperedPrismGeometry({ bottomWidth: 0.09, topWidth: 0.15, height: 0.42, depth: 0.14 })
+const WARDEN_BREASTPLATE = createProfilePrismGeometry(
+  [[-0.22, -0.2], [-0.28, 0.12], [-0.15, 0.3], [0, 0.36], [0.15, 0.3], [0.28, 0.12], [0.22, -0.2], [0, -0.3]],
+  0.055,
+)
+const WARDEN_HOOD_CROWN = createTaperedPrismGeometry({ bottomWidth: 0.31, topWidth: 0.18, height: 0.3, depth: 0.28 })
 const WARDEN_CLOAK = createProfilePrismGeometry(
   [[-0.25, 0.28], [-0.34, -0.34], [0, -0.46], [0.34, -0.34], [0.25, 0.28]],
   0.055,
@@ -196,6 +202,10 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
             metalness={0.46}
           />
         </mesh>
+        <mesh castShadow position={[0, 0.08, -0.177]} rotation={[Math.PI / 2, 0, 0]}>
+          <primitive attach="geometry" object={WARDEN_BREASTPLATE} />
+          <meshStandardMaterial color="#63706a" roughness={0.42} metalness={0.58} />
+        </mesh>
         <mesh castShadow position={[0, -0.14, -0.17]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.225, 0.026, 6, 20, Math.PI]} />
           <meshStandardMaterial color="#76563b" roughness={0.4} metalness={0.68} />
@@ -228,13 +238,13 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
           <cylinderGeometry args={[0.145, 0.19, 0.26, 7]} />
           <meshStandardMaterial color="#12191a" roughness={0.86} metalness={0.12} />
         </mesh>
-        <mesh castShadow position={[0, 0.54, -0.14]} rotation={[Math.PI / 2, 0, 0]} scale={[0.9, 1.2, 1]}>
-          <octahedronGeometry args={[0.14, 0]} />
+        <mesh castShadow position={[0, 0.67, 0.015]}>
+          <primitive attach="geometry" object={WARDEN_HOOD_CROWN} />
           <meshStandardMaterial
             ref={cloakMaterialRef}
-            color="#9f9b8b"
-            roughness={0.48}
-            metalness={0.42}
+            color="#1b2b2e"
+            roughness={0.9}
+            metalness={0.05}
           />
         </mesh>
         <mesh position={[0, 0.535, -0.255]}>
@@ -264,6 +274,7 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
         <torusGeometry args={[0.3, 0.025, 6, 28, Math.PI * 1.25]} />
         <meshStandardMaterial ref={guardMaterialRef} color="#8fc4da" transparent opacity={0.5} />
       </mesh>
+      <PlayerSkillVfx runtime={runtime} />
     </group>
   )
 }

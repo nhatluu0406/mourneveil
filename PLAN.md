@@ -1,56 +1,49 @@
-# PLAN: M13 Character Progression & Build Identity — Macro-batch 3
+# PLAN: M13 Character Progression & Build Identity — Macro-batch 4
 <!-- Live M13 graph only. -->
 
-Input: Product Owner M13 MB3 active-skills brief | Stack: `STACK.md`
+Input: Product Owner M13 MB4 presentation brief | Stack: `STACK.md`
 Task slug: `m13-character-progression-build-identity`
-Agent: Cursor only
+Agent: Codex only
 
 ## Goal
 
-Make build identity playable: one equipped active skill, three authored skills with simulation authority, loadout persistence, HUD/panel skill presentation, and Oath & Armory without a dominant native scrollbar.
+Make active skills and progression visibly native to Mourneveil, eliminate native inventory scrolling at 1440×900, and materially improve the Refuge–Court hero frames without changing gameplay authority.
 
 ## Non-goals
 
-- Skill tree, hotbar, mana, 8-ability UI
-- Animation/VFX/icon art polish (Codex later)
-- M14, push, multiplayer, ECS
-- Universal cancel-anything behavior
-- Broad unrelated render/world refactors
+- Skill timing, damage, cooldown, movement, guard, unlock, progression, or SaveFileV4 changes
+- New region, gameplay system, external assets, third-party icons, controller, M14
+- New render authority, per-activation resources, or broad world/camera refactor
 
 ## Steps
 
-- [x] 1. Active-skill contract, three skills, unlock/equip/cooldown/save V4
+- [x] 1. Reproduce and fix Oath & Armory overflow contract
   - depends: —
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/game/skills/**`, combat/defense/attack hooks, `src/game/save/**`, STACK skill law, input skill binding
-  - verifier: `npx vitest run src/game/skills src/game/save src/game/combat/playerDefense.test.ts src/game/character/playerProgression`
-- [x] 2. GameRuntime integration + HUD/panel skill UI + scrollbar hardening
+  - owns/allows: `src/ui/**`, `src/app/styles.css`, M13 visual gate
+  - verifier: focused UI tests + 1440×900 no-scroll assertions + 1280×720 single-owned-scroller assertion
+- [x] 2. Add skill identity and actor presentation
   - depends: 1
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `GameRuntime`, `browserGate`, `useGameRuntime`, `src/ui/**`, `src/app/styles.css`, animation projection hooks
-  - verifier: `npx vitest run src/ui src/game/runtime/GameRuntime.test.ts src/render/animation`
-- [x] 3. Gates, regression, hygiene, docs/HANDOFF
-  - depends: 1, 2
+  - owns/allows: presentation-only skill glyph/VFX/pose modules, `PlayerVisual`, restrained enemy materials
+  - verifier: focused skill presentation/animation tests + `gate:m13-active-skills` + M13 visual captures
+- [ ] 3. Uplift Refuge–Court world art and complete integration
+  - depends: 2
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `scripts/browser/gate-m13-*`, package scripts, PLAN/HANDOFF/current-state/REPOMAP
-  - verifier: `npm run gate:m13-active-skills` + `npm run gate:m13-progression` + visual gate + requested regressions + `npm run verify`
+  - owns/allows: ADR-0002 world types/registry/placements/shared materials, gates, docs/state
+  - verifier: route/world tests + M13 visual gate + M10 performance/resource soak + requested regressions + `npm run verify`
 
-## Decisions
+## Locked decisions
 
-- Unlocks derived from level (L1 Veil Step, L2 Oath Cleave, L3 Ward Pulse); do not persist unlock lists.
-- Persist equipped skill id only via SaveFileV4; do not persist cooldown/activation/execution.
-- Death/respawn/save restore clear transient skill cooldown via existing combat reset.
-- Skills activate only from combat idle + alive + not guarding/guard-broken; no universal cancel.
-- Key binding: `Q` (`KeyQ`).
-- Ward Pulse: clear guard impact + temporary +1 threshold for 90 steps.
-- Veil Step: collision-resolved reposition, no i-frames, longer cooldown than dodge.
-- Oath Cleave: fixed-step contact attack using Might via heavy-damage resolution + authored bonus.
-- Panel: 1440×900 no native page/panel scrollbar; 1280×720 themed internal scroll on least-critical owned-relics section only.
+- All skill movement/contact/effect/timing remains simulation-owned; animation, VFX, icons, HUD, and environment are projections only.
+- 1440×900 has no page, panel, or native owned scrollbar; 1280×720 may scroll only the relic inventory region.
+- Skill vocabulary: Veil Step torn rupture; Oath Cleave bronze oath-force; Ward Pulse angular containment facets.
+- Visible fixtures outnumber actual lights; shared geometry/materials and conditional VFX must avoid activation-time resource growth.
 
 ## Escalation
 
 - Same failure 3× → stuck report + stop.
-- Authority conflict with combat/save → stop for review.
+- Any need to redesign skill/progression/save/combat authority → stop for review.

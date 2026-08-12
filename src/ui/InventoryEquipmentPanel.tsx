@@ -2,7 +2,6 @@ import type { GameRuntime, GameRuntimeSnapshot } from '../game/runtime/GameRunti
 import { getItemDefinition, type EquipSlot, type ItemDefinition, type ItemId } from '../game/items/itemDefinition'
 import type { ProgressionAttributeId } from '../game/character/playerProgression'
 import {
-  getSkillDefinition,
   SKILL_DEFINITIONS,
   SKILL_INPUT_BINDING_LABEL,
   type SkillId,
@@ -78,7 +77,7 @@ export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: In
 
   return (
     <div className="inventory-overlay" role="presentation">
-      <aside className="inventory-panel inventory-panel--build" aria-label="Inventory, equipment, and progression" data-scrollbar-policy="contained">
+      <aside className="inventory-panel inventory-panel--build" aria-label="Inventory, equipment, and progression" data-scrollbar-policy="contained" data-inventory-panel="1">
         <header className="inventory-panel__header">
           <div><p className="inventory-panel__eyebrow">Veilbound Warden</p><h2>Oath & Armory</h2></div>
           <button type="button" className="inventory-panel__close" onClick={onClose}>Close · I</button>
@@ -122,23 +121,7 @@ export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: In
               </section>
 
               <section className="inventory-skills" aria-label="Active oath skills" data-skill-loadout="1">
-                <h3>Active Oath <kbd>{SKILL_INPUT_BINDING_LABEL}</kbd></h3>
-                <div className="inventory-skills__equipped">
-                  <span className="inventory-item-glyph">
-                    <SkillGlyph id={skills.equippedSkillId ?? 'empty'} />
-                  </span>
-                  <div>
-                    <span>Equipped</span>
-                    <strong>{skills.equippedSkillId === null ? 'None' : getSkillDefinition(skills.equippedSkillId)?.displayName}</strong>
-                    <small>
-                      {skills.ready
-                        ? 'Ready'
-                        : skills.cooldownRemainingSteps > 0
-                          ? `Cooldown ${skills.cooldownRemainingSteps} steps`
-                          : 'Committed'}
-                    </small>
-                  </div>
-                </div>
+                <h3><span>Active Oath</span><small>{skills.equippedSkillId === null ? 'No oath bound' : skills.ready ? 'Equipped · Ready' : skills.cooldownRemainingSteps > 0 ? `Equipped · ${skills.cooldownRemainingSteps} steps` : 'Equipped · Committed'}</small><kbd>{SKILL_INPUT_BINDING_LABEL}</kbd></h3>
                 <ul>
                   {SKILL_DEFINITIONS.map((definition) => {
                     const isUnlocked = unlocked.has(definition.id)
@@ -151,7 +134,7 @@ export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: In
                       >
                         <span className="inventory-item-glyph"><SkillGlyph id={definition.id} /></span>
                         <div>
-                          <span>{definition.category} · CD {definition.action.cooldownSteps}</span>
+                          <span>{definition.category} · {definition.action.cooldownSteps} step cooldown</span>
                           <strong>{definition.displayName}</strong>
                           <small>{isUnlocked ? definition.shortDescription : `Unlocks at level ${definition.unlockLevel}`}</small>
                         </div>
@@ -160,7 +143,7 @@ export function InventoryEquipmentPanel({ snapshot, runtime, open, onClose }: In
                           disabled={!isUnlocked || isEquipped}
                           onClick={() => equipSkill(definition.id)}
                         >
-                          {isEquipped ? 'Bound' : isUnlocked ? 'Equip' : 'Locked'}
+                          {isEquipped ? 'Equipped' : isUnlocked ? 'Bind' : `L${definition.unlockLevel}`}
                         </button>
                       </li>
                     )
