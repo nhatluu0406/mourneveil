@@ -937,6 +937,30 @@ body {
   border-color: rgb(132 205 202 / 45%);
 }
 
+.gameplay-hud__acquisition,
+.gameplay-hud__slice-complete {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.45rem 0.78rem;
+  border: 1px solid rgb(196 170 120 / 42%);
+  background: rgb(8 10 12 / 82%);
+  color: #e7dfd0;
+  text-align: center;
+}
+
+.gameplay-hud__acquisition strong,
+.gameplay-hud__slice-complete {
+  font: 700 0.78rem var(--ui-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gameplay-hud__acquisition span {
+  color: #9aa193;
+  font: 500 0.68rem var(--ui-body);
+}
+
 .gameplay-hud__prompt kbd,
 .gameplay-hud__equipment-slot kbd,
 .gameplay-hud__control-hints kbd {

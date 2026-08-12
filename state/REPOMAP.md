@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (53L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (50L)
+- PLAN.md (49L)
 - README.md (38L)
 - SETUP.md (44L)
 - STACK.md (82L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (63L)
+- package.json (64L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -198,7 +198,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (44 files)
+  - **scripts/browser/** (45 files)
     - README.md (18L)
     - gate-m10-camera-occlusion-repro.mjs (101L)
     - gate-m10-camera-stability.mjs (194L)
@@ -208,10 +208,10 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m10-ui-compact.mjs (129L)
     - gate-m11-boss-foundation.mjs (198L)
     - gate-m11-boss-visual.mjs (320L)
+    - gate-m12-alpha-slice.mjs (210L)
     - gate-m12-build-choice.mjs (161L)
     - gate-m4-e2e.mjs (139L)
-    - gate-m44-echoes.mjs (131L)
-    - ... +32 more
+    - ... +33 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -227,6 +227,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
   - main.tsx (16L) -- imports: ./app/App
   - vite-env.d.ts (1L)
   - **src/app/** (4 files)
-    - App.tsx (137L) -- symbols: App; imports: ../debug/Dev
+    - App.tsx (137L) -- symbols: App; imports: ../debu
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

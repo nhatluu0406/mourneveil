@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { GameRuntimeSnapshot } from '../game/runtime/GameRuntime'
 import { resolvePlayerOutgoingHitConfirm } from '../render/playerCombatFeedback'
 import {
   equippedCharmLabel,
   equippedWeaponLabel,
   isBossThreat,
+  isVerticalSliceComplete,
+  resolveAcquisitionToast,
   resolveGameplayInteractionPrompt,
   resolveEquipmentBar,
   resolveNearestThreat,
@@ -19,12 +21,18 @@ interface GameplayHudProps {
   readonly snapshot: GameRuntimeSnapshot
 }
 
-function ZonePresentation({ zone }: { readonly zone: ReturnType<typeof resolveZoneHudCopy> }) {
+function ZonePresentation({
+  zone,
+  presentationKey,
+}: {
+  readonly zone: ReturnType<typeof resolveZoneHudCopy>
+  readonly presentationKey: string
+}) {
   const [expanded, setExpanded] = useState(true)
   useEffect(() => {
     const timeout = window.setTimeout(() => setExpanded(false), 3200)
     return () => window.clearTimeout(timeout)
-  }, [])
+  }, [presentationKey])
   return (
     <>
       <header className={`gameplay-hud__location${expanded ? ' is-expanded' : ' is-compact'}`} aria-label="Current location" data-zone-presentation={expanded ? 'expanded' : 'compact'}>
@@ -45,8 +53,24 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
   const prompt = resolveGameplayInteractionPrompt(snapshot)
   const weapon = equippedWeaponLabel(snapshot)
   const charm = equippedCharmLabel(snapshot)
-  const zone = resolveZoneHudCopy(snapshot.world.currentZoneId)
+  const sliceComplete = isVerticalSliceComplete(snapshot)
+  const zone = resolveZoneHudCopy(snapshot.world.currentZoneId, snapshot)
   const equipmentBar = resolveEquipmentBar(snapshot)
+  const acquisition = resolveAcquisitionToast(snapshot)
+  const [toastStep, setToastStep] = useState<number | null>(null)
+  const seenAcquisition = useRef<number | null>(null)
+  useEffect(() => {
+    const step = snapshot.lastLootAcquisition?.simulationStep ?? null
+    if (step === null || step === seenAcquisition.current) return
+    seenAcquisition.current = step
+    setToastStep(step)
+    const timeout = window.setTimeout(() => setToastStep((current) => (current === step ? null : current)), 4200)
+    return () => window.clearTimeout(timeout)
+  }, [snapshot.lastLootAcquisition?.simulationStep])
+  const showAcquisitionToast =
+    toastStep !== null &&
+    acquisition !== null &&
+    snapshot.lastLootAcquisition?.simulationStep === toastStep
   const damagedRecently =
     snapshot.incomingContact.lastHit !== null &&
     snapshot.incomingContact.lastHit.outcome === 'damaged' &&
@@ -84,14 +108,18 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
   const power = Math.max(snapshot.resolvedAttackDamage.light, snapshot.resolvedAttackDamage.heavy)
   const bossThreat = threat !== null && isBossThreat(threat.definitionId)
   const bossPhase = bossThreat && threat !== null && threatRatio <= 0.5 ? 2 : 1
+  const zoneKey = sliceComplete
+    ? 'slice-complete'
+    : (snapshot.world.currentZoneId ?? 'between')
 
   return (
     <div
       className={`gameplay-hud${damagedRecently ? ' gameplay-hud--hit' : ''}`}
       aria-label="Gameplay HUD"
       data-product-hud="1"
+      data-slice-complete={sliceComplete ? '1' : '0'}
     >
-      {bossThreat ? null : <ZonePresentation key={snapshot.world.currentZoneId ?? 'between'} zone={zone} />}
+      {bossThreat ? null : <ZonePresentation key={zoneKey} presentationKey={zoneKey} zone={zone} />}
 
       {threat !== null ? (
         <section className={`gameplay-hud__threat${bossThreat ? ' gameplay-hud__threat--boss' : ''}`} aria-label={bossThreat ? 'Boss threat' : 'Nearest threat'}>
@@ -158,6 +186,17 @@ export function GameplayHud({ snapshot }: GameplayHudProps) {
 
       <div className="gameplay-hud__center">
         {prompt !== null ? <div className="gameplay-hud__prompt"><kbd>{prompt.split(' — ')[0]}</kbd><strong>{prompt.split(' — ')[1]}</strong></div> : null}
+        {showAcquisitionToast && acquisition !== null ? (
+          <div className="gameplay-hud__acquisition" role="status" data-acquisition-toast="1">
+            <strong>{acquisition.title}</strong>
+            <span>{acquisition.detail}</span>
+          </div>
+        ) : null}
+        {sliceComplete && !bossThreat ? (
+          <div className="gameplay-hud__slice-complete" role="status" data-slice-complete-banner="1">
+            Rite complete
+          </div>
+        ) : null}
         {guardFeedback !== null ? (
           <div
             className={`gameplay-hud__guard-feedback${snapshot.defense.guardBroken ? ' is-broken' : ''}`}

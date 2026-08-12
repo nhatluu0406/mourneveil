@@ -4,6 +4,7 @@ import {
   MOURNEVEIL_CONNECTED_LEVEL,
   type MourneveilZoneId,
 } from '../game/world/connectedLevel'
+import { BOSS_TECHNICAL_ID } from '../game/enemies/bossKit'
 import { getItemDefinition } from '../game/items/itemDefinition'
 
 export type GameplayInteractionPrompt =
@@ -29,6 +30,11 @@ export interface EquipmentBarSlot {
   readonly binding: 'LMB' | 'E' | null
   readonly icon: EquipmentBarIcon
   readonly equipped: boolean
+}
+
+export interface AcquisitionToastCopy {
+  readonly title: string
+  readonly detail: string
 }
 
 const ZONE_COPY: Readonly<Record<MourneveilZoneId, ZoneHudCopy>> = Object.freeze({
@@ -64,6 +70,12 @@ const ZONE_COPY: Readonly<Record<MourneveilZoneId, ZoneHudCopy>> = Object.freeze
   },
 })
 
+const SLICE_COMPLETE_COPY: ZoneHudCopy = Object.freeze({
+  eyebrow: 'Rite I · Complete',
+  title: 'The Veilbound Sepulchre',
+  objective: 'Rite complete. The Sepulchre is still. Save and rest when ready.',
+})
+
 function horizontalDistance(
   left: { readonly x: number; readonly z: number },
   right: { readonly x: number; readonly z: number },
@@ -71,12 +83,49 @@ function horizontalDistance(
   return Math.hypot(left.x - right.x, left.z - right.z)
 }
 
-export function resolveZoneHudCopy(zoneId: MourneveilZoneId | null): ZoneHudCopy {
+export function isVerticalSliceComplete(
+  snapshot: Pick<GameRuntimeSnapshot, 'world'>,
+): boolean {
+  return snapshot.world.defeatedBossIds.includes(BOSS_TECHNICAL_ID)
+}
+
+export function resolveZoneHudCopy(
+  zoneId: MourneveilZoneId | null,
+  snapshot?: Pick<GameRuntimeSnapshot, 'world'>,
+): ZoneHudCopy {
+  if (snapshot !== undefined && isVerticalSliceComplete(snapshot)) {
+    return SLICE_COMPLETE_COPY
+  }
   if (zoneId !== null) return ZONE_COPY[zoneId]
   return {
     eyebrow: 'Mourneveil · Rite I',
     title: 'Between Reliquaries',
     objective: 'Find the next veil-lit path.',
+  }
+}
+
+export function resolveAcquisitionToast(
+  snapshot: GameRuntimeSnapshot,
+): AcquisitionToastCopy | null {
+  const acquisition = snapshot.lastLootAcquisition
+  if (acquisition === null) return null
+  const definition = getItemDefinition(acquisition.itemId)
+  if (definition === null) return null
+  const equipped =
+    definition.slot === 'weapon'
+      ? snapshot.equipment.weaponItemId === acquisition.itemId
+      : definition.slot === 'charm'
+        ? snapshot.equipment.charmItemId === acquisition.itemId
+        : true
+  const detail =
+    definition.slot === null
+      ? definition.description
+      : equipped
+        ? 'Added to inventory'
+        : 'Press I to equip'
+  return {
+    title: `Acquired ${definition.displayName}`,
+    detail,
   }
 }
 

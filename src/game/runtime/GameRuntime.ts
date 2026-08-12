@@ -180,6 +180,11 @@ export interface GameRuntimeSnapshot {
   readonly inventory: InventorySnapshot
   readonly equipment: EquipmentSnapshot
   readonly lootPickup: LootPickupSnapshot
+  /** Presentation-only last acquisition cue; not persisted. */
+  readonly lastLootAcquisition: {
+    readonly itemId: ItemId
+    readonly simulationStep: number
+  } | null
   readonly world: ConnectedWorldSnapshot
   readonly encounterActivation: EncounterActivationSnapshot
   readonly resolvedAttackDamage: {
@@ -234,6 +239,7 @@ export class GameRuntime {
   private attackExecutionFacing: PlayerFacingDirection | null = null
   private movementOverride: PlayerMovementIntent | null = null
   private persistHandler: (() => void) | null = null
+  private lastLootAcquisition: { itemId: ItemId; simulationStep: number } | null = null
 
   setPersistHandler(handler: (() => void) | null): void {
     this.persistHandler = handler
@@ -731,6 +737,10 @@ export class GameRuntime {
         const loot = this.lootPickupRuntime.tryPickup(this.playerState.position, true)
         if (loot.accepted) {
           this.inventoryRuntime.add(loot.itemId)
+          this.lastLootAcquisition = {
+            itemId: loot.itemId,
+            simulationStep: nextStepCount,
+          }
           this.markPersistentChange()
         }
       }
@@ -970,6 +980,7 @@ export class GameRuntime {
       inventory: this.inventoryRuntime.snapshot(),
       equipment: this.equipmentRuntime.snapshot(),
       lootPickup: this.lootPickupRuntime.snapshot(),
+      lastLootAcquisition: this.lastLootAcquisition,
       world: this.worldRuntime.snapshot(),
       encounterActivation: this.encounterActivationRuntime.snapshot(),
       resolvedAttackDamage: this.resolvedAttackDamage(),

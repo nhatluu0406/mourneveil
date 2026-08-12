@@ -1,50 +1,49 @@
-# PLAN: M12 Vertical Slice Alpha Acceptance — Macro-batch 1
+# PLAN: M12 Vertical Slice Alpha Acceptance — Macro-batch 2
 <!-- Live M12 graph only. -->
 
-Input: M11 closed (`v0.11.0-boss-vertical-slice` on `f84c619`) | Stack: `STACK.md`
+Input: MB1 at `2826701`; M11 tag on `19abed3` | Stack: `STACK.md`
 Task slug: `m12-vertical-slice-alpha-acceptance`
 Agent: Cursor only
 
 ## Goal
 
-Close a Vertical Slice Alpha acceptance gap: charm choice must create a real survivability vs guard tradeoff through the existing equipment→modifier→combat authority path. No M13 deep itemization.
+Audit the complete vertical slice against `docs/product/vertical-slice.md`, close at most three genuine alpha blockers, and add `gate:m12-alpha-slice`. No M13 systems.
 
 ## Non-goals
 
-- M12 tag/closure; M13 Playable Alpha deep progression
-- Skill trees, crafting, randomized affixes, large RPG stat frameworks
-- HUD redesign; item art / loot VFX polish (Codex later)
-- Boss/enemy global rebalance; new Three.js content
+- M12 tag/self-close; M13 Playable Alpha depth
+- Skill trees, XP, NPC/dialogue, crafting, rarity economy, quest engine
+- Broad art/camera redesign; triangle chasing
 
 ## Steps
 
-- [x] 1. Equipment modifier contract + ward charm definition
+- [x] 1. Acceptance criteria + playthrough audit + M11 tag correction
   - depends: —
-  - risk: MEDIUM
+  - risk: LOW
   - isolation: sequential
-  - owns/allows: `src/game/items/**`, defense threshold wiring in `playerDefense` / `GameRuntime`
-  - verifier: `npx vitest run src/game/items src/game/combat/playerDefense.test.ts src/game/combat/playerDefense.equipment.test.ts`
-- [x] 2. Acquisition, save/load, HUD projection, tradeoff tests
+  - owns/allows: PLAN/HANDOFF notes; local tag retarget only
+  - verifier: `git show v0.11.0-boss-vertical-slice --no-patch`
+- [x] 2. Close ≤3 alpha blockers (endpoint, loot feedback, build clarity)
   - depends: 1
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: encounter loot placement, save tests, HUD model reads only
-  - verifier: `npx vitest run src/game/character/playerLootEquipment.integration.test.ts src/ui`
-- [x] 3. M12 runtime gate + regression + docs
-  - depends: 1, 2
+  - owns/allows: HUD/inventory projection, thin acquisition signal; no combat redesign
+  - verifier: `npx vitest run src/ui src/game/character/verticalSliceAcceptance.test.ts`
+- [x] 3. End-to-end `gate:m12-alpha-slice` + regression + docs
+  - depends: 2
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `scripts/browser/gate-m12-build-choice.mjs`, package script, HANDOFF
-  - verifier: `npm run gate:m12-build-choice && npm run gate:m11-boss-foundation && npm run verify`
+  - owns/allows: `scripts/browser/gate-m12-alpha-slice.mjs`, package script, HANDOFF/current-state
+  - verifier: `npm run gate:m12-alpha-slice && npm run gate:m12-build-choice && npm run verify`
 
 ## Decisions
 
-- Roadmap M12 name is **Vertical Slice Alpha acceptance** (not “Progression & Build Depth”; deeper itemization remains M13+).
-- MB1 closes vision’s “meaningful progression” gap with two charm tradeoffs on the existing modifier contract.
-- Vitality Charm: +20 max HP, no guard bonus. Ward Seal: +1 guard impact threshold, no HP bonus.
-- Pressure skirmisher drops Ward Seal; brute still drops Vitality.
+- Vertical-slice contract (`docs/product/vertical-slice.md`) is the M12 acceptance source of truth.
+- M11 tag convention is closure-docs commit (M7–M10); local tag retargeted to `19abed3`.
+- Blockers closed: (1) post-boss rite-complete endpoint, (2) acquisition toast + I-to-equip cue, (3) inventory Guard/build comparison.
+- Elite variation / controller / deep itemization remain out of M12 scope.
 
 ## Escalation
 
-- Same failure 3× → stuck report and escalate.
-- Save-schema breakage without migration path → stop for review.
+- Same failure 3× → stuck report.
+- New gameplay-authority redesign → stop for review.

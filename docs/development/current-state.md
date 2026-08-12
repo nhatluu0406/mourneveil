@@ -1,18 +1,18 @@
 # Current State
 
 - Updated: 2026-08-12
-- Accepted: **M11 Boss Vertical Slice** → `v0.11.0-boss-vertical-slice`
+- Accepted: **M11 Boss Vertical Slice** → `v0.11.0-boss-vertical-slice` (`19abed3`)
 - Prior: `v0.10.0-visual-production-identity` (M10), `v0.9.0-combat-depth` (M9)
-- Active task: `m12-vertical-slice-alpha-acceptance` (Macro-batch 1 complete locally)
+- Active task: `m12-vertical-slice-alpha-acceptance` (MB2 complete; awaiting PO acceptance)
 
 ## Status
 
-**M11 PRODUCT OWNER ACCEPTED / CLOSED** (`v0.11.0-boss-vertical-slice`). M12 Vertical Slice Alpha acceptance MB1 delivered a vitality vs ward charm tradeoff. M12 remains active and untagged.
+**M11 CLOSED.** M12 Vertical Slice Alpha acceptance MB1+MB2 complete locally (build choice + endpoint/loot clarity + `gate:m12-alpha-slice`). M12 remains untagged pending Product Owner acceptance. Do not start M13.
 
 ## What exists
 
-- Connected RPG loop through M11 boss vertical slice
-- Meaningful charm tradeoff (Vitality HP vs Ward Seal guard) on existing equipment authority
+- Full authored vertical-slice journey through boss defeat with rite-complete endpoint
+- Vitality vs Ward charm tradeoff, acquisition feedback, inventory Guard comparison
 - Camera/occlusion stability, production visual identity, combat depth
 - Gate-owned `tmp-m*` cleanup (`KEEP_ARTIFACTS=1` opt-in keep)
 
@@ -24,4 +24,4 @@
 
 ## Next executable work
 
-M12 Macro-batch 2 — remaining alpha acceptance gaps per Product Owner. Deeper itemization remains M13+.
+Product Owner M12 acceptance. Post-M12 feature map lives in the MB2 report (progression/skills/items/NPC/world remain M13+).

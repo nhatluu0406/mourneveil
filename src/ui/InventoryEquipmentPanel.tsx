@@ -22,7 +22,7 @@ export function InventoryEquipmentPanel({
   open,
   onClose,
 }: InventoryEquipmentPanelProps) {
-  const { inventory, equipment, resolvedAttackDamage, playerHealth } = snapshot
+  const { inventory, equipment, resolvedAttackDamage, playerHealth, defense } = snapshot
 
   if (!open) return null
 
@@ -48,7 +48,7 @@ export function InventoryEquipmentPanel({
 
         <p className="inventory-panel__meta">
           Light {resolvedAttackDamage.light} · Heavy {resolvedAttackDamage.heavy} · Max HP{' '}
-          {playerHealth.health.maximum}
+          {playerHealth.health.maximum} · Guard {defense.guardImpactThreshold}
         </p>
 
         <section>
@@ -95,6 +95,13 @@ export function InventoryEquipmentPanel({
                   >
                     <span className="inventory-panel__name">
                       {definition?.displayName ?? 'Unknown item'} ×{entry.quantity}
+                      {definition?.slot === 'charm' ? (
+                        <small>
+                          {' '}
+                          HP +{definition.modifiers.maxHealthBonus} · Guard +
+                          {definition.modifiers.guardImpactThresholdBonus}
+                        </small>
+                      ) : null}
                     </span>
                     {definition?.slot !== null && definition?.slot !== undefined ? (
                       <button type="button" onClick={() => equip(entry.itemId)}>
