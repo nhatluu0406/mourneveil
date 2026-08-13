@@ -13,13 +13,11 @@ import { PLAYER_CAPSULE_RADIUS } from './playerCollisionConfig'
 const CLEARANCE = PLAYER_CAPSULE_RADIUS + 0.05
 
 describe('connected-level solid authoring', () => {
-  it('keeps every landmark in the authoritative collider set with matching extents', () => {
+  it('keeps compiled blockers inside the authoritative collider set', () => {
     for (const landmark of CONNECTED_LEVEL_LANDMARKS) {
       const collider = CONNECTED_LEVEL_COLLIDERS.find((entry) => entry.id === landmark.id)
       expect(collider).toEqual(landmark)
       expect(collider?.kind).toBe('blocker')
-      expect(collider?.position).toEqual(landmark.position)
-      expect(collider?.size).toEqual(landmark.size)
     }
   })
 

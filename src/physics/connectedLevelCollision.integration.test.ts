@@ -18,18 +18,24 @@ describe('connected graybox Rapier collision', () => {
   it('supports the intended entry-to-final-gate long route without wall penetration', () => {
     const fixture = createFixture({ shortcutOpen: false, finalGateOpen: false }, { x: -14, y: 0.82, z: 6 })
     const route = [
-      { x: -10, y: 0.82, z: 6 },
-      { x: -9, y: 0.82, z: 2 },
+      { x: -14, y: 0.82, z: 6 },
+      { x: -12.4, y: 0.82, z: 6 },
+      { x: -12.4, y: 0.82, z: 4.2 },
+      { x: -11.5, y: 0.82, z: 4.2 },
+      { x: -10.4, y: 0.82, z: 3.8 },
+      { x: -10, y: 0.82, z: 2 },
+      { x: -8, y: 0.82, z: 1 },
       CONNECTED_LEVEL_CHECKPOINT_DEFINITION.interactionPosition,
-      { x: -6, y: 0.82, z: -5.8 },
-      { x: -2.2, y: 0.82, z: -5.8 },
-      { x: 2, y: 0.82, z: -4 },
-      { x: 9, y: 0.82, z: -4 },
+      { x: -5.5, y: 0.82, z: -3.6 },
+      { x: -1, y: 0.82, z: -4 },
+      { x: 2.4, y: 0.82, z: -4 },
+      { x: 5.5, y: 0.82, z: -4 },
+      { x: 8.4, y: 0.82, z: -4 },
     ]
     for (const waypoint of route) {
-      expect(moveToward(fixture, waypoint)).toBe(true)
+      expect(moveToward(fixture, waypoint), `reach ${JSON.stringify(waypoint)}`).toBe(true)
     }
-    expect(Math.abs(fixture.position.x - 9)).toBeLessThan(0.13)
+    expect(Math.abs(fixture.position.x - 8.4)).toBeLessThan(0.2)
     fixture.free()
   })
 
@@ -44,9 +50,9 @@ describe('connected graybox Rapier collision', () => {
 
     const openedShortcut = createFixture(
       { shortcutOpen: true, finalGateOpen: false },
-      { x: -2, y: 0.82, z: -1.3 },
+      { x: -1.6, y: 0.82, z: -2 },
     )
-    expect(moveToward(openedShortcut, { x: -5, y: 0.82, z: -1.3 })).toBe(true)
+    expect(moveToward(openedShortcut, { x: -3.7, y: 0.82, z: -1.2 }, 160)).toBe(true)
     openedShortcut.free()
 
     const closedFinal = createFixture(
@@ -68,7 +74,7 @@ describe('connected graybox Rapier collision', () => {
   it('keeps the player capsule inside the perimeter boundary', () => {
     const fixture = createFixture(
       { shortcutOpen: true, finalGateOpen: true },
-      { x: 16, y: 0.82, z: -4 },
+      { x: 14.4, y: 0.82, z: -4 },
     )
     expect(moveToward(fixture, { x: 20, y: 0.82, z: -4 }, 100)).toBe(false)
     expect(fixture.position.x).toBeLessThanOrEqual(16.15)

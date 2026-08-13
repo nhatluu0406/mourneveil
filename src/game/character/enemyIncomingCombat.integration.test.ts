@@ -12,7 +12,7 @@ const NEUTRAL = { horizontal: 0, forward: 0 } as const
 
 function createApproachingRuntime(): GameRuntime {
   const runtime = new GameRuntime()
-  runtime.debugSetPlayerPosition({ x: -2, y: 0.82, z: -3 })
+  runtime.debugSetPlayerPosition({ x: 1.35, y: 0.82, z: -2.6 })
   runtime.attachCollisionResolver(FLAT_GROUND)
   runtime.attachEnemyCollisionResolver(runtime.snapshot().enemy.id, FLAT_GROUND)
   runtime.attachCombatContactQuery(({ hurtboxes }) =>

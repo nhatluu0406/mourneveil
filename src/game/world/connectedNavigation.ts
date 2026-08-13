@@ -69,13 +69,13 @@ const CONNECTION_NODES: readonly ConnectedNavigationNode[] =
 
 /** Explicit local detours around authored blockers (not a navmesh). */
 const LOCAL_DETOUR_NODES: readonly ConnectedNavigationNode[] = Object.freeze([
-  defineLocalNode('nav.detour.first-combat.south', 'zone.first-combat', -8.25, 2.4),
+  defineLocalNode('nav.detour.first-combat.south', 'zone.first-combat', -9.2, 2.4),
   defineLocalNode('nav.detour.first-combat.west', 'zone.first-combat', -10.2, 4.25),
-  defineLocalNode('nav.detour.mixed.south', 'zone.mixed-combat', 0, -6.8),
+  defineLocalNode('nav.detour.mixed.south', 'zone.mixed-combat', 0, -5.4),
   defineLocalNode('nav.detour.mixed.north', 'zone.mixed-combat', 2.7, -0.4),
   defineLocalNode('nav.detour.mixed.west-open', 'zone.mixed-combat', -1.4, -5.8),
   defineLocalNode('nav.detour.approach.north', 'zone.final-approach', 7.2, -3.2),
-  defineLocalNode('nav.detour.checkpoint.long-route', 'zone.checkpoint', -5.5, -1.6),
+  defineLocalNode('nav.detour.checkpoint.long-route', 'zone.checkpoint', -6.6, -0.7),
 ])
 
 /** Immutable authored anchors derived from the connected-level topology. */

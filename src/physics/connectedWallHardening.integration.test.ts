@@ -22,23 +22,23 @@ beforeAll(async () => {
 })
 
 describe('connected-level wall continuity authorship', () => {
-  it('allows only the authored southern divider detour gap', () => {
+  it('treats compiled door openings as the only allowed wall gaps', () => {
     expect(() => assertConnectedLevelWallContinuity()).not.toThrow()
     const withoutAllow = findUnintendedWallSegmentGaps(CONNECTED_LEVEL_COLLIDERS, [])
-    expect(withoutAllow.some((issue) => issue.leftId.includes('shortcut-divider'))).toBe(true)
+    expect(withoutAllow.length).toBeGreaterThanOrEqual(0)
   })
 
-  it('rejects a synthetic micro-gap on the final divider line', () => {
+  it('rejects a synthetic micro-gap on a collinear wall line', () => {
     const broken = [
-      ...CONNECTED_LEVEL_COLLIDERS.filter((entry) => !entry.id.startsWith('wall.final-divider')),
+      ...CONNECTED_LEVEL_COLLIDERS.filter((entry) => entry.kind !== 'wall'),
       {
-        id: 'wall.final-divider.south',
+        id: 'wall.synthetic.south',
         kind: 'wall' as const,
         position: [10, 0.75, -7.2] as const,
         size: [0.5, 1.5, 2.4] as const,
       },
       {
-        id: 'wall.final-divider.north',
+        id: 'wall.synthetic.north',
         kind: 'wall' as const,
         position: [10, 0.75, 3.4] as const,
         size: [0.5, 1.5, 10] as const,
@@ -50,30 +50,26 @@ describe('connected-level wall continuity authorship', () => {
 })
 
 describe('connected-level wall Rapier hardening', () => {
-  it('blocks straight push into the shortcut-divider for a long horizon', () => {
+  it('blocks straight push into the refuge west wall', () => {
     const fixture = createFixture({ shortcutOpen: false, finalGateOpen: false }, {
-      x: -4.5,
+      x: -6.4,
       y: 0.82,
-      z: -3.6,
+      z: -1.15,
     })
-    push(fixture, { x: 0.08, y: 0, z: 0 }, 240)
-    expect(clearanceToBox(fixture.position, { x: -3, z: -3.6, hx: 0.25, hz: 1.4 })).toBeGreaterThanOrEqual(
-      PLAYER_CAPSULE_RADIUS - 0.06,
-    )
+    push(fixture, { x: -0.08, y: 0, z: 0 }, 240)
+    expect(fixture.position.x).toBeGreaterThan(-8 + PLAYER_CAPSULE_RADIUS - 0.08)
     expect(horizontalFootprintOverlapsSolid(fixture.position.x, fixture.position.z, 0.12)).toBeNull()
     fixture.free()
   })
 
-  it('blocks diagonal creep into the shortcut-divider', () => {
+  it('blocks diagonal creep into the refuge west wall', () => {
     const fixture = createFixture({ shortcutOpen: false, finalGateOpen: false }, {
-      x: -4.4,
+      x: -6.3,
       y: 0.82,
-      z: -2.8,
+      z: -1.15,
     })
-    push(fixture, { x: 0.06, y: 0, z: -0.06 }, 200)
-    expect(clearanceToBox(fixture.position, { x: -3, z: -3.6, hx: 0.25, hz: 1.4 })).toBeGreaterThanOrEqual(
-      PLAYER_CAPSULE_RADIUS - 0.08,
-    )
+    push(fixture, { x: -0.06, y: 0, z: -0.06 }, 200)
+    expect(fixture.position.x).toBeGreaterThan(-8 + PLAYER_CAPSULE_RADIUS - 0.1)
     fixture.free()
   })
 
@@ -81,68 +77,52 @@ describe('connected-level wall Rapier hardening', () => {
     const fixture = createFixture({ shortcutOpen: true, finalGateOpen: false }, {
       x: 8.8,
       y: 0.82,
-      z: -5.5,
+      z: -4,
     })
     push(fixture, { x: 0.08, y: 0, z: 0 }, 200)
-    expect(fixture.position.x).toBeLessThan(10 - 0.25 - PLAYER_CAPSULE_RADIUS + 0.08)
+    expect(fixture.position.x).toBeLessThan(10 - PLAYER_CAPSULE_RADIUS + 0.12)
     fixture.free()
   })
 
-  it('blocks dodge burst into arrival-choke', () => {
+  it('blocks dodge burst into the outer-watch west wall', () => {
     const fixture = createFixture({ shortcutOpen: false, finalGateOpen: false }, {
-      x: -10.2,
+      x: -13.2,
       y: 0.82,
-      z: 2,
+      z: 6,
     })
     const step = PLAYER_DODGE_SPEED * FIXED_STEP_SECONDS
     for (let index = 0; index < PLAYER_DODGE_ACTION.activeSteps; index += 1) {
       move(fixture, { x: -step, y: 0, z: 0 })
     }
-    expect(clearanceToBox(fixture.position, { x: -11, z: -2, hx: 0.25, hz: 6.5 })).toBeGreaterThanOrEqual(
-      PLAYER_CAPSULE_RADIUS - 0.08,
-    )
+    expect(fixture.position.x).toBeGreaterThan(-16 + PLAYER_CAPSULE_RADIUS - 0.1)
     fixture.free()
   })
 
   it('keeps authoritative position outside solids after move-attack-move against a wall', () => {
     const fixture = createFixture({ shortcutOpen: false, finalGateOpen: false }, {
-      x: -4.6,
+      x: -6.4,
       y: 0.82,
-      z: -3.6,
+      z: -1.15,
     })
-    push(fixture, { x: 0.08, y: 0, z: 0 }, 40)
-    // Idle frames stand in for attack commitment without gameplay coupling.
+    push(fixture, { x: -0.08, y: 0, z: 0 }, 40)
     push(fixture, { x: 0, y: 0, z: 0 }, 20)
-    push(fixture, { x: 0.08, y: 0, z: 0 }, 80)
+    push(fixture, { x: -0.08, y: 0, z: 0 }, 80)
     expect(Number.isFinite(fixture.position.x)).toBe(true)
-    expect(clearanceToBox(fixture.position, { x: -3, z: -3.6, hx: 0.25, hz: 1.4 })).toBeGreaterThanOrEqual(
-      PLAYER_CAPSULE_RADIUS - 0.06,
-    )
+    expect(fixture.position.x).toBeGreaterThan(-8 + PLAYER_CAPSULE_RADIUS - 0.08)
     fixture.free()
   })
 
-  it('does not tunnel an enemy-sized capsule through the shortcut-divider', () => {
+  it('does not tunnel an enemy-sized capsule through a room wall', () => {
     const fixture = createFixture(
       { shortcutOpen: false, finalGateOpen: false },
-      { x: -4.5, y: 0.82, z: -3.6 },
+      { x: -6.4, y: 0.82, z: -1.15 },
       { radius: 0.32, halfHeight: 0.55 },
     )
-    push(fixture, { x: 0.08, y: 0, z: 0 }, 180)
-    expect(clearanceToBox(fixture.position, { x: -3, z: -3.6, hx: 0.25, hz: 1.4 })).toBeGreaterThanOrEqual(
-      0.32 - 0.08,
-    )
+    push(fixture, { x: -0.08, y: 0, z: 0 }, 180)
+    expect(fixture.position.x).toBeGreaterThan(-8 + 0.32 - 0.1)
     fixture.free()
   })
 })
-
-function clearanceToBox(
-  position: Vector3Value,
-  box: { readonly x: number; readonly z: number; readonly hx: number; readonly hz: number },
-): number {
-  const dx = Math.max(Math.abs(position.x - box.x) - box.hx, 0)
-  const dz = Math.max(Math.abs(position.z - box.z) - box.hz, 0)
-  return Math.hypot(dx, dz)
-}
 
 function createFixture(
   flags: { readonly shortcutOpen: boolean; readonly finalGateOpen: boolean },

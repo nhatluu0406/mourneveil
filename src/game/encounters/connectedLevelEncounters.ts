@@ -47,7 +47,7 @@ export interface ConnectedEncounterDefinition {
 
 export const M5_ENEMY_PLACEMENTS: readonly ConnectedEnemyPlacement[] = Object.freeze([
   // Mixed court: skirmisher holds the near approach; brute anchors the south pocket.
-  definePlacement('enemy.skirmisher.1', 'encounter.m5.mixed', 'skirmisher', 1.4, -2.6, -1, 0, 'loot.skirmisher-early'),
+  definePlacement('enemy.skirmisher.1', 'encounter.m5.mixed', 'skirmisher', 2.1, -2.6, -1, 0, 'loot.skirmisher-early'),
   definePlacement('enemy.brute.1', 'encounter.m5.mixed', 'brute', 2.6, -5.4, -1, 0, 'loot.brute-middle'),
   // Introduction: early survivability charm teach.
   definePlacement(

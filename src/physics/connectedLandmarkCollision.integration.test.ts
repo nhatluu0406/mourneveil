@@ -19,8 +19,8 @@ beforeAll(async () => {
 })
 
 describe('connected landmark Rapier collision', () => {
-  it('stops the player outside the watch-column landmark under repeated push', () => {
-    const landmark = CONNECTED_LEVEL_LANDMARKS.find((entry) => entry.id === 'landmark.watch-column')!
+  it('stops the player outside the watch monolith under repeated push', () => {
+    const landmark = landmarkByOwner('monolith')
     const start = {
       x: landmark.position[0],
       y: 0.82,
@@ -38,8 +38,8 @@ describe('connected landmark Rapier collision', () => {
     fixture.free()
   })
 
-  it('stops the player outside the approach-cairn landmark', () => {
-    const landmark = CONNECTED_LEVEL_LANDMARKS.find((entry) => entry.id === 'landmark.approach-cairn')!
+  it('stops the player outside the approach cairn', () => {
+    const landmark = landmarkByOwner('approach.cairn')
     const start = {
       x: landmark.position[0],
       y: 0.82,
@@ -55,8 +55,8 @@ describe('connected landmark Rapier collision', () => {
     fixture.free()
   })
 
-  it('blocks diagonal creep into the court obelisk', () => {
-    const landmark = CONNECTED_LEVEL_LANDMARKS.find((entry) => entry.id === 'landmark.court-obelisk')!
+  it('blocks diagonal creep into a court sarcophagus', () => {
+    const landmark = landmarkByOwner('dressing.room.court.sarcophagus')
     const start = {
       x: landmark.position[0] - 1.2,
       y: 0.82,
@@ -71,15 +71,14 @@ describe('connected landmark Rapier collision', () => {
     fixture.free()
   })
 
-  it('blocks a dodge-length burst into the watch-column', () => {
-    const landmark = CONNECTED_LEVEL_LANDMARKS.find((entry) => entry.id === 'landmark.watch-column')!
+  it('blocks a dodge-length burst into the watch monolith', () => {
+    const landmark = landmarkByOwner('monolith')
     const start = {
       x: landmark.position[0],
       y: 0.82,
       z: landmark.position[2] + landmark.size[2] / 2 + PLAYER_CAPSULE_RADIUS + 0.15,
     }
     const fixture = createFixture(start)
-    // Production dodge applies PLAYER_DODGE_SPEED across active steps — not one giant translation.
     const step = PLAYER_DODGE_SPEED * FIXED_STEP_SECONDS
     for (let i = 0; i < PLAYER_DODGE_ACTION.activeSteps; i += 1) {
       move(fixture, { x: 0, y: 0, z: -step })
@@ -90,8 +89,8 @@ describe('connected landmark Rapier collision', () => {
     fixture.free()
   })
 
-  it('stops an enemy-sized capsule outside the watch-column', () => {
-    const landmark = CONNECTED_LEVEL_LANDMARKS.find((entry) => entry.id === 'landmark.watch-column')!
+  it('stops an enemy-sized capsule outside the watch monolith', () => {
+    const landmark = landmarkByOwner('monolith')
     const enemyRadius = 0.32
     const enemyHalfHeight = 0.55
     const start = {
@@ -109,6 +108,12 @@ describe('connected landmark Rapier collision', () => {
     fixture.free()
   })
 })
+
+function landmarkByOwner(fragment: string) {
+  const landmark = CONNECTED_LEVEL_LANDMARKS.find((entry) => (entry.ownerInstanceId ?? entry.id).includes(fragment))
+  if (landmark === undefined) throw new Error(`Missing compiled landmark: ${fragment}`)
+  return landmark
+}
 
 function createFixture(
   initial: Vector3Value,
