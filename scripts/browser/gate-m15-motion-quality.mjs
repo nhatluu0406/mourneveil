@@ -66,6 +66,18 @@ await runOwnedBrowserGate({
     lookAtSettled <= 2.8
       ? pass(`lookAt step bounded (${lookAtSettled.toFixed(3)})`)
       : fail(`lookAt step too large (${lookAtSettled.toFixed(3)})`)
+    const idleDelta = collected.idleGait?.phaseDelta ?? collected.idleGait?.gaitPhase ?? 0
+    idleDelta <= 0.05
+      ? pass(`idle gait phase frozen (delta=${idleDelta})`)
+      : fail(`idle gait still advancing (${idleDelta})`)
+    const occluded = collected.occluded ?? []
+    occluded.length === 0
+      ? pass('no architecture fade IDs during motion')
+      : fail(`occluded placements: ${occluded.join(',')}`)
+    const unsupported = collected.placementAudit?.unsupportedOrdinary ?? []
+    unsupported.length === 0
+      ? pass('no unsupported ordinary placements')
+      : fail(`unsupported: ${unsupported.map((e) => e.id).join(',')}`)
     if ((summary.renderer.drawCalls ?? 0) > 450) fail(`drawCalls ${summary.renderer.drawCalls}`)
     else pass(`draw calls ${summary.renderer.drawCalls}`)
   },

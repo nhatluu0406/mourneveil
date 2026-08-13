@@ -9,6 +9,9 @@ import {
 } from '../input/playerRecoveryIntent'
 import { readCameraDiagnostic } from './cameraDiagnosticPublish'
 import { captureMotionTelemetry, resetMotionTelemetry, setMotionTelemetryPaused } from './motionTelemetry'
+import { readPlayerLocomotionPresentation } from '../render/animation/playerLocomotionPresentation'
+import { auditWorldPlacements } from '../render/world/ossuary/placementAudit'
+import { OSSUARY_ROUTE_PLACEMENTS } from '../render/world/ossuary/routePlacements'
 import { auditScenePlacements } from '../render/world/ossuary/scenePresentation'
 import { readInstanceMatrixProbe } from './instanceMatrixProbe'
 import {
@@ -58,6 +61,8 @@ declare global {
       resetMotionTelemetry: () => unknown
       pauseMotionTelemetry: (paused: boolean) => unknown
       sceneAudit: () => unknown
+      locomotion: () => unknown
+      placementAudit: () => unknown
     }
   }
 }
@@ -144,6 +149,8 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
       setMotionTelemetryPaused(Boolean(paused))
     },
     sceneAudit: () => auditScenePlacements(),
+    locomotion: () => readPlayerLocomotionPresentation(),
+    placementAudit: () => auditWorldPlacements(OSSUARY_ROUTE_PLACEMENTS),
   }
 
   return () => {

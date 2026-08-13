@@ -5,33 +5,45 @@ Task: m15-presentation-motion-scene-readability
 
 ## Status
 
-ACTIVE — MB1 complete locally. Motion/quality gates green. Not M15-closed.
+ACTIVE — MB2 complete locally. Ready for Product Owner visual review. Not M15-closed. Do not start M16. Do not assign Codex until PO accepts the room shells.
 
-## Locked decisions
+## Locked decisions (keep MB1)
 
 - Fixed 60 Hz simulation. Rapier on authoritative transforms. Camera follows interpolated player presentation.
-- Two rAF loops retained; interpolation is the smoothness layer.
-- Default camera: closer-tactical. Baseline A/B: `?m15Baseline=1`.
-- DEV FPS HUD: `?perfHud=1` or F3. Production hidden.
+- Two rAF loops retained. Default camera: closer-tactical. DEV FPS HUD: `?perfHud=1` or F3.
 - Zone mount: current + neighbors + perimeter.
 
-## Same-host before → after (Playwright 1440×900, Node 24)
+## Locked decisions (MB2)
 
-- Player screen height: 115.3 → 148.7 px (**+29%**)
-- lookAt step: 1.77 → 0.97 m
-- screen X variance: 2750 → 1227
-- draw calls: 227 → 207; objects: 541 → 437; meshes: 323 → 266
-- Host FPS under Playwright ~7–10; not used as a universal CI law
+- Static architecture stays opaque. Allowed fade IDs: `gate.shortcut`, `gate.final`.
+- Camera-near edges (east/+X, north/+Z) are low wall.bay parapets. Far edges may be tall. No roof.
+- ADR-0003: rooms → placements → ADR-0002 registry. Gameplay topology unchanged.
+- MAGICAL_VFX: 4 wisps. One hanging bell with `supportInstanceId`. No ordinary floaters.
+- Locomotion gait is presentation-only and distance-driven. Teleports reset gait.
 
-Evidence: `state/tasks/m15-presentation-motion-scene-readability/reports/mb1-comparison.json`
+## Same-host metrics (Playwright 1440×900)
 
-## Art-only for Codex
+MB1 after → MB2 after (motion gate):
+- draw calls: 207 → 164–221 (host-noisy; no ceiling raise)
+- scene objects: 437 → 378
+- placements: 409 → 141
+- meshes: 266 → ~226–236
+- lights (culled): 9 → 7; authored actual-light budget still ≤12
+- player screen height: 148.7 px (held)
+- lookAt max step: 0.97 → 0.42 m
+- idle gait delta: 0
 
-- Arch/pole density around the hero still competes after closer framing
-- Processional markers are tall high-contrast silhouettes
-- Some benches/props read weakly grounded in dark pools
-- Material contrast and background mass composition
+Stretch ≤350 objects / ≤230 meshes not hit; improved vs MB1 and below previous live route.
+
+## Art-only for Codex (after PO accepts shells)
+
+- Surface richness on rectangular floors/walls
+- Prop grouping and material contrast
+- Arch/doorway production language on far openings
+- Background mass composition
+- Stronger practical-light fixtures (layout is stable)
 
 ## Next session starts with
 
-1. MB2: further transition polish and any remaining technical clutter from Product Owner review. Do not start M16.
+1. Product Owner screenshot/video review of MB2 rooms + walk.
+2. Only after structural acceptance: M15 MB3 Codex art on stable shells.

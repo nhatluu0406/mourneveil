@@ -38,6 +38,8 @@
     "gate:m14-art-production": "node scripts/browser/gate-m14-art-production.mjs",
     "gate:m15-motion-quality": "node scripts/browser/gate-m15-motion-quality.mjs",
     "gate:m15-quality-audit": "node scripts/browser/gate-m15-quality-audit.mjs",
+    "gate:m15-occlusion": "node scripts/browser/gate-m15-occlusion.mjs",
+    "gate:m15-room-architecture": "node scripts/browser/gate-m15-room-architecture.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

@@ -1,65 +1,64 @@
-# PLAN: M15 Presentation, Motion & Scene Readability — Macro-batch 1
+# PLAN: M15 Presentation, Motion & Scene Readability — Macro-batch 2
 <!-- Live M15 graph only. -->
 
-Input: Product Owner M15 MB1 presentation brief | Stack: `STACK.md`
+Input: Product Owner M15 MB2 room/locomotion/occlusion brief | Stack: `STACK.md`
 Task slug: `m15-presentation-motion-scene-readability`
 Agent: Cursor only
 
 ## Goal
 
-Make the existing playable-alpha route feel stable, readable, and smooth with measurable presentation quality. Establish before/after motion evidence. Do not expand content.
+Make the hero route read as camera-safe rectangular rooms with grounded architecture and distance-driven walk presentation. Keep MB1 interpolation, closer-tactical camera, telemetry, and zone mounting. Do not close or tag M15. Do not start M16. No Codex art.
 
 ## Non-goals
 
 - New enemies, NPCs, quests, regions, or M16
-- Art-direction redesign, new meshes/materials/VFX (Codex)
-- Copying Vesperfall assets, layouts, UI, or pixel targets
-- Variable-step gameplay; interpolating Rapier/collision authority
-- Huge simulation/render loop rewrite without evidence
+- New production meshes/materials/VFX (Codex MB3 after PO structural acceptance)
+- Generic architecture transparency / Vesperfall copy
+- Variable-step gameplay; interpolating Rapier
+- Complex IK; rewriting the two-loop clock
 
 ## Steps
 
-- [x] 1. Frame/camera telemetry, DEV FPS HUD, motion + quality gates
+- [x] 1. Room-first contract, floorplan, ADR-0003
   - depends: —
-  - risk: MEDIUM
+  - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/debug/`, `src/ui/` perf HUD, `src/app/`, `scripts/browser/gate-m15-*.mjs`, `package.json`, focused tests
-  - verifier: focused telemetry tests + `npm run gate:m15-motion-quality` + `npm run gate:m15-quality-audit`
-- [x] 2. Presentation interpolation + loop decision
+  - owns/allows: `docs/design/m15-dungeon-floorplan.md`, `docs/architecture/decisions/0003-room-first-dungeon-composition.md`, `src/render/world/ossuary/dungeonRooms.ts`, STACK/PLAN
+  - verifier: focused room-bounds/connection tests
+- [x] 2. Camera-safe shells + fade removal + grounding audit
   - depends: 1
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `src/game/core/`, `src/game/runtime/`, `src/physics/PlayerPhysicsBody.tsx`, `src/render/FollowCameraRig.tsx`, `STACK.md` presentation ownership
-  - verifier: focused interpolation tests + historical `gate:m10-camera-stability`
-- [x] 3. Camera framing, dead-zone, impulse channel
-  - depends: 2
+  - owns/allows: `roomShell.ts`, `roomDressing.ts`, `routePlacements.ts`, `definitions.ts`, `cameraOcclusion`/`ConnectedLevelVisual`, `placementAudit.ts`, occlusion gates
+  - verifier: no ordinary `occlusionPolicy:'fade'`; placement audit has zero unsupported ordinary objects; `gate:m15-occlusion` + room tests
+- [x] 3. Distance-driven locomotion presentation
+  - depends: —
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `src/render/followCamera.ts`, `FollowCameraRig.tsx`, `src/app/App.tsx` FOV, camera tests
-  - verifier: focused camera tests + `gate:m10-camera-stability` + `gate:m10-occlusion-readability`
-- [x] 4. Technical clutter, floating placements, zone activation, occlusion corridor
-  - depends: 1
+  - owns/allows: `src/render/animation/playerLocomotionPresentation.ts`, `playerProceduralPose.ts`, `PlayerVisual.tsx`, motion gate
+  - verifier: idle/blocked gait delta ~0; distance-proportional phase; focused turn tests
+- [x] 4. Route migration evidence, density, regressions, MB2 handoff
+  - depends: 2, 3
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `src/render/world/`, `cameraOcclusion.ts`, `ConnectedLevelVisual.tsx`, placement tests
-  - verifier: placement/occlusion tests + `gate:m15-quality-audit` (no draw-call regression vs same-host before)
-- [x] 5. Before/after evidence, full regressions, MB1 handoff
-  - depends: 2, 3, 4
-  - risk: MEDIUM
-  - isolation: sequential
-  - owns/allows: active HANDOFF/current-state/PLAN, M14/M13/M12/M10 gates, `npm run verify`
-  - verifier: motion/quality gates + M14/M13/M12/M10/lifecycle/assets + `npm run verify` + LeanLoop checks
+  - owns/allows: gates, HANDOFF, current-state, package.json
+  - verifier: M15 motion/quality/occlusion/room gates + M14/M13/M12/M10/lifecycle/assets + `npm run verify`
 
-## Locked decisions
+## Locked decisions (keep from MB1)
 
-- Simulation stays fixed 60 Hz. Collision/Rapier stay on authoritative sim transforms.
-- Camera follows the same interpolated player presentation the viewer sees.
-- Two rAF loops stay; interpolation absorbs phase mismatch. Single-owner rewrite not justified.
-- Selected camera profile: `closer-tactical` (FOV 38, offset 6.15/7.55/6.15). `current` remains for `?m15Baseline=1`.
-- Hit impulse is a vertical trauma offset, not a follow-target rewrite.
-- Zone presentation mounts current + neighbors + perimeter. `?zoneCull=0` keeps the M14 art leak probe honest.
-- Cursor may fix technical placement/duplicates/culling; Codex owns artistic replacement.
+- Fixed 60 Hz simulation. Rapier on authoritative transforms. Camera follows interpolated player presentation.
+- Two rAF loops retained. Default camera: closer-tactical. DEV FPS HUD: `?perfHud=1` or F3.
+- Zone mount: current + neighbors + perimeter.
 - Vesperfall is inspiration only.
+
+## Locked decisions (MB2)
+
+- STATIC ARCHITECTURE STAYS OPAQUE. Only `gate.shortcut` and `gate.final` may fade.
+- Camera-near room edges (east/+X and north/+Z) use low parapets; far edges may be tall. No roof.
+- Rooms are authored rectangles with openings; placements are generated from rooms then sparsely dressed. ADR-0002 registry stays underneath.
+- Gameplay zone IDs, encounters, checkpoint, shortcut, and final gate stay; presentation coordinates may move to match rooms.
+- MAGICAL_VFX (wisps) may float. Ordinary stone/bone/metal must ground or attach.
+- Locomotion gait is presentation-only and distance-driven. No sim/root-motion authority change.
 
 ## Escalation
 

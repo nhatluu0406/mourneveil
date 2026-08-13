@@ -77,7 +77,14 @@ export async function runM15MotionScript(page, artifactDir) {
   await soak(page, 800)
   await page.evaluate(() => window.__MOURNEVEIL_GATE__.resetMotionTelemetry())
   await soak(page, 250)
+  const idleGaitBefore = await page.evaluate(() => window.__MOURNEVEIL_GATE__.locomotion())
+  await soak(page, 400)
+  const idleGait = await page.evaluate(() => window.__MOURNEVEIL_GATE__.locomotion())
+  idleGait.phaseDelta = Math.abs((idleGait.gaitPhase ?? 0) - (idleGaitBefore.gaitPhase ?? 0))
   await captureCheckpoint(page, artifactDir, '01-idle')
+
+  await holdKeys(page, ['KeyW'], 220)
+  await captureCheckpoint(page, artifactDir, '01b-walk-start')
 
   await holdKeys(page, ['KeyW'], 1100)
   await captureCheckpoint(page, artifactDir, '02-straight')
@@ -94,6 +101,7 @@ export async function runM15MotionScript(page, artifactDir) {
   await captureCheckpoint(page, artifactDir, '05-strafe')
 
   await holdKeys(page, ['KeyA'], 1000)
+  const wallGait = await page.evaluate(() => window.__MOURNEVEIL_GATE__.locomotion())
   await captureCheckpoint(page, artifactDir, '06-wall-slide')
 
   await holdKeys(page, ['KeyW', 'KeyA'], 800)
@@ -116,7 +124,7 @@ export async function runM15MotionScript(page, artifactDir) {
   await holdKeys(page, ['KeyW'], 1800)
   await captureCheckpoint(page, artifactDir, '12-zone-transition')
 
-  return page.evaluate(() => {
+  const endState = await page.evaluate(() => {
     const g = window.__MOURNEVEIL_GATE__
     return {
       telemetry: g.motionTelemetry(),
@@ -126,8 +134,12 @@ export async function runM15MotionScript(page, artifactDir) {
       zoneId: g.snapshot().world.currentZoneId,
       player: g.snapshot().player.position,
       presentation: g.snapshot().presentation,
+      locomotion: g.locomotion(),
+      placementAudit: g.placementAudit(),
+      occluded: [...(g.occludedPlacementIds() ?? [])],
     }
   })
+  return { ...endState, idleGait, wallGait }
 }
 
 export async function writeQualitySummary(artifactDir, summary) {

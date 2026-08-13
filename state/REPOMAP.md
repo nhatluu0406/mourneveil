@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (56L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (64L)
+- PLAN.md (66L)
 - README.md (38L)
 - SETUP.md (44L)
-- STACK.md (84L)
+- STACK.md (88L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (73L)
+- package.json (75L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -169,15 +169,18 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - animation-presentation.md (14L)
     - asset-pipeline.md (36L)
     - overview.md (81L)
-    - **docs/architecture/decisions/** (2 files)
+    - **docs/architecture/decisions/** (3 files)
       - 0001-web-stack.md (46L)
       - 0002-modular-world-objects.md (42L)
+      - 0003-room-first-dungeon-composition.md (41L)
   - **docs/art/** (2 files)
     - m11-boss-visual-handoff.md (95L)
     - visual-direction.md (49L)
+  - **docs/design/** (1 files)
+    - m15-dungeon-floorplan.md (54L)
   - **docs/development/** (5 files)
     - agent-routing.md (38L)
-    - current-state.md (20L)
+    - current-state.md (21L)
     - definition-of-done.md (67L)
     - m14-codex-art-handoff.md (70L)
     - workflow.md (53L)
@@ -199,7 +202,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (54 files)
+  - **scripts/browser/** (56 files)
     - README.md (18L)
     - gate-m10-camera-occlusion-repro.mjs (101L)
     - gate-m10-camera-stability.mjs (194L)
@@ -212,7 +215,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - gate-m12-alpha-slice.mjs (222L)
     - gate-m12-build-choice.mjs (161L)
     - gate-m13-active-skills.mjs (306L)
-    - ... +42 more
+    - ... +44 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -223,11 +226,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - sync.py (279L) -- symbols: digest_tree, skill_dirs, parse_skill_names, installed_skill_names, scoped_skills
     - task.py (52L) -- symbols: main
     - token_report.py (41L) -- symbols: load_version, main
-    - worktree.py (130L) -- symbols: git, default_parent, list_rows, main
-- **src/** (2 files)
-  - main.tsx (16L) -- imports: ./app/App
-  - vite-env.d.ts (1L)
-  - **src/app/** (4 files)
-    -
+    - worktree.py (130L) -- symbols: git, default_parent, list_rows, ma
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)
