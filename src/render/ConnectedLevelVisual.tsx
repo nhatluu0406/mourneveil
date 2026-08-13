@@ -8,6 +8,7 @@ import {
   type ConnectedLevelBoxCollider,
 } from '../physics/connectedLevelCollision'
 import { aabbFromCenterSize, occludingSolidIds } from './cameraOcclusion'
+import { isAllowedOcclusionFadeId } from './allowedOcclusionFade'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { forEachOcclusionMaterial, registerOcclusionMaterial } from './occlusionMaterials'
 import { OssuaryEnvironmentKit } from './OssuaryEnvironmentKit'
@@ -112,7 +113,7 @@ function SolidVisual({ collider }: { readonly collider: ConnectedLevelBoxCollide
   )
 }
 
-/** Presentation-only fade of foreground gate bars + ADR-0002 fade-eligible architecture. */
+/** Presentation-only fade of foreground gate bars. Architecture stays opaque. */
 export function CameraOcclusionFader({ runtime }: { readonly runtime: GameRuntime }) {
   useFrame(({ camera }, delta) => {
     const world = runtime.snapshot().world
@@ -120,7 +121,7 @@ export function CameraOcclusionFader({ runtime }: { readonly runtime: GameRuntim
       shortcutOpen: world.openedShortcutIds.includes('connection.shortcut-checkpoint-mixed'),
       finalGateOpen: world.finalGateReached,
     })
-      .filter((collider) => shouldRenderProxyMesh(collider))
+      .filter((collider) => shouldRenderProxyMesh(collider) && isAllowedOcclusionFadeId(collider.id))
       .map((collider) => ({ id: collider.id, box: aabbFromCenterSize(collider.position, collider.size) }))
 
     const player = playerVisualPosition(runtime, usesInterpolatedPresentation())

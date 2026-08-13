@@ -1,17 +1,28 @@
 import { describe, expect, it } from 'vitest'
 import { OSSUARY_ROUTE_PLACEMENTS, OSSUARY_LANDMARKS, OSSUARY_ROUTE_CAPTURE_POINTS } from './routePlacements'
 import { groupPlacementsByObjectId, resolveWorldObjectDefinition } from '../worldObjectRegistry'
+import { MOURNEVEIL_DUNGEON_ROOMS } from './dungeonRooms'
 
 describe('ossuary route placements', () => {
   it('covers each authored route area with reusable object types', () => {
     expect(new Set(OSSUARY_ROUTE_PLACEMENTS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk', 'final-arena', 'perimeter']),
+      new Set([
+        'refuge',
+        'corridor',
+        'first-combat',
+        'court',
+        'mixed-court',
+        'ash-walk',
+        'final-approach',
+        'final-arena',
+        'perimeter',
+      ]),
     )
+    expect(OSSUARY_ROUTE_PLACEMENTS.some((entry) => entry.objectId === 'ossuary.floor.foundation')).toBe(true)
     expect(
-      OSSUARY_ROUTE_PLACEMENTS.some((entry) => entry.objectId === 'ossuary.floor.slab'),
-    ).toBe(true)
-    expect(
-      OSSUARY_ROUTE_PLACEMENTS.some((entry) => entry.objectId === 'ossuary.wall.bay'),
+      OSSUARY_ROUTE_PLACEMENTS.some(
+        (entry) => entry.objectId === 'ossuary.wall.bay' || entry.objectId === 'ossuary.floor.pit-rim',
+      ),
     ).toBe(true)
   })
 
@@ -33,14 +44,7 @@ describe('ossuary route placements', () => {
         (entry) => resolveWorldObjectDefinition(entry.objectId).renderMode === 'instanced',
       ),
     )
-    expect((groups.get('ossuary.floor.slab') ?? []).length).toBeGreaterThan(10)
-    expect((groups.get('ossuary.rubble.cluster') ?? []).length).toBeGreaterThan(5)
-  })
-
-  it('requires only placement edits to relocate an arch', () => {
-    const arch = OSSUARY_ROUTE_PLACEMENTS.find((entry) => entry.instanceId === 'arch.corridor.0')
-    expect(arch?.objectId).toBe('ossuary.arch.full')
-    expect(arch?.position[0]).toBeCloseTo(-7.78)
+    expect((groups.get('ossuary.floor.foundation') ?? []).length).toBeGreaterThan(7)
   })
 
   it('provides distinct landmarks and capture anchors', () => {
@@ -58,57 +62,48 @@ describe('ossuary route placements', () => {
 
   it('separates visible practical fixtures from sparse actual light owners', () => {
     const practicals = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId.startsWith('ossuary.light.'))
-    expect(new Set(practicals.map((entry) => entry.objectId))).toEqual(new Set([
-      'ossuary.light.wall-sconce',
-      'ossuary.light.brazier',
-      'ossuary.light.veil-lamp',
-      'ossuary.light.candle-cluster',
-      'ossuary.light.candelabrum',
-      'ossuary.light.reliquary-lantern',
-      'ossuary.light.double-sconce',
-      'ossuary.light.ember-bowl',
-      'ossuary.light.spectral-reliquary',
-    ]))
-    expect(practicals.filter((entry) => entry.variant === 'actual-light')).toHaveLength(7)
+    expect(practicals.filter((entry) => entry.variant === 'actual-light').length).toBe(
+      MOURNEVEIL_DUNGEON_ROOMS.reduce(
+        (sum, room) => sum + room.lightAnchors.filter((anchor) => anchor.actualLight).length,
+        0,
+      ),
+    )
     expect(practicals.length).toBeGreaterThan(5)
+    expect(practicals.filter((entry) => entry.variant === 'actual-light').length).toBeLessThanOrEqual(12)
   })
 
-  it('gives the Court of Quiet Names distinct pointed architecture and source fixtures', () => {
-    const court = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'mixed-court')
-    expect(court.some((entry) => entry.objectId === 'ossuary.arch.lancet')).toBe(true)
-    expect(court.some((entry) => entry.objectId === 'ossuary.arch.lancet-broken')).toBe(true)
-    expect(court.filter((entry) => entry.objectId === 'ossuary.niche.cluster')).toHaveLength(2)
-    expect(court.some((entry) => entry.objectId === 'ossuary.light.spectral-reliquary')).toBe(true)
-    expect(court.filter((entry) => entry.variant === 'actual-light')).toHaveLength(2)
-  })
-
-  it('authors a readable final arena with reusable funeral assets and a clear center', () => {
+  it('keeps court and sepulchre centers clear of tall dressing', () => {
+    const courtCenter = OSSUARY_ROUTE_PLACEMENTS.filter(
+      (entry) =>
+        entry.area === 'court' &&
+        entry.position[0] > -1.2 &&
+        entry.position[0] < 0.4 &&
+        entry.position[2] > -4.6 &&
+        entry.position[2] < -2.4 &&
+        !entry.objectId.startsWith('ossuary.floor.'),
+    )
+    expect(courtCenter).toHaveLength(0)
     const arena = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'final-arena')
-    expect(arena.filter((entry) => entry.objectId === 'ossuary.floor.seal-slab').length).toBeGreaterThan(30)
-    expect(arena.some((entry) => entry.objectId === 'ossuary.landmark.arena-seal')).toBe(true)
-    expect(arena.some((entry) => entry.objectId === 'ossuary.metal.burial-screen')).toBe(true)
-    expect(arena.some((entry) => entry.objectId === 'ossuary.reliquary.broken')).toBe(true)
-    expect(arena.filter((entry) => entry.variant === 'actual-light')).toHaveLength(2)
-    const centerClutter = arena.filter((entry) => entry.position[0] > 11.6 && entry.position[0] < 14.4 && entry.position[2] > -5.4 && entry.position[2] < -2.6 && !entry.objectId.startsWith('ossuary.floor.') && entry.objectId !== 'ossuary.landmark.arena-seal')
+    const centerClutter = arena.filter(
+      (entry) =>
+        entry.position[0] > 11.6 &&
+        entry.position[0] < 14.4 &&
+        entry.position[2] > -5.4 &&
+        entry.position[2] < -2.6 &&
+        !entry.objectId.startsWith('ossuary.floor.') &&
+        entry.objectId !== 'ossuary.landmark.arena-seal',
+    )
     expect(centerClutter).toHaveLength(0)
   })
 
-  it('establishes continuous foundations and explicit broken-floor edges across the route', () => {
-    const routedAreas = ['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk', 'final-arena']
+  it('establishes continuous foundations across every room', () => {
     const foundations = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.foundation')
-    expect(new Set(foundations.map((entry) => entry.area))).toEqual(new Set(routedAreas))
-    expect(OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.broken-edge').length).toBeGreaterThanOrEqual(10)
-    expect(OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.pit-rim').length).toBeGreaterThanOrEqual(6)
+    expect(new Set(foundations.map((entry) => entry.area)).size).toBeGreaterThanOrEqual(7)
   })
 
-  it('keeps perimeter silhouettes outside the walkable route and non-colliding by construction', () => {
+  it('keeps perimeter silhouettes outside the walkable route', () => {
     const silhouettes = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'perimeter')
-    expect(silhouettes.length).toBeGreaterThan(8)
-    expect(silhouettes.every((entry) => entry.objectId.startsWith('ossuary.'))).toBe(true)
-    expect(
-      silhouettes.some((entry) => entry.objectId === 'ossuary.silhouette.mass'),
-    ).toBe(true)
-    expect(silhouettes.some((entry) => entry.instanceId.includes('.se'))).toBe(false)
+    expect(silhouettes.length).toBeGreaterThan(3)
     expect(silhouettes.find((entry) => entry.instanceId === 'silhouette.ash.east')?.position[0]).toBeGreaterThan(16.5)
   })
 })

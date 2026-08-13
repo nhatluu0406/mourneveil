@@ -4,10 +4,16 @@ export type OssuaryRouteArea =
   | 'refuge'
   | 'corridor'
   | 'first-combat'
+  | 'court'
   | 'mixed-court'
   | 'ash-walk'
+  | 'final-approach'
   | 'final-arena'
   | 'perimeter'
+
+export type WorldObjectAnchorPolicy = 'floor' | 'wall' | 'hanging' | 'structural' | 'vfx'
+
+export type RoomWallSide = 'north' | 'south' | 'east' | 'west'
 
 export type WorldObjectFamily =
   | 'architecture'
@@ -85,7 +91,7 @@ export type OssuaryObjectId =
 
 export type WorldObjectRenderMode = 'instanced' | 'unique'
 
-/** Presentation-only camera readability: fade eligible tall architecture when it occludes. */
+/** Only explicitly allowlisted IDs may fade. Architecture defaults to solid. */
 export type WorldObjectOcclusionPolicy = 'fade' | 'solid'
 
 export interface WorldObjectDefinition {
@@ -97,6 +103,7 @@ export interface WorldObjectDefinition {
   readonly receiveShadow: boolean
   readonly renderMode: WorldObjectRenderMode
   readonly occlusionPolicy?: WorldObjectOcclusionPolicy
+  readonly anchorPolicy?: WorldObjectAnchorPolicy
   /** Optional authored visual bounds hint for documentation/debug — not collision. */
   readonly visualBounds?: readonly [number, number, number]
 }
@@ -109,6 +116,8 @@ export interface WorldObjectPlacement {
   readonly rotation: readonly [number, number, number]
   readonly scale?: readonly [number, number, number]
   readonly variant?: string
+  /** Hanging placements must name a structural support instance. */
+  readonly supportInstanceId?: string
 }
 
 export function resolvePlacementScale(

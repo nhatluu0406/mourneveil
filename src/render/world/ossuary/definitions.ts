@@ -52,7 +52,7 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     receiveShadow: true,
     renderMode: 'instanced',
   }),
-  'ossuary.floor.foundation': define({ id: 'ossuary.floor.foundation', family: 'architecture', materialKey: 'ashStone', castShadow: false, receiveShadow: true, renderMode: 'instanced' }),
+  'ossuary.floor.foundation': define({ id: 'ossuary.floor.foundation', family: 'architecture', materialKey: 'floorSlab', castShadow: false, receiveShadow: true, renderMode: 'instanced' }),
   'ossuary.floor.broken-edge': define({ id: 'ossuary.floor.broken-edge', family: 'architecture', materialKey: 'ashStone', castShadow: true, receiveShadow: true, renderMode: 'instanced' }),
   'ossuary.floor.pit-rim': define({ id: 'ossuary.floor.pit-rim', family: 'architecture', materialKey: 'floorSlab', castShadow: true, receiveShadow: true, renderMode: 'instanced' }),
   'ossuary.wall.bay': define({
@@ -62,7 +62,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [0.16, 1.25, 1.2],
   }),
   'ossuary.wall.break': define({
@@ -72,7 +71,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [0.68, 0.68, 0.68],
   }),
   'ossuary.buttress': define({
@@ -82,7 +80,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [0.42, 2.04, 0.4],
   }),
   'ossuary.arch.full': define({
@@ -92,7 +89,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [1.92, 1.1, 0.22],
   }),
   'ossuary.arch.rib': define({
@@ -102,30 +98,29 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [0.24, 1.7, 0.22],
   }),
   'ossuary.arch.lancet': define({
-    id: 'ossuary.arch.lancet', family: 'architecture', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [1.5, 2.25, 0.22],
+    id: 'ossuary.arch.lancet', family: 'architecture', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced',  visualBounds: [1.5, 2.25, 0.22],
   }),
   'ossuary.arch.lancet-broken': define({
-    id: 'ossuary.arch.lancet-broken', family: 'architecture', materialKey: 'recessStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [1.35, 1.8, 0.26],
+    id: 'ossuary.arch.lancet-broken', family: 'architecture', materialKey: 'recessStone', castShadow: true, receiveShadow: true, renderMode: 'instanced',  visualBounds: [1.35, 1.8, 0.26],
   }),
   'ossuary.buttress.split': define({
-    id: 'ossuary.buttress.split', family: 'architecture', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.56, 1.9, 0.5],
+    id: 'ossuary.buttress.split', family: 'architecture', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced',  visualBounds: [0.56, 1.9, 0.5],
   }),
   'ossuary.niche.cluster': define({
-    id: 'ossuary.niche.cluster', family: 'burial', materialKey: 'recessStone', castShadow: false, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.1, 1.25, 1.15],
+    id: 'ossuary.niche.cluster', family: 'burial', materialKey: 'recessStone', castShadow: false, receiveShadow: true, renderMode: 'instanced',  visualBounds: [0.1, 1.25, 1.15],
   }),
   'ossuary.memorial.cluster': define({
     id: 'ossuary.memorial.cluster', family: 'burial', materialKey: 'darkStone', castShadow: true, receiveShadow: true, renderMode: 'instanced', visualBounds: [0.8, 0.85, 0.28],
   }),
   'ossuary.reliquary.chain': define({
-    id: 'ossuary.reliquary.chain', family: 'metal', materialKey: 'iron', castShadow: true, receiveShadow: false, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.24, 1.7, 0.12],
+    id: 'ossuary.reliquary.chain', family: 'metal', materialKey: 'iron', castShadow: true, receiveShadow: false, renderMode: 'instanced',  visualBounds: [0.24, 1.7, 0.12],
   }),
-  'ossuary.wall.ledge': define({ id: 'ossuary.wall.ledge', family: 'architecture', materialKey: 'floorSlab', castShadow: true, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.18, 0.16, 1.1] }),
-  'ossuary.grave.plaque': define({ id: 'ossuary.grave.plaque', family: 'burial', materialKey: 'bone', castShadow: false, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.05, 0.4, 0.28] }),
-  'ossuary.metal.bronze-brace': define({ id: 'ossuary.metal.bronze-brace', family: 'metal', materialKey: 'bronze', castShadow: false, receiveShadow: true, renderMode: 'instanced', occlusionPolicy: 'fade', visualBounds: [0.08, 0.64, 0.08] }),
+  'ossuary.wall.ledge': define({ id: 'ossuary.wall.ledge', family: 'architecture', materialKey: 'floorSlab', castShadow: true, receiveShadow: true, renderMode: 'instanced',  visualBounds: [0.18, 0.16, 1.1] }),
+  'ossuary.grave.plaque': define({ id: 'ossuary.grave.plaque', family: 'burial', materialKey: 'bone', castShadow: false, receiveShadow: true, renderMode: 'instanced',  visualBounds: [0.05, 0.4, 0.28] }),
+  'ossuary.metal.bronze-brace': define({ id: 'ossuary.metal.bronze-brace', family: 'metal', materialKey: 'bronze', castShadow: false, receiveShadow: true, renderMode: 'instanced',  visualBounds: [0.08, 0.64, 0.08] }),
   'ossuary.niche.recess': define({
     id: 'ossuary.niche.recess',
     family: 'burial',
@@ -133,7 +128,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: true,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [0.06, 0.74, 0.62],
   }),
   'ossuary.niche.arch': define({
@@ -143,7 +137,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: false,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [0.58, 0.58, 0.07],
   }),
   'ossuary.sarcophagus.body': define({
@@ -225,6 +218,7 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: false,
     renderMode: 'instanced',
+    anchorPolicy: 'vfx',
   }),
   'ossuary.silhouette.mass': define({
     id: 'ossuary.silhouette.mass',
@@ -233,7 +227,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: false,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [2.4, 3.2, 0.55],
   }),
   'ossuary.silhouette.column': define({
@@ -243,7 +236,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: false,
     receiveShadow: false,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [0.55, 3.4, 0.55],
   }),
   'ossuary.light.wall-sconce': define({
@@ -305,7 +297,6 @@ export const OSSUARY_OBJECT_DEFINITIONS: Readonly<
     castShadow: true,
     receiveShadow: true,
     renderMode: 'instanced',
-    occlusionPolicy: 'fade',
     visualBounds: [1.4, 1.3, 0.09],
   }),
   'ossuary.reliquary.broken': define({

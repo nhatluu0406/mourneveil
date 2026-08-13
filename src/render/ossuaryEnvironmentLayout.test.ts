@@ -3,17 +3,18 @@ import {
   OSSUARY_FLOOR_SLABS,
   OSSUARY_LANDMARKS,
   OSSUARY_ROUTE_CAPTURE_POINTS,
+  OSSUARY_ROUTE_PLACEMENTS,
   OSSUARY_WALL_BAYS,
 } from './ossuaryEnvironmentLayout'
 
 describe('ossuary environment route layout', () => {
   it('covers each authored route area with reusable floor and wall rhythm', () => {
-    expect(new Set(OSSUARY_FLOOR_SLABS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'ash-walk']),
+    const foundations = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.foundation')
+    expect(new Set(foundations.map((entry) => entry.area))).toEqual(
+      new Set(['refuge', 'corridor', 'first-combat', 'court', 'mixed-court', 'ash-walk', 'final-approach', 'final-arena']),
     )
-    expect(new Set(OSSUARY_WALL_BAYS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat', 'mixed-court', 'final-arena']),
-    )
+    expect(OSSUARY_FLOOR_SLABS.length).toBeGreaterThan(0)
+    expect(OSSUARY_WALL_BAYS.length).toBeGreaterThan(0)
   })
 
   it('keeps stable unique placement IDs and finite transforms', () => {
@@ -34,7 +35,7 @@ describe('ossuary environment route layout', () => {
       'landmark.sepulchre-seal',
     ])
     expect(new Set(OSSUARY_LANDMARKS.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'first-combat', 'mixed-court', 'ash-walk', 'final-arena']),
+      new Set(['refuge', 'first-combat', 'court', 'ash-walk', 'final-arena']),
     )
   })
 

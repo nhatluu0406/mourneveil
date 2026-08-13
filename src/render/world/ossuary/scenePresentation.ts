@@ -7,8 +7,10 @@ export const ALL_ROUTE_AREAS: readonly OssuaryRouteArea[] = Object.freeze([
   'refuge',
   'corridor',
   'first-combat',
+  'court',
   'mixed-court',
   'ash-walk',
+  'final-approach',
   'final-arena',
   'perimeter',
 ])
@@ -22,18 +24,19 @@ export const ZONE_VISIBLE_AREAS: Readonly<Record<MourneveilZoneId, readonly Ossu
       'refuge',
       'corridor',
       'first-combat',
-      'mixed-court',
+      'court',
       'perimeter',
     ] as const,
     'zone.mixed-combat': [
+      'court',
       'mixed-court',
       'corridor',
       'refuge',
       'ash-walk',
       'perimeter',
     ] as const,
-    'zone.final-approach': ['ash-walk', 'mixed-court', 'final-arena', 'perimeter'] as const,
-    'zone.final-arena': ['final-arena', 'ash-walk', 'perimeter'] as const,
+    'zone.final-approach': ['ash-walk', 'final-approach', 'mixed-court', 'final-arena', 'perimeter'] as const,
+    'zone.final-arena': ['final-arena', 'final-approach', 'ash-walk', 'perimeter'] as const,
   })
 
 export type PropAnchorClass =
@@ -42,6 +45,7 @@ export type PropAnchorClass =
   | 'hanging'
   | 'intentionally-floating'
   | 'architectural'
+  | 'vfx'
 
 export type SceneFamilyBucket =
   | 'architecture'
@@ -89,7 +93,7 @@ export function classifySceneFamily(objectId: string): SceneFamilyBucket {
 
 export function classifyPropAnchor(placement: WorldObjectPlacement): PropAnchorClass {
   const id = placement.objectId
-  if (id === 'ossuary.wisp') return 'intentionally-floating'
+  if (id === 'ossuary.wisp' || placement.variant === 'vfx') return 'vfx'
   if (id === 'ossuary.reliquary.chain' || id === 'ossuary.corridor.bell') return 'hanging'
   if (id.includes('arch') || id.includes('buttress') || id.includes('silhouette')) {
     return 'architectural'
@@ -110,7 +114,7 @@ export function classifyPropAnchor(placement: WorldObjectPlacement): PropAnchorC
 /** Flag placements whose origin sits too high without a hanging/veil/arch reason. */
 export function isSuspiciousUnsupported(placement: WorldObjectPlacement): boolean {
   const anchor = classifyPropAnchor(placement)
-  if (anchor === 'hanging' || anchor === 'intentionally-floating' || anchor === 'architectural') {
+  if (anchor === 'hanging' || anchor === 'vfx' || anchor === 'architectural') {
     return false
   }
   if (anchor === 'wall-anchored') return false
@@ -147,6 +151,7 @@ export function auditScenePlacements(
     hanging: 0,
     'intentionally-floating': 0,
     architectural: 0,
+    vfx: 0,
   }
   const suspiciousUnsupported: string[] = []
   for (const placement of placements) {

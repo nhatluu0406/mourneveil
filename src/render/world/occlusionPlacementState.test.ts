@@ -7,22 +7,24 @@ import {
   isPlacementOccluded,
 } from './occlusionPlacementState'
 import { resolveWorldObjectDefinition } from './worldObjectRegistry'
+import { ALLOWED_OCCLUSION_FADE_IDS } from '../allowedOcclusionFade'
 
 describe('occlusion placement state', () => {
-  it('indexes fade-eligible architecture placements with stable instance IDs', () => {
+  it('indexes no ordinary architecture as fade-eligible', () => {
     rebuildFadeOcclusionSolids(OSSUARY_ROUTE_PLACEMENTS)
-    const solids = listFadeOcclusionSolids()
-    expect(solids.length).toBeGreaterThan(10)
-    expect(solids.every((entry) => typeof entry.id === 'string')).toBe(true)
-    const bay = solids.find((entry) => entry.id.startsWith('bay.'))
-    expect(bay).toBeDefined()
+    expect(listFadeOcclusionSolids()).toEqual([])
+    expect(
+      OSSUARY_ROUTE_PLACEMENTS.every(
+        (entry) => resolveWorldObjectDefinition(entry.objectId).occlusionPolicy !== 'fade',
+      ),
+    ).toBe(true)
+    expect(ALLOWED_OCCLUSION_FADE_IDS).toEqual(['gate.shortcut', 'gate.final'])
   })
 
   it('tracks occluded placement IDs without mutating definitions', () => {
     setOccludedPlacementIds(new Set(['bay.watch.0']))
     expect(isPlacementOccluded('bay.watch.0')).toBe(true)
     expect(isPlacementOccluded('bay.watch.1')).toBe(false)
-    expect(resolveWorldObjectDefinition('ossuary.wall.bay').occlusionPolicy).toBe('fade')
-    expect(resolveWorldObjectDefinition('ossuary.floor.slab').occlusionPolicy).not.toBe('fade')
+    expect(resolveWorldObjectDefinition('ossuary.wall.bay').occlusionPolicy).not.toBe('fade')
   })
 })

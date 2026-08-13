@@ -1,5 +1,6 @@
 import type { Aabb3 } from '../cameraOcclusion'
 import { aabbFromCenterSize } from '../cameraOcclusion'
+import { worldObjectAllowsFade } from '../allowedOcclusionFade'
 import { resolveWorldObjectDefinition } from './worldObjectRegistry'
 import {
   resolvePlacementScale,
@@ -56,7 +57,7 @@ export function listFadeOcclusionSolids(): ReadonlyArray<{ readonly id: string; 
 export function rebuildFadeOcclusionSolids(placements: readonly WorldObjectPlacement[]): void {
   fadeSolids = placements.flatMap((placement) => {
     const definition = resolveWorldObjectDefinition(placement.objectId)
-    if (definition.occlusionPolicy !== 'fade') return []
+    if (!worldObjectAllowsFade(definition.occlusionPolicy)) return []
     const bounds = definition.visualBounds ?? [1, 1, 1]
     const scale = resolvePlacementScale(placement, definition)
     // Pad so thin rotated wall bays still catch high-oblique readability casts.
