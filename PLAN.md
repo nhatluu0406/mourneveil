@@ -19,31 +19,31 @@ Make the existing playable-alpha route feel stable, readable, and smooth with me
 
 ## Steps
 
-- [ ] 1. Frame/camera telemetry, DEV FPS HUD, motion + quality gates
+- [x] 1. Frame/camera telemetry, DEV FPS HUD, motion + quality gates
   - depends: —
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: `src/debug/`, `src/ui/` perf HUD, `src/app/`, `scripts/browser/gate-m15-*.mjs`, `package.json`, focused tests
   - verifier: focused telemetry tests + `npm run gate:m15-motion-quality` + `npm run gate:m15-quality-audit`
-- [ ] 2. Presentation interpolation + loop decision
+- [x] 2. Presentation interpolation + loop decision
   - depends: 1
   - risk: HIGH
   - isolation: sequential
   - owns/allows: `src/game/core/`, `src/game/runtime/`, `src/physics/PlayerPhysicsBody.tsx`, `src/render/FollowCameraRig.tsx`, `STACK.md` presentation ownership
   - verifier: focused interpolation tests + historical `gate:m10-camera-stability`
-- [ ] 3. Camera framing, dead-zone, impulse channel
+- [x] 3. Camera framing, dead-zone, impulse channel
   - depends: 2
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: `src/render/followCamera.ts`, `FollowCameraRig.tsx`, `src/app/App.tsx` FOV, camera tests
   - verifier: focused camera tests + `gate:m10-camera-stability` + `gate:m10-occlusion-readability`
-- [ ] 4. Technical clutter, floating placements, zone activation, occlusion corridor
+- [x] 4. Technical clutter, floating placements, zone activation, occlusion corridor
   - depends: 1
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: `src/render/world/`, `cameraOcclusion.ts`, `ConnectedLevelVisual.tsx`, placement tests
   - verifier: placement/occlusion tests + `gate:m15-quality-audit` (no draw-call regression vs same-host before)
-- [ ] 5. Before/after evidence, full regressions, MB1 handoff
+- [x] 5. Before/after evidence, full regressions, MB1 handoff
   - depends: 2, 3, 4
   - risk: MEDIUM
   - isolation: sequential
@@ -54,7 +54,10 @@ Make the existing playable-alpha route feel stable, readable, and smooth with me
 
 - Simulation stays fixed 60 Hz. Collision/Rapier stay on authoritative sim transforms.
 - Camera follows the same interpolated player presentation the viewer sees.
-- Two rAF loops stay unless evidence proves a single owner is safer.
+- Two rAF loops stay; interpolation absorbs phase mismatch. Single-owner rewrite not justified.
+- Selected camera profile: `closer-tactical` (FOV 38, offset 6.15/7.55/6.15). `current` remains for `?m15Baseline=1`.
+- Hit impulse is a vertical trauma offset, not a follow-target rewrite.
+- Zone presentation mounts current + neighbors + perimeter. `?zoneCull=0` keeps the M14 art leak probe honest.
 - Cursor may fix technical placement/duplicates/culling; Codex owns artistic replacement.
 - Vesperfall is inspiration only.
 
