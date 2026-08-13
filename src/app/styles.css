@@ -910,15 +910,91 @@ body {
 .inventory-panel--build {
   display: flex;
   flex-direction: column;
-  width: min(64rem, calc(100vw - 3rem));
+  width: min(72rem, calc(100vw - 2.5rem));
   max-height: calc(100vh - 2rem);
   overflow: hidden;
   padding: 0.85rem 1rem 0.9rem;
   scrollbar-width: none;
 }
 .inventory-panel--build::-webkit-scrollbar { display: none; }
-.inventory-panel--build .inventory-panel__header { margin-bottom: 0.35rem; }
+.inventory-panel--build .inventory-panel__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
 .inventory-panel--build h2 { font-size: 1.35rem; }
+.panel-tabs { display: flex; gap: 0.25rem; padding: 0.12rem; border: 1px solid rgb(181 151 101 / 28%); background: rgb(0 0 0 / 28%); }
+.panel-tabs button { min-width: 5.5rem; padding: 0.28rem 0.7rem; }
+.panel-tabs button[aria-selected="true"] { border-color: rgb(181 151 101 / 55%); background: rgb(152 118 60 / 18%); color: #eee4d1; }
+.armory-layout,
+.oath-layout {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.armory-layout {
+  grid-template-columns: minmax(14rem, 0.85fr) minmax(16rem, 1.15fr) minmax(16rem, 1fr);
+  gap: 0.7rem;
+}
+.armory-owned,
+.armory-detail,
+.armory-loadout { min-height: 0; overflow: hidden; }
+.armory-owned ul { display: flex; flex-direction: column; gap: 0.28rem; margin: 0; padding: 0; list-style: none; }
+.armory-item-row {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.28rem 0.35rem;
+  text-align: left;
+  border: 1px solid rgb(255 255 255 / 8%);
+  background: rgb(0 0 0 / 18%);
+}
+.armory-item-row.is-selected { border-color: rgb(181 151 101 / 48%); background: rgb(152 118 60 / 12%); }
+.armory-item-row__copy { display: grid; min-width: 0; }
+.armory-item-row__copy strong { color: #e9dfcd; font: 550 0.76rem var(--ui-display); }
+.armory-item-row__copy small { color: rgb(207 196 175 / 58%); font-size: 0.52rem; text-transform: uppercase; }
+.armory-detail { display: flex; flex-direction: column; gap: 0.35rem; }
+.armory-detail__hero { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: 0.45rem; align-items: center; }
+.armory-detail__mod { display: block; color: rgb(207 196 175 / 70%); font-size: 0.58rem; }
+.oath-layout { grid-template-rows: auto minmax(0, 1fr); gap: 0.55rem; }
+.oath-layout__body { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 0.75rem; min-height: 0; overflow: hidden; }
+.title-screen {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 18%, rgb(89 156 151 / 12%), transparent 42%),
+    linear-gradient(180deg, #070b0e, #0c1014 60%, #08090b);
+}
+.title-screen__panel {
+  width: min(28rem, calc(100vw - 2rem));
+  padding: 1.4rem 1.5rem 1.3rem;
+  border: 1px solid var(--ui-hairline);
+  background: var(--ui-panel-strong);
+  box-shadow: 0 1.2rem 2.8rem rgb(0 0 0 / 45%);
+}
+.title-screen__eyebrow,
+.title-screen__lede { margin: 0; color: rgb(205 198 181 / 62%); letter-spacing: 0.12em; text-transform: uppercase; }
+.title-screen__eyebrow { font-size: 0.58rem; }
+.title-screen h1 { margin: 0.35rem 0 0.7rem; color: #eee4d1; font: 600 1.55rem var(--ui-display); }
+.title-screen__lede { font-size: 0.62rem; line-height: 1.55; letter-spacing: 0.08em; }
+.title-screen__actions { display: flex; gap: 0.5rem; margin-top: 1.1rem; }
+.title-screen__actions button,
+.title-screen__confirm button {
+  padding: 0.45rem 0.9rem;
+  color: #eee4d1;
+  border: 1px solid rgb(181 151 101 / 42%);
+  background: rgb(152 118 60 / 16%);
+}
+.title-screen__ghost { background: transparent; }
+.title-screen__confirm h2 { margin: 0 0 0.4rem; font: 600 1rem var(--ui-display); }
+.title-screen__confirm p { margin: 0; color: rgb(205 198 181 / 70%); font-size: 0.78rem; line-height: 1.45; }
 .inventory-panel__body {
   display: flex;
   flex: 1 1 auto;
@@ -1065,11 +1141,13 @@ body {
   .inventory-panel--build { width: calc(100vw - 1rem); max-height: calc(100vh - 1rem); padding: 0.65rem; }
   .progression-summary { grid-template-columns: 5rem minmax(8rem, 1fr) 5rem; }
   .inventory-panel__columns,
-  .inventory-owned ul { grid-template-columns: 1fr; }
+  .inventory-owned ul,
+  .armory-layout,
+  .oath-layout__body { grid-template-columns: 1fr; }
   .inventory-skills ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-/* Compact height / 1280×720: themed internal scroll on owned relics only. */
+/* Compact height / 1280×720: one owned Armory list may scroll. */
 @media (max-height: 760px), (max-width: 1280px) {
   .inventory-panel--build { padding-block: 0.55rem; }
   .inventory-panel--build .inventory-panel__header { margin-bottom: 0.2rem; }
@@ -1077,16 +1155,19 @@ body {
   .progression-attribute { min-height: 3rem; margin-bottom: 0.2rem; padding-block: 0.25rem; }
   .inventory-panel__body { gap: 0.35rem; }
   .inventory-skill-card { min-height: 5.5rem; padding-block: 0.25rem; }
+  .armory-owned,
   .inventory-owned {
-    max-height: 7.5rem;
     overflow-x: hidden;
     overflow-y: auto;
     padding-right: 0.2rem;
     scrollbar-width: thin;
     scrollbar-color: rgb(141 191 186 / 35%) rgb(0 0 0 / 25%);
   }
+  .armory-owned::-webkit-scrollbar,
   .inventory-owned::-webkit-scrollbar { width: 0.35rem; }
+  .armory-owned::-webkit-scrollbar-track,
   .inventory-owned::-webkit-scrollbar-track { background: rgb(0 0 0 / 25%); }
+  .armory-owned::-webkit-scrollbar-thumb,
   .inventory-owned::-webkit-scrollbar-thumb {
     border-radius: 0.2rem;
     background: linear-gradient(180deg, rgb(109 168 162 / 45%), rgb(181 151 101 / 40%));
@@ -1095,7 +1176,10 @@ body {
 
 @media (min-width: 1281px) and (min-height: 861px) {
   .inventory-panel--build,
-  .inventory-owned {
+  .inventory-owned,
+  .armory-owned,
+  .armory-layout,
+  .oath-layout {
     overflow: hidden;
   }
 }
