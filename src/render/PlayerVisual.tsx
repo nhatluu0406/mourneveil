@@ -14,6 +14,10 @@ import { localNegativeZFacingYaw } from './enemyAttackPresentation'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { projectPlayerAnimation } from './animation/playerAnimationProjection'
 import { resolvePlayerProceduralPose } from './animation/playerProceduralPose'
+import {
+  tickPlayerLocomotionPresentation,
+} from './animation/playerLocomotionPresentation'
+import { playerVisualPosition, usesInterpolatedPresentation } from './presentationSampling'
 import { resolvePlayerOutgoingHitConfirm } from './playerCombatFeedback'
 import { combatContactCueLayout, shouldShowCombatContactDebug } from './combatContactCueLayout'
 import { CombatContactVolumeCue } from './CombatContactVolumeCue'
@@ -60,10 +64,6 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
   useFrame((_state, deltaSeconds) => {
     const snapshot = runtime.snapshot()
     const animation = projectPlayerAnimation(snapshot)
-    const proceduralPose = resolvePlayerProceduralPose(
-      animation,
-      snapshot.simulation.stepCount,
-    )
     const facingGroup = facingGroupRef.current
     const bodyGroup = bodyGroupRef.current
     const weaponSweep = weaponSweepRef.current
@@ -112,7 +112,29 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     const facing = resolveAttackPresentationFacing(snapshot.attack, {
       facing: animation.facing,
     })
-    facingGroup.rotation.y = localNegativeZFacingYaw(facing)
+    const committedTurn =
+      animation.mode === 'light-attack' ||
+      animation.mode === 'heavy-attack' ||
+      animation.mode === 'dodge'
+    const presented = playerVisualPosition(runtime, usesInterpolatedPresentation())
+    const locomotion = tickPlayerLocomotionPresentation({
+      positionX: presented.x,
+      positionZ: presented.z,
+      facingX: facing.x,
+      facingZ: facing.z,
+      deltaSeconds: deltaSeconds,
+      grounded: snapshot.player.grounded,
+      committedAttack: committedTurn,
+      currentYawRadians: facingGroup.rotation.y,
+    })
+    facingGroup.rotation.y = committedTurn
+      ? localNegativeZFacingYaw(facing)
+      : locomotion.yawRadians
+    const proceduralPose = resolvePlayerProceduralPose(
+      animation,
+      snapshot.simulation.stepCount,
+      locomotion,
+    )
     const pose = computePlayerAttackPresentationPose(snapshot.combat)
     weapon.visible = pose.weaponVisible
     weaponSweep.rotation.y = pose.weaponYawRadians
@@ -127,8 +149,8 @@ export function PlayerVisual({ runtime }: { runtime: GameRuntime }) {
     bodyGroup.position.y = MathUtils.damp(bodyGroup.position.y, proceduralPose.bodyOffsetY, damping, deltaSeconds)
     bodyGroup.position.x = MathUtils.damp(bodyGroup.position.x, proceduralPose.bodyOffsetX, damping, deltaSeconds)
     torso.rotation.x = MathUtils.damp(torso.rotation.x, proceduralPose.torsoPitch, damping, deltaSeconds)
-    leftLeg.rotation.x = MathUtils.damp(leftLeg.rotation.x, proceduralPose.limbSwing, damping, deltaSeconds)
-    rightLeg.rotation.x = MathUtils.damp(rightLeg.rotation.x, -proceduralPose.limbSwing, damping, deltaSeconds)
+    leftLeg.rotation.x = MathUtils.damp(leftLeg.rotation.x, proceduralPose.leftLimbSwing, damping, deltaSeconds)
+    rightLeg.rotation.x = MathUtils.damp(rightLeg.rotation.x, proceduralPose.rightLimbSwing, damping, deltaSeconds)
     leftArm.rotation.x = MathUtils.damp(leftArm.rotation.x, 0.15 + proceduralPose.leftArmPitch, damping, deltaSeconds)
     rightArm.rotation.x = MathUtils.damp(rightArm.rotation.x, 0.15 + proceduralPose.rightArmPitch, damping, deltaSeconds)
     weaponSweep.rotation.x = MathUtils.damp(weaponSweep.rotation.x, proceduralPose.weaponPitch, damping, deltaSeconds)

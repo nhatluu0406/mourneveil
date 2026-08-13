@@ -1,5 +1,9 @@
 import type { AnimationPresentationState } from './animationPresentation'
 import { SKILL_OATH_CLEAVE_ID, SKILL_VEIL_STEP_ID, SKILL_WARD_PULSE_ID } from '../../game/skills/skillDefinition'
+import {
+  plantedFootSwing,
+  type PlayerLocomotionPresentation,
+} from './playerLocomotionPresentation'
 
 export interface PlayerProceduralPose {
   readonly bodyOffsetX: number
@@ -10,23 +14,26 @@ export interface PlayerProceduralPose {
   readonly bodyRoll: number
   readonly torsoPitch: number
   readonly limbSwing: number
+  readonly leftLimbSwing: number
+  readonly rightLimbSwing: number
   readonly leftArmPitch: number
   readonly rightArmPitch: number
   readonly weaponPitch: number
   readonly defeated: boolean
 }
 
-/** Pure procedural backend; simulation step is the only cadence input. */
+/** Pure procedural backend. Locomotion gait is distance-driven presentation state. */
 export function resolvePlayerProceduralPose(
   state: AnimationPresentationState,
   simulationStep: number,
+  locomotion: PlayerLocomotionPresentation | null = null,
 ): PlayerProceduralPose {
   const progress = state.action?.normalizedPhaseProgress ?? 0
   const phase = state.action?.phase ?? 'idle'
   // Slow restrained breath — no toy bounce / scale pulse.
   const breath = Math.sin(simulationStep * 0.028)
   const speed = Math.min(state.locomotionSpeed, PLAYER_MOVE_SPEED_REF)
-  const locomotionCycle = simulationStep * (0.09 + speed * 0.022)
+  const timeCycle = simulationStep * (0.09 + speed * 0.022)
 
   if (state.action?.actionId === SKILL_VEIL_STEP_ID) {
     const compression = phase === 'startup' ? progress : phase === 'active' ? 1 - progress * 0.35 : 0.65 * (1 - progress)
@@ -136,17 +143,29 @@ export function resolvePlayerProceduralPose(
         weaponPitch: 0.12,
       })
     case 'locomotion': {
-      const stride =
-        Math.sin(locomotionCycle) * Math.min(0.78, 0.2 + speed * 0.11)
-      // Grounded vertical settle — avoid marching bounce.
-      const settle = Math.abs(Math.sin(locomotionCycle)) * 0.008
+      const gait = locomotion ?? {
+        gaitPhase: timeCycle,
+        gaitAmplitude: 1,
+        planarSpeed: speed,
+        mode: 'walk' as const,
+        grounded: true,
+        yawRadians: 0,
+      }
+      const plant = plantedFootSwing(
+        gait.gaitPhase,
+        gait.gaitAmplitude * Math.min(0.78, 0.2 + speed * 0.11),
+      )
       return pose({
-        bodyOffsetY: settle,
+        bodyOffsetY: plant.pelvisY,
         torsoPitch: 0.07 + speed * 0.008,
-        limbSwing: stride,
-        leftArmPitch: -stride * 0.72,
-        rightArmPitch: stride * 0.72,
-        weaponPitch: stride * 0.08,
+        bodyOffsetX: plant.left * 0.02,
+        bodyRoll: plant.left * 0.04,
+        limbSwing: plant.left,
+        leftLimbSwing: plant.left,
+        rightLimbSwing: plant.right,
+        leftArmPitch: -plant.right * 0.72,
+        rightArmPitch: -plant.left * 0.72,
+        weaponPitch: plant.left * 0.08,
       })
     }
     case 'idle':
@@ -166,19 +185,21 @@ export function resolvePlayerProceduralPose(
 const PLAYER_MOVE_SPEED_REF = 4
 
 function pose(overrides: Partial<PlayerProceduralPose>): PlayerProceduralPose {
+  const limbSwing = overrides.limbSwing ?? 0
   return {
-    bodyOffsetX: 0,
-    bodyOffsetY: 0,
-    bodyScaleX: 1,
-    bodyScaleY: 1,
-    bodyScaleZ: 1,
-    bodyRoll: 0,
-    torsoPitch: 0,
-    limbSwing: 0,
-    leftArmPitch: 0,
-    rightArmPitch: 0,
-    weaponPitch: 0,
-    defeated: false,
-    ...overrides,
+    bodyOffsetX: overrides.bodyOffsetX ?? 0,
+    bodyOffsetY: overrides.bodyOffsetY ?? 0,
+    bodyScaleX: overrides.bodyScaleX ?? 1,
+    bodyScaleY: overrides.bodyScaleY ?? 1,
+    bodyScaleZ: overrides.bodyScaleZ ?? 1,
+    bodyRoll: overrides.bodyRoll ?? 0,
+    torsoPitch: overrides.torsoPitch ?? 0,
+    limbSwing,
+    leftLimbSwing: overrides.leftLimbSwing ?? limbSwing,
+    rightLimbSwing: overrides.rightLimbSwing ?? -limbSwing,
+    leftArmPitch: overrides.leftArmPitch ?? 0,
+    rightArmPitch: overrides.rightArmPitch ?? 0,
+    weaponPitch: overrides.weaponPitch ?? 0,
+    defeated: overrides.defeated ?? false,
   }
 }
