@@ -3,10 +3,9 @@ import {
   GameRuntime,
   type GameRuntimeSnapshot,
 } from '../game/runtime/GameRuntime'
-import {
-  GameSaveService,
-  LocalStorageSaveStorage,
-} from '../game/save/gameSaveService'
+import { constructGameSession } from '../game/save/constructGameSession'
+import type { GameSaveService } from '../game/save/gameSaveService'
+import type { GameSessionIntent } from '../game/save/sessionIntent'
 import { BrowserAttackInput } from '../input/browserAttackInput'
 import type { AimDirectionResolver, CombatInputSnapshot } from '../input/browserAttackInput'
 import { BrowserGamepadInput } from '../input/browserGamepadInput'
@@ -23,52 +22,30 @@ export interface GameRuntimeIntegrationSnapshot extends GameRuntimeSnapshot {
   readonly combatInput: CombatInputSnapshot
 }
 
-interface GameRuntimeIntegration {
-  readonly runtime: GameRuntime
-  readonly snapshot: GameRuntimeIntegrationSnapshot
+export interface GameRuntimeIntegration {
+  readonly runtime: GameRuntime | null
+  readonly snapshot: GameRuntimeIntegrationSnapshot | null
   readonly attachGameplayInput: (
     surface: HTMLElement,
     resolveAimDirection: AimDirectionResolver,
   ) => void
 }
 
-export function useGameRuntime(): GameRuntimeIntegration {
-  const saveService = useMemo(
-    () =>
-      new GameSaveService(
-        typeof localStorage === 'undefined'
-          ? {
-              readRaw: () => null,
-              writeRaw: () => undefined,
-              clear: () => undefined,
-            }
-          : new LocalStorageSaveStorage(localStorage),
-      ),
-    [],
-  )
+export function useGameRuntime(
+  intent: GameSessionIntent | null,
+  saveService: GameSaveService,
+): GameRuntimeIntegration {
   const runtime = useMemo(() => {
-    const next = new GameRuntime()
-    const loaded = saveService.load()
-    if (loaded.ok) next.applySave(loaded.save)
-    next.setPersistHandler(() => {
-      saveService.save(next.captureSave())
-    })
-    return next
-  }, [saveService])
+    if (intent === null) return null
+    return constructGameSession(intent, saveService)
+  }, [intent, saveService])
   const combatInputRef = useRef<BrowserAttackInput | null>(null)
   const keyboardInputRef = useRef<BrowserMovementInput | null>(null)
   const pendingGameplayInputRef = useRef<{
     surface: HTMLElement
     resolveAimDirection: AimDirectionResolver
   } | null>(null)
-  const [snapshot, setSnapshot] = useState<GameRuntimeIntegrationSnapshot>(
-    () => ({
-      ...runtime.snapshot(),
-      movementIntent: { horizontal: 0, forward: 0 },
-      activeInputSource: 'none',
-      combatInput: neutralCombatInputSnapshot(),
-    }),
-  )
+  const [snapshot, setSnapshot] = useState<GameRuntimeIntegrationSnapshot | null>(null)
 
   const attachGameplayInput = useCallback(
     (surface: HTMLElement, resolveAimDirection: AimDirectionResolver): void => {
@@ -90,6 +67,9 @@ export function useGameRuntime(): GameRuntimeIntegration {
   )
 
   useEffect(() => {
+    if (runtime === null) {
+      return
+    }
     const keyboardInput = new BrowserMovementInput(window, document)
     const gamepadInput = new BrowserGamepadInput(window, document)
     let previousFrameTime = performance.now()
@@ -158,17 +138,16 @@ export function useGameRuntime(): GameRuntimeIntegration {
       if (skillRequest !== null) {
         runtime.requestPlayerSkillUse(skillRequest, composed.intent)
       }
-      const snapshot = runtime.advanceFrame(
+      const next = runtime.advanceFrame(
         frameDeltaSeconds,
         composed.intent,
       )
 
-      // Keep simulation every frame; throttle React panel updates to cut sustained-input jank.
       framesSinceProjection += 1
       if (framesSinceProjection >= 6) {
         framesSinceProjection = 0
         setSnapshot({
-          ...snapshot,
+          ...next,
           movementIntent: composed.intent,
           activeInputSource: composed.source,
           combatInput: combatInput?.snapshot() ?? neutralCombatInputSnapshot(),
@@ -191,8 +170,17 @@ export function useGameRuntime(): GameRuntimeIntegration {
 
   return {
     runtime,
-    snapshot,
+    snapshot: runtime === null ? null : (snapshot ?? withNeutralInput(runtime.snapshot())),
     attachGameplayInput,
+  }
+}
+
+function withNeutralInput(snapshot: GameRuntimeSnapshot): GameRuntimeIntegrationSnapshot {
+  return {
+    ...snapshot,
+    movementIntent: { horizontal: 0, forward: 0 },
+    activeInputSource: 'none',
+    combatInput: neutralCombatInputSnapshot(),
   }
 }
 

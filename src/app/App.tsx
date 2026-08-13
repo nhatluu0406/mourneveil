@@ -16,24 +16,50 @@ import {
 } from '../render/followCamera'
 import { GameplayHud } from '../ui/GameplayHud'
 import { InventoryEquipmentPanel } from '../ui/InventoryEquipmentPanel'
+import { TitleScreen } from '../ui/TitleScreen'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
 import { useGameRuntime } from './useGameRuntime'
+import { useGameSession } from './useGameSession'
+import type { GameRuntime } from '../game/runtime/GameRuntime'
+import type { GameRuntimeIntegrationSnapshot } from './useGameRuntime'
 
-/** Cap retina DPR so a simple graybox scene does not allocate 2× drawing buffers by default. */
 const RENDERER_DPR: [number, number] = [1, 1.35]
 
 export function App() {
+  const session = useGameSession()
+  const game = useGameRuntime(session.intent, session.saveService)
+  if (game.runtime === null || game.snapshot === null) {
+    return (
+      <main className="app-shell">
+        <TitleScreen
+          hasSave={session.hasSave}
+          confirmingNewRite={session.confirmingNewRite}
+          onContinue={session.chooseContinue}
+          onNewRite={session.chooseNewRite}
+          onConfirmNewRite={session.confirmNewRite}
+          onCancelNewRite={session.cancelNewRite}
+        />
+      </main>
+    )
+  }
+  return <GameplayApp runtime={game.runtime} snapshot={game.snapshot} attachGameplayInput={game.attachGameplayInput} />
+}
+
+function GameplayApp({
+  runtime,
+  snapshot,
+  attachGameplayInput,
+}: {
+  readonly runtime: GameRuntime
+  readonly snapshot: GameRuntimeIntegrationSnapshot
+  readonly attachGameplayInput: ReturnType<typeof useGameRuntime>['attachGameplayInput']
+}) {
   const [rendererReady, setRendererReady] = useState(false)
   const [physicsReady, setPhysicsReady] = useState(false)
   const [cameraDiagnostic, setCameraDiagnostic] =
     useState<CameraDiagnostic | null>(null)
   const [devDetailsVisible, setDevDetailsVisible] = useState(false)
   const [inventoryOpen, setInventoryOpen] = useState(false)
-  const {
-    runtime,
-    snapshot: runtimeSnapshot,
-    attachGameplayInput,
-  } = useGameRuntime()
   const reportPhysicsReady = useCallback(() => setPhysicsReady(true), [])
   const reportCameraDiagnostic = useCallback((diagnostic: CameraDiagnostic) => {
     if (!devDetailsVisible) return
@@ -50,9 +76,9 @@ export function App() {
       createDevelopmentDiagnostic(
         rendererReady,
         physicsReady,
-        runtimeSnapshot,
+        snapshot,
       ),
-    [rendererReady, physicsReady, runtimeSnapshot],
+    [rendererReady, physicsReady, snapshot],
   )
 
   useEffect(() => {
@@ -133,9 +159,9 @@ export function App() {
           </Suspense>
         </Canvas>
       </RenderErrorBoundary>
-      <GameplayHud snapshot={runtimeSnapshot} />
+      <GameplayHud snapshot={snapshot} />
       <InventoryEquipmentPanel
-        snapshot={runtimeSnapshot}
+        snapshot={snapshot}
         runtime={runtime}
         open={inventoryOpen}
         onClose={() => setInventoryOpen(false)}

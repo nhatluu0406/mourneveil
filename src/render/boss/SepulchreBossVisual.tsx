@@ -39,6 +39,7 @@ export function SepulchreBossVisual({ runtime, enemyId }: { readonly runtime: Ga
   const phasePulse = useRef(0)
   const defeatSeen = useRef(false)
   const defeatPulse = useRef(0)
+  const mountedDefeated = useRef<boolean | null>(null)
   const [cues, setCues] = useState<BossCueMount>({
     startup: null,
     phasePulse: false,
@@ -81,14 +82,28 @@ export function SepulchreBossVisual({ runtime, enemyId }: { readonly runtime: Ga
     right.rotation.y = MathUtils.damp(right.rotation.y, presentation.coreExposure * 0.72, 7, delta)
     left.position.x = MathUtils.damp(left.position.x, -0.25 - presentation.coreExposure * 0.18, 7, delta)
     right.position.x = MathUtils.damp(right.position.x, 0.25 + presentation.coreExposure * 0.18, 7, delta)
-    core.scale.setScalar(MathUtils.damp(core.scale.x, 0.35 + presentation.coreExposure * 0.9, 9, delta))
-    core.rotation.y += delta * (presentation.phaseTwo ? 2.3 : 0.7)
+    core.scale.setScalar(MathUtils.damp(core.scale.x, presentation.defeated ? 0.12 : 0.35 + presentation.coreExposure * 0.9, 9, delta))
+    if (!presentation.defeated) {
+      core.rotation.y += delta * (presentation.phaseTwo ? 2.3 : 0.7)
+    }
+    core.visible = !presentation.defeated
+
+    if (presentation.defeated && !defeatSeen.current) {
+      body.rotation.x = presentation.bodyPitch
+      body.rotation.z = 0.32
+      body.position.y = -0.34
+      body.position.z = presentation.bodyOffsetZ
+      weapon.rotation.x = presentation.weaponPitch
+      weapon.rotation.y = presentation.weaponYaw
+      weapon.rotation.z = presentation.weaponRoll
+    }
 
     // Encounter reset / HP restore must clear one-shot presentation latches.
     if (!presentation.phaseTwo) phaseTwoSeen.current = false
     if (enemy.alive) {
       defeatSeen.current = false
       defeatPulse.current = 0
+      core.visible = true
     }
 
     if (presentation.phaseTwo && !phaseTwoSeen.current) {
@@ -101,9 +116,13 @@ export function SepulchreBossVisual({ runtime, enemyId }: { readonly runtime: Ga
       phaseRef.current.scale.setScalar(0.75 + (1 - phasePulse.current) * 1.45)
     }
 
+    if (mountedDefeated.current === null) {
+      mountedDefeated.current = presentation.defeated
+    }
+
     if (presentation.defeated && !defeatSeen.current) {
       defeatSeen.current = true
-      defeatPulse.current = 1
+      if (!mountedDefeated.current) defeatPulse.current = 1
     }
     defeatPulse.current = Math.max(0, defeatPulse.current - delta / 2.4)
     if (defeatRef.current !== null) {

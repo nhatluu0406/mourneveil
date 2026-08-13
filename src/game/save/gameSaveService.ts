@@ -101,6 +101,10 @@ export class GameSaveService {
     return result.ok ? result.save : createDefaultSaveV4()
   }
 
+  hasValidSave(): boolean {
+    return this.load().ok
+  }
+
   clear(): void {
     this.storage.clear()
   }
