@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery } from './freshSession.mjs'
 
 const OUT = 'tmp-m10-hero-visual'
 const PORT = 4197
@@ -73,7 +74,7 @@ await runOwnedBrowserGate({
       if (/failed to load|GLTFLoader|404.*assets/i.test(text)) assetErrors.push(text)
     })
 
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
       timeout: 30_000,
     })
@@ -119,7 +120,7 @@ await runOwnedBrowserGate({
       })
       await capture(page, '03-corridor-composition')
 
-      await page.reload({ waitUntil: 'load' })
+      await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
       await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
         timeout: 30_000,
       })

@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery } from './freshSession.mjs'
 
 const OUT = 'tmp-m13-progression-visual'
 const PORT = 4210
@@ -24,7 +25,7 @@ await runOwnedBrowserGate({
   run: async (page, { baseUrl, artifactDir }) => {
     const pageErrors = []
     page.on('pageerror', (error) => pageErrors.push(String(error)))
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await page.evaluate(() => {
       localStorage.removeItem('mourneveil.save.v4')

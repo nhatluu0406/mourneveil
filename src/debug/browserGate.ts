@@ -19,6 +19,8 @@ import {
   setOcclusionOverride,
 } from '../render/world/occlusionPlacementState'
 import { readRendererStats } from './rendererStats'
+import { auditCompiledDungeon } from '../content/world/compileIntegrity'
+import { compileOssuaryDungeon, OSSUARY_DUNGEON } from '../content/world/dungeons/ossuary/OssuaryDungeon'
 
 declare global {
   interface Window {
@@ -63,6 +65,7 @@ declare global {
       sceneAudit: () => unknown
       locomotion: () => unknown
       placementAudit: () => unknown
+      compiledWorld: () => unknown
     }
   }
 }
@@ -151,6 +154,17 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
     sceneAudit: () => auditScenePlacements(),
     locomotion: () => readPlayerLocomotionPresentation(),
     placementAudit: () => auditWorldPlacements(OSSUARY_ROUTE_PLACEMENTS),
+    compiledWorld: () => {
+      const compiled = compileOssuaryDungeon()
+      return {
+        roomCount: OSSUARY_DUNGEON.rooms.length,
+        instanceCount: compiled.renderInstances.length,
+        structuralColliderCount: compiled.colliders.filter((entry) => entry.kind !== 'floor').length,
+        navObstacleCount: compiled.navObstacles.length,
+        lightCount: compiled.lights.length,
+        integrity: auditCompiledDungeon(compiled),
+      }
+    },
   }
 
   return () => {

@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery } from './freshSession.mjs'
 
 const OUT = 'tmp-m11-boss-visual'
 const PORT = 4206
@@ -113,7 +114,7 @@ await runOwnedBrowserGate({
     const assetErrors = []
     page.on('pageerror', (error) => pageErrors.push(String(error)))
     page.on('console', (message) => { if (/failed to load|404.*assets|GLTFLoader/i.test(message.text())) assetErrors.push(message.text()) })
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
 

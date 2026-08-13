@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery } from './freshSession.mjs'
 
 const OUT = 'tmp-m14-art-production'
 const PORT = 4215
@@ -17,7 +18,7 @@ await runOwnedBrowserGate({
   run: async (page, { baseUrl, artifactDir }) => {
     const pageErrors = []
     page.on('pageerror', (error) => pageErrors.push(String(error)))
-    await page.goto(`${baseUrl}?zoneCull=0`, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl, '?zoneCull=0'), { waitUntil: 'load' })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await page.evaluate(() => {
       localStorage.removeItem('mourneveil.save.v4')
@@ -53,7 +54,7 @@ await runOwnedBrowserGate({
     await page.keyboard.press('i')
 
     await page.evaluate(() => localStorage.removeItem('mourneveil.save.v4'))
-    await page.reload({ waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await page.evaluate(() => { const g = window.__MOURNEVEIL_GATE__; g.resetMeleeFixture(); g.restorePlayer(); g.setPlayerPosition({ x: -5.7, y: 0.82, z: 0.2 }); g.advance(2) })
     await page.evaluate(() => { const g = window.__MOURNEVEIL_GATE__; g.acquireItem('item.charm.oathbrand-ember'); g.advance(1) })

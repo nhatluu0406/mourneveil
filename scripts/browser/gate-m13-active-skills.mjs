@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery, continueExistingSession } from './freshSession.mjs'
 
 const OUT = 'tmp-m13-active-skills'
 const PORT = 4211
@@ -27,7 +28,7 @@ await runOwnedBrowserGate({
       pageErrors.push(String(error))
       console.error(`PAGE ERROR: ${error}`)
     })
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
       timeout: 30_000,
@@ -38,7 +39,7 @@ await runOwnedBrowserGate({
       localStorage.removeItem('mourneveil.save.v2')
       localStorage.removeItem('mourneveil.save.v1')
     })
-    await page.reload({ waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
       timeout: 30_000,
@@ -159,8 +160,8 @@ await runOwnedBrowserGate({
       if (veil?.accepted !== true) throw new Error(`veil start failed ${JSON.stringify(veil)}`)
       drainCombat()
       const afterPos = g.snapshot().player.position
-      // Open-space travel would be ~2.2m; choke wall at x≈-11 must stop the body earlier.
-      if (afterPos.x <= -11.2 || afterPos.x < beforePos.x - 1.6) {
+      // Outer-watch west wall is at x=-12; open-space Veil Step is ~2.2m.
+      if (afterPos.x <= -11.75) {
         throw new Error(`Veil Step crossed wall: ${beforePos.x} -> ${afterPos.x}`)
       }
       if (!(afterPos.x < beforePos.x)) {
@@ -247,8 +248,7 @@ await runOwnedBrowserGate({
 
     for (const note of report.notes) pass(note)
 
-    await page.reload({ waitUntil: 'load' })
-    await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
+    await continueExistingSession(page, baseUrl)
     await soak(page, 500)
 
     const afterLoad = await page.evaluate(() => {

@@ -2,6 +2,7 @@ import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { runOwnedBrowserGate, shouldKeepGateArtifacts } from './runtimeGateLifecycle.mjs'
 import { M15_VIEWPORT, soak } from './m15MotionScenario.mjs'
+import { withFreshQuery } from './freshSession.mjs'
 
 const OUT = 'tmp-m15-occlusion'
 const PORT = 4222
@@ -26,7 +27,7 @@ await runOwnedBrowserGate({
     if (artifactDir) await mkdir(path.join(artifactDir, 'frames'), { recursive: true })
     const pageErrors = []
     page.on('pageerror', (error) => pageErrors.push(String(error)))
-    await page.goto(`${baseUrl}?perfHud=1`, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl, '?perfHud=1'), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await soak(page, 800)

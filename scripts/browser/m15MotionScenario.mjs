@@ -1,5 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { withFreshQuery } from './freshSession.mjs'
 
 export const M15_VIEWPORT = { width: 1440, height: 900 }
 
@@ -37,18 +38,7 @@ export async function bootM15Page(page, baseUrl, phase = m15MotionPhase()) {
     pageErrors.push(String(error))
     console.error(`PAGE ERROR: ${error}`)
   })
-  await page.goto(`${baseUrl}${m15Query(phase)}`, { waitUntil: 'load' })
-  await page.waitForSelector('canvas', { timeout: 30_000 })
-  await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
-    timeout: 30_000,
-  })
-  await page.evaluate(() => {
-    localStorage.removeItem('mourneveil.save.v4')
-    localStorage.removeItem('mourneveil.save.v3')
-    localStorage.removeItem('mourneveil.save.v2')
-    localStorage.removeItem('mourneveil.save.v1')
-  })
-  await page.reload({ waitUntil: 'load' })
+  await page.goto(withFreshQuery(baseUrl, m15Query(phase)), { waitUntil: 'load' })
   await page.waitForSelector('canvas', { timeout: 30_000 })
   await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
     timeout: 30_000,

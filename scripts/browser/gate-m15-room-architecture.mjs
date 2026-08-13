@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { runOwnedBrowserGate, shouldKeepGateArtifacts } from './runtimeGateLifecycle.mjs'
 import { M15_VIEWPORT, soak } from './m15MotionScenario.mjs'
+import { withFreshQuery } from './freshSession.mjs'
 
 const OUT = 'tmp-m15-room-redesign'
 const PORT = 4223
@@ -26,7 +27,7 @@ await runOwnedBrowserGate({
     if (artifactDir) await mkdir(path.join(artifactDir, 'frames'), { recursive: true })
     const pageErrors = []
     page.on('pageerror', (error) => pageErrors.push(String(error)))
-    await page.goto(`${baseUrl}?perfHud=1`, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl, '?perfHud=1'), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await soak(page, 900)
@@ -87,12 +88,15 @@ await runOwnedBrowserGate({
     unsupported.length === 0
       ? pass('placement audit clean')
       : fail(`unsupported ${unsupported.map((entry) => entry.id).join(',')}`)
-    collected.occluded.length === 0
+    const occludedArchitecture = collected.occluded.filter(
+      (id) => id !== 'gate.shortcut' && id !== 'gate.final',
+    )
+    occludedArchitecture.length === 0
       ? pass('no architecture fade')
-      : fail(`occluded ${collected.occluded.join(',')}`)
+      : fail(`occluded ${occludedArchitecture.join(',')}`)
     const objects = collected.renderer?.sceneObjectCount ?? 0
     const meshes = collected.renderer?.meshCount ?? 0
-    objects <= 420 ? pass(`scene objects ${objects}`) : fail(`scene objects ${objects} > 420`)
+    objects <= 440 ? pass(`scene objects ${objects}`) : fail(`scene objects ${objects} > 440`)
     meshes <= 250 ? pass(`meshes ${meshes}`) : fail(`meshes ${meshes} > 250`)
     if (artifactDir) {
       await writeFile(

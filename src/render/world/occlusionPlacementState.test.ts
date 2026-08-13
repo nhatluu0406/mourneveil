@@ -10,14 +10,14 @@ import { resolveWorldObjectDefinition } from './worldObjectRegistry'
 import { ALLOWED_OCCLUSION_FADE_IDS } from '../allowedOcclusionFade'
 
 describe('occlusion placement state', () => {
-  it('indexes no ordinary architecture as fade-eligible', () => {
+  it('indexes only authored gates as fade-eligible', () => {
     rebuildFadeOcclusionSolids(OSSUARY_ROUTE_PLACEMENTS)
-    expect(listFadeOcclusionSolids()).toEqual([])
+    expect(listFadeOcclusionSolids().map((entry) => entry.id).sort()).toEqual(['gate.final', 'gate.shortcut'])
     expect(
-      OSSUARY_ROUTE_PLACEMENTS.every(
-        (entry) => resolveWorldObjectDefinition(entry.objectId).occlusionPolicy !== 'fade',
-      ),
-    ).toBe(true)
+      OSSUARY_ROUTE_PLACEMENTS.filter(
+        (entry) => resolveWorldObjectDefinition(entry.objectId).occlusionPolicy === 'fade',
+      ).map((entry) => entry.instanceId).sort(),
+    ).toEqual(['gate.final', 'gate.shortcut'])
     expect(ALLOWED_OCCLUSION_FADE_IDS).toEqual(['gate.shortcut', 'gate.final'])
   })
 

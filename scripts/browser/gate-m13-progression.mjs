@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery, continueExistingSession } from './freshSession.mjs'
 
 const OUT = 'tmp-m13-progression'
 const PORT = 4209
@@ -27,7 +28,7 @@ await runOwnedBrowserGate({
       pageErrors.push(String(error))
       console.error(`PAGE ERROR: ${error}`)
     })
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
       timeout: 30_000,
@@ -38,7 +39,7 @@ await runOwnedBrowserGate({
       localStorage.removeItem('mourneveil.save.v2')
       localStorage.removeItem('mourneveil.save.v1')
     })
-    await page.reload({ waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
       timeout: 30_000,
@@ -165,11 +166,7 @@ await runOwnedBrowserGate({
 
     for (const note of report.notes) pass(note)
 
-    await page.reload({ waitUntil: 'load' })
-    await page.waitForSelector('canvas', { timeout: 30_000 })
-    await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
-      timeout: 30_000,
-    })
+    await continueExistingSession(page, baseUrl)
     await soak(page, 800)
 
     const afterReload = await page.evaluate(({ xpBefore, levelBefore, allocBefore }) => {

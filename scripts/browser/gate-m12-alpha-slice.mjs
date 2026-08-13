@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery, continueExistingSession } from './freshSession.mjs'
 
 const OUT = 'tmp-m12-alpha-slice'
 const PORT = 4208
@@ -38,12 +39,12 @@ await runOwnedBrowserGate({
       console.error(`PAGE ERROR: ${error}`)
     })
 
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.evaluate(() => {
       localStorage.removeItem('mourneveil.save.v1')
       localStorage.removeItem('mourneveil.save.v2')
     })
-    await page.reload({ waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await soak(page, 900)
@@ -192,8 +193,7 @@ await runOwnedBrowserGate({
       ? pass('9 boss defeated + slice endpoint')
       : fail(`boss=${JSON.stringify(state.world.defeatedBossIds)} hud=${JSON.stringify(hud)}`)
 
-    await page.reload({ waitUntil: 'load' })
-    await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
+    await continueExistingSession(page, baseUrl)
     await soak(page, 800)
     state = await page.evaluate(() => window.__MOURNEVEIL_GATE__.snapshot())
     state.world.defeatedBossIds.includes('boss.veilbound-sepulchre') &&

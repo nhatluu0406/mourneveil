@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery } from './freshSession.mjs'
 
 const OUT = 'tmp-m10-camera-occlusion-repro'
 const PORT = 4199
@@ -17,7 +18,7 @@ await runOwnedBrowserGate({
   port: PORT,
   artifactDir: OUT,
   run: async (page, { baseUrl }) => {
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await soak(page, 1200)

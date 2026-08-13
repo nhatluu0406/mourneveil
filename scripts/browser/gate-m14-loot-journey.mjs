@@ -1,4 +1,5 @@
 import { runOwnedBrowserGate } from './runtimeGateLifecycle.mjs'
+import { withFreshQuery, continueExistingSession } from './freshSession.mjs'
 
 const OUT = 'tmp-m14-loot-journey'
 const PORT = 4215
@@ -37,7 +38,7 @@ await runOwnedBrowserGate({
       pageErrors.push(String(error))
       console.error(`PAGE ERROR: ${error}`)
     })
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
       timeout: 30_000,
@@ -48,7 +49,7 @@ await runOwnedBrowserGate({
       localStorage.removeItem('mourneveil.save.v2')
       localStorage.removeItem('mourneveil.save.v1')
     })
-    await page.reload({ waitUntil: 'load' })
+    await page.goto(withFreshQuery(baseUrl), { waitUntil: 'load' })
     await page.waitForSelector('canvas', { timeout: 30_000 })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
       timeout: 30_000,
@@ -161,11 +162,7 @@ await runOwnedBrowserGate({
     pass(`first-run diversity ${journey.count}`)
     if (!journey.defeatedBoss) fail('boss not marked defeated')
 
-    await page.reload({ waitUntil: 'load' })
-    await page.waitForSelector('canvas', { timeout: 30_000 })
-    await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, {
-      timeout: 30_000,
-    })
+    await continueExistingSession(page, baseUrl)
     await soak(page, 600)
 
     await page.evaluate(({ ownedBefore, echoesBefore }) => {
