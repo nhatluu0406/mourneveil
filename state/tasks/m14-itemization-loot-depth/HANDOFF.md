@@ -1,36 +1,37 @@
 # HANDOFF
 
-Updated: 2026-08-13 by Codex
+Updated: 2026-08-14 by Cursor
 Task: m14-itemization-loot-depth
 
 ## Status
 
-ACTIVE — MB3 art production complete locally. **M14 READY FOR CURSOR FINAL HARDENING.** Not accepted, closed, or tagged.
+**ACCEPTED / CLOSED** — Product Owner accepted Itemization & Loot Depth.
+Tagged `v0.14.0-itemization-loot-depth` on the M14 docs-closure commit.
 
-## Locked systems state
+Camera smoothness, actor prominence, and scene-readability polish are M15 work. They did not block M14.
 
-- Eight authored items, loot order/tables, modifiers, equipment rules, duplicate→Echo behavior, SaveFileV4, progression, skills, combat, boss reward, and encounter state were not changed.
-- Render weapons and loot effects remain presentation only; attack reach/contact/colliders remain simulation-owned.
+## Locked decisions
 
-## MB3 art delivered
+- Eight authored unique items; first-run discoverable set is seven plus Mourning Phial as replay alternate.
+- Duplicate unique pickup converts to Echoes; loot tables stay deterministic (not procedural ARPG).
+- Equipment modifiers compose through `resolvePlayerCombatStats`; combat never reads raw item switches.
+- Render weapons and loot effects remain presentation only; attack reach/contact/colliders stay simulation-owned.
+- SaveFileV4 persists inventory/equipment/loot memory, not derived combat stats.
 
-- Eight distinct project-authored item glyphs and Bound/Reliquary frame language.
-- Three compact equipped weapon variants selected from canonical equipment state: balanced Oathblade, broad Gravebrand, hooked Veil Thorn.
-- Bound/Reliquary pickup cues, local equip affirmation, and rarity-aware acquisition toast chrome.
-- Route-wide dark foundation below authored slabs; broken-edge/pit-rim modules classify floor termination.
-- Reusable wall ledges, grave plaques, bronze braces, and higher instanced processional-light density across Refuge → Sepulchre.
-- Shared material midtones lifted without global exposure or additional real lights.
-- Art gate: `gate:m14-art-production` (14 captures, all item/weapon/route states, 1280×720, resource soak).
+## Final verification (closure)
 
-## Evidence
+- `gate:m14-itemization` PASS (8 items, tradeoffs, skill composition, duplicate→Echo, boss reward, save/load)
+- `gate:m14-loot-journey` PASS (7 first-run, reload no duplicate grants)
+- `gate:m14-art-production` PASS (14-state art gate; 354 calls / 34,667 tris / 540 objects / 323 meshes / 12 lights at 1280×720; pickup/equip growth 0)
+- Toolchain: Node v24.11.0 / npm 11.6.2 (canonical Node 22 / npm 10 unavailable on PATH; no repo-local `.tools/node22`)
 
-- Retained review run inspected all 14 frames; normal gate removes artifacts. Reproduce with `KEEP_ARTIFACTS=1 npm run gate:m14-art-production`.
-- Warmed art frame: 358 draw calls, 33,911 triangles, 197 geometries, 3 textures, 13 programs, 540 objects, 323 meshes, 12 lights, ~86 MB heap.
-- Repeated pickup/equip geometry/texture/mesh/light delta = 0.
-- PASS: M14 itemization/loot/art, M13 active skills, M12 alpha, M10 camera/occlusion/perf, lifecycle, assets, `npm run verify` (95 files / 433 tests), diff check, LeanLoop doctor/sync.
-- Host shell: Node 24.11.0/npm 11.6.1; repo-local portable Node was not created. Cursor should run final acceptance under canonical Node 22/npm 10.
-- D-004 remains: 3.687 MB minified / 1.240 MB gzip main chunk.
+## Delivered
+
+- Authored equipment ecosystem with weapon/charm tradeoffs and item↔skill synergy
+- Deterministic loot tables, pickup/equip presentation, Bound/Reliquary identity
+- Ossuary floor/void language and practical-light dressing (Codex MB3)
+- M14 gates: itemization, loot-journey, art-production
 
 ## Next
 
-**CURSOR — M14 final hardening / integration audit / acceptance preparation / closure.** Address only concrete defects; close/tag only with Product Owner authorization.
+M15 — Presentation, Motion & Scene Readability. Do not reopen M14 execution in `PLAN.md`.

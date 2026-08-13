@@ -26,9 +26,10 @@ Directional version targets: `v0.7` animated combat / production-slice progressi
 | Milestone | Focus |
 | --- | --- |
 | **M13** | Character Progression & Build Identity — **PRODUCT OWNER ACCEPTED** (`v0.13.0-character-progression-build`) |
-| **M14** | Itemization & Loot Depth — **ACTIVE** |
+| **M14** | Itemization & Loot Depth — **PRODUCT OWNER ACCEPTED** (`v0.14.0-itemization-loot-depth`) |
+| **M15** | Presentation, Motion & Scene Readability — **ACTIVE** |
 
-- Authored equipment ecosystem and compact modifier vocabulary (not procedural ARPG loot)
+- Stable, readable, smooth playable-alpha route before expanding enemy/world/NPC content
 - Larger enemy roster and encounter systems
 - Expanded connected world
 - NPC interaction and environmental lore

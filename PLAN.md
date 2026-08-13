@@ -1,50 +1,64 @@
-# PLAN: M14 Itemization & Loot Depth — Macro-batch 3
-<!-- Live M14 graph only. -->
+# PLAN: M15 Presentation, Motion & Scene Readability — Macro-batch 1
+<!-- Live M15 graph only. -->
 
-Input: Product Owner M14 MB3 art-production brief | Stack: `STACK.md`
-Task slug: `m14-itemization-loot-depth`
-Agent: Codex only
+Input: Product Owner M15 MB1 presentation brief | Stack: `STACK.md`
+Task slug: `m15-presentation-motion-scene-readability`
+Agent: Cursor only
 
 ## Goal
 
-Deliver one obvious art-only uplift across item identity, equipped weapons, loot feedback, connected floor/void language, practical-light rhythm, and ossuary architecture while preserving all M14 gameplay authority.
+Make the existing playable-alpha route feel stable, readable, and smooth with measurable presentation quality. Establish before/after motion evidence. Do not expand content.
 
 ## Non-goals
 
-- Item modifiers, loot order/tables, duplicate rules, equipment rules, skills, combat, save, progression, boss or encounter authority
-- Ninth item, procedural loot, new gameplay regions, global exposure solution
-- M14 closure/tag, M15, push
+- New enemies, NPCs, quests, regions, or M16
+- Art-direction redesign, new meshes/materials/VFX (Codex)
+- Copying Vesperfall assets, layouts, UI, or pixel targets
+- Variable-step gameplay; interpolating Rapier/collision authority
+- Huge simulation/render loop rewrite without evidence
 
 ## Steps
 
-- [x] 1. Item and equipment identity
+- [ ] 1. Frame/camera telemetry, DEV FPS HUD, motion + quality gates
   - depends: —
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: item glyph projection, player weapon presentation, pickup/equip presentation, acquisition toast styling, focused tests
-  - verifier: focused item/weapon/presentation tests + M14 itemization gate
-- [x] 2. Connected ossuary floor, void, illumination, and architecture pass
+  - owns/allows: `src/debug/`, `src/ui/` perf HUD, `src/app/`, `scripts/browser/gate-m15-*.mjs`, `package.json`, focused tests
+  - verifier: focused telemetry tests + `npm run gate:m15-motion-quality` + `npm run gate:m15-quality-audit`
+- [ ] 2. Presentation interpolation + loop decision
   - depends: 1
-  - risk: MEDIUM
+  - risk: HIGH
   - isolation: sequential
-  - owns/allows: ADR-0002 definitions/placements/geometries/materials/lights, visual-only route composition, focused tests
-  - verifier: route placement tests + camera/occlusion/performance gates + screenshot review
-- [x] 3. Art evidence, full regressions, and durable handoff
+  - owns/allows: `src/game/core/`, `src/game/runtime/`, `src/physics/PlayerPhysicsBody.tsx`, `src/render/FollowCameraRig.tsx`, `STACK.md` presentation ownership
+  - verifier: focused interpolation tests + historical `gate:m10-camera-stability`
+- [ ] 3. Camera framing, dead-zone, impulse channel
   - depends: 2
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: M14 art gate, package script, visual direction, active HANDOFF/current-state/REPOMAP
-  - verifier: M14/M13/M12 gates + assets/lifecycle + `npm run verify` + LeanLoop checks
+  - owns/allows: `src/render/followCamera.ts`, `FollowCameraRig.tsx`, `src/app/App.tsx` FOV, camera tests
+  - verifier: focused camera tests + `gate:m10-camera-stability` + `gate:m10-occlusion-readability`
+- [ ] 4. Technical clutter, floating placements, zone activation, occlusion corridor
+  - depends: 1
+  - risk: MEDIUM
+  - isolation: sequential
+  - owns/allows: `src/render/world/`, `cameraOcclusion.ts`, `ConnectedLevelVisual.tsx`, placement tests
+  - verifier: placement/occlusion tests + `gate:m15-quality-audit` (no draw-call regression vs same-host before)
+- [ ] 5. Before/after evidence, full regressions, MB1 handoff
+  - depends: 2, 3, 4
+  - risk: MEDIUM
+  - isolation: sequential
+  - owns/allows: active HANDOFF/current-state/PLAN, M14/M13/M12/M10 gates, `npm run verify`
+  - verifier: motion/quality gates + M14/M13/M12/M10/lifecycle/assets + `npm run verify` + LeanLoop checks
 
 ## Locked decisions
 
-- All eight item IDs and all gameplay/save/runtime contracts are immutable for this batch.
-- Equipped weapon visual derives from the existing equipped item snapshot; render geometry never changes reach/contact.
-- World additions are presentation shells over unchanged physics/world authority.
-- Visible fixtures may multiply through shared/instanced assets; actual light count stays bounded and evidence-driven.
-- M14 remains active; Cursor owns final hardening, systems fixes, acceptance, and closure.
+- Simulation stays fixed 60 Hz. Collision/Rapier stay on authoritative sim transforms.
+- Camera follows the same interpolated player presentation the viewer sees.
+- Two rAF loops stay unless evidence proves a single owner is safer.
+- Cursor may fix technical placement/duplicates/culling; Codex owns artistic replacement.
+- Vesperfall is inspiration only.
 
 ## Escalation
 
-- Any required gameplay/save/loot authority change → stop and report to Cursor.
+- Gameplay/save/loot authority change → stop.
 - Same failure 3× → stuck report + stop.
