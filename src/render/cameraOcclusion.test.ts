@@ -44,7 +44,6 @@ describe('camera occlusion helpers', () => {
       { id: 'bay.north', box: northBay },
     ])
     expect(ids).toContain('bay.neighbor')
-    expect(ids).toContain('bay.north')
-    expect(ids).toContain('bay.far')
+    expect(ids).not.toContain('bay.far')
   })
 })

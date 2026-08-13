@@ -81,6 +81,26 @@ body {
   padding: 0.75rem 0.85rem;
 }
 
+.perf-hud {
+  position: absolute;
+  z-index: 4;
+  top: 1rem;
+  right: 1rem;
+  min-width: 6.5rem;
+  padding: 0.4rem 0.55rem;
+  color: #e8dfcf;
+  background: rgb(10 14 16 / 72%);
+  border: 1px solid rgb(196 170 120 / 28%);
+  border-radius: 0.16rem;
+  pointer-events: none;
+}
+
+.perf-hud pre {
+  margin: 0;
+  font: 650 0.72rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+
 .development-panel__header {
   display: flex;
   align-items: flex-start;

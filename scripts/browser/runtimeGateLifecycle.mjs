@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { rm, mkdir } from 'node:fs/promises'
+import { rm, mkdir, readdir, rename } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { createServer } from 'node:net'
@@ -62,6 +62,9 @@ export async function runOwnedBrowserGate({
   port = DEFAULT_PORT,
   headless = true,
   viewport = { width: 1440, height: 900 },
+  deviceScaleFactor = 1,
+  recordVideo = false,
+  videoFileName = 'motion.webm',
   artifactDir = null,
   afterCleanup,
 }) {
@@ -81,6 +84,9 @@ export async function runOwnedBrowserGate({
     cleanupPromise ??= (async () => {
       await closeQuietly(page)
       await closeQuietly(context)
+      if (recordVideo && artifacts !== null) {
+        await finalizeGateVideo(artifacts.path, videoFileName)
+      }
       await closeQuietly(browser)
       await stopOwnedProcessTree(server)
       let artifactCleanup = null
@@ -104,7 +110,14 @@ export async function runOwnedBrowserGate({
   try {
     await waitForHttp(`http://${host}:${port}/`, server, output)
     browser = await chromium.launch({ headless })
-    context = await browser.newContext({ viewport })
+    context = await browser.newContext({
+      viewport,
+      deviceScaleFactor,
+      recordVideo:
+        recordVideo && artifacts !== null
+          ? { dir: artifacts.path, size: viewport }
+          : undefined,
+    })
     page = await context.newPage()
     return await run(page, {
       baseUrl: `http://${host}:${port}/`,
@@ -117,6 +130,15 @@ export async function runOwnedBrowserGate({
     removeSignalHandlers()
     await cleanup()
   }
+}
+
+async function finalizeGateVideo(dir, fileName) {
+  const entries = await readdir(dir)
+  const webm = entries.find((name) => name.endsWith('.webm'))
+  if (webm === undefined) return
+  const from = path.join(dir, webm)
+  const to = path.join(dir, fileName)
+  if (from !== to) await rename(from, to)
 }
 
 export function spawnOwnedVite({ cwd, host = DEFAULT_HOST, port = DEFAULT_PORT, output = [] }) {

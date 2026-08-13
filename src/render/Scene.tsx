@@ -16,6 +16,7 @@ import {
 } from './ConnectedLevelVisual'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { RendererStatsPublisher } from './RendererStatsPublisher'
+import { MotionTelemetryPublisher } from './MotionTelemetryPublisher'
 import { VeilCombatVfx } from './VeilCombatVfx'
 
 interface SceneProps {
@@ -82,6 +83,7 @@ export function Scene({
       />
       <FollowCameraRig runtime={runtime} onDiagnostic={onCameraDiagnostic} />
       {import.meta.env.DEV ? <RendererStatsPublisher /> : null}
+      {import.meta.env.DEV ? <MotionTelemetryPublisher runtime={runtime} /> : null}
       <GameWorld onPhysicsReady={onPhysicsReady} runtime={runtime} />
     </>
   )

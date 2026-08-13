@@ -36,6 +36,8 @@
     "gate:m14-itemization": "node scripts/browser/gate-m14-itemization.mjs",
     "gate:m14-loot-journey": "node scripts/browser/gate-m14-loot-journey.mjs",
     "gate:m14-art-production": "node scripts/browser/gate-m14-art-production.mjs",
+    "gate:m15-motion-quality": "node scripts/browser/gate-m15-motion-quality.mjs",
+    "gate:m15-quality-audit": "node scripts/browser/gate-m15-quality-audit.mjs",
     "dev": "vite",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

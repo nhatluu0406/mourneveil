@@ -1,10 +1,15 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useRef } from 'react'
 import { publishCameraDiagnostic } from '../debug/cameraDiagnosticPublish'
+import { isM15Baseline } from '../debug/devQuery'
 import type { GameRuntime } from '../game/runtime/GameRuntime'
+import { playerVisualPosition } from './presentationSampling'
 import {
   FOLLOW_CAMERA_MODE,
   createInitialFollowCameraState,
+  getFollowCameraProfile,
+  resolveFollowCameraProfileId,
+  setFollowCameraProfile,
   stepFollowCamera,
   type CameraDiagnostic,
   type FollowCameraState,
@@ -17,7 +22,13 @@ interface FollowCameraRigProps {
 }
 
 const HIT_IMPULSE_SECONDS = 0.1
-const HIT_IMPULSE_DISTANCE = 0.08
+const HIT_IMPULSE_DISTANCE = 0.07
+
+function syncProfileFromSearch(): void {
+  if (typeof window === 'undefined') return
+  const baseline = isM15Baseline(window.location.search)
+  setFollowCameraProfile(resolveFollowCameraProfileId(window.location.search, baseline))
+}
 
 /** Presentation-only R3F camera driver. Does not write into simulation. */
 export function FollowCameraRig({
@@ -30,14 +41,34 @@ export function FollowCameraRig({
   const lastHitKeyRef = useRef<string | null>(null)
   const impulseRemainingRef = useRef(0)
   const impulseScaleRef = useRef(1)
+  const interpolateRef = useRef(true)
+  const profileSyncedRef = useRef(false)
 
   useFrame((_, deltaSeconds) => {
+    if (!profileSyncedRef.current) {
+      syncProfileFromSearch()
+      interpolateRef.current = !isM15Baseline(
+        typeof window === 'undefined' ? '' : window.location.search,
+      )
+      profileSyncedRef.current = true
+    }
     const snapshot = runtime.snapshot()
-    const playerPosition = snapshot.player.position
+    const playerPosition = playerVisualPosition(runtime, interpolateRef.current)
     const facing = snapshot.player.facing
     const previous =
       stateRef.current ?? createInitialFollowCameraState(playerPosition, facing)
-    const next = stepFollowCamera(previous, playerPosition, deltaSeconds, facing)
+    const teleportDistance = Math.hypot(
+      playerPosition.x - previous.previousPlayerPosition.x,
+      playerPosition.z - previous.previousPlayerPosition.z,
+    )
+    const next = stepFollowCamera(
+      teleportDistance > 3
+        ? createInitialFollowCameraState(playerPosition, facing)
+        : previous,
+      playerPosition,
+      deltaSeconds,
+      facing,
+    )
     stateRef.current = next
 
     const outgoing = resolvePlayerOutgoingHitConfirm({
@@ -79,7 +110,7 @@ export function FollowCameraRig({
       0,
       impulseRemainingRef.current - deltaSeconds,
     )
-    const impulseStrength =
+    const impulseMeters =
       impulseRemainingRef.current > 0
         ? Math.sin((impulseRemainingRef.current / HIT_IMPULSE_SECONDS) * Math.PI) *
           HIT_IMPULSE_DISTANCE *
@@ -87,9 +118,9 @@ export function FollowCameraRig({
         : 0
 
     const cameraPosition = {
-      x: next.pose.position.x + impulseStrength * 0.35,
-      y: next.pose.position.y + impulseStrength * 0.2,
-      z: next.pose.position.z + impulseStrength * 0.35,
+      x: next.pose.position.x,
+      y: next.pose.position.y + impulseMeters,
+      z: next.pose.position.z,
     }
     camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z)
     camera.lookAt(next.pose.lookAt.x, next.pose.lookAt.y, next.pose.lookAt.z)
@@ -97,9 +128,12 @@ export function FollowCameraRig({
 
     const diagnostic: CameraDiagnostic = {
       mode: FOLLOW_CAMERA_MODE,
+      profileId: getFollowCameraProfile().id,
       followLookAt: next.pose.lookAt,
       lookAheadDir: next.lookAheadDir,
       cameraPosition,
+      impulseMeters,
+      holdActive: next.holdActive,
     }
     publishCameraDiagnostic(diagnostic)
 

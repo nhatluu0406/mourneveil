@@ -215,4 +215,19 @@ describe('GameRuntime', () => {
       defense: { guarding: false, guardIntentHeld: false, invulnerable: false },
     })
   })
+
+  it('exposes previous/current transforms for presentation interpolation', () => {
+    const runtime = new GameRuntime()
+    runtime.attachCollisionResolver(resolveOnFlatGround)
+    runtime.advanceFrame(FIXED_STEP_SECONDS, { horizontal: 1, forward: 0 })
+    const afterStep = runtime.snapshot()
+    expect(afterStep.presentation.simulationPosition).toEqual(afterStep.player.position)
+    expect(afterStep.presentation.renderAlpha).toBe(0)
+    runtime.advanceFrame(FIXED_STEP_SECONDS / 2, { horizontal: 1, forward: 0 })
+    const mid = runtime.snapshot()
+    expect(mid.presentation.renderAlpha).toBeCloseTo(0.5, 5)
+    expect(runtime.presentedPlayerPosition().x).toBeGreaterThan(mid.presentation.previousSimulationPosition.x)
+    expect(runtime.presentedPlayerPosition().x).toBeLessThan(mid.player.position.x)
+    expect(runtime.lastSimulationFrame()?.stepsExecuted).toBe(0)
+  })
 })

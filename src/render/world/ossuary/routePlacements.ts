@@ -213,8 +213,6 @@ const MIXED_COURT_SHELL: readonly WorldObjectPlacement[] = Object.freeze([
     place(`niche.court.${index}`, 'ossuary.niche.recess', 'mixed-court', [-2.94, 0.92, z], [0, Math.PI, 0], [0.82, 0.82, 0.82]),
     place(`niche.court.${index}.arch`, 'ossuary.niche.arch', 'mixed-court', [-2.98, 1.18, z], [0, Math.PI / 2, 0], [0.92, 1.12, 0.92]),
   ]),
-  place('arch.court.entry', 'ossuary.arch.full', 'mixed-court', [-1.75, 1.55, -4.7], [0, Math.PI / 2, 0], [1.25, 1.2, 1.25]),
-  place('arch.court.processional', 'ossuary.arch.full', 'mixed-court', [3.75, 1.55, -4], [0, Math.PI / 2, 0], [1.3, 1.25, 1.3]),
   place('lancet.court.entry', 'ossuary.arch.lancet', 'mixed-court', [-1.78, 1.12, -4.7], [0, Math.PI / 2, 0], [1.15, 1.15, 1.15]),
   place('lancet.court.broken', 'ossuary.arch.lancet-broken', 'mixed-court', [3.78, 1.02, -4], [0.04, Math.PI / 2, -0.06], [1.2, 1.2, 1.2]),
   place('split-buttress.court.north', 'ossuary.buttress.split', 'mixed-court', [0.15, 1.02, -6.78], [0, Math.PI / 2, 0], [1.05, 1.05, 1.05]),

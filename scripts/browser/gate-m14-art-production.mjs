@@ -17,7 +17,7 @@ await runOwnedBrowserGate({
   run: async (page, { baseUrl, artifactDir }) => {
     const pageErrors = []
     page.on('pageerror', (error) => pageErrors.push(String(error)))
-    await page.goto(baseUrl, { waitUntil: 'load' })
+    await page.goto(`${baseUrl}?zoneCull=0`, { waitUntil: 'load' })
     await page.waitForFunction(() => Boolean(window.__MOURNEVEIL_GATE__), null, { timeout: 30_000 })
     await page.evaluate(() => {
       localStorage.removeItem('mourneveil.save.v4')

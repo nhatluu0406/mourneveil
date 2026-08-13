@@ -82,7 +82,7 @@ export function readabilityOcclusionOrigin(camera: Vec3, focus: Vec3): Vec3 {
  * that still cover the actor in screen space. Treat the camera→focus XZ segment as a
  * corridor and fade tall solids whose footprints enter that corridor.
  */
-export const READABILITY_CORRIDOR_RADIUS_METERS = 1.45
+export const READABILITY_CORRIDOR_RADIUS_METERS = 1.05
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value))
@@ -131,8 +131,8 @@ function thinWallPlaneOccludes(camera: Vec3, focus: Vec3, box: Aabb3): boolean {
     if ((camera.x - wallX) * (focus.x - wallX) >= 0) return false
     const t = (wallX - camera.x) / (focus.x - camera.x)
     if (t <= 0.04 || t >= 0.99) return false
-    const z0 = Math.min(camera.z, focus.z) - 2.85
-    const z1 = Math.max(camera.z, focus.z) + 0.45
+    const z0 = Math.min(camera.z, focus.z) - 0.55
+    const z1 = Math.max(camera.z, focus.z) + 0.35
     return box.maximum.z >= z0 && box.minimum.z <= z1
   }
 
@@ -141,8 +141,8 @@ function thinWallPlaneOccludes(camera: Vec3, focus: Vec3, box: Aabb3): boolean {
   if ((camera.z - wallZ) * (focus.z - wallZ) >= 0) return false
   const t = (wallZ - camera.z) / (focus.z - camera.z)
   if (t <= 0.04 || t >= 0.99) return false
-  const x0 = Math.min(camera.x, focus.x) - 2.85
-  const x1 = Math.max(camera.x, focus.x) + 0.45
+  const x0 = Math.min(camera.x, focus.x) - 0.55
+  const x1 = Math.max(camera.x, focus.x) + 0.35
   return box.maximum.x >= x0 && box.minimum.x <= x1
 }
 
@@ -185,8 +185,8 @@ function corridorOccludesSolid(
 
   // Allow slightly past the focus: high-oblique views still cover the actor with
   // neighboring divider bays whose centers project just beyond the look target.
-  if (bestT < 0.05 || bestT > 1.18) return false
-  const radiusScale = bestT > 1 ? 0.9 : 1
+  if (bestT < 0.08 || bestT > 1.05) return false
+  const radiusScale = bestT > 1 ? 0.75 : 1
   return bestDistance <= corridorRadius * radiusScale
 }
 

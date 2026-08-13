@@ -51,6 +51,11 @@ import {
   type SimulationTimeSnapshot,
 } from '../core/fixedStepClock'
 import {
+  interpolateVector3,
+  renderAlphaFromAccumulator,
+  type PresentationTransform,
+} from '../core/presentationTransform'
+import {
   advanceMeleeEnemy,
   createEnemyAttackSpatialSnapshot,
   enemyAttackDamage,
@@ -183,6 +188,7 @@ import {
   type CharacterCollisionResolver,
   type PlayerFacingDirection,
   type PlayerMotorState,
+  type Vector3Value,
 } from '../character/playerMotor'
 
 export const INTRO_LOOT_ITEM_ID = 'item.charm.vitality' as const
@@ -256,6 +262,11 @@ export interface GameRuntimeSnapshot {
   }
   /** Active skill loadout + cooldown presentation hooks for UI/Codex. */
   readonly skills: PlayerSkillSnapshot
+  /**
+   * Presentation sampling only. Collision/Rapier stay on `player.position`.
+   * Render + camera lerp previous→current with `renderAlpha`.
+   */
+  readonly presentation: PresentationTransform
 }
 
 export interface GameRuntimeAdvance extends GameRuntimeSnapshot {
@@ -295,6 +306,10 @@ export class GameRuntime {
   private playerState = createPlayerMotorState(
     MOURNEVEIL_CONNECTED_LEVEL.entryPosition,
   )
+  private previousPlayerPosition: Vector3Value = {
+    ...MOURNEVEIL_CONNECTED_LEVEL.entryPosition,
+  }
+  private lastFrameAdvance: FixedStepAdvance | null = null
   private readonly playerHealthRuntime = new PlayerHealthRuntime(
     this.playerState.position,
   )
@@ -395,6 +410,7 @@ export class GameRuntime {
     this.playerState = createPlayerMotorState(
       this.checkpointRuntime.activeRespawnPosition() ?? MOURNEVEIL_CONNECTED_LEVEL.entryPosition,
     )
+    this.snapPresentationHistory()
     this.playerHealthRuntime.updatePosition(this.playerState.position)
     this.worldRuntime.restore(save.world)
     this.flaskRuntime.setCharges(save.flaskCharges)
@@ -659,6 +675,7 @@ export class GameRuntime {
   debugSetPlayerPosition(position: { readonly x: number; readonly y: number; readonly z: number }): void {
     if (!this.playerHealthRuntime.snapshot().health.alive) return
     this.playerState = createPlayerMotorState(position)
+    this.snapPresentationHistory()
     this.playerHealthRuntime.updatePosition(position)
     this.worldRuntime.updatePlayerPosition(position)
   }
@@ -874,6 +891,7 @@ export class GameRuntime {
     }
 
     this.playerState = createPlayerMotorState(respawnPosition)
+    this.snapPresentationHistory()
     this.playerHealthRuntime.updatePosition(respawnPosition)
     this.playerHealthRuntime.restoreToMaximum()
     this.resetPlayerActionState()
@@ -894,6 +912,7 @@ export class GameRuntime {
     const hitEvents: CombatHitEvent[] = []
     const incomingHitEvents: CombatHitEvent[] = []
     const frame = this.clock.advance(frameDeltaSeconds, (fixedStepSeconds, nextStepCount) => {
+      this.previousPlayerPosition = { ...this.playerState.position }
       const playerAlive = this.playerHealthRuntime.snapshot().health.alive
       if (playerAlive) this.combatRuntime.advanceFixedStep()
       const combat = this.combatRuntime.snapshot()
@@ -1140,6 +1159,7 @@ export class GameRuntime {
       this.updateFinalGateProgress()
     })
 
+    this.lastFrameAdvance = frame
     return { ...this.snapshot(), frame, hitEvents, incomingHitEvents }
   }
 
@@ -1218,7 +1238,28 @@ export class GameRuntime {
       skills: this.skillRuntime.snapshot(combat, {
         remainingSteps: (actionId) => this.combatRuntime.cooldownRemainingSteps(actionId),
       }),
+      presentation: {
+        simulationPosition: this.playerState.position,
+        previousSimulationPosition: this.previousPlayerPosition,
+        renderAlpha: renderAlphaFromAccumulator(this.clock.snapshot().accumulatorSeconds),
+      },
     }
+  }
+
+  lastSimulationFrame(): FixedStepAdvance | null {
+    return this.lastFrameAdvance
+  }
+
+  presentedPlayerPosition(): Vector3Value {
+    return interpolateVector3(
+      this.previousPlayerPosition,
+      this.playerState.position,
+      renderAlphaFromAccumulator(this.clock.snapshot().accumulatorSeconds),
+    )
+  }
+
+  private snapPresentationHistory(): void {
+    this.previousPlayerPosition = { ...this.playerState.position }
   }
 
   private ensureEnemyNavigationRoute(enemyId: string): void {

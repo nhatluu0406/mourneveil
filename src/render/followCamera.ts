@@ -1,30 +1,31 @@
 import type { Vector3Value } from '../game/character/playerMotor'
+import {
+  getFollowCameraProfile,
+  type FollowCameraProfile,
+} from './followCameraProfiles'
 
-/** Fixed high-oblique offset from the follow look target (presentation-only). */
+export {
+  DEFAULT_FOLLOW_CAMERA_PROFILE_ID,
+  FOLLOW_CAMERA_PROFILE_CLOSER_TACTICAL,
+  FOLLOW_CAMERA_PROFILE_CURRENT,
+  FOLLOW_CAMERA_PROFILES,
+  getFollowCameraProfile,
+  resolveFollowCameraProfileId,
+  setFollowCameraProfile,
+} from './followCameraProfiles'
+
+/** Active profile offset — tests pin the selected M15 closer-tactical framing. */
 export const FOLLOW_CAMERA_OFFSET: Vector3Value = Object.freeze({
-  x: 7.35,
-  y: 9.05,
-  z: 7.35,
+  x: 6.15,
+  y: 7.55,
+  z: 6.15,
 })
 
-/**
- * Meters of look-target bias along a *damped* look-ahead direction.
- * Favor progression without yanking on discrete facing flips.
- */
-export const FOLLOW_LOOK_AHEAD_METERS = 0.85
-
-/** Exponential follow rate for the look target (higher = snappier). */
-export const FOLLOW_DAMPING = 10
-
-/** Slower rate for look-ahead direction so facing flips do not hunt. */
-export const LOOK_AHEAD_DAMPING = 3.5
-
-/** Ignore look-ahead steering below this planar speed (m/s), estimated from position delta. */
+export const FOLLOW_LOOK_AHEAD_METERS = 0.5
+export const FOLLOW_DAMPING = 8
+export const LOOK_AHEAD_DAMPING = 3.2
 export const LOOK_AHEAD_SPEED_DEADZONE = 0.35
-
-/** Ignore tiny direction changes (dot product above this keeps current look-ahead). */
 export const LOOK_AHEAD_DIR_DEADZONE = 0.985
-
 export const FOLLOW_CAMERA_MODE = 'high-oblique-follow' as const
 
 export interface FollowCameraPose {
@@ -39,16 +40,19 @@ export interface CameraFacingHint {
 
 export interface FollowCameraState {
   readonly pose: FollowCameraPose
-  /** Unit XZ look-ahead direction (damped). */
   readonly lookAheadDir: CameraFacingHint
   readonly previousPlayerPosition: Vector3Value
+  readonly holdActive: boolean
 }
 
 export interface CameraDiagnostic {
   readonly mode: typeof FOLLOW_CAMERA_MODE
+  readonly profileId: string
   readonly followLookAt: Vector3Value
   readonly cameraPosition: Vector3Value
   readonly lookAheadDir: CameraFacingHint
+  readonly impulseMeters: number
+  readonly holdActive: boolean
 }
 
 function normalizeXZ(x: number, z: number): CameraFacingHint | null {
@@ -60,7 +64,7 @@ function normalizeXZ(x: number, z: number): CameraFacingHint | null {
 export function computeFollowLookAt(
   playerPosition: Vector3Value,
   lookAheadDir: CameraFacingHint | null = null,
-  lookAheadMeters: number = FOLLOW_LOOK_AHEAD_METERS,
+  lookAheadMeters: number = getFollowCameraProfile().lookAheadMeters,
 ): Vector3Value {
   return {
     x: playerPosition.x + (lookAheadDir === null ? 0 : lookAheadDir.x * lookAheadMeters),
@@ -69,15 +73,17 @@ export function computeFollowLookAt(
   }
 }
 
-export function computeDesiredCameraPosition(lookAt: Vector3Value): Vector3Value {
+export function computeDesiredCameraPosition(
+  lookAt: Vector3Value,
+  offset: Vector3Value = getFollowCameraProfile().offset,
+): Vector3Value {
   return {
-    x: lookAt.x + FOLLOW_CAMERA_OFFSET.x,
-    y: lookAt.y + FOLLOW_CAMERA_OFFSET.y,
-    z: lookAt.z + FOLLOW_CAMERA_OFFSET.z,
+    x: lookAt.x + offset.x,
+    y: lookAt.y + offset.y,
+    z: lookAt.z + offset.z,
   }
 }
 
-/** Frame-rate independent exponential approach of `current` toward `target`. */
 export function dampScalar(
   current: number,
   target: number,
@@ -88,10 +94,6 @@ export function dampScalar(
   return current + (target - current) * t
 }
 
-/**
- * Angle-lerp look-ahead on XZ. Vector lerp + renormalize collapses on reverses;
- * spherical-style blend keeps direction continuous.
- */
 export function dampLookAheadDirection(
   current: CameraFacingHint,
   desired: CameraFacingHint,
@@ -102,7 +104,6 @@ export function dampLookAheadDirection(
   if (dot > LOOK_AHEAD_DIR_DEADZONE) return current
   const t = 1 - Math.exp(-damping * Math.max(0, deltaSeconds))
   const blend = Math.min(1, t)
-  // Near-opposite directions: sin(angle)≈0 — fall back to perpendicular blend axis.
   if (dot <= -0.999) {
     const perp = normalizeXZ(-current.z, current.x) ?? { x: 0, z: 1 }
     const mid = normalizeXZ(
@@ -119,10 +120,6 @@ export function dampLookAheadDirection(
   return normalizeXZ(current.x * a + desired.x * b, current.z * a + desired.z * b) ?? desired
 }
 
-/**
- * Prefer planar motion for look-ahead. When nearly idle, keep the prior direction
- * so discrete facing flips (attack / wall-slide) do not yank the camera.
- */
 export function resolveLookAheadDesire(
   previousPlayerPosition: Vector3Value,
   playerPosition: Vector3Value,
@@ -141,19 +138,53 @@ export function resolveLookAheadDesire(
   return currentLookAhead
 }
 
+function planarDistance(a: Vector3Value, b: Vector3Value): number {
+  return Math.hypot(a.x - b.x, a.z - b.z)
+}
+
+function applyLookAtHold(
+  currentLookAt: Vector3Value,
+  desiredLookAt: Vector3Value,
+  holdActive: boolean,
+  profile: FollowCameraProfile,
+): { readonly lookAt: Vector3Value; readonly holdActive: boolean } {
+  const error = planarDistance(currentLookAt, desiredLookAt)
+  if (profile.holdReleaseMeters <= 0) {
+    return { lookAt: desiredLookAt, holdActive: false }
+  }
+  if (holdActive) {
+    if (error < profile.holdReleaseMeters) {
+      return {
+        lookAt: { x: currentLookAt.x, y: desiredLookAt.y, z: currentLookAt.z },
+        holdActive: true,
+      }
+    }
+    return { lookAt: desiredLookAt, holdActive: false }
+  }
+  if (error <= profile.holdRadiusMeters) {
+    return {
+      lookAt: { x: currentLookAt.x, y: desiredLookAt.y, z: currentLookAt.z },
+      holdActive: true,
+    }
+  }
+  return { lookAt: desiredLookAt, holdActive: false }
+}
+
 export function createInitialFollowCameraState(
   playerPosition: Vector3Value,
   facing: CameraFacingHint = { x: 0, z: -1 },
 ): FollowCameraState {
+  const profile = getFollowCameraProfile()
   const lookAheadDir = normalizeXZ(facing.x, facing.z) ?? { x: 0, z: -1 }
-  const lookAt = computeFollowLookAt(playerPosition, lookAheadDir)
+  const lookAt = computeFollowLookAt(playerPosition, lookAheadDir, profile.lookAheadMeters)
   return {
     pose: {
       lookAt,
-      position: computeDesiredCameraPosition(lookAt),
+      position: computeDesiredCameraPosition(lookAt, profile.offset),
     },
     lookAheadDir,
     previousPlayerPosition: { ...playerPosition },
+    holdActive: true,
   }
 }
 
@@ -163,6 +194,7 @@ export function stepFollowCamera(
   deltaSeconds: number,
   facing: CameraFacingHint = previous.lookAheadDir,
 ): FollowCameraState {
+  const profile = getFollowCameraProfile()
   const desiredDir = resolveLookAheadDesire(
     previous.previousPlayerPosition,
     playerPosition,
@@ -173,21 +205,32 @@ export function stepFollowCamera(
   const lookAheadDir = dampLookAheadDirection(
     previous.lookAheadDir,
     desiredDir,
-    LOOK_AHEAD_DAMPING,
+    profile.lookAheadDamping,
     deltaSeconds,
   )
-  const desiredLookAt = computeFollowLookAt(playerPosition, lookAheadDir)
+  const rawDesiredLookAt = computeFollowLookAt(
+    playerPosition,
+    lookAheadDir,
+    profile.lookAheadMeters,
+  )
+  const held = applyLookAtHold(
+    previous.pose.lookAt,
+    rawDesiredLookAt,
+    previous.holdActive,
+    profile,
+  )
   const lookAt = {
-    x: dampScalar(previous.pose.lookAt.x, desiredLookAt.x, FOLLOW_DAMPING, deltaSeconds),
-    y: dampScalar(previous.pose.lookAt.y, desiredLookAt.y, FOLLOW_DAMPING, deltaSeconds),
-    z: dampScalar(previous.pose.lookAt.z, desiredLookAt.z, FOLLOW_DAMPING, deltaSeconds),
+    x: dampScalar(previous.pose.lookAt.x, held.lookAt.x, profile.damping, deltaSeconds),
+    y: dampScalar(previous.pose.lookAt.y, held.lookAt.y, profile.damping, deltaSeconds),
+    z: dampScalar(previous.pose.lookAt.z, held.lookAt.z, profile.damping, deltaSeconds),
   }
   return {
     pose: {
       lookAt,
-      position: computeDesiredCameraPosition(lookAt),
+      position: computeDesiredCameraPosition(lookAt, profile.offset),
     },
     lookAheadDir,
     previousPlayerPosition: { ...playerPosition },
+    holdActive: held.holdActive,
   }
 }

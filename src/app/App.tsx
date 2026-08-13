@@ -2,11 +2,18 @@ import { Canvas } from '@react-three/fiber'
 import { ACESFilmicToneMapping, PCFSoftShadowMap, SRGBColorSpace } from 'three'
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { DevelopmentPanel } from '../debug/DevelopmentPanel'
+import { PerfHud } from '../debug/PerfHud'
+import { shouldShowPerfHud, isM15Baseline } from '../debug/devQuery'
 import { installDevelopmentBrowserGate } from '../debug/browserGate'
 import { createDevelopmentDiagnostic } from '../debug/developmentDiagnostic'
 import { Scene } from '../render/Scene'
 import type { CameraDiagnostic } from '../render/followCamera'
 import { createPointerWorldAimResolver } from '../render/pointerWorldAim'
+import {
+  resolveFollowCameraProfileId,
+  setFollowCameraProfile,
+  FOLLOW_CAMERA_PROFILES,
+} from '../render/followCamera'
 import { GameplayHud } from '../ui/GameplayHud'
 import { InventoryEquipmentPanel } from '../ui/InventoryEquipmentPanel'
 import { RenderErrorBoundary } from './RenderErrorBoundary'
@@ -32,6 +39,12 @@ export function App() {
     if (!devDetailsVisible) return
     setCameraDiagnostic(diagnostic)
   }, [devDetailsVisible])
+  const cameraProfile = useMemo(() => {
+    const search = typeof window === 'undefined' ? '' : window.location.search
+    const id = resolveFollowCameraProfileId(search, isM15Baseline(search))
+    setFollowCameraProfile(id)
+    return FOLLOW_CAMERA_PROFILES[id]
+  }, [])
   const diagnostic = useMemo(
     () =>
       createDevelopmentDiagnostic(
@@ -79,12 +92,17 @@ export function App() {
         <Canvas
           shadows
           camera={{
-            position: [8.5, 10.5, 8.5],
-            fov: 40,
+            position: [
+              cameraProfile.offset.x,
+              cameraProfile.offset.y,
+              cameraProfile.offset.z,
+            ],
+            fov: cameraProfile.fov,
             near: 0.1,
             far: 120,
           }}
-          dpr={RENDERER_DPR}          fallback={
+          dpr={RENDERER_DPR}
+          fallback={
             <div className="render-fallback" role="alert">
               <h2>3D renderer unavailable</h2>
               <p>This browser does not provide the WebGL support Mourneveil needs.</p>
@@ -130,6 +148,15 @@ export function App() {
           onResetTrainingTarget={() => runtime.resetTrainingTarget()}
           onRestorePlayerForDevelopment={() => runtime.restorePlayerForDevelopment()}
           onResetMeleeFixture={() => runtime.resetMeleeFixture()}
+        />
+      ) : null}
+      {import.meta.env.DEV ? (
+        <PerfHud
+          visible={shouldShowPerfHud(
+            typeof window === 'undefined' ? '' : window.location.search,
+            true,
+            devDetailsVisible,
+          )}
         />
       ) : null}
     </main>

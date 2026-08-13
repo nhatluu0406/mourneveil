@@ -81,4 +81,14 @@ describe('followCamera', () => {
     state = stepFollowCamera(state, { x: 1.001, y: 0.82, z: 1 }, 1 / 60, { x: -1, z: 0 })
     expect(state.lookAheadDir.x).toBeGreaterThan(0.5)
   })
+
+  it('holds lookAt xz for sub-threshold player motion', () => {
+    const player = { x: 0, y: 0.82, z: 0 }
+    let state = createInitialFollowCameraState(player, { x: 0, z: -1 })
+    const heldLookAt = { ...state.pose.lookAt }
+    state = stepFollowCamera(state, { x: 0.04, y: 0.82, z: 0 }, 1 / 60, { x: 0, z: -1 })
+    expect(state.holdActive).toBe(true)
+    expect(state.pose.lookAt.x).toBeCloseTo(heldLookAt.x, 3)
+    expect(state.pose.lookAt.z).toBeCloseTo(heldLookAt.z, 3)
+  })
 })

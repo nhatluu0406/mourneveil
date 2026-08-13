@@ -11,6 +11,7 @@ import { aabbFromCenterSize, occludingSolidIds } from './cameraOcclusion'
 import { MOURNEVEIL_PALETTE } from './mourneveilPalette'
 import { forEachOcclusionMaterial, registerOcclusionMaterial } from './occlusionMaterials'
 import { OssuaryEnvironmentKit } from './OssuaryEnvironmentKit'
+import { playerVisualPosition, usesInterpolatedPresentation } from './presentationSampling'
 import {
   listFadeOcclusionSolids,
   setOccludedPlacementIds,
@@ -122,7 +123,7 @@ export function CameraOcclusionFader({ runtime }: { readonly runtime: GameRuntim
       .filter((collider) => shouldRenderProxyMesh(collider))
       .map((collider) => ({ id: collider.id, box: aabbFromCenterSize(collider.position, collider.size) }))
 
-    const player = runtime.snapshot().player.position
+    const player = playerVisualPosition(runtime, usesInterpolatedPresentation())
     const focus = { x: player.x, y: player.y + 0.55, z: player.z }
     const cameraPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z }
     const placementSolids = listFadeOcclusionSolids()
@@ -158,7 +159,7 @@ export function ConnectedLevelVisual({ runtime }: { readonly runtime: GameRuntim
         <SolidVisual key={collider.id} collider={collider} />
       ))}
 
-      <OssuaryEnvironmentKit />
+      <OssuaryEnvironmentKit runtime={runtime} />
     </>
   )
 }

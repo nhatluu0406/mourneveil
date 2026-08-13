@@ -8,6 +8,8 @@ import {
   PLAYER_WORLD_INTERACTION_REQUEST,
 } from '../input/playerRecoveryIntent'
 import { readCameraDiagnostic } from './cameraDiagnosticPublish'
+import { captureMotionTelemetry, resetMotionTelemetry, setMotionTelemetryPaused } from './motionTelemetry'
+import { auditScenePlacements } from '../render/world/ossuary/scenePresentation'
 import { readInstanceMatrixProbe } from './instanceMatrixProbe'
 import {
   readOccludedPlacementIds,
@@ -52,6 +54,10 @@ declare global {
       instanceMatrixProbe: () => unknown
       forceOccludeAllFadePlacements: () => unknown
       clearOcclusionOverride: () => unknown
+      motionTelemetry: () => unknown
+      resetMotionTelemetry: () => unknown
+      pauseMotionTelemetry: (paused: boolean) => unknown
+      sceneAudit: () => unknown
     }
   }
 }
@@ -130,6 +136,14 @@ export function installDevelopmentBrowserGate(runtime: GameRuntime): () => void 
       setOcclusionOverride('auto')
       return readOccludedPlacementIds()
     },
+    motionTelemetry: () => captureMotionTelemetry(),
+    resetMotionTelemetry: () => {
+      resetMotionTelemetry()
+    },
+    pauseMotionTelemetry: (paused) => {
+      setMotionTelemetryPaused(Boolean(paused))
+    },
+    sceneAudit: () => auditScenePlacements(),
   }
 
   return () => {
