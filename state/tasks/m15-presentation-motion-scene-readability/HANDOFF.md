@@ -5,45 +5,33 @@ Task: m15-presentation-motion-scene-readability
 
 ## Status
 
-ACTIVE — MB2 complete locally. Ready for Product Owner visual review. Not M15-closed. Do not start M16. Do not assign Codex until PO accepts the room shells.
+ACTIVE — **M15 MB3 READY FOR PRODUCT OWNER ACCEPTANCE**. Not M15-closed. Do not tag. Do not start M16. Codex art waits for PO.
 
-## Locked decisions (keep MB1)
+## Locked decisions (keep MB1/MB2)
 
-- Fixed 60 Hz simulation. Rapier on authoritative transforms. Camera follows interpolated player presentation.
-- Two rAF loops retained. Default camera: closer-tactical. DEV FPS HUD: `?perfHud=1` or F3.
-- Zone mount: current + neighbors + perimeter.
+- Fixed 60 Hz. Rapier on authoritative transforms. Camera follows interpolated player.
+- Opaque static architecture. Fade only `gate.shortcut` / `gate.final`.
+- Camera-near edges: low parapets. Far: tall. No roof.
+- Distance-driven gait is presentation-only.
 
-## Locked decisions (MB2)
+## Locked decisions (MB3)
 
-- Static architecture stays opaque. Allowed fade IDs: `gate.shortcut`, `gate.final`.
-- Camera-near edges (east/+X, north/+Z) are low wall.bay parapets. Far edges may be tall. No roof.
-- ADR-0003: rooms → placements → ADR-0002 registry. Gameplay topology unchanged.
-- MAGICAL_VFX: 4 wisps. One hanging bell with `supportInstanceId`. No ordinary floaters.
-- Locomotion gait is presentation-only and distance-driven. Teleports reset gait.
+- ADR-0004: DUNGEON → ROOM → INSTANCES → TYPE CATALOG → render/collision/light/interaction.
+- Instance ≠ type. One module per reusable type. Dungeon owns placements.
+- `compileDungeon` is the only structural authority. `CONNECTED_LEVEL_COLLIDERS` is derived.
+- Title resolves Continue / New Rite / Begin Rite before `GameRuntime` construction. `?fresh=1` starts a new rite.
+- I opens Armory. Oath is a separate view.
 
-## Same-host metrics (Playwright 1440×900)
+## Collision root cause (fixed)
 
-MB1 after → MB2 after (motion gate):
-- draw calls: 207 → 164–221 (host-noisy; no ceiling raise)
-- scene objects: 437 → 378
-- placements: 409 → 141
-- meshes: 266 → ~226–236
-- lights (culled): 9 → 7; authored actual-light budget still ≤12
-- player screen height: 148.7 px (held)
-- lookAt max step: 0.97 → 0.42 m
-- idle gait delta: 0
+Visual M15 walls were room-shell placements. Physics still used the legacy graybox map. Compiler now emits both from the same instances.
 
-Stretch ≤350 objects / ≤230 meshes not hit; improved vs MB1 and below previous live route.
+## Object / file notes
 
-## Art-only for Codex (after PO accepts shells)
+- Catalog modules under `src/content/world/objects/` plus `remaining.ts` for leftover types.
+- `InventoryEquipmentPanel` is a shell over `oathArmory/*`.
+- Actor folders re-export existing visuals (no simulation rewrite).
 
-- Surface richness on rectangular floors/walls
-- Prop grouping and material contrast
-- Arch/doorway production language on far openings
-- Background mass composition
-- Stronger practical-light fixtures (layout is stable)
+## Next
 
-## Next session starts with
-
-1. Product Owner screenshot/video review of MB2 rooms + walk.
-2. Only after structural acceptance: M15 MB3 Codex art on stable shells.
+Product Owner play: walls, Continue vs New Rite, Armory/Oath, defeated boss corpse. Codex art only after acceptance.

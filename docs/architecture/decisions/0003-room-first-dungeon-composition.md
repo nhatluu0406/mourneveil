@@ -19,7 +19,7 @@ Author **rooms first**, then derive placements:
 6. **Grounding law:** every ordinary placement is `floor`, `wall`, `hanging` (with support), or `structural`. Only explicit `vfx` may float.
 7. **Occlusion law:** static architecture remains opaque. Only simulation-driven gate bars (`gate.shortcut`, `gate.final`) may fade.
 
-Hierarchy: **ROOM COMPOSITION → OBJECT PLACEMENTS → REGISTRY DEFINITIONS**.
+Hierarchy: **ROOM COMPOSITION → OBJECT INSTANCES → TYPE CATALOG → compile → render/collision/light/interaction** (ADR-0004).
 
 ## Consequences
 
@@ -37,5 +37,6 @@ Hierarchy: **ROOM COMPOSITION → OBJECT PLACEMENTS → REGISTRY DEFINITIONS**.
 ## Links
 
 - `docs/design/m15-dungeon-floorplan.md`
-- `src/render/world/ossuary/dungeonRooms.ts`
+- `src/content/world/dungeons/ossuary/`
 - ADR-0002 (registry remains the object substrate)
+- ADR-0004 (compile law)

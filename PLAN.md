@@ -1,66 +1,78 @@
-# PLAN: M15 Presentation, Motion & Scene Readability — Macro-batch 2
+# PLAN: M15 Presentation, Motion & Scene Readability — Macro-batch 3
 <!-- Live M15 graph only. -->
 
-Input: Product Owner M15 MB2 room/locomotion/occlusion brief | Stack: `STACK.md`
+Input: Product Owner M15 MB3 world-integrity brief | Stack: `STACK.md`
 Task slug: `m15-presentation-motion-scene-readability`
 Agent: Cursor only
 
 ## Goal
 
-Make the hero route read as camera-safe rectangular rooms with grounded architecture and distance-driven walk presentation. Keep MB1 interpolation, closer-tactical camera, telemetry, and zone mounting. Do not close or tag M15. Do not start M16. No Codex art.
+One canonical authored dungeon compiles to render, collision, nav, lights, and interactions. Player and enemy cannot cross visible walls. Continue vs New Rite is explicit. Armory and Oath are separate views. Do not close or tag M15. Do not start M16. No Codex art.
 
 ## Non-goals
 
-- New enemies, NPCs, quests, regions, or M16
-- New production meshes/materials/VFX (Codex MB3 after PO structural acceptance)
-- Generic architecture transparency / Vesperfall copy
-- Variable-step gameplay; interpolating Rapier
-- Complex IK; rewriting the two-loop clock
+- M15 closure, tags, push, or M16
+- New production meshes/materials/VFX
+- Procedural roguelike / ECS / inheritance trees
+- Rewriting simulation combat/save schema versions
+- Invisible gameplay volumes unless proven necessary
 
 ## Steps
 
-- [x] 1. Room-first contract, floorplan, ADR-0003
+- [x] 1. Canonical dungeon + object modules + pure compiler
   - depends: —
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `docs/design/m15-dungeon-floorplan.md`, `docs/architecture/decisions/0003-room-first-dungeon-composition.md`, `src/render/world/ossuary/dungeonRooms.ts`, STACK/PLAN
-  - verifier: focused room-bounds/connection tests
-- [x] 2. Camera-safe shells + fade removal + grounding audit
+  - owns/allows: `src/content/world/**`, ADR-0004, object catalog, room modules, compileDungeon; render re-exports
+  - verifier: `npx vitest run src/content/world`
+- [x] 2. Derive physics from compiled dungeon; delete handwritten wall map
   - depends: 1
   - risk: HIGH
   - isolation: sequential
-  - owns/allows: `roomShell.ts`, `roomDressing.ts`, `routePlacements.ts`, `definitions.ts`, `cameraOcclusion`/`ConnectedLevelVisual`, `placementAudit.ts`, occlusion gates
-  - verifier: no ordinary `occlusionPolicy:'fade'`; placement audit has zero unsupported ordinary objects; `gate:m15-occlusion` + room tests
-- [x] 3. Distance-driven locomotion presentation
+  - owns/allows: `src/physics/connectedLevelCollision.ts`, Rapier tests, integrity audit, enemy/player wall tests
+  - verifier: `npx vitest run src/content/world src/physics src/render/world/ossuary`
+- [x] 3. Session semantics: Continue / New Rite / ?fresh=1 / defeated boss
+  - depends: —
+  - risk: HIGH
+  - isolation: sequential
+  - owns/allows: `src/app/`, `src/game/save/`, boss presentation, gate helper
+  - verifier: `npx vitest run src/app src/game/save src/game/enemies/bossFoundation.test.ts src/render/boss`
+- [x] 4. Armory / Oath information architecture
   - depends: —
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: `src/render/animation/playerLocomotionPresentation.ts`, `playerProceduralPose.ts`, `PlayerVisual.tsx`, motion gate
-  - verifier: idle/blocked gait delta ~0; distance-proportional phase; focused turn tests
-- [x] 4. Route migration evidence, density, regressions, MB2 handoff
-  - depends: 2, 3
+  - owns/allows: `src/ui/**`, `src/app/styles.css`
+  - verifier: `npx vitest run src/ui`
+- [x] 5. Actor modules, dead-code removal, gates, docs, MB3 handoff
+  - depends: 1, 2, 3, 4
   - risk: MEDIUM
   - isolation: sequential
-  - owns/allows: gates, HANDOFF, current-state, package.json
-  - verifier: M15 motion/quality/occlusion/room gates + M14/M13/M12/M10/lifecycle/assets + `npm run verify`
+  - owns/allows: actor folders, gates, STACK/HANDOFF/current-state/roadmap, ADR
+  - verifier: `npm run verify` plus listed M15/regression gates
 
-## Locked decisions (keep from MB1)
+## Parallel groups
 
-- Fixed 60 Hz simulation. Rapier on authoritative transforms. Camera follows interpolated player presentation.
-- Two rAF loops retained. Default camera: closer-tactical. DEV FPS HUD: `?perfHud=1` or F3.
-- Zone mount: current + neighbors + perimeter.
-- Vesperfall is inspiration only.
+- none (single-writer main tree)
 
-## Locked decisions (MB2)
+## Locked decisions (keep MB1/MB2)
 
-- STATIC ARCHITECTURE STAYS OPAQUE. Only `gate.shortcut` and `gate.final` may fade.
-- Camera-near room edges (east/+X and north/+Z) use low parapets; far edges may be tall. No roof.
-- Rooms are authored rectangles with openings; placements are generated from rooms then sparsely dressed. ADR-0002 registry stays underneath.
-- Gameplay zone IDs, encounters, checkpoint, shortcut, and final gate stay; presentation coordinates may move to match rooms.
-- MAGICAL_VFX (wisps) may float. Ordinary stone/bone/metal must ground or attach.
-- Locomotion gait is presentation-only and distance-driven. No sim/root-motion authority change.
+- Fixed 60 Hz simulation. Rapier on authoritative transforms. Camera follows interpolated player.
+- Static architecture opaque. Fade only `gate.shortcut` / `gate.final`.
+- Camera-near edges: low parapets. Far edges: tall. No roof.
+- Locomotion gait is presentation-only and distance-driven.
+- No class-inheritance object framework (ADR-0002).
+
+## Locked decisions (MB3)
+
+- Structural objects are never authored independently in render and physics.
+- Hierarchy: DUNGEON → ROOM → OBJECT INSTANCES → OBJECT TYPE CATALOG → render/collision/light/interaction.
+- Instance ≠ type. One module per reusable type; dungeon owns placements.
+- Production room files must not create `<mesh>`, `<pointLight>`, or `<CuboidCollider>`.
+- `CONNECTED_LEVEL_COLLIDERS` is derived from `compileDungeon` or removed.
+- Title screen resolves session intent before `GameRuntime` construction. `?fresh=1` starts a new rite.
+- Reload with a save shows Continue/New Rite; Continue loads canonical save.
 
 ## Escalation
 
-- Gameplay/save/loot authority change → stop.
+- Gameplay/save schema version bump → stop unless required for session reset.
 - Same failure 3× → stuck report + stop.
