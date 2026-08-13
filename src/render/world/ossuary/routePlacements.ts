@@ -1,15 +1,8 @@
-import type { OssuaryRouteArea, WorldObjectPlacement } from '../worldObjectTypes'
-import { generateRoomDressing } from './roomDressing'
-import { generateDungeonShell } from './roomShell'
+import { compileOssuaryDungeon } from '../../../content/world/dungeons/ossuary/OssuaryDungeon'
+import type { WorldObjectPlacement } from '../worldObjectTypes'
 
-/**
- * Room-first hero-route composition: shells from dungeon rooms, then sparse dressing.
- * Object modules own HOW each type renders.
- */
-export const OSSUARY_ROUTE_PLACEMENTS: readonly WorldObjectPlacement[] = Object.freeze([
-  ...generateDungeonShell(),
-  ...generateRoomDressing(),
-])
+/** Room-first hero-route composition compiled from the canonical ossuary dungeon. */
+export const OSSUARY_ROUTE_PLACEMENTS: readonly WorldObjectPlacement[] = compileOssuaryDungeon().renderInstances
 
 export interface OssuaryLandmarkDefinition {
   readonly id:
@@ -18,7 +11,7 @@ export interface OssuaryLandmarkDefinition {
     | 'landmark.mixed-funeral-brazier'
     | 'landmark.ash-veil-lamp'
     | 'landmark.sepulchre-seal'
-  readonly area: OssuaryRouteArea
+  readonly area: WorldObjectPlacement['area']
   readonly position: readonly [number, number, number]
   readonly description: string
 }

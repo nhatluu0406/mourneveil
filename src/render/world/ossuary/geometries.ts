@@ -25,6 +25,7 @@ const FLOOR_FOUNDATION = new BoxGeometry(1, 0.055, 1)
 const FLOOR_BROKEN_EDGE = createProfilePrismGeometry([[-0.5, -0.18], [-0.31, -0.3], [-0.08, -0.2], [0.16, -0.33], [0.5, -0.16], [0.5, 0.16], [-0.5, 0.16]], 0.08)
 const FLOOR_PIT_RIM = FLOOR_BROKEN_EDGE
 const WALL_BAY = new BoxGeometry(0.16, 1.25, 1.2)
+const WALL_PARAPET = WALL_BAY
 const WALL_BREAK = new DodecahedronGeometry(0.34, 0)
 const BUTTRESS = createTaperedPrismGeometry({
   bottomWidth: 0.42,
@@ -110,6 +111,7 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   'ossuary.floor.broken-edge': FLOOR_BROKEN_EDGE,
   'ossuary.floor.pit-rim': FLOOR_PIT_RIM,
   'ossuary.wall.bay': WALL_BAY,
+  'ossuary.wall.parapet': WALL_PARAPET,
   'ossuary.wall.break': WALL_BREAK,
   'ossuary.buttress': BUTTRESS,
   'ossuary.arch.full': ARCH_FULL,

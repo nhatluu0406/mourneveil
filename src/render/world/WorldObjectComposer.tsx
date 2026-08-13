@@ -14,6 +14,7 @@ import { ReliquaryPlinth } from './ossuary/landmarks/ReliquaryPlinth'
 import { VeilWispMotion } from './ossuary/dressing/VeilWispMotion'
 import { PracticalLightFixture } from './ossuary/lighting/PracticalLightFixture'
 import { SepulchreArenaSeal } from './ossuary/landmarks/SepulchreArenaSeal'
+import { GateBarsVisual } from './ossuary/interactive/GateBarsVisual'
 import {
   isPlacementOccluded,
   rebuildFadeOcclusionSolids,
@@ -118,6 +119,11 @@ function UniqueObject({ placement }: { readonly placement: WorldObjectPlacement 
       return <ReliquaryPlinth placement={placement} />
     case 'ossuary.corridor.bell':
       return <CorridorBell placement={placement} />
+    case 'ossuary.gate.shortcut':
+    case 'ossuary.gate.final':
+      return <GateBarsVisual placement={placement} />
+    case 'ossuary.interactive.checkpoint-shrine':
+      return null
     default:
       throw new Error(`No unique renderer registered for "${placement.objectId}"`)
   }
