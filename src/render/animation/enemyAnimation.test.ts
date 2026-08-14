@@ -22,11 +22,10 @@ describe('shared enemy animation foundation', () => {
     expect(SKIRMISHER_ROLE.presentation.animation).not.toEqual(
       BRUTE_ROLE.presentation.animation,
     )
-    expect(
-      resolveEnemyProceduralPose(skirmisherState, SKIRMISHER_ROLE.presentation.animation, 20),
-    ).not.toEqual(
-      resolveEnemyProceduralPose(bruteState, BRUTE_ROLE.presentation.animation, 20),
-    )
+    const skirmisherPose = resolveEnemyProceduralPose(skirmisherState, SKIRMISHER_ROLE.presentation.animation, 20)
+    const brutePose = resolveEnemyProceduralPose(bruteState, BRUTE_ROLE.presentation.animation, 20)
+    expect(skirmisherPose).not.toEqual(brutePose)
+    expect(skirmisherPose.leftLegPitch).toBe(-skirmisherPose.rightLegPitch)
   })
 
   it('keeps attack presentation on accepted execution facing until recovery completes', () => {

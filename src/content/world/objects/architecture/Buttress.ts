@@ -4,7 +4,7 @@ export const Buttress = defineObject({
   id: 'ossuary.buttress',
   family: 'architecture',
   materialKey: 'darkStone',
-  castShadow: true,
+  castShadow: false,
   receiveShadow: true,
   renderMode: 'instanced',
   anchorPolicy: 'structural',

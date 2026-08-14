@@ -8,6 +8,8 @@ export interface EnemyProceduralPose {
   readonly bodyScaleY: number
   readonly weaponPitch: number
   readonly weaponYaw: number
+  readonly leftLegPitch: number
+  readonly rightLegPitch: number
 }
 
 export function resolveEnemyProceduralPose(
@@ -36,7 +38,8 @@ export function resolveEnemyProceduralPose(
         weaponPitch: tuning.hitRecoil * 0.55,
       })
     case 'locomotion': {
-      const cycle = simulationStep * tuning.locomotionCadence
+      const cadence = Math.max(0.2, state.locomotionSpeed)
+      const cycle = simulationStep * tuning.locomotionCadence * cadence
       const stride = Math.sin(cycle)
       return pose({
         // Planted cadence — avoid abs(sin) toy bounce.
@@ -44,6 +47,8 @@ export function resolveEnemyProceduralPose(
         bodyPitch: aggressiveLean + stride * 0.03,
         bodyRoll: stride * (tuning.locomotionCadence > 0.14 ? 0.045 : 0.02),
         weaponPitch: stride * (tuning.locomotionCadence > 0.14 ? 0.16 : 0.08),
+        leftLegPitch: stride * (tuning.locomotionCadence > 0.14 ? 0.48 : 0.32),
+        rightLegPitch: -stride * (tuning.locomotionCadence > 0.14 ? 0.48 : 0.32),
       })
     }
     case 'enemy-attack': {
@@ -98,6 +103,8 @@ function pose(overrides: Partial<EnemyProceduralPose>): EnemyProceduralPose {
     bodyScaleY: 1,
     weaponPitch: 0,
     weaponYaw: 0,
+    leftLegPitch: 0,
+    rightLegPitch: 0,
     ...overrides,
   }
 }

@@ -25,21 +25,21 @@ Rebuild Rite I as one readable funerary dungeon complex, redesign procedural act
   - owns/allows: `src/content/world/dungeons/ossuary/**`, object definitions/catalog, compiler tests, existing collider metadata
   - outcome: one continuous foundation/exterior perimeter with interior partitions; logical room IDs/topology/anchors preserved; hard/soft/VFX classifications explicit
   - verifier: `npx vitest run src/content/world src/physics/connectedLevelCollision.test.ts` + `npm run gate:m15-world-integrity` + `npm run gate:m15-room-architecture`
-- [ ] 2. Architectural art, scale reset, light/shadow policy
+- [x] 2. Architectural art, scale reset, light/shadow policy
   - depends: 1
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: modular object types, `src/render/world/**`, `src/render/Scene.tsx`, art/STACK decisions
   - outcome: grounded doorway/arch language, restrained landmarks, 3–5 practical PointLights, actor/major-enemy-only dynamic shadows, normal instanced frustum culling
   - verifier: focused world/render tests + `npm run gate:m15-occlusion` + `npm run gate:m15-quality-audit`
-- [ ] 3. Warden and enemy silhouette/rig redesign
+- [x] 3. Warden and enemy silhouette/rig redesign
   - depends: 1
   - risk: MEDIUM
   - isolation: sequential
   - owns/allows: `src/render/actors/**`, `PlayerVisual`, `EnemyVisual`, boss presentation modules, shared actor materials/geometries
   - outcome: articulated player rig and role-readable enemies/boss, presentation-only and collider-neutral
   - verifier: focused actor/animation tests + M11 boss regression gate
-- [ ] 4. Distance-driven locomotion presentation
+- [x] 4. Distance-driven locomotion presentation
   - depends: 3
   - risk: MEDIUM
   - isolation: sequential

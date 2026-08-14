@@ -22,6 +22,7 @@ import {
   createProfilePrismGeometry,
   createTaperedPrismGeometry,
 } from './productionGeometry'
+import { ActorGroundingCue } from './actors/ActorGroundingCue'
 
 const SKIRMISHER_TORSO = createTaperedPrismGeometry({ bottomWidth: 0.24, topWidth: 0.36, height: 0.7, depth: 0.25 })
 const SKIRMISHER_LIMB = createTaperedPrismGeometry({ bottomWidth: 0.06, topWidth: 0.1, height: 0.45, depth: 0.09 })
@@ -30,6 +31,7 @@ const SKIRMISHER_BLADE = createProfilePrismGeometry(
   0.028,
 )
 const BRUTE_TORSO = createTaperedPrismGeometry({ bottomWidth: 0.78, topWidth: 0.62, height: 0.9, depth: 0.52 })
+const BRUTE_LEG = createTaperedPrismGeometry({ bottomWidth: 0.18, topWidth: 0.25, height: 0.48, depth: 0.24 })
 
 const STATE_MIX = {
   idle: 0,
@@ -80,6 +82,8 @@ function ProceduralEnemyVisual({
   const recoveryMaterialRef = useRef<MeshBasicMaterial>(null)
   const contactRef = useRef<Group>(null)
   const weaponRef = useRef<Mesh>(null)
+  const leftLegRef = useRef<Group>(null)
+  const rightLegRef = useRef<Group>(null)
 
   useFrame((_state, deltaSeconds) => {
     const runtimeSnapshot = runtime.snapshot()
@@ -109,6 +113,8 @@ function ProceduralEnemyVisual({
     const recoveryMaterial = recoveryMaterialRef.current
     const contact = contactRef.current
     const weapon = weaponRef.current
+    const leftLeg = leftLegRef.current
+    const rightLeg = rightLegRef.current
     if (
       facing === null ||
       body === null ||
@@ -118,7 +124,9 @@ function ProceduralEnemyVisual({
       recovery === null ||
       recoveryMaterial === null ||
       contact === null ||
-      weapon === null
+      weapon === null ||
+      leftLeg === null ||
+      rightLeg === null
     ) {
       return
     }
@@ -150,6 +158,8 @@ function ProceduralEnemyVisual({
       damping,
       deltaSeconds,
     )
+    leftLeg.rotation.x = MathUtils.damp(leftLeg.rotation.x, proceduralPose.leftLegPitch, damping, deltaSeconds)
+    rightLeg.rotation.x = MathUtils.damp(rightLeg.rotation.x, proceduralPose.rightLegPitch, damping, deltaSeconds)
     material.color.set(
       isBrute
           ? MOURNEVEIL_PALETTE.brute.body
@@ -207,9 +217,20 @@ function ProceduralEnemyVisual({
             : 'enemy.skirmisher.veil-riven',
       }}
     >
+      <ActorGroundingCue scale={isBrute ? 1.45 : 0.82} />
       <group ref={bodyRef}>
         {largeBody ? (
           <>
+            <group ref={leftLegRef} position={[-0.24, -0.45, 0.04]}>
+              <mesh castShadow position={[0, -0.2, 0]} geometry={BRUTE_LEG}>
+                <meshStandardMaterial color="#302725" roughness={0.84} metalness={0.12} />
+              </mesh>
+            </group>
+            <group ref={rightLegRef} position={[0.24, -0.45, 0.04]}>
+              <mesh castShadow position={[0, -0.2, 0]} geometry={BRUTE_LEG}>
+                <meshStandardMaterial color="#302725" roughness={0.84} metalness={0.12} />
+              </mesh>
+            </group>
             <mesh castShadow receiveShadow position={[0, -0.05, 0]}>
               <primitive attach="geometry" object={BRUTE_TORSO} />
               <meshStandardMaterial ref={materialRef} roughness={0.82} metalness={0.12} />
@@ -289,14 +310,16 @@ function ProceduralEnemyVisual({
               <primitive attach="geometry" object={SKIRMISHER_LIMB} />
               <meshStandardMaterial color="#3b594b" roughness={0.8} />
             </mesh>
-            <mesh castShadow position={[-0.16, -0.39, 0.02]} rotation={[0, 0, 0.08]}>
-              <primitive attach="geometry" object={SKIRMISHER_LIMB} />
-              <meshStandardMaterial color="#1f312a" roughness={0.9} />
-            </mesh>
-            <mesh castShadow position={[0.16, -0.39, 0.02]} rotation={[0, 0, -0.08]}>
-              <primitive attach="geometry" object={SKIRMISHER_LIMB} />
-              <meshStandardMaterial color="#1f312a" roughness={0.9} />
-            </mesh>
+            <group ref={leftLegRef} position={[-0.16, -0.18, 0.02]} rotation={[0, 0, 0.08]}>
+              <mesh castShadow position={[0, -0.23, 0]} geometry={SKIRMISHER_LIMB}>
+                <meshStandardMaterial color="#1f312a" roughness={0.9} />
+              </mesh>
+            </group>
+            <group ref={rightLegRef} position={[0.16, -0.18, 0.02]} rotation={[0, 0, -0.08]}>
+              <mesh castShadow position={[0, -0.23, 0]} geometry={SKIRMISHER_LIMB}>
+                <meshStandardMaterial color="#1f312a" roughness={0.9} />
+              </mesh>
+            </group>
             <mesh ref={weaponRef} castShadow position={[0.2, 0.05, -0.42]} rotation={[0.55, 0.1, 0]}>
               <primitive attach="geometry" object={SKIRMISHER_BLADE} />
               <meshStandardMaterial

@@ -193,11 +193,14 @@ describe('distance-driven player locomotion', () => {
     }
     const pose = resolvePlayerProceduralPose(walkState(), 40, locomotion)
     expect(pose.leftLimbSwing).not.toBe(pose.rightLimbSwing)
+    expect(pose.leftKneePitch).toBeGreaterThan(pose.rightKneePitch)
+    expect(Math.abs(pose.pelvisYaw)).toBeGreaterThan(0.01)
     const idlePose = resolvePlayerProceduralPose({ ...walkState(), mode: 'idle', locomotionSpeed: 0 }, 40, {
       ...locomotion,
       gaitAmplitude: 0,
       mode: 'idle',
     })
     expect(idlePose.limbSwing).toBe(0)
+    expect(idlePose.leftKneePitch).toBe(0)
   })
 })

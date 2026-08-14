@@ -38,8 +38,8 @@ describe('connected landmark Rapier collision', () => {
     fixture.free()
   })
 
-  it('stops the player outside the approach cairn', () => {
-    const landmark = landmarkByOwner('approach.cairn')
+  it('stops the player outside the approach broken reliquary', () => {
+    const landmark = landmarkByOwner('approach.reliquary')
     const start = {
       x: landmark.position[0],
       y: 0.82,

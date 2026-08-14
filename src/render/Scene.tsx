@@ -60,14 +60,20 @@ export function Scene({
   onCameraDiagnostic,
   runtime,
 }: SceneProps) {
+  const dynamicShadows =
+    import.meta.env.DEV &&
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).has('m15Shadows')
+
   return (
     <>
       <color attach="background" args={[MOURNEVEIL_PALETTE.background]} />
       <fog attach="fog" args={['#10181c', 30, 70]} />
       <ambientLight intensity={0.5} color="#879ea1" />
       <hemisphereLight args={['#a8c0c2', '#2d211b', 0.66]} />
+      {/* M15 default: source lighting plus contact/value grounding; no full-route dynamic shadow pass. */}
       <directionalLight
-        castShadow
+        castShadow={dynamicShadows}
         intensity={1.28}
         position={[8, 16, 6]}
         color="#b8d5da"

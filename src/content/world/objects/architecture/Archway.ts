@@ -4,7 +4,7 @@ export const Archway = defineObject({
   id: 'ossuary.arch.full',
   family: 'architecture',
   materialKey: 'darkStone',
-  castShadow: true,
+  castShadow: false,
   receiveShadow: true,
   renderMode: 'instanced',
   anchorPolicy: 'structural',

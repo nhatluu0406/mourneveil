@@ -16,6 +16,11 @@ export interface PlayerProceduralPose {
   readonly limbSwing: number
   readonly leftLimbSwing: number
   readonly rightLimbSwing: number
+  readonly leftKneePitch: number
+  readonly rightKneePitch: number
+  readonly leftAnklePitch: number
+  readonly rightAnklePitch: number
+  readonly pelvisYaw: number
   readonly leftArmPitch: number
   readonly rightArmPitch: number
   readonly weaponPitch: number
@@ -163,6 +168,11 @@ export function resolvePlayerProceduralPose(
         limbSwing: plant.left,
         leftLimbSwing: plant.left,
         rightLimbSwing: plant.right,
+        leftKneePitch: gaitKnee(gait.gaitPhase) * gait.gaitAmplitude,
+        rightKneePitch: gaitKnee(gait.gaitPhase + Math.PI) * gait.gaitAmplitude,
+        leftAnklePitch: gaitAnkle(gait.gaitPhase) * gait.gaitAmplitude,
+        rightAnklePitch: gaitAnkle(gait.gaitPhase + Math.PI) * gait.gaitAmplitude,
+        pelvisYaw: Math.sin(gait.gaitPhase) * gait.gaitAmplitude * 0.075,
         leftArmPitch: -plant.right * 0.72,
         rightArmPitch: -plant.left * 0.72,
         weaponPitch: plant.left * 0.08,
@@ -197,9 +207,27 @@ function pose(overrides: Partial<PlayerProceduralPose>): PlayerProceduralPose {
     limbSwing,
     leftLimbSwing: overrides.leftLimbSwing ?? limbSwing,
     rightLimbSwing: overrides.rightLimbSwing ?? -limbSwing,
+    leftKneePitch: overrides.leftKneePitch ?? 0,
+    rightKneePitch: overrides.rightKneePitch ?? 0,
+    leftAnklePitch: overrides.leftAnklePitch ?? 0,
+    rightAnklePitch: overrides.rightAnklePitch ?? 0,
+    pelvisYaw: overrides.pelvisYaw ?? 0,
     leftArmPitch: overrides.leftArmPitch ?? 0,
     rightArmPitch: overrides.rightArmPitch ?? 0,
     weaponPitch: overrides.weaponPitch ?? 0,
     defeated: overrides.defeated ?? false,
   }
+}
+
+/** Four-phase contact/down/passing/up leg articulation from the distance-owned gait phase. */
+function gaitKnee(phase: number): number {
+  const swing = Math.max(0, Math.sin(phase))
+  const loading = Math.max(0, -Math.sin(phase))
+  return 0.06 + swing * 0.62 + loading * 0.13
+}
+
+function gaitAnkle(phase: number): number {
+  const forward = Math.sin(phase)
+  const toeOff = Math.max(0, -Math.sin(phase))
+  return -forward * 0.2 - toeOff * 0.18
 }

@@ -5,7 +5,7 @@ export const LowParapet = defineObject({
   family: 'architecture',
   materialKey: 'darkStone',
   defaultScale: [1, 0.34, 1],
-  castShadow: true,
+  castShadow: false,
   receiveShadow: true,
   renderMode: 'instanced',
   anchorPolicy: 'structural',

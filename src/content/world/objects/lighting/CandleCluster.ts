@@ -6,7 +6,7 @@ export const CandleCluster = defineObject({
   materialKey: 'bone',
   castShadow: false,
   receiveShadow: false,
-  renderMode: 'unique',
+  renderMode: 'instanced',
   anchorPolicy: 'floor',
   lighting: { kind: 'emissive' },
   tags: ['lighting'],

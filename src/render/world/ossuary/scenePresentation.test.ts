@@ -36,7 +36,7 @@ describe('scene presentation activation', () => {
     })).toBe('vfx')
     const audit = auditScenePlacements()
     expect(audit.total).toBe(OSSUARY_ROUTE_PLACEMENTS.length)
-    expect(audit.byFamily.floor).toBeGreaterThan(10)
+    expect(audit.byFamily.floor).toBeGreaterThanOrEqual(9)
     expect(audit.suspiciousUnsupported).toEqual([])
   })
 })

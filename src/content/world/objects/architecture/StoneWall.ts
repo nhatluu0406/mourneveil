@@ -4,7 +4,7 @@ export const StoneWall = defineObject({
   id: 'ossuary.wall.bay',
   family: 'architecture',
   materialKey: 'darkStone',
-  castShadow: true,
+  castShadow: false,
   receiveShadow: true,
   renderMode: 'instanced',
   anchorPolicy: 'structural',

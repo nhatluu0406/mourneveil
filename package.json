@@ -40,6 +40,7 @@
     "gate:m15-quality-audit": "node scripts/browser/gate-m15-quality-audit.mjs",
     "gate:m15-occlusion": "node scripts/browser/gate-m15-occlusion.mjs",
     "gate:m15-room-architecture": "node scripts/browser/gate-m15-room-architecture.mjs",
+    "gate:m15-art-reset": "node scripts/browser/gate-m15-art-reset.mjs",
     "gate:m15-world-integrity": "node scripts/browser/gate-m15-world-integrity.mjs",
     "gate:m15-session-flow": "node scripts/browser/gate-m15-session-flow.mjs",
     "gate:m15-armory-oath-ui": "node scripts/browser/gate-m15-armory-oath-ui.mjs",

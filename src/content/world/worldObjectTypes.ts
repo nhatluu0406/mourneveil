@@ -117,6 +117,8 @@ export interface WorldObjectCollision {
   readonly colliderKind?: WorldColliderKind
   /** Local-space box before placement scale/yaw. Defaults to visualBounds. */
   readonly dimensions?: readonly [number, number, number]
+  /** Local-space center offset for floor-grounded visuals whose origin is at the base. */
+  readonly offset?: readonly [number, number, number]
   readonly navigationBlocking?: boolean
 }
 

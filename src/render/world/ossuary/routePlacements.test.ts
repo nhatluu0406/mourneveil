@@ -44,7 +44,8 @@ describe('ossuary route placements', () => {
         (entry) => resolveWorldObjectDefinition(entry.objectId).renderMode === 'instanced',
       ),
     )
-    expect((groups.get('ossuary.floor.foundation') ?? []).length).toBeGreaterThan(7)
+    expect((groups.get('ossuary.floor.foundation') ?? [])).toHaveLength(1)
+    expect((groups.get('ossuary.wall.exterior') ?? []).length).toBeGreaterThan(10)
   })
 
   it('provides distinct landmarks and capture anchors', () => {
@@ -96,14 +97,15 @@ describe('ossuary route placements', () => {
     expect(centerClutter).toHaveLength(0)
   })
 
-  it('establishes continuous foundations across every room', () => {
+  it('establishes one continuous foundation beneath every room', () => {
     const foundations = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.foundation')
-    expect(new Set(foundations.map((entry) => entry.area)).size).toBeGreaterThanOrEqual(7)
+    expect(foundations).toHaveLength(1)
+    expect(foundations[0]?.scale).toEqual([32, 2.4, 17])
   })
 
-  it('keeps perimeter silhouettes outside the walkable route', () => {
-    const silhouettes = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'perimeter')
-    expect(silhouettes.length).toBeGreaterThan(3)
-    expect(silhouettes.find((entry) => entry.instanceId === 'silhouette.ash.east')?.position[0]).toBeGreaterThan(16.5)
+  it('uses a grounded perimeter shell instead of disconnected silhouette masses', () => {
+    const perimeter = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.area === 'perimeter')
+    expect(perimeter.filter((entry) => entry.objectId === 'ossuary.wall.exterior').length).toBeGreaterThan(10)
+    expect(perimeter.some((entry) => entry.objectId === 'ossuary.silhouette.mass')).toBe(false)
   })
 })

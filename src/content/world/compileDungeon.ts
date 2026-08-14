@@ -84,6 +84,11 @@ export function compileDungeon(
 
   for (const placement of renderInstances) {
     const definition = catalog[placement.objectId] ?? getWorldObjectDefinition(placement.objectId)
+    if (
+      placement.objectId === 'ossuary.wall.bay' ||
+      placement.objectId === 'ossuary.wall.exterior' ||
+      placement.objectId === 'ossuary.wall.parapet'
+    ) continue
     const derived = colliderFromInstance(placement, definition, dynamicState)
     if (derived !== null) pushUniqueCollider(colliders, colliderKeys, derived)
   }
@@ -445,11 +450,7 @@ function landmarks(room: DungeonRoomDefinition): WorldObjectPlacement[] {
       return [instance('landmark.watch.monolith', 'ossuary.landmark.veil-monolith', room.area, anchor)]
     case 'room.final-approach':
       return [
-        instance('landmark.approach.cairn', 'ossuary.rubble.cluster', room.area, [anchor[0], 0.06, anchor[2]], ZERO, [
-          1.15,
-          0.7,
-          1.15,
-        ]),
+        instance('landmark.approach.reliquary', 'ossuary.reliquary.broken', room.area, [anchor[0], 0.36, anchor[2]], ZERO, [0.9, 0.9, 0.9]),
       ]
     case 'room.sepulchre':
       return [instance('landmark.sepulchre.seal', 'ossuary.landmark.arena-seal', room.area, anchor)]
@@ -480,8 +481,8 @@ function cornerDressing(room: DungeonRoomDefinition): WorldObjectPlacement[] {
     const far = z < (room.landmarkAnchor?.[2] ?? z) || x < (room.landmarkAnchor?.[0] ?? x)
     if (index === 0 && far) {
       result.push(
-        instance(`dressing.${room.id}.sarcophagus`, 'ossuary.sarcophagus.body', room.area, [x, 0.22, z], [0, 0.04, 0]),
-        instance(`dressing.${room.id}.lid`, 'ossuary.sarcophagus.lid', room.area, [x, 0.48, z], [0, 0.04, 0]),
+        instance(`dressing.${room.id}.sarcophagus`, 'ossuary.sarcophagus.body', room.area, [x, 0.18, z], [0, 0.04, 0], [0.78, 0.82, 0.78]),
+        instance(`dressing.${room.id}.lid`, 'ossuary.sarcophagus.lid', room.area, [x, 0.39, z], [0, 0.04, 0], [0.78, 0.82, 0.78]),
       )
     } else {
       result.push(
@@ -561,6 +562,11 @@ function colliderFromInstance(
     ? [local[0] * scale[0], local[1] * scale[1], local[2] * scale[2]]
     : [local[2] * scale[2], local[1] * scale[1], local[0] * scale[0]]
   const kind = collision.colliderKind ?? 'blocker'
+  const offset = collision.offset ?? ZERO
+  const cos = Math.cos(yaw)
+  const sin = Math.sin(yaw)
+  const offsetX = (offset[0] * cos + offset[2] * sin) * scale[0]
+  const offsetZ = (-offset[0] * sin + offset[2] * cos) * scale[2]
   const position: readonly [number, number, number] =
     kind === 'checkpoint'
       ? [
@@ -568,7 +574,11 @@ function colliderFromInstance(
           CONNECTED_LEVEL_CHECKPOINT_DEFINITION.collisionSize[1] / 2,
           CONNECTED_LEVEL_CHECKPOINT_DEFINITION.visualPosition.z,
         ]
-      : placement.position
+      : [
+          placement.position[0] + offsetX,
+          placement.position[1] + offset[1] * scale[1],
+          placement.position[2] + offsetZ,
+        ]
   const colliderSize =
     kind === 'checkpoint' ? CONNECTED_LEVEL_CHECKPOINT_DEFINITION.collisionSize : size
   return Object.freeze({

@@ -29,6 +29,7 @@ export function RendererStatsPublisher() {
   const { gl, scene } = useThree()
   const frameRef = useRef(0)
   const drawingBufferRef = useRef(new Vector2())
+  const gpuTimerAvailableRef = useRef<boolean | null>(null)
 
   useFrame(() => {
     frameRef.current += 1
@@ -58,6 +59,12 @@ export function RendererStatsPublisher() {
     })
 
     const drawingBuffer = gl.getDrawingBufferSize(drawingBufferRef.current)
+    if (gpuTimerAvailableRef.current === null) {
+      const context = gl.getContext()
+      gpuTimerAvailableRef.current =
+        context instanceof WebGL2RenderingContext &&
+        context.getExtension('EXT_disjoint_timer_query_webgl2') !== null
+    }
     publishInstanceMatrixProbe(scene)
     publishRendererStats({
       drawCalls: info.render.calls,
@@ -75,9 +82,15 @@ export function RendererStatsPublisher() {
       canvasHeight: canvas.clientHeight,
       shadowMapEnabled: shadowMap?.enabled === true,
       shadowMapSize,
+      shadowCasterCount: countBy(
+        scene,
+        (object) => (object as Mesh).isMesh === true && (object as Mesh).castShadow,
+      ),
+      gpuTimerAvailable: gpuTimerAvailableRef.current,
       sceneObjectCount: countBy(scene, () => true),
       meshCount: countBy(scene, (object) => (object as Mesh).isMesh === true),
       lightCount: countBy(scene, (object) => (object as Light).isLight === true),
+      pointLightCount: countBy(scene, (object) => object.type === 'PointLight'),
       jsHeapUsedBytes: memory?.usedJSHeapSize ?? null,
       jsHeapTotalBytes: memory?.totalJSHeapSize ?? null,
       devicePixelRatio: typeof window === 'undefined' ? 1 : window.devicePixelRatio,

@@ -14,9 +14,12 @@ export interface RendererStatsSnapshot {
   readonly canvasHeight: number
   readonly shadowMapEnabled: boolean
   readonly shadowMapSize: number | null
+  readonly shadowCasterCount: number
+  readonly gpuTimerAvailable: boolean
   readonly sceneObjectCount: number
   readonly meshCount: number
   readonly lightCount: number
+  readonly pointLightCount: number
   readonly jsHeapUsedBytes: number | null
   readonly jsHeapTotalBytes: number | null
   readonly devicePixelRatio: number

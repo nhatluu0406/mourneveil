@@ -8,11 +8,11 @@ import {
 } from './ossuaryEnvironmentLayout'
 
 describe('ossuary environment route layout', () => {
-  it('covers each authored route area with reusable floor and wall rhythm', () => {
+  it('covers the route with one envelope plus reusable floor and wall rhythm', () => {
     const foundations = OSSUARY_ROUTE_PLACEMENTS.filter((entry) => entry.objectId === 'ossuary.floor.foundation')
-    expect(new Set(foundations.map((entry) => entry.area))).toEqual(
-      new Set(['refuge', 'corridor', 'first-combat', 'court', 'mixed-court', 'ash-walk', 'final-approach', 'final-arena']),
-    )
+    expect(foundations).toHaveLength(1)
+    expect(foundations[0]?.area).toBe('perimeter')
+    expect(foundations[0]?.scale).toEqual([32, 2.4, 17])
     expect(OSSUARY_FLOOR_SLABS.length).toBeGreaterThan(0)
     expect(OSSUARY_WALL_BAYS.length).toBeGreaterThan(0)
   })

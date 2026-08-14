@@ -37,7 +37,10 @@ const BUTTRESS = createTaperedPrismGeometry({
   height: 2.04,
   depth: 0.4,
 })
-const ARCH_FULL = new TorusGeometry(0.96, 0.11, 6, 24, Math.PI)
+const ARCH_FULL = createProfilePrismGeometry(
+  [[-0.82, -1.08], [-0.82, 0.26], [-0.48, 0.72], [0, 1.06], [0.48, 0.72], [0.82, 0.26], [0.82, -1.08], [0.6, -1.08], [0.6, 0.18], [0, 0.79], [-0.6, 0.18], [-0.6, -1.08]],
+  0.16,
+)
 const ARCH_RIB = createTaperedPrismGeometry({
   bottomWidth: 0.24,
   topWidth: 0.16,
@@ -102,6 +105,21 @@ const BURIAL_SCREEN = createProfilePrismGeometry(
   0.045,
 )
 const BROKEN_RELIQUARY = createTaperedPrismGeometry({ bottomWidth: 0.72, topWidth: 0.46, height: 0.72, depth: 0.42 })
+const LIGHT_SCONCE = createProfilePrismGeometry(
+  [[-0.2, -0.2], [-0.11, 0.12], [0, 0.28], [0.11, 0.12], [0.2, -0.2]],
+  0.22,
+)
+const LIGHT_BOWL = new CylinderGeometry(0.32, 0.2, 0.22, 8)
+const LIGHT_LAMP = createTaperedPrismGeometry({ bottomWidth: 0.18, topWidth: 0.1, height: 1.18, depth: 0.16 })
+const LIGHT_CANDELABRUM = createProfilePrismGeometry(
+  [[-0.36, 0.34], [-0.08, 0.48], [-0.05, -0.52], [0.05, -0.52], [0.08, 0.48], [0.36, 0.34], [0.36, 0.48], [0, 0.64], [-0.36, 0.48]],
+  0.08,
+)
+const LIGHT_RELIQUARY = new OctahedronGeometry(0.3, 0)
+const LIGHT_DOUBLE_SCONCE = createProfilePrismGeometry(
+  [[-0.42, -0.18], [-0.3, 0.18], [-0.08, 0.02], [0.08, 0.02], [0.3, 0.18], [0.42, -0.18]],
+  0.18,
+)
 
 /** Shared geometries for instanced ossuary object types. Unique landmarks own local meshes. */
 export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
@@ -146,6 +164,16 @@ export const OSSUARY_OBJECT_GEOMETRIES: Readonly<
   'ossuary.silhouette.column': SILHOUETTE_COLUMN,
   'ossuary.metal.burial-screen': BURIAL_SCREEN,
   'ossuary.reliquary.broken': BROKEN_RELIQUARY,
+  'ossuary.light.wall-sconce': LIGHT_SCONCE,
+  'ossuary.light.brazier': LIGHT_BOWL,
+  'ossuary.light.veil-lamp': LIGHT_LAMP,
+  'ossuary.light.candle-cluster': LIGHT_CANDELABRUM,
+  'ossuary.light.candelabrum': LIGHT_CANDELABRUM,
+  'ossuary.light.reliquary-lantern': LIGHT_RELIQUARY,
+  'ossuary.light.double-sconce': LIGHT_DOUBLE_SCONCE,
+  'ossuary.light.processional-torch': LIGHT_LAMP,
+  'ossuary.light.ember-bowl': LIGHT_BOWL,
+  'ossuary.light.spectral-reliquary': LIGHT_RELIQUARY,
 })
 
 export function getOssuaryObjectGeometry(objectId: OssuaryObjectId): BufferGeometry {

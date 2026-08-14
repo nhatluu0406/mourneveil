@@ -13,6 +13,7 @@ import { CombatVeilMonolith } from './ossuary/landmarks/CombatVeilMonolith'
 import { ReliquaryPlinth } from './ossuary/landmarks/ReliquaryPlinth'
 import { VeilWispMotion } from './ossuary/dressing/VeilWispMotion'
 import { PracticalLightFixture } from './ossuary/lighting/PracticalLightFixture'
+import { castsDynamicWorldShadow } from './worldShadowPolicy'
 import { SepulchreArenaSeal } from './ossuary/landmarks/SepulchreArenaSeal'
 import { GateBarsVisual } from './ossuary/interactive/GateBarsVisual'
 import {
@@ -91,9 +92,8 @@ function InstancedObjectGroup({
       ref={ref}
       name={`world-object.${objectId}`}
       args={[resolved.geometry, resolved.material, placements.length]}
-      castShadow={resolved.definition.castShadow}
+      castShadow={castsDynamicWorldShadow(resolved.definition)}
       receiveShadow={resolved.definition.receiveShadow}
-      frustumCulled={false}
     />
   )
 }
@@ -139,8 +139,13 @@ export function WorldObjectComposer({
     rebuildFadeOcclusionSolids(placements)
   }, [placements])
 
+  const actualLights = placements.filter(
+    (placement) => placement.objectId.startsWith('ossuary.light.') && placement.variant === 'actual-light',
+  )
   const instanced = placements.filter(
-    (placement) => resolveWorldObjectDefinition(placement.objectId).renderMode === 'instanced',
+    (placement) =>
+      resolveWorldObjectDefinition(placement.objectId).renderMode === 'instanced' &&
+      placement.variant !== 'actual-light',
   )
   const unique = placements.filter(
     (placement) => resolveWorldObjectDefinition(placement.objectId).renderMode === 'unique',
@@ -161,6 +166,9 @@ export function WorldObjectComposer({
       ) : null}
       {unique.map((placement) => (
         <UniqueObject key={placement.instanceId} placement={placement} />
+      ))}
+      {actualLights.map((placement) => (
+        <PracticalLightFixture key={placement.instanceId} placement={placement} />
       ))}
     </group>
   )

@@ -50,10 +50,12 @@ describe('room-first dungeon composition', () => {
     )
   })
 
-  it('generates a continuous foundation per floor and camera-near parapets', () => {
+  it('generates one continuous foundation envelope and camera-near parapets', () => {
     const shell = generateDungeonShell()
     const foundations = shell.filter((entry) => entry.objectId === 'ossuary.floor.foundation')
-    expect(foundations.length).toBe(MOURNEVEIL_DUNGEON_ROOMS.reduce((sum, room) => sum + room.floors.length, 0))
+    expect(foundations).toHaveLength(1)
+    expect(foundations[0]?.scale).toEqual([32, 2.4, 17])
+    expect(shell.filter((entry) => entry.objectId === 'ossuary.wall.exterior').length).toBeGreaterThan(10)
     expect(shell.some((entry) => entry.instanceId.startsWith('parapet.room.refuge.'))).toBe(true)
     expect(shell.some((entry) => entry.instanceId.startsWith('wall.room.refuge.'))).toBe(true)
   })
