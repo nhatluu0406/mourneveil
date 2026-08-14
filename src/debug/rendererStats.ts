@@ -15,6 +15,7 @@ export interface RendererStatsSnapshot {
   readonly shadowMapEnabled: boolean
   readonly shadowMapSize: number | null
   readonly shadowCasterCount: number
+  readonly shadowCastingLightCount: number
   readonly gpuTimerAvailable: boolean
   readonly sceneObjectCount: number
   readonly meshCount: number

@@ -46,7 +46,7 @@ Rebuild Rite I as one readable funerary dungeon complex, redesign procedural act
   - owns/allows: presentation animation modules/tests and visual refs only
   - outcome: contact/down/passing/up gait, eased start/stop, articulated feet/knees/arms/pelvis; enemy stepping; no root motion or speed changes
   - verifier: `npx vitest run src/render/animation src/render/PlayerVisual.test.ts` + `npm run gate:m15-motion-quality`
-- [ ] 5. Render consolidation, evidence, regressions, handoff
+- [x] 5. Render consolidation, evidence, regressions, handoff
   - depends: 1–4
   - risk: HIGH
   - isolation: sequential

@@ -161,17 +161,17 @@ await runOwnedBrowserGate({
         : fail(`${entry.name} center frame still black/occluded: ${JSON.stringify(probe)}`)
     }
 
-    // Collision still works after proxy visual removal.
+    // Collision still works after the M15 macro-envelope replaced the legacy divider coordinates.
     const blocked = await page.evaluate(() => {
       const g = window.__MOURNEVEIL_GATE__
-      g.setPlayerPosition({ x: -4.5, y: 0.82, z: -3.6 })
-      g.setPlayerFacing({ x: 1, z: 0 })
-      for (let i = 0; i < 40; i += 1) g.advance(1, { horizontal: 1, forward: 0 })
+      g.setPlayerPosition({ x: -6.4, y: 0.82, z: -1.15 })
+      g.setPlayerFacing({ x: -1, z: 0 })
+      for (let i = 0; i < 40; i += 1) g.advance(1, { horizontal: -1, forward: 0 })
       return g.snapshot().player.position
     })
-    blocked.x < -3.15
-      ? pass(`divider collision still blocks (x=${blocked.x.toFixed(3)})`)
-      : fail(`divider collision failed (x=${blocked.x})`)
+    blocked.x > -8
+      ? pass(`authored refuge wall still blocks (x=${blocked.x.toFixed(3)})`)
+      : fail(`authored refuge wall collision failed (x=${blocked.x})`)
 
     pageErrors.length === 0 ? pass('no uncaught page errors') : fail(pageErrors.join(' | '))
   },

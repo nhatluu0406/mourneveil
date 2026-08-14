@@ -39,7 +39,7 @@ async function shot(page, artifactDir, name) {
 
 async function sample(page) {
   await page.evaluate(() => window.__MOURNEVEIL_GATE__.resetMotionTelemetry())
-  await page.waitForTimeout(3200)
+  await page.waitForTimeout(5200)
   return page.evaluate(() => ({
     renderer: window.__MOURNEVEIL_GATE__.rendererStats(),
     motion: window.__MOURNEVEIL_GATE__.motionTelemetry(),

@@ -7,13 +7,13 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
 - .gitignore (56L)
 - AGENTS.md (199L)
 - CLAUDE.md (38L)
-- PLAN.md (66L)
+- PLAN.md (64L)
 - README.md (38L)
 - SETUP.md (44L)
-- STACK.md (88L)
+- STACK.md (89L)
 - eslint.config.js (28L)
 - index.html (13L)
-- package.json (75L)
+- package.json (79L)
 - tsconfig.app.json (24L)
 - tsconfig.json (7L)
 - ... +2 more
@@ -169,10 +169,11 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - animation-presentation.md (14L)
     - asset-pipeline.md (36L)
     - overview.md (81L)
-    - **docs/architecture/decisions/** (3 files)
+    - **docs/architecture/decisions/** (4 files)
       - 0001-web-stack.md (46L)
       - 0002-modular-world-objects.md (42L)
-      - 0003-room-first-dungeon-composition.md (41L)
+      - 0003-room-first-dungeon-composition.md (42L)
+      - 0004-canonical-dungeon-compilation.md (37L)
   - **docs/art/** (2 files)
     - m11-boss-visual-handoff.md (95L)
     - visual-direction.md (49L)
@@ -180,7 +181,7 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - m15-dungeon-floorplan.md (54L)
   - **docs/development/** (5 files)
     - agent-routing.md (38L)
-    - current-state.md (21L)
+    - current-state.md (22L)
     - definition-of-done.md (67L)
     - m14-codex-art-handoff.md (70L)
     - workflow.md (53L)
@@ -202,20 +203,20 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - author-skirmisher-proof-glb.mjs (201L)
     - import-production-assets.mjs (23L)
     - verify-production-assets.mjs (28L)
-  - **scripts/browser/** (56 files)
+  - **scripts/browser/** (61 files)
     - README.md (18L)
-    - gate-m10-camera-occlusion-repro.mjs (101L)
-    - gate-m10-camera-stability.mjs (194L)
-    - gate-m10-hero-visual.mjs (306L)
-    - gate-m10-occlusion-readability.mjs (201L)
-    - gate-m10-perf-baseline.mjs (225L)
-    - gate-m10-ui-compact.mjs (129L)
-    - gate-m11-boss-foundation.mjs (198L)
-    - gate-m11-boss-visual.mjs (320L)
+    - freshSession.mjs (38L)
+    - gate-m10-camera-occlusion-repro.mjs (102L)
+    - gate-m10-camera-stability.mjs (195L)
+    - gate-m10-hero-visual.mjs (307L)
+    - gate-m10-occlusion-readability.mjs (202L)
+    - gate-m10-perf-baseline.mjs (226L)
+    - gate-m10-ui-compact.mjs (130L)
+    - gate-m11-boss-foundation.mjs (199L)
+    - gate-m11-boss-visual.mjs (321L)
     - gate-m12-alpha-slice.mjs (222L)
-    - gate-m12-build-choice.mjs (161L)
-    - gate-m13-active-skills.mjs (306L)
-    - ... +44 more
+    - gate-m12-build-choice.mjs (162L)
+    - ... +49 more
   - **scripts/leanloop/** (10 files)
     - doctor.py (195L) -- symbols: sha256_file, read_version, command_available, sync_ownership_hash, main
     - git_guard.py (50L) -- symbols: git, main
@@ -226,6 +227,6 @@ Compact navigation map. Confirm exact behavior with targeted grep/ranged reads.
     - sync.py (279L) -- symbols: digest_tree, skill_dirs, parse_skill_names, installed_skill_names, scoped_skills
     - task.py (52L) -- symbols: main
     - token_report.py (41L) -- symbols: load_version, main
-    - worktree.py (130L) -- symbols: git, default_parent, list_rows, ma
+    - worktree.py (130L) -- sy
 
 ... (truncated; deepen with targeted grep/read rather than raising the global map budget)

@@ -66,6 +66,12 @@ export function RendererStatsPublisher() {
         context.getExtension('EXT_disjoint_timer_query_webgl2') !== null
     }
     publishInstanceMatrixProbe(scene)
+    const shadowCastingLightCount = countBy(
+      scene,
+      (object) =>
+        (object as Light).isLight === true &&
+        (object as Light & { castShadow?: boolean }).castShadow === true,
+    )
     publishRendererStats({
       drawCalls: info.render.calls,
       triangles: info.render.triangles,
@@ -84,8 +90,12 @@ export function RendererStatsPublisher() {
       shadowMapSize,
       shadowCasterCount: countBy(
         scene,
-        (object) => (object as Mesh).isMesh === true && (object as Mesh).castShadow,
+        (object) =>
+          shadowCastingLightCount > 0 &&
+          (object as Mesh).isMesh === true &&
+          (object as Mesh).castShadow,
       ),
+      shadowCastingLightCount,
       gpuTimerAvailable: gpuTimerAvailableRef.current,
       sceneObjectCount: countBy(scene, () => true),
       meshCount: countBy(scene, (object) => (object as Mesh).isMesh === true),

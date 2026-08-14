@@ -23,6 +23,7 @@ function sample(overrides: Partial<RendererStatsSnapshot> = {}): RendererStatsSn
     shadowMapEnabled: true,
     shadowMapSize: 1024,
     shadowCasterCount: 3,
+    shadowCastingLightCount: 1,
     gpuTimerAvailable: false,
     sceneObjectCount: 120,
     meshCount: 80,
