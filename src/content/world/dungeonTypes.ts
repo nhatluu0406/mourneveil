@@ -84,6 +84,8 @@ export interface DungeonCheckpointAnchor {
 export interface DungeonDefinition {
   readonly id: string
   readonly displayName: string
+  /** Shared building envelope. Logical rooms partition this continuous footprint. */
+  readonly architecturalEnvelope?: RoomBounds
   readonly rooms: readonly DungeonRoomDefinition[]
   readonly connections: readonly DungeonConnectionRef[]
   readonly spawnPoints: readonly DungeonSpawnPoint[]

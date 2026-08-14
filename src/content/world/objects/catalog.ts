@@ -1,6 +1,7 @@
 import type { OssuaryObjectId, WorldObjectDefinition } from '../worldObjectTypes'
 import { FloorFoundation } from './architecture/FloorFoundation'
 import { StoneWall } from './architecture/StoneWall'
+import { ExteriorWall } from './architecture/ExteriorWall'
 import { LowParapet } from './architecture/LowParapet'
 import { Archway } from './architecture/Archway'
 import { Buttress } from './architecture/Buttress'
@@ -20,6 +21,7 @@ import { REMAINING_OBJECT_DEFINITIONS } from './remaining'
 const PRODUCTION_MODULES: readonly WorldObjectDefinition[] = Object.freeze([
   FloorFoundation,
   StoneWall,
+  ExteriorWall,
   LowParapet,
   Archway,
   Buttress,

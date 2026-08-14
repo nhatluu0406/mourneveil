@@ -47,12 +47,24 @@ export function compileDungeon(
   const wallKeys = new Set<string>()
   const colliderKeys = new Set<string>()
 
+  if (dungeon.architecturalEnvelope !== undefined) {
+    const envelope = envelopeFoundationPlacement(dungeon.architecturalEnvelope)
+    renderInstances.push(envelope)
+    pushUniqueCollider(colliders, colliderKeys, floorCollider(envelope, dungeon.architecturalEnvelope))
+    const shell = envelopeWalls(dungeon.architecturalEnvelope)
+    renderInstances.push(...shell.placements)
+    for (const collider of shell.colliders) pushUniqueCollider(colliders, colliderKeys, collider)
+  }
+
   for (const room of dungeon.rooms) {
     for (const [floorIndex, floor] of room.floors.entries()) {
-      const foundation = foundationPlacement(room, floor, floorIndex)
-      renderInstances.push(foundation)
-      pushUniqueCollider(colliders, colliderKeys, floorCollider(foundation, floor))
+      if (dungeon.architecturalEnvelope === undefined) {
+        const foundation = foundationPlacement(room, floor, floorIndex)
+        renderInstances.push(foundation)
+        pushUniqueCollider(colliders, colliderKeys, floorCollider(foundation, floor))
+      }
       for (const side of ['west', 'east', 'south', 'north'] as const) {
+        if (dungeon.architecturalEnvelope !== undefined && sideIsEnvelopeBoundary(floor, side, dungeon.architecturalEnvelope)) continue
         const compiled = wallRun(dungeon.rooms, room, floor, floorIndex, side, wallKeys)
         renderInstances.push(...compiled.placements)
         for (const collider of compiled.colliders) {
@@ -68,7 +80,7 @@ export function compileDungeon(
     if (room.objectInstances !== undefined) renderInstances.push(...room.objectInstances)
   }
 
-  renderInstances.push(...explicitSupports(), ...magicalVfx(), ...perimeterMasses(), ...shrineInstances(dungeon))
+  renderInstances.push(...explicitSupports(), ...magicalVfx(), ...shrineInstances(dungeon))
 
   for (const placement of renderInstances) {
     const definition = catalog[placement.objectId] ?? getWorldObjectDefinition(placement.objectId)
@@ -115,6 +127,61 @@ export function compileDungeon(
     lights: Object.freeze(lightsOut),
     interactions: Object.freeze(interactions),
   })
+}
+
+function envelopeFoundationPlacement(footprint: RoomBounds): WorldObjectPlacement {
+  return instance(
+    'foundation.dungeon.ossuary',
+    'ossuary.floor.foundation',
+    'perimeter',
+    [(footprint.minX + footprint.maxX) / 2, 0.045, (footprint.minZ + footprint.maxZ) / 2],
+    ZERO,
+    [footprint.maxX - footprint.minX, 2.4, footprint.maxZ - footprint.minZ],
+  )
+}
+
+function envelopeWalls(footprint: RoomBounds): {
+  placements: WorldObjectPlacement[]
+  colliders: WorldBoxCollider[]
+} {
+  const placements: WorldObjectPlacement[] = []
+  const colliders: WorldBoxCollider[] = []
+  for (const side of ['west', 'east', 'south', 'north'] as const) {
+    const vertical = side === 'west' || side === 'east'
+    const plane = side === 'west' ? footprint.minX : side === 'east' ? footprint.maxX : side === 'south' ? footprint.minZ : footprint.maxZ
+    const start = vertical ? footprint.minZ : footprint.minX
+    const end = vertical ? footprint.maxZ : footprint.maxX
+    const length = end - start
+    const steps = Math.max(1, Math.ceil(length / 2.4))
+    const step = length / steps
+    const cameraNear = side === 'east' || side === 'north'
+    for (let index = 0; index < steps; index += 1) {
+      const along = start + (index + 0.5) * step
+      placements.push(instance(
+        `wall.envelope.${side}.${index}`,
+        cameraNear ? 'ossuary.wall.parapet' : 'ossuary.wall.exterior',
+        'perimeter',
+        [vertical ? plane : along, cameraNear ? PARAPET_Y : 0.9, vertical ? along : plane],
+        [0, vertical ? 0 : Math.PI / 2, 0],
+        cameraNear ? [1.45, 0.42, step / 1.2] : [1, 1, step / 2.4],
+      ))
+    }
+    colliders.push(Object.freeze({
+      id: `collider.wall.envelope.${side}`,
+      kind: 'wall' as const,
+      position: Object.freeze([vertical ? plane : (start + end) / 2, cameraNear ? 0.6 : 0.9, vertical ? (start + end) / 2 : plane] as const),
+      size: Object.freeze([vertical ? WALL_THICKNESS * 1.75 : length, cameraNear ? PARAPET_HEIGHT : 1.8, vertical ? length : WALL_THICKNESS * 1.75] as const),
+      ownerInstanceId: `wall.envelope.${side}.0`,
+    }))
+  }
+  return { placements, colliders }
+}
+
+function sideIsEnvelopeBoundary(floor: RoomBounds, side: RoomWallSide, envelope: RoomBounds): boolean {
+  if (side === 'west') return Math.abs(floor.minX - envelope.minX) < 0.01
+  if (side === 'east') return Math.abs(floor.maxX - envelope.maxX) < 0.01
+  if (side === 'south') return Math.abs(floor.minZ - envelope.minZ) < 0.01
+  return Math.abs(floor.maxZ - envelope.maxZ) < 0.01
 }
 
 function foundationPlacement(
@@ -459,16 +526,6 @@ function magicalVfx(): WorldObjectPlacement[] {
     instance('vfx.wisp.court', 'ossuary.wisp', 'court', [-2.35, 1.15, -6.35], ZERO, [0.65, 0.65, 0.65], 'vfx'),
     instance('vfx.wisp.ash', 'ossuary.wisp', 'ash-walk', [6.55, 1.15, -6.2], ZERO, [0.6, 0.6, 0.6], 'vfx'),
     instance('vfx.wisp.sepulchre', 'ossuary.wisp', 'final-arena', [15.1, 1.2, -1.35], ZERO, [0.7, 0.7, 0.7], 'vfx'),
-  ]
-}
-
-function perimeterMasses(): WorldObjectPlacement[] {
-  return [
-    instance('silhouette.north', 'ossuary.silhouette.mass', 'perimeter', [-6, 0.85, 12.4], ZERO, [3.2, 1.6, 1.4]),
-    instance('silhouette.west', 'ossuary.silhouette.mass', 'perimeter', [-19.2, 0.9, 4], ZERO, [1.6, 1.8, 3.4]),
-    instance('silhouette.south', 'ossuary.silhouette.mass', 'perimeter', [2, 0.8, -11.2], ZERO, [4.2, 1.5, 1.3]),
-    instance('silhouette.ash.east', 'ossuary.silhouette.mass', 'perimeter', [18.6, 0.85, -4], ZERO, [1.5, 1.7, 3.6]),
-    instance('silhouette.column.se', 'ossuary.silhouette.column', 'perimeter', [17.4, 1.1, -9.2], ZERO, [1, 1.3, 1]),
   ]
 }
 

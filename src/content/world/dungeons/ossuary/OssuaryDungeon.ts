@@ -18,6 +18,7 @@ import { SepulchreRoom } from './rooms/SepulchreRoom'
 export const OSSUARY_DUNGEON: DungeonDefinition = Object.freeze({
   id: 'dungeon.ossuary.rite-i',
   displayName: 'Ossuary · Rite I',
+  architecturalEnvelope: Object.freeze({ minX: -16, maxX: 16, minZ: -8, maxZ: 9 }),
   rooms: Object.freeze([
     OuterWatchRoom,
     RefugeRoom,

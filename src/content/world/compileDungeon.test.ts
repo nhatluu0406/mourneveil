@@ -20,6 +20,7 @@ describe('canonical dungeon definition', () => {
     const ids = listWorldObjectIds()
     expect(new Set(ids).size).toBe(ids.length)
     expect(ids).toContain('ossuary.wall.parapet')
+    expect(ids).toContain('ossuary.wall.exterior')
     expect(ids).toContain('ossuary.gate.shortcut')
     expect(OSSUARY_OBJECT_DEFINITIONS['ossuary.wall.bay']?.collision?.kind).toBe('box')
   })
@@ -37,7 +38,10 @@ describe('canonical dungeon definition', () => {
 
   it('owns render and collision from the same instances', () => {
     const compiled = compileOssuaryDungeon()
-    expect(compiled.renderInstances.some((entry) => entry.objectId === 'ossuary.floor.foundation')).toBe(true)
+    const foundations = compiled.renderInstances.filter((entry) => entry.objectId === 'ossuary.floor.foundation')
+    expect(foundations).toHaveLength(1)
+    expect(foundations[0]?.instanceId).toBe('foundation.dungeon.ossuary')
+    expect(compiled.renderInstances.some((entry) => entry.objectId === 'ossuary.wall.exterior')).toBe(true)
     expect(compiled.renderInstances.some((entry) => entry.objectId === 'ossuary.wall.parapet')).toBe(true)
     expect(compiled.colliders.some((entry) => entry.kind === 'wall')).toBe(true)
     expect(compiled.colliders.some((entry) => entry.id === 'gate.shortcut')).toBe(true)

@@ -4,6 +4,7 @@ import { resolveObjectCollision, type WorldObjectPlacement } from './worldObject
 
 const STRUCTURAL_IDS = new Set([
   'ossuary.wall.bay',
+  'ossuary.wall.exterior',
   'ossuary.wall.parapet',
   'ossuary.floor.foundation',
   'ossuary.sarcophagus.body',
@@ -84,7 +85,11 @@ export function auditCompiledDungeon(compiled: CompiledDungeon): DungeonIntegrit
 
 function coversPlacement(collider: WorldBoxCollider, placement: WorldObjectPlacement): boolean {
   if (collider.ownerInstanceId === placement.instanceId || collider.id === placement.instanceId) return true
-  if (placement.objectId !== 'ossuary.wall.bay' && placement.objectId !== 'ossuary.wall.parapet') return false
+  if (
+    placement.objectId !== 'ossuary.wall.bay' &&
+    placement.objectId !== 'ossuary.wall.exterior' &&
+    placement.objectId !== 'ossuary.wall.parapet'
+  ) return false
   return xzOverlaps(placement, collider)
 }
 

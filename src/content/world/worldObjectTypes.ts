@@ -48,6 +48,7 @@ export type OssuaryObjectId =
   | 'ossuary.floor.broken-edge'
   | 'ossuary.floor.pit-rim'
   | 'ossuary.wall.bay'
+  | 'ossuary.wall.exterior'
   | 'ossuary.wall.parapet'
   | 'ossuary.wall.break'
   | 'ossuary.buttress'
